@@ -1,4 +1,6 @@
-# apm - A Package Manager for ABAP
+<p align="center"><img srv="abapPM_256x256.png"></p>
+
+# apm
 
 apm is a package manager for ABAP applications and libraries.
 
@@ -18,10 +20,6 @@ Recommend SAP package: `$APM`.
 
 Start apm using transaction `ZAPM`.
 
-```abap
-
-```
-
 ## Contributions
 
 All contributions are welcome! Read our [Contribution Guidelines](CONTRIBUTING.md), fork this repo, and create a pull request.
@@ -30,10 +28,6 @@ All contributions are welcome! Read our [Contribution Guidelines](CONTRIBUTING.m
 
 Made with :heart: in Canada
 
-Copyright 2023 Marc Bernard <https://marcbernardtools.com/>
+Copyright 2023 Marc Bernard <https://marcf.be/>
 
 Follow [@marcfbe](https://twitter.com/marcfbe) on Twitter
-
-<p><a href="https://marcbernardtools.com/"><img width="160" height="65" src="https://marcbernardtools.com/info/MBT_Logo_640x250_on_Gray.png" alt="MBT Logo"></a></p>
-
-
