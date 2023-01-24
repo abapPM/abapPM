@@ -1,4 +1,4 @@
-<p align="center"><img srv="abapPM_256x256.png"></p>
+<p align="center"><img srv="img/abapPM_256x256.png"></p>
 
 # apm
 
