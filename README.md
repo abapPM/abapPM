@@ -1,4 +1,9 @@
-![apm](img/abapPM_256x256.png)
+<div align="center">
+  <img src="https://github.com/abapPM/abapPM/blob/main/img/abapPM.svg?raw=true&ver=1.0.0"
+       alt="apm - A Package Manager for ABAP" 
+       height="200"
+       width="200" />
+</div>
 
 # apm
 
