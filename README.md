@@ -7,7 +7,7 @@
 
 # apm
 
-apm is a package manager for ABAP applications and libraries.
+apm is a package manager for ABAP applications and modules.
 
 NO WARRANTIES, [MIT License](LICENSE)
 
