@@ -47,6 +47,6 @@ All contributions are welcome! Read our [Contribution Guidelines](CONTRIBUTING.m
 
 Made with :heart: in Canada
 
-Copyright 2024 Marc Bernard <https://marcf.be/>
+Copyright 2024 apm.to Inc. <https://abappm.com>
 
-Follow [@marcfbe](https://twitter.com/marcfbe) on Twitter
+Follow [@abap_pm](https://twitter.com/abap_pm) on X/Twitter
