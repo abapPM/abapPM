@@ -7,13 +7,17 @@
 
 # apm
 
-apm is a package manager for ABAP applications and modules.
+apm is a website, registry, and package manager for ABAP applications and modules.
+
+This repository contains the source code of the package manager. You can find the website at https://abappm.com.
 
 NO WARRANTIES, [MIT License](LICENSE)
 
 ## Prerequisites
 
-SAP Basis 7.02 or higher
+SAP Basis 7.40 SP 8 or higher 
+
+(A downport to 7.02 is on the roadmap)
 
 ## Installation
 
