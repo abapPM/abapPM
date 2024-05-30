@@ -4,19 +4,18 @@
 
 FORM run.
 
-  DATA lx_exception TYPE REF TO zcx_abapgit_exception.
-  DATA lx_not_found TYPE REF TO zcx_abapgit_not_found.
+  DATA lx_error TYPE REF TO cx_root.
 
   TRY.
       " TODO: Authorization check
 
-      " TODO: Persistency
-      " zcl_abapgit_migrations=>run( ).
+      " Initialize Persistency
+      zcl_abappm_package_json_setup=>run( ).
+
       PERFORM open_gui.
-    CATCH zcx_abapgit_exception INTO lx_exception.
-      MESSAGE lx_exception TYPE 'E'.
-    CATCH zcx_abapgit_not_found INTO lx_not_found.
-      MESSAGE lx_not_found TYPE 'E'.
+
+    CATCH cx_root INTO lx_error.
+      MESSAGE lx_error TYPE 'E'.
   ENDTRY.
 
 ENDFORM.                    "run
