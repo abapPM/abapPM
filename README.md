@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/abapPM/abapPM/blob/main/img/abapPM.svg?raw=true&ver=1.0.0"
+  <img src="https://github.com/abapPM/abapPM/blob/main/img/apm_logo.svg?raw=true&ver=1.0.0"
        alt="apm - A Package Manager for ABAP" 
        height="200"
        width="200" />
