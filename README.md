@@ -13,9 +13,11 @@
 
 # apm
 
-apm is a website, registry, and package manager for ABAP applications and modules.
+apm is a *website*, *registry*, and *package manager* for ABAP applications and modules.
 
-This repository contains the source code of the package manager. You can find the website at https://abappm.com.
+This repository contains the source code of the package manager. 
+
+You can find the website at https://abappm.com and the registry at https://registry.abappm.com.
 
 The goal of this project is to become THE package manager that ABAP developers around the world can't live without.
 
