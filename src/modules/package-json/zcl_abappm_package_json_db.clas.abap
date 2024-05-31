@@ -1,8 +1,8 @@
-CLASS zcl_abappm_package_json_db DEFINITION
+CLASS ZCL_ABAPPM_PACKAGE_JSON_DB DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE
-  GLOBAL FRIENDS zcl_abappm_package_json.
+  GLOBAL FRIENDS ZCL_ABAPPM_PACKAGE_JSON.
 
 ************************************************************************
 * Package JSON - Persistence
@@ -23,10 +23,14 @@ CLASS zcl_abappm_package_json_db DEFINITION
       END OF ty_abappm.
 
     CONSTANTS:
-      c_devclass TYPE c LENGTH 30 VALUE '$TMP',
-      c_tabname  TYPE c LENGTH 30 VALUE 'ZABAPPM',
-      c_lock     TYPE c LENGTH 30 VALUE 'EZABAPPM',
-      c_english  TYPE c LENGTH 1 VALUE 'E'.
+      c_zapm TYPE tadir-object  VALUE 'ZAPM'.
+
+    CONSTANTS:
+      c_devclass    TYPE c LENGTH 30 VALUE '$TMP',
+      c_transaction TYPE c LENGTH 30 VALUE 'ZAPM',
+      c_tabname     TYPE c LENGTH 30 VALUE 'ZABAPPM',
+      c_lock        TYPE c LENGTH 30 VALUE 'EZABAPPM',
+      c_english     TYPE c LENGTH 1  VALUE 'E'.
 
     CONSTANTS:
       BEGIN OF c_type,
@@ -45,20 +49,20 @@ CLASS zcl_abappm_package_json_db DEFINITION
       RETURNING
         VALUE(result) TYPE ty_abappm
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     METHODS save
       IMPORTING
         !iv_type    TYPE ty_abappm-type DEFAULT c_type-package_json
         !iv_content TYPE ty_abappm-data
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     METHODS delete
       IMPORTING
         !iv_type TYPE ty_abappm-type OPTIONAL
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -67,17 +71,17 @@ CLASS zcl_abappm_package_json_db DEFINITION
 
     METHODS tadir
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     METHODS corr
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_package_json_db IMPLEMENTATION.
+CLASS ZCL_ABAPPM_PACKAGE_JSON_DB IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -90,7 +94,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
     CALL FUNCTION 'RS_CORR_INSERT'
       EXPORTING
         object              = mv_package
-        object_class        = zif_abappm_package_json=>c_obj_type
+        object_class        = c_zapm
         devclass            = mv_package
         master_language     = 'E' " always English
         global_lock         = abap_true
@@ -102,7 +106,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
         unknown_objectclass = 3
         OTHERS              = 4.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
   ENDMETHOD.
@@ -116,7 +120,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
       DELETE FROM (c_tabname) WHERE name = mv_package AND type = iv_type.
     ENDIF.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise( |Error deleting { mv_package }| ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE( |Error deleting { mv_package }| ).
     ENDIF.
 
     corr( ).
@@ -129,7 +133,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
     SELECT SINGLE * FROM (c_tabname) INTO result
       WHERE name = mv_package AND type = iv_type.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise( |Error loading { mv_package }| ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE( |Error loading { mv_package }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -152,7 +156,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
 
     INSERT (c_tabname) FROM ls_abappm.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise( |Error saving { mv_package }| ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE( |Error saving { mv_package }| ).
     ENDIF.
 
     tadir( ).
@@ -168,7 +172,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
       EXPORTING
         wi_test_modus                  = abap_false
         wi_tadir_pgmid                 = 'R3TR'
-        wi_tadir_object                = zif_abappm_package_json=>c_obj_type
+        wi_tadir_object                = c_zapm
         wi_tadir_obj_name              = mv_package
         wi_tadir_devclass              = mv_package
       EXCEPTIONS
@@ -198,7 +202,7 @@ CLASS zcl_abappm_package_json_db IMPLEMENTATION.
         no_change_from_sap_to_tmp      = 24
         OTHERS                         = 25.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
   ENDMETHOD.

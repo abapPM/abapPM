@@ -1,4 +1,4 @@
-CLASS zcl_abappm_package_json_setup DEFINITION
+CLASS ZCL_ABAPPM_PACKAGE_JSON_SETUP DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
@@ -7,14 +7,14 @@ CLASS zcl_abappm_package_json_setup DEFINITION
 
     CLASS-METHODS run
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CLASS-METHODS tobj_create
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     CLASS-METHODS tobj_exists
       RETURNING
@@ -22,7 +22,7 @@ CLASS zcl_abappm_package_json_setup DEFINITION
 
     CLASS-METHODS table_create
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     CLASS-METHODS table_exists
       RETURNING
@@ -30,7 +30,7 @@ CLASS zcl_abappm_package_json_setup DEFINITION
 
     CLASS-METHODS lock_create
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     CLASS-METHODS lock_exists
       RETURNING
@@ -40,7 +40,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
+CLASS ZCL_ABAPPM_PACKAGE_JSON_SETUP IMPLEMENTATION.
 
 
   METHOD lock_create.
@@ -55,38 +55,38 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
       <ls_dd26e> LIKE LINE OF lt_dd26e,
       <ls_dd27p> LIKE LINE OF lt_dd27p.
 
-    ls_dd25v-viewname   = zcl_abappm_package_json_db=>c_lock.
+    ls_dd25v-viewname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
     ls_dd25v-aggtype    = 'E'.
-    ls_dd25v-roottab    = zcl_abappm_package_json_db=>c_tabname.
-    ls_dd25v-ddlanguage = zcl_abappm_package_json_db=>c_english.
+    ls_dd25v-roottab    = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
+    ls_dd25v-ddlanguage = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ENGLISH.
     ls_dd25v-ddtext     = 'apm - Persistence'.
 
     APPEND INITIAL LINE TO lt_dd26e ASSIGNING <ls_dd26e>.
-    <ls_dd26e>-viewname   = zcl_abappm_package_json_db=>c_lock.
-    <ls_dd26e>-tabname    = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd26e>-viewname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
+    <ls_dd26e>-tabname    = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd26e>-tabpos     = '0001'.
-    <ls_dd26e>-fortabname = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd26e>-fortabname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd26e>-enqmode    = 'E'.
 
     APPEND INITIAL LINE TO lt_dd27p ASSIGNING <ls_dd27p>.
-    <ls_dd27p>-viewname  = zcl_abappm_package_json_db=>c_lock.
+    <ls_dd27p>-viewname  = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
     <ls_dd27p>-objpos    = '0001'.
     <ls_dd27p>-viewfield = 'NAME'.
-    <ls_dd27p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd27p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd27p>-fieldname = 'NAME'.
     <ls_dd27p>-keyflag   = abap_true.
 
     APPEND INITIAL LINE TO lt_dd27p ASSIGNING <ls_dd27p>.
-    <ls_dd27p>-viewname  = zcl_abappm_package_json_db=>c_lock.
+    <ls_dd27p>-viewname  = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
     <ls_dd27p>-objpos    = '0002'.
     <ls_dd27p>-viewfield = 'TYPE'.
-    <ls_dd27p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd27p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd27p>-fieldname = 'TYPE'.
     <ls_dd27p>-keyflag   = abap_true.
 
     CALL FUNCTION 'DDIF_ENQU_PUT'
       EXPORTING
-        name              = zcl_abappm_package_json_db=>c_lock
+        name              = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK
         dd25v_wa          = ls_dd25v
       TABLES
         dd26e_tab         = lt_dd26e
@@ -99,10 +99,10 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
-    lv_obj_name = zcl_abappm_package_json_db=>c_lock.
+    lv_obj_name = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -111,22 +111,22 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         wi_tadir_obj_name = lv_obj_name
         wi_set_genflag    = abap_true
         wi_test_modus     = abap_false
-        wi_tadir_devclass = zcl_abappm_package_json_db=>c_devclass
+        wi_tadir_devclass = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_DEVCLASS
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_ENQU_ACTIVATE'
       EXPORTING
-        name        = zcl_abappm_package_json_db=>c_lock
+        name        = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK
       EXCEPTIONS
         not_found   = 1
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise( |Error activating { zcl_abappm_package_json_db=>c_lock }| ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE( |Error activating { ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -137,7 +137,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     DATA lv_viewname TYPE dd25l-viewname.
 
     SELECT SINGLE viewname FROM dd25l INTO lv_viewname
-      WHERE viewname = zcl_abappm_package_json_db=>c_lock.
+      WHERE viewname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_LOCK.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
@@ -172,14 +172,14 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     FIELD-SYMBOLS:
       <ls_dd03p> LIKE LINE OF lt_dd03p.
 
-    ls_dd02v-tabname    = zcl_abappm_package_json_db=>c_tabname.
-    ls_dd02v-ddlanguage = zcl_abappm_package_json_db=>c_english.
+    ls_dd02v-tabname    = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
+    ls_dd02v-ddlanguage = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ENGLISH.
     ls_dd02v-tabclass   = 'TRANSP'.
     ls_dd02v-ddtext     = 'apm - Persistence'.
     ls_dd02v-contflag   = 'A'.
     ls_dd02v-exclass    = '1'.
 
-    ls_dd09l-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    ls_dd09l-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     ls_dd09l-as4local  = 'A'.
     ls_dd09l-tabkat    = '1'.
     ls_dd09l-tabart    = 'APPL0'.
@@ -187,7 +187,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     ls_dd09l-pufferung = 'P'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'NAME'.
     <ls_dd03p>-position  = '0001'.
     <ls_dd03p>-keyflag   = 'X'.
@@ -196,7 +196,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     <ls_dd03p>-leng      = '000030'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'TYPE'.
     <ls_dd03p>-position  = '0002'.
     <ls_dd03p>-keyflag   = 'X'.
@@ -204,13 +204,13 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     <ls_dd03p>-leng      = '000030'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'DATA'.
     <ls_dd03p>-position  = '0003'.
     <ls_dd03p>-datatype  = 'STRG'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'LUSER'.
     <ls_dd03p>-position  = '0004'.
     <ls_dd03p>-rollname  = 'AS4USER'.
@@ -218,7 +218,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     <ls_dd03p>-leng      = '000012'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'LDATE'.
     <ls_dd03p>-position  = '0005'.
     <ls_dd03p>-rollname  = 'AS4DATE'.
@@ -226,7 +226,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     <ls_dd03p>-leng      = '000008'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zcl_abappm_package_json_db=>c_tabname.
+    <ls_dd03p>-tabname   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_dd03p>-fieldname = 'LTIME'.
     <ls_dd03p>-position  = '0006'.
     <ls_dd03p>-rollname  = 'AS4TIME'.
@@ -235,7 +235,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
 
     CALL FUNCTION 'DDIF_TABL_PUT'
       EXPORTING
-        name              = zcl_abappm_package_json_db=>c_tabname
+        name              = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME
         dd02v_wa          = ls_dd02v
         dd09l_wa          = ls_dd09l
       TABLES
@@ -248,10 +248,10 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
-    lv_obj_name = zcl_abappm_package_json_db=>c_tabname.
+    lv_obj_name = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -260,16 +260,16 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         wi_tadir_obj_name = lv_obj_name
         wi_set_genflag    = abap_true
         wi_test_modus     = abap_false
-        wi_tadir_devclass = zcl_abappm_package_json_db=>c_devclass
+        wi_tadir_devclass = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_DEVCLASS
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_TABL_ACTIVATE'
       EXPORTING
-        name        = zcl_abappm_package_json_db=>c_tabname
+        name        = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME
         auth_chk    = abap_false
       IMPORTING
         rc          = lv_subrc
@@ -278,7 +278,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0 OR lv_subrc <> 0.
-      zcx_abappm_package_json=>raise( |Error activating { zcl_abappm_package_json_db=>c_tabname }| ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE( |Error activating { ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -289,7 +289,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     DATA lv_tabname TYPE dd02l-tabname.
 
     SELECT SINGLE tabname FROM dd02l INTO lv_tabname
-      WHERE tabname = zcl_abappm_package_json_db=>c_tabname.
+      WHERE tabname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
@@ -309,7 +309,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
       <ls_objsl> TYPE objsl,
       <ls_objm>  TYPE objm.
 
-    ls_objh-objectname = zif_abappm_package_json=>c_obj_type.
+    ls_objh-objectname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ZAPM.
     ls_objh-objecttype = 'L'.
     ls_objh-objcateg   = 'APPL'.
     ls_objh-checkid    = 'L'.
@@ -317,25 +317,25 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     ls_objh-objtransp  = '2'.
     ls_objh-objcharset = '1'.
 
-    ls_objt-language   = zcl_abappm_package_json_db=>c_english.
-    ls_objt-objectname = zif_abappm_package_json=>c_obj_type.
+    ls_objt-language   = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ENGLISH.
+    ls_objt-objectname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ZAPM.
     ls_objt-objecttype = 'L'.
     ls_objt-ddtext     = 'apm'.
 
     APPEND INITIAL LINE TO lt_objs ASSIGNING <ls_objs>.
-    <ls_objs>-objectname = zif_abappm_package_json=>c_obj_type.
+    <ls_objs>-objectname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ZAPM.
     <ls_objs>-objecttype = 'L'.
-    <ls_objs>-tabname    = zcl_abappm_package_json_db=>c_tabname.
+    <ls_objs>-tabname    = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_objs>-ddic       = abap_true.
     <ls_objs>-prim_table = abap_true.
 
     APPEND INITIAL LINE TO lt_objsl ASSIGNING <ls_objsl>.
-    <ls_objsl>-objectname = zif_abappm_package_json=>c_obj_type.
+    <ls_objsl>-objectname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ZAPM.
     <ls_objsl>-objecttype = 'L'.
     <ls_objsl>-trwcount   = '01'.
     <ls_objsl>-tpgmid     = 'R3TR'.
     <ls_objsl>-tobject    = 'TABU'.
-    <ls_objsl>-tobj_name  = zcl_abappm_package_json_db=>c_tabname.
+    <ls_objsl>-tobj_name  = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_TABNAME.
     <ls_objsl>-tobjkey    = '/&/*'.
     <ls_objsl>-masknlen   = 7.
     <ls_objsl>-maskklen   = 2.
@@ -350,7 +350,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         iv_objecttext         = ls_objt-ddtext
         iv_objcateg           = ls_objh-objcateg
         iv_objtransp          = ls_objh-objtransp
-        iv_devclass           = zcl_abappm_package_json_db=>c_devclass
+        iv_devclass           = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_DEVCLASS
       TABLES
         tt_v_obj_s            = lt_objs
         tt_objm               = lt_objm
@@ -363,7 +363,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         OTHERS                = 6.
     IF sy-subrc <> 0.
       " TOBJ has to be saved/generated after the DDIC tables have been activated
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
     CALL FUNCTION 'OBJ_SET_IMPORTABLE'
@@ -378,7 +378,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
         object_enqueue_failed = 4
         OTHERS                = 5.
     IF sy-subrc <> 0.
-      zcx_abappm_package_json=>raise_t100( ).
+      ZCX_ABAPPM_PACKAGE_JSON=>RAISE_T100( ).
     ENDIF.
 
     UPDATE objh SET objtransp = ls_objh-objtransp
@@ -392,7 +392,7 @@ CLASS zcl_abappm_package_json_setup IMPLEMENTATION.
     DATA lv_objectname TYPE objh-objectname.
 
     SELECT SINGLE objectname FROM objh INTO lv_objectname
-      WHERE objectname = zif_abappm_package_json=>c_obj_type AND objecttype = 'L'.
+      WHERE objectname = ZCL_ABAPPM_PACKAGE_JSON_DB=>C_ZAPM AND objecttype = 'L'.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.

@@ -128,6 +128,9 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
     lv_key = ii_event->query( )->get( 'KEY' ).
 
     CASE ii_event->mv_action.
+      WHEN zif_abapgit_definitions=>c_action-abapgit_home.
+        rs_handled-page = main_page( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN zif_abapgit_definitions=>c_action-go_home.
         lv_last_repo_key = zcl_abapgit_persistence_user=>get_instance( )->get_repo_show( ).
 

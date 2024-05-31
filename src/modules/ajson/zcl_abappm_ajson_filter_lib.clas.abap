@@ -1,58 +1,58 @@
-CLASS zcl_abappm_ajson_filter_lib DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class ZCL_ABAPPM_AJSON_FILTER_LIB definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
+  public section.
 
-    CLASS-METHODS create_empty_filter
-      RETURNING
-        VALUE(ri_filter) TYPE REF TO zif_abappm_ajson_filter
-      RAISING
-        zcx_abappm_ajson_error .
-    CLASS-METHODS create_path_filter
-      IMPORTING
-        !it_skip_paths     TYPE string_table OPTIONAL
-        !iv_skip_paths     TYPE string OPTIONAL
-        !iv_pattern_search TYPE abap_bool DEFAULT abap_false
-      RETURNING
-        VALUE(ri_filter)   TYPE REF TO zif_abappm_ajson_filter
-      RAISING
-        zcx_abappm_ajson_error .
-    CLASS-METHODS create_and_filter
-      IMPORTING
-        !it_filters      TYPE zif_abappm_ajson_filter=>ty_filter_tab
-      RETURNING
-        VALUE(ri_filter) TYPE REF TO zif_abappm_ajson_filter
-      RAISING
-        zcx_abappm_ajson_error .
+    class-methods create_empty_filter
+      returning
+        value(ri_filter) type ref to ZIF_ABAPPM_AJSON_FILTER
+      raising
+        ZCX_ABAPPM_AJSON_ERROR .
+    class-methods create_path_filter
+      importing
+        !it_skip_paths type string_table optional
+        !iv_skip_paths type string optional
+        !iv_pattern_search type abap_bool default abap_false
+      returning
+        value(ri_filter) type ref to ZIF_ABAPPM_AJSON_FILTER
+      raising
+        ZCX_ABAPPM_AJSON_ERROR .
+    class-methods create_and_filter
+      importing
+        !it_filters type ZIF_ABAPPM_AJSON_FILTER=>TY_FILTER_TAB
+      returning
+        value(ri_filter) type ref to ZIF_ABAPPM_AJSON_FILTER
+      raising
+        ZCX_ABAPPM_AJSON_ERROR .
 
-  PROTECTED SECTION.
-  PRIVATE SECTION.
+  protected section.
+  private section.
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_ajson_filter_lib IMPLEMENTATION.
+CLASS ZCL_ABAPPM_AJSON_FILTER_LIB IMPLEMENTATION.
 
 
-  METHOD create_and_filter.
-    CREATE OBJECT ri_filter TYPE lcl_and_filter
-      EXPORTING
+  method create_and_filter.
+    create object ri_filter type lcl_and_filter
+      exporting
         it_filters = it_filters.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD create_empty_filter.
-    CREATE OBJECT ri_filter TYPE lcl_empty_filter.
-  ENDMETHOD.
+  method create_empty_filter.
+    create object ri_filter type lcl_empty_filter.
+  endmethod.
 
 
-  METHOD create_path_filter.
-    CREATE OBJECT ri_filter TYPE lcl_paths_filter
-      EXPORTING
+  method create_path_filter.
+    create object ri_filter type lcl_paths_filter
+      exporting
         iv_pattern_search = iv_pattern_search
-        it_skip_paths     = it_skip_paths
-        iv_skip_paths     = iv_skip_paths.
-  ENDMETHOD.
+        it_skip_paths = it_skip_paths
+        iv_skip_paths = iv_skip_paths.
+  endmethod.
 ENDCLASS.

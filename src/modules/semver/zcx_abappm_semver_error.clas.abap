@@ -1,4 +1,4 @@
-CLASS zcx_abappm_semver_error DEFINITION
+CLASS ZCX_ABAPPM_SEMVER_ERROR DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
@@ -14,6 +14,8 @@ CLASS zcx_abappm_semver_error DEFINITION
 
     INTERFACES if_t100_dyn_msg.
     INTERFACES if_t100_message.
+
+    CLASS-DATA null TYPE string.
 
     METHODS constructor
       IMPORTING
@@ -33,7 +35,7 @@ CLASS zcx_abappm_semver_error DEFINITION
         !iv_text     TYPE clike
         !ix_previous TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     "! Raise exception with T100 message
     "! <p>
@@ -57,7 +59,7 @@ CLASS zcx_abappm_semver_error DEFINITION
         VALUE(iv_msgv4) TYPE symsgv DEFAULT sy-msgv4
         !ix_previous    TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     "! Raise with text from previous exception
     "! @parameter ix_previous | Previous exception
@@ -66,7 +68,7 @@ CLASS zcx_abappm_semver_error DEFINITION
       IMPORTING
         !ix_previous TYPE REF TO cx_root
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -83,7 +85,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_abappm_semver_error IMPLEMENTATION.
+CLASS ZCX_ABAPPM_SEMVER_ERROR IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -110,7 +112,6 @@ CLASS zcx_abappm_semver_error IMPLEMENTATION.
 
     DATA:
       lv_text TYPE string,
-      lv_rest TYPE string,
       ls_msg  TYPE symsg.
 
     IF iv_text IS INITIAL.
@@ -122,7 +123,7 @@ CLASS zcx_abappm_semver_error IMPLEMENTATION.
     ls_msg = split_text_to_symsg( lv_text ).
 
     " Set syst variables using generic error message
-    MESSAGE e001(00) WITH ls_msg-msgv1 ls_msg-msgv2 ls_msg-msgv3 ls_msg-msgv4 INTO lv_rest.
+    MESSAGE e001(00) WITH ls_msg-msgv1 ls_msg-msgv2 ls_msg-msgv3 ls_msg-msgv4 INTO null.
 
     raise_t100( ix_previous = ix_previous ).
 
@@ -142,7 +143,7 @@ CLASS zcx_abappm_semver_error IMPLEMENTATION.
       ls_t100_key-attr4 = 'IF_T100_DYN_MSG~MSGV4'.
     ENDIF.
 
-    RAISE EXCEPTION TYPE zcx_abappm_semver_error
+    RAISE EXCEPTION TYPE ZCX_ABAPPM_SEMVER_ERROR
       EXPORTING
         textid   = ls_t100_key
         msgv1    = iv_msgv1

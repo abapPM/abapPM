@@ -1,4 +1,4 @@
-CLASS zcx_abappm_tar DEFINITION
+CLASS ZCX_ABAPPM_TAR DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
@@ -34,7 +34,7 @@ CLASS zcx_abappm_tar DEFINITION
         !iv_text     TYPE clike
         !ix_previous TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_tar.
+        ZCX_ABAPPM_TAR.
 
     "! Raise exception with T100 message
     "! <p>
@@ -58,7 +58,7 @@ CLASS zcx_abappm_tar DEFINITION
         VALUE(iv_msgv4) TYPE symsgv DEFAULT sy-msgv4
         !ix_previous    TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_tar.
+        ZCX_ABAPPM_TAR.
 
     "! Raise with text from previous exception
     "! @parameter ix_previous | Previous exception
@@ -67,7 +67,7 @@ CLASS zcx_abappm_tar DEFINITION
       IMPORTING
         !ix_previous TYPE REF TO cx_root
       RAISING
-        zcx_abappm_tar.
+        ZCX_ABAPPM_TAR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -84,7 +84,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_abappm_tar IMPLEMENTATION.
+CLASS ZCX_ABAPPM_TAR IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -142,7 +142,7 @@ CLASS zcx_abappm_tar IMPLEMENTATION.
       ls_t100_key-attr4 = 'IF_T100_DYN_MSG~MSGV4'.
     ENDIF.
 
-    RAISE EXCEPTION TYPE zcx_abappm_tar
+    RAISE EXCEPTION TYPE ZCX_ABAPPM_TAR
       EXPORTING
         textid   = ls_t100_key
         msgv1    = iv_msgv1

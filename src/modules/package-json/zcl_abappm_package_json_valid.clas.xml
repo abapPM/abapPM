@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ABAPPM_AJSON_UTILITIES</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_PACKAGE_JSON_VALID</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>AJSON Utilities</DESCRIPT>
+    <DESCRIPT>Package JSON - Validator</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

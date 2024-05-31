@@ -1,23 +1,23 @@
-INTERFACE zif_abappm_ajson_filter
-  PUBLIC.
+interface ZIF_ABAPPM_AJSON_FILTER
+  public.
 
-  TYPES ty_filter_tab TYPE STANDARD TABLE OF REF TO zif_abappm_ajson_filter WITH KEY table_line.
-  TYPES ty_visit_type TYPE i.
+  types ty_filter_tab type standard table of ref to ZIF_ABAPPM_AJSON_FILTER with key table_line.
+  types ty_visit_type type i.
 
-  CONSTANTS:
-    BEGIN OF visit_type,
-      value TYPE ty_visit_type VALUE 0,
-      open  TYPE ty_visit_type VALUE 1,
-      close TYPE ty_visit_type VALUE 2,
-    END OF visit_type.
+  constants:
+    begin of visit_type,
+      value type ty_visit_type value 0,
+      open  type ty_visit_type value 1,
+      close type ty_visit_type value 2,
+    end of visit_type.
 
-  METHODS keep_node
-    IMPORTING
-      is_node        TYPE zif_abappm_ajson_types=>ty_node
-      iv_visit       TYPE ty_visit_type DEFAULT visit_type-value
-    RETURNING
-      VALUE(rv_keep) TYPE abap_bool
-    RAISING
-      zcx_abappm_ajson_error.
+  methods keep_node
+    importing
+      is_node type ZIF_ABAPPM_AJSON_TYPES=>TY_NODE
+      iv_visit type ty_visit_type default visit_type-value
+    returning
+      value(rv_keep) type abap_bool
+    raising
+      ZCX_ABAPPM_AJSON_ERROR.
 
-ENDINTERFACE.
+endinterface.

@@ -1,8 +1,15 @@
-CLASS zcx_abappm_package_json DEFINITION
+CLASS ZCX_ABAPPM_PACKAGE_JSON DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
 
+************************************************************************
+* SemVer Error
+*
+* Copyright (c) Isaac Z. Schlueter and Contributors
+* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
+* SPDX-License-Identifier: ISC
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES if_t100_dyn_msg.
@@ -28,7 +35,7 @@ CLASS zcx_abappm_package_json DEFINITION
         !iv_text     TYPE clike
         !ix_previous TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     "! Raise exception with T100 message
     "! <p>
@@ -52,7 +59,7 @@ CLASS zcx_abappm_package_json DEFINITION
         VALUE(iv_msgv4) TYPE symsgv DEFAULT sy-msgv4
         !ix_previous    TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
     "! Raise with text from previous exception
     "! @parameter ix_previous | Previous exception
@@ -61,7 +68,7 @@ CLASS zcx_abappm_package_json DEFINITION
       IMPORTING
         !ix_previous TYPE REF TO cx_root
       RAISING
-        zcx_abappm_package_json.
+        ZCX_ABAPPM_PACKAGE_JSON.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -78,7 +85,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_abappm_package_json IMPLEMENTATION.
+CLASS ZCX_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -136,7 +143,7 @@ CLASS zcx_abappm_package_json IMPLEMENTATION.
       ls_t100_key-attr4 = 'IF_T100_DYN_MSG~MSGV4'.
     ENDIF.
 
-    RAISE EXCEPTION TYPE zcx_abappm_package_json
+    RAISE EXCEPTION TYPE ZCX_ABAPPM_PACKAGE_JSON
       EXPORTING
         textid   = ls_t100_key
         msgv1    = iv_msgv1

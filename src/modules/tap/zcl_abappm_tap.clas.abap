@@ -1,4 +1,4 @@
-CLASS zcl_abappm_tap DEFINITION
+CLASS ZCL_ABAPPM_TAP DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -9,7 +9,7 @@ CLASS zcl_abappm_tap DEFINITION
   PUBLIC SECTION.
 
     CONSTANTS:
-      version     TYPE string VALUE '1.0.0',
+      version     TYPE string VALUE '1.0.0' ##NEEDED,
       tap_version TYPE string VALUE 'TAP version 14' ##NO_TEXT.
 
     DATA testdoc TYPE string_table READ-ONLY.
@@ -30,7 +30,7 @@ CLASS zcl_abappm_tap DEFINITION
     DATA:
       BEGIN OF subtest READ-ONLY,
         description TYPE string,
-        tap         TYPE REF TO zcl_abappm_tap,
+        tap         TYPE REF TO ZCL_ABAPPM_TAP,
         failed      TYPE abap_bool,
       END OF subtest.
 
@@ -55,17 +55,17 @@ CLASS zcl_abappm_tap DEFINITION
         count         TYPE i
         reason        TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS end
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS bailout
       IMPORTING
         reason        TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS passing
       RETURNING
@@ -75,7 +75,7 @@ CLASS zcl_abappm_tap DEFINITION
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS pass
       IMPORTING
@@ -84,25 +84,25 @@ CLASS zcl_abappm_tap DEFINITION
         todo          TYPE abap_bool OPTIONAL
           PREFERRED PARAMETER msg
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS fail
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS skip
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS todo
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     " Actual
 
@@ -110,7 +110,7 @@ CLASS zcl_abappm_tap DEFINITION
       IMPORTING
         t             TYPE any
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     " Asserts
 
@@ -122,188 +122,188 @@ CLASS zcl_abappm_tap DEFINITION
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS ok "same as true
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS false
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS not_ok "same as false
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS equals
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS eq "same as equals
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS differs
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS ne "same as differs
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS equals_float
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS eq_f "same as equals_float
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS cp
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS np
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS cs
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS ns
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS error
       IMPORTING
         msg           TYPE csequence
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS initial
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS not_initial
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS bound
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS not_bound
       IMPORTING
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS contains
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap ##SHADOW[CONTAINS].
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP ##SHADOW[CONTAINS].
 
     METHODS not_contains
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS matches
       IMPORTING
         regex         TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap ##SHADOW[MATCHES].
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP ##SHADOW[MATCHES].
 
     METHODS re "same as matches
       IMPORTING
         regex         TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS return_code
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS rc "same as return_code
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS subrc
       IMPORTING
         exp           TYPE sy-subrc DEFAULT 0
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS index
       IMPORTING
         exp           TYPE sy-index
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS tabix
       IMPORTING
         exp           TYPE sy-tabix
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS throws
       IMPORTING
@@ -314,21 +314,21 @@ CLASS zcl_abappm_tap DEFINITION
       IMPORTING
         t             TYPE any ##NEEDED
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS type
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS kind
       IMPORTING
         exp           TYPE any
         msg           TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     " Subtests
 
@@ -336,11 +336,11 @@ CLASS zcl_abappm_tap DEFINITION
       IMPORTING
         description   TYPE csequence OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     METHODS test_end
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAP.
 
     " Snapshots
 
@@ -387,7 +387,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_tap IMPLEMENTATION.
+CLASS ZCL_ABAPPM_TAP IMPLEMENTATION.
 
 
   METHOD abort.
@@ -411,14 +411,27 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD comment.
+
+    DATA warning TYPE REF TO if_aunit_info_warning.
+
     IF options-logging = abap_true.
       APPEND |# { msg }| TO testdoc.
     ELSE.
       " LOG is an enhancement to add comments to unit test output (ZTAP_INFO)
-      DATA(warning) = cl_aunit_warning_c=>log( msg = msg ).
-      cl_aunit_failure_handler=>raise_warning( warning ).
+      TRY.
+          CALL METHOD cl_aunit_warning_c=>('log')
+            EXPORTING
+              msg    = msg
+            RECEIVING
+              result = warning.
+
+          cl_aunit_failure_handler=>raise_warning( warning ).
+        CATCH cx_root ##NO_HANDLER.
+      ENDTRY.
     ENDIF.
+
     result = me.
+
   ENDMETHOD.
 
 
@@ -479,10 +492,14 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
     ASSIGN act->* TO FIELD-SYMBOL(<act>).
     ASSERT <act> IS ASSIGNED.
 
-    cl_abap_unit_assert=>assert_differs(
-      act = <act>
-      exp = exp
-      msg = msg ).
+    TRY.
+        cl_abap_unit_assert=>assert_differs(
+          act = <act>
+          exp = exp
+          msg = msg ).
+      CATCH cx_sy_dyn_call_illegal_type.
+        " Different types means pass the test!
+    ENDTRY.
 
     result = me.
   ENDMETHOD.

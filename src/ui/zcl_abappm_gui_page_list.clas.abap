@@ -375,7 +375,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       EXPORTING
         iv_only_favorites = iv_only_favorites.
 
-    ri_page = zcl_abapgit_gui_page_hoc=>create(
+    ri_page = zcl_abappm_gui_page_hoc=>create(
       iv_page_title         = 'Package List'
       ii_page_menu_provider = lo_component
       ii_child_component    = lo_component ).

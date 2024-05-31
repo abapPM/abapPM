@@ -1,4 +1,4 @@
-CLASS zcl_abappm_semver_cli DEFINITION
+CLASS ZCL_ABAPPM_SEMVER_CLI DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -17,7 +17,7 @@ CLASS zcl_abappm_semver_cli DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
   PROTECTED SECTION.
 
@@ -29,7 +29,7 @@ CLASS zcl_abappm_semver_cli DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
   PRIVATE SECTION.
 
@@ -50,13 +50,13 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_semver_cli IMPLEMENTATION.
+CLASS ZCL_ABAPPM_SEMVER_CLI IMPLEMENTATION.
 
 
   METHOD help.
 
     result = VALUE #(
-      ( |SemVer { zif_abappm_semver_constants=>version }| )
+      ( |SemVer { ZIF_ABAPPM_SEMVER_CONSTANTS=>VERSION }| )
       ( `` )
       ( `ABAP implementation of the https://semver.org/ specification` )
       ( `Original JavaScript Copyright Isaac Z. Schlueter` )
@@ -188,7 +188,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
     LOOP AT versions ASSIGNING FIELD-SYMBOL(<version>).
 
       IF coerce = abap_true.
-        DATA(semver) = zcl_abappm_semver_functions=>coerce( version = <version> rtl = rtl ).
+        DATA(semver) = ZCL_ABAPPM_SEMVER_FUNCTIONS=>COERCE( version = <version> rtl = rtl ).
         IF semver IS BOUND.
           <version> = semver->version.
         ELSE.
@@ -197,24 +197,24 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
-      IF NOT zcl_abappm_semver_functions=>valid( <version> ).
+      IF NOT ZCL_ABAPPM_SEMVER_FUNCTIONS=>VALID( <version> ).
         DELETE versions.
       ENDIF.
 
     ENDLOOP.
 
     IF versions IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'No valid versions found' ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'No valid versions found' ).
     ENDIF.
 
     IF inc IS NOT INITIAL AND ( lines( versions ) > 1 OR lines( ranges ) > 0 ).
-      zcx_abappm_semver_error=>raise( '--inc can only be used on a single version with no range' ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( '--inc can only be used on a single version with no range' ).
     ENDIF.
 
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range>).
       LOOP AT versions ASSIGNING <version>.
 
-        IF NOT zcl_abappm_semver_functions=>satisfies( version = <version> range = <range> loose = loose incpre = incpre ).
+        IF NOT ZCL_ABAPPM_SEMVER_FUNCTIONS=>SATISFIES( version = <version> range = <range> loose = loose incpre = incpre ).
           DELETE versions.
         ENDIF.
 
@@ -222,7 +222,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
     ENDLOOP.
 
     IF versions IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'No valid versions found' ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'No valid versions found' ).
     ENDIF.
 
     result = success( ).
@@ -233,18 +233,18 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
   METHOD success.
 
     IF reverse = abap_true.
-      versions = zcl_abappm_semver_functions=>rsort( versions ).
+      versions = ZCL_ABAPPM_SEMVER_FUNCTIONS=>RSORT( versions ).
     ELSE.
-      versions = zcl_abappm_semver_functions=>sort( versions ).
+      versions = ZCL_ABAPPM_SEMVER_FUNCTIONS=>SORT( versions ).
     ENDIF.
 
     LOOP AT versions ASSIGNING FIELD-SYMBOL(<version>).
-      <version> = zcl_abappm_semver_functions=>clean( version = <version> loose = loose incpre = incpre ).
+      <version> = ZCL_ABAPPM_SEMVER_FUNCTIONS=>CLEAN( version = <version> loose = loose incpre = incpre ).
     ENDLOOP.
 
     IF inc IS NOT INITIAL.
       LOOP AT versions ASSIGNING <version>.
-        DATA(semver) = zcl_abappm_semver_functions=>inc(
+        DATA(semver) = ZCL_ABAPPM_SEMVER_FUNCTIONS=>INC(
           version         = <version>
           release         = inc
           identifier      = identifier
