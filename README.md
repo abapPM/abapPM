@@ -31,7 +31,7 @@ SAP Basis 7.40 SP 8 or higher
 
 ## Installation
 
-You can install apm using [abapGit](https://github.com/abapGit/abapGit) either creating a new online repository for https://github.com/abapPM/abapPM or downloading the repository [ZIP file](https://github.com/abapPM/abapPM/archive/main.zip) and creating a new offline repository.
+You can install *apm* using [abapGit](https://github.com/abapGit/abapGit) either creating a new online repository for https://github.com/abapPM/abapPM or downloading the repository [ZIP file](https://github.com/abapPM/abapPM/archive/main.zip) and creating a new offline repository.
 
 Recommend SAP package: `$APM`.
 
@@ -47,6 +47,6 @@ All contributions are welcome! Read our [Contribution Guidelines](CONTRIBUTING.m
 
 Made with :heart: in Canada
 
-Copyright 2024 apm.to Inc. <https://abappm.com>
+Copyright 2024 apm.to Inc. <https://apm.to>
 
-Follow [@abap_pm](https://twitter.com/abap_pm) on X/Twitter
+Follow [@marcfbe](https://twitter.com/marcfbe) on X/Twitter

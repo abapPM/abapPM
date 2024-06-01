@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: apm
-Upstream-Contact: Marc Bernard <hello@abappm.com>
+Upstream-Contact: apm.to Inc. <hello@apm.to>
 Source: https://github.com/abapPM/abapPM
 
 Files: *
-Copyright: 2024 apm.to Inc. <https://abappm.com>
+Copyright: 2024 apm.to Inc. <https://apm.to>
 License: MIT
 
 Files: src/*abapgit*
