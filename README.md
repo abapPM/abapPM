@@ -19,8 +19,6 @@ This repository contains the source code of the package manager.
 
 You can find the website at https://abappm.com and the registry at https://registry.abappm.com.
 
-The goal of this project is to become THE package manager that ABAP developers around the world can't live without.
-
 NO WARRANTIES, [MIT License](LICENSE)
 
 ## Prerequisites
@@ -31,10 +29,9 @@ SAP Basis 7.40 SP 8 or higher
 
 ## Installation
 
-Recommend SAP package: `$ABAPPM`.
-
 1. Download the standalone version of apm from [zapm_standalone](/build/zapm_standalone.abap)
-1. Create the program `ZAPM_STANDALONE` in your system, upload the code, and activate
+1. Create a new SAP package in your system. Recommended: `$APM`.
+1. Create the program `ZAPM_STANDALONE` in the package, upload the code, and activate
 1. Create transaction `ZAPM` for the program `ZAPM_STANDALONE`
 
 ## Usage
@@ -45,7 +42,11 @@ Start apm using transaction `ZAPM`.
 
 All contributions are welcome! Read our [Contribution Guidelines](CONTRIBUTING.md), fork this repo, and create a pull request.
 
-You can install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) either by creating a new online repository for https://github.com/abapPM/abapPM or downloading the repository [ZIP file](https://github.com/abapPM/abapPM/archive/main.zip) and creating a new offline repository.
+Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) either by creating a new online repository for https://github.com/abapPM/abapPM.
+
+*Note:*
+
+Different from other projects, a build process is required to create the standalone version which is not documented yet! 
 
 ## About
 
