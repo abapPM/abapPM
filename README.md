@@ -13,7 +13,7 @@
 
 # apm
 
-apm is a *website* 🌐, *registry* 📑, and *package manager* 📦 for ABAP applications and modules.
+apm is a *package manager* 📦 for ABAP applications and modules, a *website* 🌐, and a *registry* 📑.
 
 This repository contains the source code of the *package manager*. 
 
