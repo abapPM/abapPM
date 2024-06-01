@@ -4,11 +4,10 @@ CLASS ZCX_ABAPPM_PACKAGE_JSON DEFINITION
   CREATE PUBLIC.
 
 ************************************************************************
-* SemVer Error
+* Package JSON Error
 *
-* Copyright (c) Isaac Z. Schlueter and Contributors
-* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
-* SPDX-License-Identifier: ISC
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 

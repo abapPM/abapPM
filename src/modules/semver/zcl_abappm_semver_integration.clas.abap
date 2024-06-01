@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_INTEGRATION DEFINITION
+CLASS zcl_abappm_semver_integration DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -7,7 +7,7 @@ CLASS ZCL_ABAPPM_SEMVER_INTEGRATION DEFINITION
 * SemVer Integration Tests
 *
 * Copyright (c) Isaac Z. Schlueter and Contributors
-* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
+* Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
   PUBLIC SECTION.
@@ -17,5 +17,5 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_INTEGRATION IMPLEMENTATION.
+CLASS zcl_abappm_semver_integration IMPLEMENTATION.
 ENDCLASS.

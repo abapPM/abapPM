@@ -3,6 +3,12 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID DEFINITION
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* Package JSON Validator
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS check

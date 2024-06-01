@@ -1,6 +1,9 @@
-*&---------------------------------------------------------------------*
-*&  Include           ZABAPPM_FORMS
-*&---------------------------------------------------------------------*
+************************************************************************
+* apm Forms
+*
+* Copyright (c) 2014 abapGit Contributors
+* SPDX-License-Identifier: MIT
+************************************************************************
 
 FORM run.
 
@@ -10,7 +13,7 @@ FORM run.
       " TODO: Authorization check
 
       " Initialize Persistency
-      zcl_abappm_package_json_setup=>run( ).
+      zcl_abappm_persist_setup=>run( ).
 
       PERFORM open_gui.
 
@@ -44,7 +47,7 @@ FORM open_gui RAISING zcx_abapgit_exception.
 
     " TODO: zcl_abapgit_services_abapgit=>prepare_gui_startup( ).
 
-    zcl_abappm_ui_factory=>get_gui( )->go_home( lv_action ).
+    zcl_abappm_gui_factory=>get_gui( )->go_home( lv_action ).
 
     CALL SELECTION-SCREEN 1001. " trigger screen
 
@@ -70,7 +73,7 @@ FORM output.
       p_exclude = lt_ucomm.
 
   TRY.
-      zcl_abappm_ui_factory=>get_gui( )->set_focus( ).
+      zcl_abappm_gui_factory=>get_gui( )->set_focus( ).
     CATCH zcx_abapgit_exception INTO lx_error.
       MESSAGE lx_error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.

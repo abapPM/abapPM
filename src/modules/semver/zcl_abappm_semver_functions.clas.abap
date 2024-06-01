@@ -6,7 +6,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
 * SemVer Functions
 *
 * Copyright (c) Isaac Z. Schlueter and Contributors
-* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
+* Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
   PUBLIC SECTION.
@@ -276,7 +276,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS IMPLEMENTATION.
+CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD clean.

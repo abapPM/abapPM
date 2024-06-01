@@ -1,11 +1,25 @@
 CLASS lcl_logo DEFINITION.
   PUBLIC SECTION.
-    CLASS-METHODS get_svg
+
+    CLASS-METHODS get_logo
+      IMPORTING
+        iv_width      TYPE i
+        iv_height     TYPE i
       RETURNING
         VALUE(rv_svg) TYPE string.
+
+    CLASS-METHODS get_text
+      IMPORTING
+        iv_width      TYPE i
+        iv_height     TYPE i
+      RETURNING
+        VALUE(rv_svg) TYPE string.
+
 ENDCLASS.
+
 CLASS lcl_logo IMPLEMENTATION.
-  METHOD get_svg.
+
+  METHOD get_logo.
     rv_svg =
     |<svg viewBox="2 2 1325 444" width="115" height="35" xmlns="http://www.w3.org/2000/svg">\n| &&
     |<g>\n| &&
@@ -49,4 +63,9 @@ CLASS lcl_logo IMPLEMENTATION.
     |</g>\n| &&
     |</svg>|.
   ENDMETHOD.
+
+  METHOD get_text.
+
+  ENDMETHOD.
+
 ENDCLASS.

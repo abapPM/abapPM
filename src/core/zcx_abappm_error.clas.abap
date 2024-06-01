@@ -3,6 +3,12 @@ CLASS zcx_abappm_error DEFINITION
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
 
+************************************************************************
+* apm Error
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES if_t100_dyn_msg.

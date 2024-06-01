@@ -6,7 +6,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
 ************************************************************************
 * Package JSON
 *
-* Copyright (c) Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
@@ -48,13 +48,17 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
 
+    CONSTANTS:
+      c_package_json TYPE string VALUE 'PACKAGE_JSON'.
+
     CLASS-DATA:
       gt_instances TYPE ty_instances.
 
     DATA:
+      mv_key          TYPE zif_persist_apm=>ty_key,
       mv_package      TYPE devclass,
       ms_package_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON,
-      mo_persist      TYPE REF TO ZCL_ABAPPM_PACKAGE_JSON_DB.
+      mi_persist      TYPE REF TO zif_persist_apm.
 
     CLASS-METHODS sort_dependencies
       IMPORTING
@@ -85,9 +89,9 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
     ms_package_json-version = iv_version.
     ms_package_json-private = iv_private.
 
-    CREATE OBJECT mo_persist
-      EXPORTING
-        iv_package = mv_package.
+    mv_key = |{ zif_persist_apm=>c_type-package }:{ mv_package }:{ c_package_json }|.
+
+    mi_persist = zcl_persist_apm=>factory( ).
 
   ENDMETHOD.
 
@@ -145,7 +149,15 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
 
   METHOD ZIF_ABAPPM_PACKAGE_JSON~DELETE.
-    mo_persist->delete( ).
+
+    DATA lx_error TYPE REF TO zcx_persist_apm.
+
+    TRY.
+        mi_persist->delete( mv_key ).
+      CATCH zcx_persist_apm INTO lx_error.
+        ZCX_ABAPPM_PACKAGE_JSON=>RAISE_WITH_TEXT( lx_error ).
+    ENDTRY.
+
   ENDMETHOD.
 
 
@@ -210,7 +222,9 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
   METHOD ZIF_ABAPPM_PACKAGE_JSON~IS_VALID.
 
-    DATA lt_errors TYPE string_table.
+    DATA:
+      lt_errors TYPE string_table,
+      lx_error  TYPE REF TO zcx_persist_apm.
 
     TRY.
         lt_errors = ZCL_ABAPPM_PACKAGE_JSON_VALID=>CHECK( ms_package_json ).
@@ -223,14 +237,37 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
 
   METHOD ZIF_ABAPPM_PACKAGE_JSON~LOAD.
-    ZIF_ABAPPM_PACKAGE_JSON~SET_JSON( mo_persist->load( )-data ).
+
+    DATA:
+      lv_value TYPE string,
+      lx_error TYPE REF TO zcx_persist_apm.
+
+    TRY.
+        lv_value = mi_persist->load( mv_key )-value.
+      CATCH zcx_persist_apm INTO lx_error.
+        ZCX_ABAPPM_PACKAGE_JSON=>RAISE_WITH_TEXT( lx_error ).
+    ENDTRY.
+
+    ZIF_ABAPPM_PACKAGE_JSON~SET_JSON( lv_value ).
     result = me.
+
   ENDMETHOD.
 
 
   METHOD ZIF_ABAPPM_PACKAGE_JSON~SAVE.
+
+    DATA lx_error TYPE REF TO zcx_persist_apm.
+
     ZCL_ABAPPM_PACKAGE_JSON_VALID=>CHECK( ms_package_json ).
-    mo_persist->save(  ZIF_ABAPPM_PACKAGE_JSON~GET_JSON( ) ).
+
+    TRY.
+        mi_persist->save(
+          iv_key   = mv_key
+          iv_value = ZIF_ABAPPM_PACKAGE_JSON~GET_JSON( ) ).
+      CATCH zcx_persist_apm INTO lx_error.
+        ZCX_ABAPPM_PACKAGE_JSON=>RAISE_WITH_TEXT( lx_error ).
+    ENDTRY.
+
   ENDMETHOD.
 
 

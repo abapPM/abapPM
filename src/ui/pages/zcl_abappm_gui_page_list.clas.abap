@@ -4,6 +4,12 @@ CLASS zcl_abappm_gui_page_list DEFINITION
   FINAL
   CREATE PRIVATE.
 
+************************************************************************
+* apm GUI Package List
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_event_handler.
@@ -58,9 +64,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       c_label_filter_prefix TYPE string VALUE `label:`,
       c_raw_field_suffix    TYPE string VALUE `_RAW` ##NO_TEXT.
 
-    DATA: mt_all_labels   TYPE string_table,
-          mo_label_colors TYPE REF TO zcl_abapgit_string_map.
-    DATA ms_list_settings TYPE zif_abapgit_definitions=>ty_list_settings.
+    DATA:
+      mt_all_labels    TYPE string_table,
+      mo_label_colors  TYPE REF TO zcl_abapgit_string_map,
+      ms_list_settings TYPE zif_abapgit_definitions=>ty_list_settings.
 
     METHODS set_order_by
       IMPORTING
@@ -80,67 +87,57 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS
-      apply_filter
-        CHANGING
-          ct_overview TYPE ty_overviews.
+    METHODS apply_filter
+      CHANGING
+        ct_overview TYPE ty_overviews.
 
-    METHODS
-      map_repo_list_to_overview
-        IMPORTING
-          it_repo_obj_list   TYPE zif_abapgit_repo_srv=>ty_repo_list
-        RETURNING
-          VALUE(rt_overview) TYPE ty_overviews
-        RAISING
-          zcx_abapgit_exception.
+    METHODS map_repo_list_to_overview
+      IMPORTING
+        it_repo_obj_list   TYPE zif_abapgit_repo_srv=>ty_repo_list
+      RETURNING
+        VALUE(rt_overview) TYPE ty_overviews
+      RAISING
+        zcx_abapgit_exception.
 
-    METHODS
-      render_repo_list
-        IMPORTING
-          ii_html     TYPE REF TO zif_abapgit_html
-          it_overview TYPE ty_overviews
-        RAISING
-          zcx_abapgit_exception.
+    METHODS render_repo_list
+      IMPORTING
+        ii_html     TYPE REF TO zif_abapgit_html
+        it_overview TYPE ty_overviews
+      RAISING
+        zcx_abapgit_exception.
 
-    METHODS
-      render_table_header
-        IMPORTING
-          ii_html TYPE REF TO zif_abapgit_html.
+    METHODS render_table_header
+      IMPORTING
+        ii_html TYPE REF TO zif_abapgit_html.
 
-    METHODS
-      render_table_footer
-        IMPORTING
-          ii_html TYPE REF TO zif_abapgit_html.
+    METHODS render_table_footer
+      IMPORTING
+        ii_html TYPE REF TO zif_abapgit_html.
 
-    METHODS
-      render_table_body
-        IMPORTING
-          ii_html      TYPE REF TO zif_abapgit_html
-          it_repo_list TYPE ty_overviews
-        RAISING
-          zcx_abapgit_exception.
+    METHODS render_table_body
+      IMPORTING
+        ii_html      TYPE REF TO zif_abapgit_html
+        it_repo_list TYPE ty_overviews
+      RAISING
+        zcx_abapgit_exception.
 
-    METHODS
-      render_table_item
-        IMPORTING
-          ii_html TYPE REF TO zif_abapgit_html
-          is_repo TYPE ty_overview
-        RAISING
-          zcx_abapgit_exception.
+    METHODS render_table_item
+      IMPORTING
+        ii_html TYPE REF TO zif_abapgit_html
+        is_repo TYPE ty_overview
+      RAISING
+        zcx_abapgit_exception.
 
-    METHODS
-      render_header_bar
-        IMPORTING
-          ii_html TYPE REF TO zif_abapgit_html.
+    METHODS render_header_bar
+      IMPORTING
+        ii_html TYPE REF TO zif_abapgit_html.
 
-    METHODS
-      render_header_label_list
-        IMPORTING
-          ii_html TYPE REF TO zif_abapgit_html.
+    METHODS render_header_label_list
+      IMPORTING
+        ii_html TYPE REF TO zif_abapgit_html.
 
-    METHODS
-      apply_order_by
-        CHANGING ct_overview TYPE ty_overviews.
+    METHODS apply_order_by
+      CHANGING ct_overview TYPE ty_overviews.
 
     METHODS prepare_overviews
       RETURNING

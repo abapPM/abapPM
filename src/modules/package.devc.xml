@@ -4,6 +4,7 @@
   <asx:values>
    <DEVC>
     <CTEXT>apm - Modules</CTEXT>
+    <RESTRICTED>X</RESTRICTED>
    </DEVC>
   </asx:values>
  </asx:abap>

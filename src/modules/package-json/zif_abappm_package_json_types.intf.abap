@@ -3,7 +3,7 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON_TYPES PUBLIC.
 ************************************************************************
 * Package JSON - Types
 *
-* Copyright (c) Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * Schema for package.abap.json
@@ -131,13 +131,13 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON_TYPES PUBLIC.
 
   CONSTANTS:
     " Package manifest
-    BEGIN OF c_package_file,
+    BEGIN OF c_package_json_file,
       obj_name  TYPE c LENGTH 7 VALUE 'package',
       sep1      TYPE c LENGTH 1 VALUE '.',
       obj_type  TYPE c LENGTH 4 VALUE 'abap',
       sep2      TYPE c LENGTH 1 VALUE '.',
       extension TYPE c LENGTH 4 VALUE 'json',
-    END OF c_package_file.
+    END OF c_package_json_file.
 
   CONSTANTS:
     " Package types

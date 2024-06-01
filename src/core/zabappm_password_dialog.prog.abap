@@ -1,6 +1,9 @@
-*&---------------------------------------------------------------------*
-*&  Include           ZABAPPM_PASSWORD_DIALOG
-*&---------------------------------------------------------------------*
+************************************************************************
+* apm Password Dialog
+*
+* Copyright (c) 2014 abapGit Contributors
+* SPDX-License-Identifier: MIT
+************************************************************************
 
 SELECTION-SCREEN BEGIN OF SCREEN 1002 TITLE sc_title.
 SELECTION-SCREEN SKIP.

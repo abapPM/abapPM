@@ -5,7 +5,7 @@ REPORT zabappm LINE-SIZE 100.
 ********************************************************************************
 * The MIT License (MIT)
 *
-* Copyright (c) 2023 apm Contributors
+* Copyright 2024 apm.to Inc. <https://apm.to>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal

@@ -1,9 +1,20 @@
-CLASS zcl_abapgit_object_zapm DEFINITION
+CLASS zcl_abapgit_object_abap DEFINITION
   PUBLIC
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* apm Object Type
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* This is a virtual object type used by abapGit to serialize and
+* deserialize apm package metadata i.e. the package.abap.json file
+*
+* This virtual object type must be added to abapGit via exit!
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_object.
@@ -26,7 +37,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
+CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -68,7 +79,7 @@ CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
 
     TRY.
         lv_json = mo_files->read_string(
-          iv_ext = |{ zif_package_json_types=>c_package_file-extension }| ).
+          iv_ext = |{ zif_package_json_types=>c_package_json_file-extension }| ).
       CATCH zcx_abapgit_exception.
         " Most probably file not found -> ignore
         RETURN.
@@ -128,13 +139,14 @@ CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
 
 
   METHOD zif_abapgit_object~jump.
+    " TODO: open apm package view
     RETURN.
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~map_filename_to_object.
 
-    IF iv_filename <> zif_package_json_types=>c_package_file.
+    IF iv_filename <> zif_package_json_types=>c_package_json_file.
       zcx_abapgit_exception=>raise( |Unexpected filename for apm package: { iv_filename }| ).
     ENDIF.
 
@@ -152,7 +164,7 @@ CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
 
     " Packages have a fixed filename so that the repository can be installed to a different
     " package(-hierarchy) on the client and not show up as a different package in the repo.
-    cv_filename = zif_package_json_types=>c_package_file.
+    cv_filename = zif_package_json_types=>c_package_json_file.
 
   ENDMETHOD.
 
@@ -168,7 +180,7 @@ CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
     ENDTRY.
 
     mo_files->add_string(
-      iv_ext    = |{ zif_package_json_types=>c_package_file-extension }|
+      iv_ext    = |{ zif_package_json_types=>c_package_json_file-extension }|
       iv_string = li_package_json->get_json( ) ).
 
   ENDMETHOD.

@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ABAPGIT_OBJECT_ZAPM</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_GUI_FACTORY</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>apm - Package JSON</DESCRIPT>
+    <DESCRIPT>apm - GUI Factory</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

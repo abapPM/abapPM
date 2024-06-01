@@ -4,7 +4,7 @@ INTERFACE ZIF_ABAPPM_SEMVER_OPTIONS PUBLIC.
 * SemVer Options
 *
 * Copyright (c) Isaac Z. Schlueter and Contributors
-* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
+* Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
 

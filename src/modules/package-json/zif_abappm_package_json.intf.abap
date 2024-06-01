@@ -3,7 +3,7 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 ************************************************************************
 * Package JSON
 *
-* Copyright (c) Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * Similar to @npmcli/package-json but with its own persistence

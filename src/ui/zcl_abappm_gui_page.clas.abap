@@ -4,6 +4,12 @@ CLASS zcl_abappm_gui_page DEFINITION
   ABSTRACT
   CREATE PUBLIC.
 
+************************************************************************
+* apm GUI Page
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_modal.
@@ -160,11 +166,9 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     ri_html->add( '<td class="center">' ).
     ri_html->add( '<div class="logo">' ).
-    ri_html->add_a( iv_act = zif_abapgit_definitions=>c_action-homepage
-                    iv_txt = ri_html->icon( 'git-alt' ) ).
-    ri_html->add_a( iv_act = zif_abapgit_definitions=>c_action-homepage
-                    iv_txt = ri_html->icon( iv_name = 'abapgit'
-                                            iv_hint = iv_time ) ).
+    ri_html->add_a( iv_act   = zif_abapgit_definitions=>c_action-homepage
+                    iv_title = iv_time
+                    iv_txt   = zcl_abappm_logo=>svg_logo_with_text( 20 ) ). " apm
     ri_html->add( '</div>' ).
     ri_html->add( |<div id="footer-version" class="version">{ get_version_details( ) }</div>| ).
     ri_html->add( '</td>' ).
@@ -181,7 +185,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     DATA lo_frontend_serv TYPE REF TO zif_abapgit_frontend_services.
 
-    rv_version = zif_abapgit_version=>c_abap_version.
+    rv_version = zif_abappm_constants=>c_version. " apm
 
     IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
       rv_version = rv_version && ` - Standalone Version`.
@@ -438,14 +442,8 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     ri_html->add( '<div id="header">' ).
 
-    ri_html->add( '<div class="logo" width="133" height="40">' ).
-    ri_html->add( lcl_logo=>get_svg( ) ).
-*    ri_html->add_a(
-*      iv_act = zif_abapgit_definitions=>c_action-abapgit_home
-*      iv_txt = ri_html->icon( 'git-alt' ) ).
-*    ri_html->add_a(
-*      iv_act = zif_abapgit_definitions=>c_action-abapgit_home
-*      iv_txt = ri_html->icon( 'abapgit' ) ).
+    ri_html->add( '<div class="logo">' ).
+    ri_html->add( zcl_abappm_logo=>svg_logo_with_text( 25 ) ). " apm
     ri_html->add( '</div>' ).
 
     ri_html->add( |<div class="page-title"><span class="spacer">&#x25BA;</span>{ lv_page_title }</div>| ).

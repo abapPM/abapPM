@@ -4,6 +4,12 @@ CLASS zcl_abappm_gui_page_hoc DEFINITION
   FINAL
   CREATE PRIVATE.
 
+************************************************************************
+* apm GUI Page HOC
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS create

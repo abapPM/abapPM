@@ -4,15 +4,15 @@ INTERFACE ZIF_ABAPPM_SEMVER_CONSTANTS PUBLIC.
 * SemVer Constants
 *
 * Copyright (c) Isaac Z. Schlueter and Contributors
-* ABAP Port by Marc Bernard <https://marcbernardtools.com/>
+* Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
-* Based on node semver package v7.6.0 (January 2024)
-* https://github.com/npm/node-semver/releases/tag/v7.6.0
+* Based on node semver package v7.6.2 (April 2024)
+* https://github.com/npm/node-semver/releases/tag/v7.6.2
 ************************************************************************
 
   " Package version
-  CONSTANTS version TYPE string VALUE '7.6.0' ##NEEDED.
+  CONSTANTS version TYPE string VALUE '7.6.2' ##NEEDED.
 
   " Note: this is the semver.org version of the spec that it implements
   " Not necessarily the package version of this code.

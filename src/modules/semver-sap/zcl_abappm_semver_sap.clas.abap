@@ -1,8 +1,14 @@
-CLASS ZCL_ABAPPM_SEMVER_SAP DEFINITION
+CLASS zcl_abappm_semver_sap DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* Semantic Version for SAP Release Mapping
+*
+* Copyright (c) apm.to <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     METHODS sap_release_to_semver
@@ -38,7 +44,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_SAP IMPLEMENTATION.
+CLASS zcl_abappm_semver_sap IMPLEMENTATION.
 
 
   METHOD sap_release_to_semver.
