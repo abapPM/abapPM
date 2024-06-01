@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
+INTERFACE zif_abappm_package_json PUBLIC.
 
 ************************************************************************
 * Package JSON
@@ -11,14 +11,14 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 * https://www.npmjs.com/package/@npmcli/package-json
 ************************************************************************
 
-  INTERFACES ZIF_ABAPPM_PACKAGE_JSON_TYPES.
+  INTERFACES zif_abappm_package_json_types.
 
   CONSTANTS:
     c_version TYPE string VALUE '1.0.0'.
 
   METHODS get
     RETURNING
-      VALUE(result) TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON.
+      VALUE(result) TYPE zif_abappm_package_json_types=>ty_package_json.
 
   METHODS get_json
     IMPORTING
@@ -28,33 +28,33 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 
   METHODS set
     IMPORTING
-      !is_json      TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON
+      !is_json      TYPE zif_abappm_package_json_types=>ty_package_json
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_PACKAGE_JSON.
+      zcx_abappm_package_json.
 
   METHODS set_json
     IMPORTING
       !iv_json      TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_PACKAGE_JSON.
+      zcx_abappm_package_json.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_PACKAGE_JSON.
+      zcx_abappm_package_json.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_PACKAGE_JSON.
+      zcx_abappm_package_json.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_PACKAGE_JSON.
+      zcx_abappm_package_json.
 
   METHODS is_valid
     RETURNING

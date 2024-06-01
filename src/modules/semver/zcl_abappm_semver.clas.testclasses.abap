@@ -4,28 +4,28 @@ CLASS ltcl_semver DEFINITION FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     METHODS:
-      comparisons FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      equality FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      to_string FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      invalid_versions FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      options FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      really_big FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      incrementing FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      compare_main_vs_pre FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      compare_build FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      comparisons FOR TESTING RAISING zcx_abappm_semver_error,
+      equality FOR TESTING RAISING zcx_abappm_semver_error,
+      to_string FOR TESTING RAISING zcx_abappm_semver_error,
+      invalid_versions FOR TESTING RAISING zcx_abappm_semver_error,
+      options FOR TESTING RAISING zcx_abappm_semver_error,
+      really_big FOR TESTING RAISING zcx_abappm_semver_error,
+      incrementing FOR TESTING RAISING zcx_abappm_semver_error,
+      compare_main_vs_pre FOR TESTING RAISING zcx_abappm_semver_error,
+      compare_build FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_SEMVER DEFINITION LOCAL FRIENDS ltcl_semver.
+CLASS zcl_abappm_semver DEFINITION LOCAL FRIENDS ltcl_semver.
 
 CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD comparisons.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>COMPARISONS( ) INTO DATA(comparison).
+    LOOP AT zcl_abappm_semver_fixtures=>comparisons( ) INTO DATA(comparison).
       DATA(msg) = |{ comparison-v0 } { comparison-v1 } { comparison-loose }|.
-      DATA(s0) = ZCL_ABAPPM_SEMVER=>CREATE( version = comparison-v0 loose = comparison-loose ).
-      DATA(s1) = ZCL_ABAPPM_SEMVER=>CREATE( version = comparison-v1 loose = comparison-loose ).
+      DATA(s0) = zcl_abappm_semver=>create( version = comparison-v0 loose = comparison-loose ).
+      DATA(s1) = zcl_abappm_semver=>create( version = comparison-v1 loose = comparison-loose ).
 
       cl_abap_unit_assert=>assert_equals( act = s0->compare( s1->version ) exp = 1 msg = msg ).
       cl_abap_unit_assert=>assert_equals( act = s0->compare( comparison-v1 ) exp = 1 msg = msg ).
@@ -39,10 +39,10 @@ CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD equality.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>EQUALITY( ) INTO DATA(equality).
+    LOOP AT zcl_abappm_semver_fixtures=>equality( ) INTO DATA(equality).
       DATA(msg) = |{ equality-v0 } { equality-v1 }|.
-      DATA(s0) = ZCL_ABAPPM_SEMVER=>CREATE( version = equality-v0 loose = equality-loose ).
-      DATA(s1) = ZCL_ABAPPM_SEMVER=>CREATE( version = equality-v1 loose = equality-loose ).
+      DATA(s0) = zcl_abappm_semver=>create( version = equality-v0 loose = equality-loose ).
+      DATA(s1) = zcl_abappm_semver=>create( version = equality-v1 loose = equality-loose ).
 
       cl_abap_unit_assert=>assert_equals( act = s0->compare( s1->version ) exp = 0 msg = msg ).
       cl_abap_unit_assert=>assert_equals( act = s1->compare( s0->version ) exp = 0 msg = msg ).
@@ -57,7 +57,7 @@ CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD to_string.
 
-    DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( 'v1.2.3' ).
+    DATA(s) = zcl_abappm_semver=>create( 'v1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = s->to_string( )
@@ -69,13 +69,13 @@ CLASS ltcl_semver IMPLEMENTATION.
   METHOD invalid_versions.
     " throws when presented with garbage
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>INVALID_VERSIONS( ) INTO DATA(invalid_version).
+    LOOP AT zcl_abappm_semver_fixtures=>invalid_versions( ) INTO DATA(invalid_version).
       DATA(msg) = |{ invalid_version-value } { invalid_version-reason }|.
 
       TRY.
-          DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( version = invalid_version-value loose = invalid_version-loose ).
+          DATA(s) = zcl_abappm_semver=>create( version = invalid_version-value loose = invalid_version-loose ).
           cl_abap_unit_assert=>fail( msg = msg ).
-        CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+        CATCH zcx_abappm_semver_error ##NO_HANDLER.
       ENDTRY.
     ENDLOOP.
 
@@ -83,14 +83,14 @@ CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD options.
 
-    DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( version = '1.2.3' loose = abap_true incpre = abap_true ).
+    DATA(s) = zcl_abappm_semver=>create( version = '1.2.3' loose = abap_true incpre = abap_true ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER=>CREATE( version = s loose = abap_true incpre = abap_true )
+      act = zcl_abappm_semver=>create( version = s loose = abap_true incpre = abap_true )
       exp = s
       msg = 'Should get same object when options match' ).
 
-    IF ZCL_ABAPPM_SEMVER=>CREATE( s ) = s.
+    IF zcl_abappm_semver=>create( s ) = s.
       cl_abap_unit_assert=>fail( msg = 'Should get new object when options do not match' ).
     ENDIF.
 
@@ -99,7 +99,7 @@ CLASS ltcl_semver IMPLEMENTATION.
   METHOD really_big.
     " test really big numeric prerelease value.
 
-    DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( |1.2.3-beta.{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }0| ).
+    DATA(s) = zcl_abappm_semver=>create( |1.2.3-beta.{ zif_abappm_semver_constants=>max_safe_integer }0| ).
 
     cl_abap_unit_assert=>assert_equals(
       act = s->prerelease[ 1 ]
@@ -107,29 +107,29 @@ CLASS ltcl_semver IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       act = s->prerelease[ 2 ]
-      exp = |{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }0| ).
+      exp = |{ zif_abappm_semver_constants=>max_safe_integer }0| ).
 
   ENDMETHOD.
 
   METHOD incrementing.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>INCREMENTS( ) INTO DATA(increments).
+    LOOP AT zcl_abappm_semver_fixtures=>increments( ) INTO DATA(increments).
       DATA(msg) = |{ increments-version } { increments-release } { increments-identifier }|.
 
       IF increments-res IS INITIAL.
         TRY.
-            DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( version = increments-version loose = increments-loose ).
+            DATA(s) = zcl_abappm_semver=>create( version = increments-version loose = increments-loose ).
 
             s->inc(
               release         = increments-release
               identifier      = increments-identifier
               identifier_base = increments-identifier_base ).
             cl_abap_unit_assert=>fail( msg = msg ).
-          CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+          CATCH zcx_abappm_semver_error ##NO_HANDLER.
             " throws when presented with garbage
         ENDTRY.
       ELSE.
-        s = ZCL_ABAPPM_SEMVER=>CREATE( version = increments-version loose = increments-loose ).
+        s = zcl_abappm_semver=>create( version = increments-version loose = increments-loose ).
 
         DATA(inc) = s->inc(
           release         = increments-release
@@ -159,7 +159,7 @@ CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD compare_main_vs_pre.
 
-    DATA(s) = ZCL_ABAPPM_SEMVER=>CREATE( '1.2.3' ).
+    DATA(s) = zcl_abappm_semver=>create( '1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = s->compare_main( '2.3.4' )
@@ -181,7 +181,7 @@ CLASS ltcl_semver IMPLEMENTATION.
       act = s->compare_main( '1.2.3-pre' )
       exp = 0 ).
 
-    DATA(p) = ZCL_ABAPPM_SEMVER=>CREATE( '1.2.3-alpha.0.pr.1' ).
+    DATA(p) = zcl_abappm_semver=>create( '1.2.3-alpha.0.pr.1' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = p->compare_pre( '9.9.9-alpha.0.pr.1' )
@@ -203,10 +203,10 @@ CLASS ltcl_semver IMPLEMENTATION.
 
   METHOD compare_build.
 
-    DATA(nobuild) = ZCL_ABAPPM_SEMVER=>CREATE( '1.0.0' ).
-    DATA(build0) = ZCL_ABAPPM_SEMVER=>CREATE( '1.0.0+0' ).
-    DATA(build1) = ZCL_ABAPPM_SEMVER=>CREATE( '1.0.0+1' ).
-    DATA(build10) = ZCL_ABAPPM_SEMVER=>CREATE( '1.0.0+1.0' ).
+    DATA(nobuild) = zcl_abappm_semver=>create( '1.0.0' ).
+    DATA(build0) = zcl_abappm_semver=>create( '1.0.0+0' ).
+    DATA(build1) = zcl_abappm_semver=>create( '1.0.0+1' ).
+    DATA(build10) = zcl_abappm_semver=>create( '1.0.0+1.0' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = nobuild->compare_build( '1.0.0+0' )

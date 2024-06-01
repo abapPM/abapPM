@@ -1,26 +1,26 @@
-class ltcl_filters_test definition final
-  for testing
-  risk level harmless
-  duration short.
-  private section.
-    methods empty_filter_simple for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods empty_filter_deep for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods path_filter for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods path_filter_string for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods path_filter_w_patterns for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods path_filter_deep for testing raising ZCX_ABAPPM_AJSON_ERROR.
-    methods and_filter for testing raising ZCX_ABAPPM_AJSON_ERROR.
-endclass.
+CLASS ltcl_filters_test DEFINITION FINAL
+  FOR TESTING
+  RISK LEVEL HARMLESS
+  DURATION SHORT.
+  PRIVATE SECTION.
+    METHODS empty_filter_simple FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS empty_filter_deep FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS path_filter FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS path_filter_string FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS path_filter_w_patterns FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS path_filter_deep FOR TESTING RAISING zcx_abappm_ajson_error.
+    METHODS and_filter FOR TESTING RAISING zcx_abappm_ajson_error.
+ENDCLASS.
 
 
-class ltcl_filters_test implementation.
+CLASS ltcl_filters_test IMPLEMENTATION.
 
-  method empty_filter_simple.
+  METHOD empty_filter_simple.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -34,22 +34,22 @@ class ltcl_filters_test implementation.
       iv_path = '/d'
       iv_val  = 0 ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_EMPTY_FILTER( ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_empty_filter( ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1","c":"3"}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method empty_filter_deep.
+  METHOD empty_filter_deep.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -63,25 +63,25 @@ class ltcl_filters_test implementation.
       iv_path = '/d/e'
       iv_val  = 0 ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_EMPTY_FILTER( ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_empty_filter( ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1"}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method path_filter.
+  METHOD path_filter.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
-    data lt_paths type string_table.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
+    DATA lt_paths TYPE string_table.
 
-    append '/b/c' to lt_paths.
+    APPEND '/b/c' TO lt_paths.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -92,22 +92,22 @@ class ltcl_filters_test implementation.
       iv_path = '/c/d'
       iv_val  = '3' ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER( it_skip_paths = lt_paths ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_path_filter( it_skip_paths = lt_paths ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1","b":{},"c":{"d":"3"}}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method path_filter_string.
+  METHOD path_filter_string.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -118,22 +118,22 @@ class ltcl_filters_test implementation.
       iv_path = '/c/d'
       iv_val  = '3' ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER( iv_skip_paths = '/b/c,/c/d' ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/b/c,/c/d' ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1","b":{},"c":{}}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method path_filter_w_patterns.
+  METHOD path_filter_w_patterns.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/@meta'
       iv_val  = 'meta' ).
@@ -150,9 +150,9 @@ class ltcl_filters_test implementation.
       iv_path = '/c/@meta2'
       iv_val  = 'meta2' ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER(
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_path_filter(
         iv_skip_paths = '/*/c,*/@*'
         iv_pattern_search = abap_true ) ).
 
@@ -160,17 +160,17 @@ class ltcl_filters_test implementation.
       act = li_json_filtered->stringify( )
       exp = '{"a":"1","b":{},"c":{"d":"3"}}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method path_filter_deep.
+  METHOD path_filter_deep.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
-    data lt_paths type string_table.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
+    DATA lt_paths TYPE string_table.
 
-    append '/b' to lt_paths.
+    APPEND '/b' TO lt_paths.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -184,26 +184,26 @@ class ltcl_filters_test implementation.
       iv_path = '/c/d'
       iv_val  = '3' ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER( it_skip_paths = lt_paths ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_path_filter( it_skip_paths = lt_paths ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1","c":{"d":"3"}}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method and_filter.
+  METHOD and_filter.
 
-    data li_json type ref to ZIF_ABAPPM_AJSON.
-    data li_json_filtered type ref to ZIF_ABAPPM_AJSON.
-    data lt_filters type ZIF_ABAPPM_AJSON_FILTER=>TY_FILTER_TAB.
+    DATA li_json TYPE REF TO zif_abappm_ajson.
+    DATA li_json_filtered TYPE REF TO zif_abappm_ajson.
+    DATA lt_filters TYPE zif_abappm_ajson_filter=>ty_filter_tab.
 
-    append ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_EMPTY_FILTER( ) to lt_filters.
-    append ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER( iv_skip_paths = '/c' ) to lt_filters.
+    APPEND zcl_abappm_ajson_filter_lib=>create_empty_filter( ) TO lt_filters.
+    APPEND zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/c' ) TO lt_filters.
 
-    li_json = ZCL_ABAPPM_AJSON=>CREATE_EMPTY( ).
+    li_json = zcl_abappm_ajson=>create_empty( ).
     li_json->set(
       iv_path = '/a'
       iv_val  = '1' ).
@@ -217,14 +217,14 @@ class ltcl_filters_test implementation.
       iv_path = '/d'
       iv_val  = 0 ).
 
-    li_json_filtered = ZCL_ABAPPM_AJSON=>CREATE_FROM(
+    li_json_filtered = zcl_abappm_ajson=>create_from(
       ii_source_json = li_json
-      ii_filter = ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_AND_FILTER( lt_filters ) ).
+      ii_filter = zcl_abappm_ajson_filter_lib=>create_and_filter( lt_filters ) ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_json_filtered->stringify( )
       exp = '{"a":"1"}' ).
 
-  endmethod.
+  ENDMETHOD.
 
-endclass.
+ENDCLASS.

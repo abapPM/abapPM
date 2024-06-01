@@ -12,15 +12,15 @@ CLASS ltcl_semver_cli DEFINITION FOR TESTING RISK LEVEL HARMLESS
           out     TYPE string OPTIONAL
           out_tab TYPE string_table OPTIONAL
           err     TYPE string OPTIONAL,
-      help FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      inc FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      sorting_and_filtering FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      coercing FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      args_with_equals FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      help FOR TESTING RAISING zcx_abappm_semver_error,
+      inc FOR TESTING RAISING zcx_abappm_semver_error,
+      sorting_and_filtering FOR TESTING RAISING zcx_abappm_semver_error,
+      coercing FOR TESTING RAISING zcx_abappm_semver_error,
+      args_with_equals FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_SEMVER_CLI DEFINITION LOCAL FRIENDS ltcl_semver_cli.
+CLASS zcl_abappm_semver_cli DEFINITION LOCAL FRIENDS ltcl_semver_cli.
 
 CLASS ltcl_semver_cli IMPLEMENTATION.
 
@@ -35,8 +35,8 @@ CLASS ltcl_semver_cli IMPLEMENTATION.
     DATA(exp_err) = replace( val = err sub = |\n| with = '' ).
 
     TRY.
-        DATA(act_out) = ZCL_ABAPPM_SEMVER_CLI=>MAIN( args ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR INTO DATA(error).
+        DATA(act_out) = zcl_abappm_semver_cli=>main( args ).
+      CATCH zcx_abappm_semver_error INTO DATA(error).
         DATA(act_err) = error->get_text( ).
     ENDTRY.
 
@@ -56,19 +56,19 @@ CLASS ltcl_semver_cli IMPLEMENTATION.
 
     test(
       args    = '-h'
-      out_tab = ZCL_ABAPPM_SEMVER_CLI=>HELP( ) ).
+      out_tab = zcl_abappm_semver_cli=>help( ) ).
 
     test(
       args    = '-?'
-      out_tab = ZCL_ABAPPM_SEMVER_CLI=>HELP( ) ).
+      out_tab = zcl_abappm_semver_cli=>help( ) ).
 
     test(
       args    = '--help'
-      out_tab = ZCL_ABAPPM_SEMVER_CLI=>HELP( ) ).
+      out_tab = zcl_abappm_semver_cli=>help( ) ).
 
     test(
       args    = ''
-      out_tab = ZCL_ABAPPM_SEMVER_CLI=>HELP( ) ).
+      out_tab = zcl_abappm_semver_cli=>help( ) ).
 
   ENDMETHOD.
 

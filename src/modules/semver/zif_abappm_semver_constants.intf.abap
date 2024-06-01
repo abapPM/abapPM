@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_SEMVER_CONSTANTS PUBLIC.
+INTERFACE zif_abappm_semver_constants PUBLIC.
 
 ************************************************************************
 * SemVer Constants

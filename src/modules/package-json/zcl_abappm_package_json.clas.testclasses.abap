@@ -3,13 +3,13 @@ CLASS ltcl_package_json DEFINITION FOR TESTING RISK LEVEL HARMLESS
 
   PRIVATE SECTION.
 
-    DATA mi_package TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON.
+    DATA mi_package TYPE REF TO zif_abappm_package_json.
 
     METHODS init_test
       IMPORTING
         iv_args TYPE string
       RAISING
-        ZCX_ABAPPM_PACKAGE_JSON.
+        zcx_abappm_package_json.
 
     METHODS test_valid
       IMPORTING
@@ -21,23 +21,23 @@ CLASS ltcl_package_json DEFINITION FOR TESTING RISK LEVEL HARMLESS
 
     METHODS test_compare
       IMPORTING
-        is_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON
+        is_json TYPE zif_abappm_package_json_types=>ty_package_json
         iv_json TYPE string.
 
     METHODS:
       valid_packages FOR TESTING,
       invalid_packages FOR TESTING,
-      get_complete FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      get_package FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      set_package FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      get_persons FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      set_persons FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      dependencies_json_to_abap FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON,
-      dependencies_abap_to_json FOR TESTING RAISING ZCX_ABAPPM_PACKAGE_JSON.
+      get_complete FOR TESTING RAISING zcx_abappm_package_json,
+      get_package FOR TESTING RAISING zcx_abappm_package_json,
+      set_package FOR TESTING RAISING zcx_abappm_package_json,
+      get_persons FOR TESTING RAISING zcx_abappm_package_json,
+      set_persons FOR TESTING RAISING zcx_abappm_package_json,
+      dependencies_json_to_abap FOR TESTING RAISING zcx_abappm_package_json,
+      dependencies_abap_to_json FOR TESTING RAISING zcx_abappm_package_json.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION LOCAL FRIENDS ltcl_package_json.
+CLASS zcl_abappm_package_json DEFINITION LOCAL FRIENDS ltcl_package_json.
 
 CLASS ltcl_package_json IMPLEMENTATION.
 
@@ -53,7 +53,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     SPLIT iv_args AT ',' INTO lv_package lv_name lv_version lv_private.
 
-    CREATE OBJECT mi_package TYPE ZCL_ABAPPM_PACKAGE_JSON
+    CREATE OBJECT mi_package TYPE zcl_abappm_package_json
       EXPORTING
         iv_package = lv_package
         iv_name    = lv_name
@@ -64,14 +64,14 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD test_valid.
 
-    DATA lx_error TYPE REF TO ZCX_ABAPPM_PACKAGE_JSON.
+    DATA lx_error TYPE REF TO zcx_abappm_package_json.
 
     TRY.
         init_test( iv_args ).
         IF mi_package->is_valid( ) = abap_false.
           cl_abap_unit_assert=>fail( |Invalid but expected valid: { iv_args }| ).
         ENDIF.
-      CATCH ZCX_ABAPPM_PACKAGE_JSON INTO lx_error.
+      CATCH zcx_abappm_package_json INTO lx_error.
         cl_abap_unit_assert=>fail( lx_error->get_text( ) ).
     ENDTRY.
 
@@ -83,7 +83,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
         IF mi_package->is_valid( ) = abap_true.
           cl_abap_unit_assert=>fail( |Valid but expected invalid: { iv_args }| ).
         ENDIF.
-      CATCH ZCX_ABAPPM_PACKAGE_JSON.
+      CATCH zcx_abappm_package_json.
     ENDTRY.
   ENDMETHOD.
 
@@ -157,8 +157,8 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     DATA:
       lv_json TYPE string,
-      ls_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON,
-      ls_dep  TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_DEPENDENCY.
+      ls_json TYPE zif_abappm_package_json_types=>ty_package_json,
+      ls_dep  TYPE zif_abappm_package_json_types=>ty_dependency.
 
     init_test( '$TEST' ).
 
@@ -252,7 +252,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD get_package.
 
-    DATA ls_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON.
+    DATA ls_json TYPE zif_abappm_package_json_types=>ty_package_json.
 
     init_test( '$TEST,test,1.0.0' ).
 
@@ -289,7 +289,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD set_package.
 
-    DATA ls_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON.
+    DATA ls_json TYPE zif_abappm_package_json_types=>ty_package_json.
 
     init_test( '$TEST' ).
 
@@ -343,8 +343,8 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     DATA:
       lv_json TYPE string,
-      ls_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON,
-      ls_dep  TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_DEPENDENCY.
+      ls_json TYPE zif_abappm_package_json_types=>ty_package_json,
+      ls_dep  TYPE zif_abappm_package_json_types=>ty_dependency.
 
     init_test( '$TEST' ).
 
@@ -384,8 +384,8 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     DATA:
       lv_json TYPE string,
-      ls_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON,
-      ls_dep  TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_DEPENDENCY.
+      ls_json TYPE zif_abappm_package_json_types=>ty_package_json,
+      ls_dep  TYPE zif_abappm_package_json_types=>ty_dependency.
 
     init_test( '$TEST' ).
 

@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
+CLASS zcl_abappm_semver_functions DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -19,7 +19,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS cmp
       IMPORTING
@@ -31,7 +31,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS coerce
       IMPORTING
@@ -40,9 +40,9 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
         loose         TYPE abap_bool DEFAULT abap_false
         incpre        TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_SEMVER
+        VALUE(result) TYPE REF TO zcl_abappm_semver
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS compare
       IMPORTING
@@ -53,7 +53,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS compare_build
       IMPORTING
@@ -64,7 +64,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS compare_loose
       IMPORTING
@@ -74,7 +74,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS diff
       IMPORTING
@@ -83,7 +83,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS eq
       IMPORTING
@@ -94,7 +94,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS gt
       IMPORTING
@@ -105,7 +105,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS gte
       IMPORTING
@@ -116,7 +116,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS inc
       IMPORTING
@@ -127,7 +127,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
         loose           TYPE abap_bool DEFAULT abap_false
         incpre          TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result)   TYPE REF TO ZCL_ABAPPM_SEMVER.
+        VALUE(result)   TYPE REF TO zcl_abappm_semver.
 
     CLASS-METHODS lt
       IMPORTING
@@ -138,7 +138,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS lte
       IMPORTING
@@ -149,7 +149,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS major
       IMPORTING
@@ -158,7 +158,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS minor
       IMPORTING
@@ -167,7 +167,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS neq
       IMPORTING
@@ -178,7 +178,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS parse
       IMPORTING
@@ -187,9 +187,9 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
         incpre        TYPE abap_bool DEFAULT abap_false
         throw_errors  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_SEMVER
+        VALUE(result) TYPE REF TO zcl_abappm_semver
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS patch
       IMPORTING
@@ -198,7 +198,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS prerelease
       IMPORTING
@@ -208,7 +208,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS rcompare
       IMPORTING
@@ -219,7 +219,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS rsort
       IMPORTING
@@ -229,7 +229,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS sort
       IMPORTING
@@ -239,7 +239,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS satisfies
       IMPORTING
@@ -250,7 +250,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS valid
       IMPORTING
@@ -270,7 +270,7 @@ CLASS ZCL_ABAPPM_SEMVER_FUNCTIONS DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
 ENDCLASS.
 
@@ -282,7 +282,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
   METHOD clean.
 
     DATA(vers) = replace(
-      val   = ZCL_ABAPPM_SEMVER_UTILS=>VERSION_TRIM( version )
+      val   = zcl_abappm_semver_utils=>version_trim( version )
       regex = '^[=v]+'
       with  = '' ).
 
@@ -315,7 +315,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       WHEN '<='.
         result = lte( a = a b = b loose = loose incpre = incpre ).
       WHEN OTHERS.
-        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid operator: { op }| ).
+        zcx_abappm_semver_error=>raise( |Invalid operator: { op }| ).
     ENDCASE.
 
   ENDMETHOD.
@@ -342,8 +342,8 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
     IF rtl = abap_false.
       DATA(r) = COND #(
         WHEN incpre = abap_true
-        THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-COERCEFULL-SAFE_SRC
-        ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-COERCE-SAFE_SRC ).
+        THEN zcl_abappm_semver_re=>token-coercefull-safe_src
+        ELSE zcl_abappm_semver_re=>token-coerce-safe_src ).
 
       FIND REGEX r IN version SUBMATCHES DATA(rest) DATA(major) DATA(minor) DATA(patch) DATA(prerelease) DATA(build).
       IF sy-subrc <> 0.
@@ -355,8 +355,8 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       " Eg, '1.2.3.4' wants to coerce '2.3.4', not '3.4' or '4'
       r = COND #(
         WHEN incpre = abap_true
-        THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-COERCERTLFULL-SAFE_SRC
-        ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-COERCERTL-SAFE_SRC ).
+        THEN zcl_abappm_semver_re=>token-coercertlfull-safe_src
+        ELSE zcl_abappm_semver_re=>token-coercertl-safe_src ).
 
       DATA(offset) = 0.
       DO.
@@ -425,8 +425,8 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD compare.
 
-    DATA(semver_a) = ZCL_ABAPPM_SEMVER=>CREATE( version = a loose = loose incpre = incpre ).
-    DATA(semver_b) = ZCL_ABAPPM_SEMVER=>CREATE( version = b loose = loose incpre = incpre ).
+    DATA(semver_a) = zcl_abappm_semver=>create( version = a loose = loose incpre = incpre ).
+    DATA(semver_b) = zcl_abappm_semver=>create( version = b loose = loose incpre = incpre ).
 
     CHECK semver_a IS BOUND AND semver_b IS BOUND.
 
@@ -437,8 +437,8 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD compare_build.
 
-    DATA(semver_a) = ZCL_ABAPPM_SEMVER=>CREATE( version = a loose = loose incpre = incpre ).
-    DATA(semver_b) = ZCL_ABAPPM_SEMVER=>CREATE( version = b loose = loose incpre = incpre ).
+    DATA(semver_a) = zcl_abappm_semver=>create( version = a loose = loose incpre = incpre ).
+    DATA(semver_b) = zcl_abappm_semver=>create( version = b loose = loose incpre = incpre ).
 
     CHECK semver_a IS BOUND AND semver_b IS BOUND.
 
@@ -535,15 +535,15 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD equality.
 
-    DATA semver_a TYPE REF TO ZCL_ABAPPM_SEMVER.
-    DATA semver_b TYPE REF TO ZCL_ABAPPM_SEMVER.
+    DATA semver_a TYPE REF TO zcl_abappm_semver.
+    DATA semver_b TYPE REF TO zcl_abappm_semver.
 
-    IF a IS BOUND AND a IS INSTANCE OF ZCL_ABAPPM_SEMVER AND b IS BOUND AND b IS INSTANCE OF ZCL_ABAPPM_SEMVER.
+    IF a IS BOUND AND a IS INSTANCE OF zcl_abappm_semver AND b IS BOUND AND b IS INSTANCE OF zcl_abappm_semver.
       semver_a ?= a.
       semver_b ?= b.
       result = xsdbool( semver_a->version = semver_b->version ).
     ELSE.
-      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid parameter type| ).
+      zcx_abappm_semver_error=>raise( |Invalid parameter type| ).
     ENDIF.
 
   ENDMETHOD.
@@ -561,23 +561,23 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD inc.
 
-    DATA semver TYPE REF TO ZCL_ABAPPM_SEMVER.
+    DATA semver TYPE REF TO zcl_abappm_semver.
 
     TRY.
         " Create new semver object
         DATA(kind) = cl_abap_typedescr=>describe_by_data( version )->type_kind.
 
-        IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF ZCL_ABAPPM_SEMVER.
+        IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF zcl_abappm_semver.
           semver ?= version.
-          result = ZCL_ABAPPM_SEMVER=>CREATE( version = semver->version loose = loose incpre = incpre ).
+          result = zcl_abappm_semver=>create( version = semver->version loose = loose incpre = incpre ).
         ELSE.
-          result = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose incpre = incpre ).
+          result = zcl_abappm_semver=>create( version = version loose = loose incpre = incpre ).
         ENDIF.
 
         CHECK result IS BOUND.
 
         result->inc( release = release identifier = identifier identifier_base = identifier_base ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR.
+      CATCH zcx_abappm_semver_error.
         CLEAR result.
     ENDTRY.
 
@@ -596,7 +596,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD major.
 
-    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose ).
+    DATA(semver) = zcl_abappm_semver=>create( version = version loose = loose ).
 
     CHECK semver IS BOUND.
 
@@ -607,7 +607,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD minor.
 
-    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose ).
+    DATA(semver) = zcl_abappm_semver=>create( version = version loose = loose ).
 
     CHECK semver IS BOUND.
 
@@ -625,14 +625,14 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
     DATA(kind) = cl_abap_typedescr=>describe_by_data( version )->type_kind.
 
-    IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF ZCL_ABAPPM_SEMVER.
+    IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF zcl_abappm_semver.
       result ?= version.
       RETURN.
     ENDIF.
 
     TRY.
-        result = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose incpre = incpre ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR INTO DATA(error).
+        result = zcl_abappm_semver=>create( version = version loose = loose incpre = incpre ).
+      CATCH zcx_abappm_semver_error INTO DATA(error).
         IF throw_errors = abap_false.
           RETURN.
         ENDIF.
@@ -645,7 +645,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
   METHOD patch.
 
-    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose ).
+    DATA(semver) = zcl_abappm_semver=>create( version = version loose = loose ).
 
     CHECK semver IS BOUND.
 
@@ -694,12 +694,12 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
   METHOD satisfies.
 
     TRY.
-        DATA(semrange) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = range loose = loose incpre = incpre ).
+        DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
 
         IF semrange IS BOUND.
           result = semrange->test( version ).
         ENDIF.
-      CATCH ZCX_ABAPPM_SEMVER_ERROR.
+      CATCH zcx_abappm_semver_error.
         result = abap_false.
     ENDTRY.
 
@@ -735,7 +735,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         CHECK semver IS BOUND.
 
         result = semver->version.
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.

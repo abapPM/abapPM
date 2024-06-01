@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_IDENTIFIERS DEFINITION
+CLASS zcl_abappm_semver_identifiers DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -31,13 +31,13 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_IDENTIFIERS IMPLEMENTATION.
+CLASS zcl_abappm_semver_identifiers IMPLEMENTATION.
 
 
   METHOD compare_identifiers.
 
-    DATA(anum) = ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( a ).
-    DATA(bnum) = ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( b ).
+    DATA(anum) = zcl_abappm_semver_utils=>is_numeric( a ).
+    DATA(bnum) = zcl_abappm_semver_utils=>is_numeric( b ).
 
     IF anum = abap_true AND bnum = abap_true.
       DATA(aval) = CONV decfloat34( a ).

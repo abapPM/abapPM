@@ -15,15 +15,15 @@ CLASS ltcl_semver_utils IMPLEMENTATION.
   METHOD is_numeric.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( '26111968' )
+      act = zcl_abappm_semver_utils=>is_numeric( '26111968' )
       exp = abap_true ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( '+123' )
+      act = zcl_abappm_semver_utils=>is_numeric( '+123' )
       exp = abap_false ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( 'abc' )
+      act = zcl_abappm_semver_utils=>is_numeric( 'abc' )
       exp = abap_false ).
 
   ENDMETHOD.
@@ -31,23 +31,23 @@ CLASS ltcl_semver_utils IMPLEMENTATION.
   METHOD trim.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |  test   | )
+      act = zcl_abappm_semver_utils=>trim( |  test   | )
       exp = 'test' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |\t\t test| )
+      act = zcl_abappm_semver_utils=>trim( |\t\t test| )
       exp = 'test' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |test\n \t| )
+      act = zcl_abappm_semver_utils=>trim( |test\n \t| )
       exp = 'test' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |test| )
+      act = zcl_abappm_semver_utils=>trim( |test| )
       exp = 'test' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |test test| )
+      act = zcl_abappm_semver_utils=>trim( |test test| )
       exp = 'test test' ).
 
   ENDMETHOD.
@@ -55,11 +55,11 @@ CLASS ltcl_semver_utils IMPLEMENTATION.
   METHOD version_trim.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>VERSION_TRIM( | v 1.2.3| )
+      act = zcl_abappm_semver_utils=>version_trim( | v 1.2.3| )
       exp = 'v1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_UTILS=>VERSION_TRIM( |=  \t 1.2.3 | )
+      act = zcl_abappm_semver_utils=>version_trim( |=  \t 1.2.3 | )
       exp = '=1.2.3' ).
 
   ENDMETHOD.

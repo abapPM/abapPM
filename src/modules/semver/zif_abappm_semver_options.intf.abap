@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_SEMVER_OPTIONS PUBLIC.
+INTERFACE zif_abappm_semver_options PUBLIC.
 
 ************************************************************************
 * SemVer Options
