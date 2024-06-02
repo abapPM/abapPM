@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ABAPPM_PACKAGE_JSON_SETUP</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_SETTINGS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Package JSON - Setup</DESCRIPT>
+    <DESCRIPT>Package JSON</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

@@ -13,8 +13,7 @@ INTERFACE zif_abappm_package_json PUBLIC.
 
   INTERFACES zif_abappm_package_json_types.
 
-  CONSTANTS:
-    c_version TYPE string VALUE '1.0.0'.
+  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   METHODS get
     RETURNING

@@ -4,6 +4,12 @@ CLASS zcl_abappm_gui_page_db DEFINITION
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* apm GUI Database Utility
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_event_handler.
@@ -46,7 +52,7 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     METHODS render_stats
       IMPORTING
-        it_db_entries  TYPE zif_package_json_db=>ty_zabappm
+        it_db_entries  TYPE zif_abappm_persist_apm=>ty_list
       RETURNING
         VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
@@ -54,7 +60,7 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     METHODS render_table
       IMPORTING
-        it_db_entries  TYPE zif_package_json_db=>ty_zabappm
+        it_db_entries  TYPE zif_abappm_persist_apm=>ty_list
       RETURNING
         VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
@@ -66,7 +72,7 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     CLASS-METHODS do_delete_entry
       IMPORTING
-        !is_key TYPE zif_abapgit_persistence=>ty_content
+        !iv_key TYPE zif_abappm_persist_apm=>ty_key
       RAISING
         zcx_abapgit_exception.
 
@@ -76,7 +82,7 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     METHODS explain_content
       IMPORTING
-        !is_data       TYPE zif_abapgit_persistence=>ty_content
+        !is_data       TYPE zif_abappm_persist_apm=>ty_zabappm
       RETURNING
         VALUE(rv_text) TYPE string
       RAISING
@@ -113,7 +119,8 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   METHOD do_backup_db.
 
     DATA:
-      lt_data     TYPE zif_package_json_db=>ty_zabappm,
+      lt_data     TYPE zif_abappm_persist_apm=>ty_list,
+      lv_type     TYPE string,
       lv_text     TYPE string,
       lt_toc      TYPE string_table,
       lo_zip      TYPE REF TO cl_abap_zip,
@@ -125,7 +132,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     FIELD-SYMBOLS:
       <ls_data> LIKE LINE OF lt_data.
 
-    lt_data = zcl_abapgit_persistence_db=>get_instance( )->list( ).
+    lt_data = zcl_abappm_persist_apm=>get_instance( )->list( ).
 
     lv_text = |Table of Content\n|.
     INSERT lv_text INTO TABLE lt_toc.
@@ -137,19 +144,16 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     CREATE OBJECT lo_zip.
 
     LOOP AT lt_data ASSIGNING <ls_data>.
-      IF <ls_data>-type = zcl_abapgit_persistence_db=>c_type_repo_csum.
-        CONCATENATE <ls_data>-type '_' <ls_data>-value '.txt' INTO lv_filename.
-      ELSE.
-        CONCATENATE <ls_data>-type '_' <ls_data>-value '.xml' INTO lv_filename.
-      ENDIF.
+      lv_filename = to_lower( <ls_data>-keys ) && '.json'.
+
       lo_zip->add(
         name    = lv_filename
-        content = zcl_abapgit_convert=>string_to_xstring_utf8( <ls_data>-data_str ) ).
+        content = zcl_abapgit_convert=>string_to_xstring_utf8( <ls_data>-value ) ).
 
       lv_text = explain_content( <ls_data> ).
       REPLACE '<strong>' IN lv_text WITH ''.
       REPLACE '</strong>' IN lv_text WITH ''.
-      lv_text = |{ <ls_data>-type },{ <ls_data>-value },{ lv_text }\n|.
+      lv_text = |{ <ls_data>-keys },{ lv_text }\n|.
       INSERT lv_text INTO TABLE lt_toc.
     ENDLOOP.
 
@@ -159,12 +163,12 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     lv_zip = lo_zip->save( ).
 
-    CONCATENATE 'abapGit_Backup_' sy-datlo '_' sy-timlo '.zip' INTO lv_filename.
+    CONCATENATE 'apm_Backup_' sy-datlo '_' sy-timlo '.zip' INTO lv_filename.
 
     li_fe_serv = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
     lv_path = li_fe_serv->show_file_save_dialog(
-      iv_title            = 'abapGit Backup'
+      iv_title            = 'apm Backup'
       iv_extension        = 'zip'
       iv_default_filename = lv_filename ).
 
@@ -172,20 +176,22 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       iv_path = lv_path
       iv_xstr = lv_zip ).
 
-    MESSAGE 'abapGit Backup successfully saved' TYPE 'S'.
+    MESSAGE 'apm Backup successfully saved' TYPE 'S'.
 
   ENDMETHOD.
 
 
   METHOD do_delete_entry.
 
-    DATA lv_answer TYPE c LENGTH 1.
+    DATA:
+      lv_answer TYPE c LENGTH 1,
+      lx_error  TYPE REF TO zcx_abappm_persist_apm.
 
-    ASSERT is_key-type IS NOT INITIAL.
+    ASSERT iv_key IS NOT INITIAL.
 
     lv_answer = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Warning'
-      iv_text_question         = |Are you sure you want to delete entry { is_key-type } { is_key-value }?|
+      iv_text_question         = |Are you sure you want to delete entry { iv_key }?|
       iv_text_button_1         = 'Yes'
       iv_icon_button_1         = 'ICON_DELETE'
       iv_text_button_2         = 'No'
@@ -197,23 +203,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_abapgit_cancel.
     ENDIF.
 
-    zcl_abapgit_persistence_db=>get_instance( )->delete(
-      iv_type  = is_key-type
-      iv_value = is_key-value ).
-
-    " If deleting repo, also delete corresponding checksums
-    " Other way around is ok, since checksums are automatically recreated
-    IF is_key-type = zcl_abapgit_persistence_db=>c_type_repo.
-      zcl_abapgit_persistence_db=>get_instance( )->delete(
-        iv_type  = zcl_abapgit_persistence_db=>c_type_repo_csum
-        iv_value = is_key-value ).
-
-      " Initialize repo list
-      zcl_abapgit_repo_srv=>get_instance( )->init( ).
-      " TODO: think how to remove this code,
-      " maybe implement subscription in persistence_db,
-      " so that repo_srv receive a notification on add/delete
-    ENDIF.
+    TRY.
+        zcl_abappm_persist_apm=>get_instance( )->delete( iv_key ).
+      CATCH zcx_abappm_persist_apm INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
     COMMIT WORK.
 
@@ -227,12 +221,13 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       lo_zip      TYPE REF TO cl_abap_zip,
       lv_zip      TYPE xstring,
       lv_path     TYPE string,
-      lv_filename TYPE string,
+      lv_key      TYPE zif_abappm_persist_apm=>ty_key,
       lv_data     TYPE xstring,
-      ls_data     TYPE zif_abapgit_persistence=>ty_content,
-      lt_data     TYPE zif_package_json_db=>ty_zabappm,
-      lt_data_old TYPE zif_package_json_db=>ty_zabappm,
-      li_fe_serv  TYPE REF TO zif_abapgit_frontend_services.
+      lt_data     TYPE zif_abappm_persist_apm=>ty_list,
+      lt_data_old TYPE zif_abappm_persist_apm=>ty_list,
+      ls_data     TYPE zif_abappm_persist_apm=>ty_zabappm,
+      li_fe_serv  TYPE REF TO zif_abapgit_frontend_services,
+      lx_error    TYPE REF TO zcx_abappm_persist_apm.
 
     FIELD-SYMBOLS:
       <ls_zipfile> LIKE LINE OF lo_zip->files.
@@ -240,9 +235,9 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     li_fe_serv = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
     lv_path = li_fe_serv->show_file_open_dialog(
-      iv_title            = 'Restore abapGit Backup'
+      iv_title            = 'Restore apm Backup'
       iv_extension        = 'zip'
-      iv_default_filename = 'abapGit_Backup_*.zip' ).
+      iv_default_filename = 'apm_Backup_*.zip' ).
 
     lv_zip = li_fe_serv->file_upload( lv_path ).
 
@@ -260,22 +255,15 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     LOOP AT lo_zip->files ASSIGNING <ls_zipfile> WHERE name <> c_toc_filename.
       CLEAR ls_data.
-      lv_filename = <ls_zipfile>-name.
-      REPLACE '.xml' IN lv_filename WITH ''.
-      REPLACE '.txt' IN lv_filename WITH ''.
-      IF lv_filename CP 'REPO_CS*'.
-        ls_data-type  = lv_filename(7).
-        ls_data-value = lv_filename+8(*).
-      ELSE.
-        SPLIT lv_filename AT '_' INTO ls_data-type ls_data-value.
-      ENDIF.
+      lv_key = replace(
+        val  = <ls_zipfile>-name
+        sub  = '.json'
+        with = '' ).
 
       " Validate DB key
-      TRY.
-          zcl_abapgit_persistence_db=>validate_entry_type( ls_data-type ).
-        CATCH zcx_abapgit_exception.
-          zcx_abapgit_exception=>raise( |Invalid DB entry type. This is not an abapGit Backup| ).
-      ENDTRY.
+      IF zcl_abappm_persist_apm=>validate_key( lv_key ) = abap_false.
+        zcx_abapgit_exception=>raise( |Invalid DB entry type. This is not an apm Backup| ).
+      ENDIF.
 
       lo_zip->get(
         EXPORTING
@@ -290,13 +278,13 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         zcx_abapgit_exception=>raise( |Error getting file { <ls_zipfile>-name } from ZIP| ).
       ENDIF.
 
-      ls_data-data_str = zcl_abapgit_convert=>xstring_to_string_utf8( lv_data ).
+      ls_data-value = zcl_abapgit_convert=>xstring_to_string_utf8( lv_data ).
       INSERT ls_data INTO TABLE lt_data.
     ENDLOOP.
 
     lv_answer = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Warning'
-      iv_text_question         = 'All existing repositories and settings will be deleted and overwritten! Continue?'
+      iv_text_question         = 'All existing packages and settings will be deleted and overwritten! Continue?'
       iv_text_button_1         = 'Restore'
       iv_icon_button_1         = 'ICON_IMPORT'
       iv_text_button_2         = 'Cancel'
@@ -308,51 +296,68 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_abapgit_cancel.
     ENDIF.
 
-    lt_data_old = zcl_abapgit_persistence_db=>get_instance( )->list( ).
-    LOOP AT lt_data_old INTO ls_data.
-      zcl_abapgit_persistence_db=>get_instance( )->delete(
-        iv_type  = ls_data-type
-        iv_value = ls_data-value ).
-    ENDLOOP.
+    TRY.
+        lt_data_old = zcl_abappm_persist_apm=>get_instance( )->list( ).
+        LOOP AT lt_data_old INTO ls_data.
+          zcl_abappm_persist_apm=>get_instance( )->delete( ls_data-keys ).
+        ENDLOOP.
 
-    COMMIT WORK AND WAIT.
+        COMMIT WORK.
 
-    LOOP AT lt_data INTO ls_data.
-      zcl_abapgit_persistence_db=>get_instance( )->add(
-        iv_type  = ls_data-type
-        iv_value = ls_data-value
-        iv_data  = ls_data-data_str ).
-    ENDLOOP.
+        LOOP AT lt_data INTO ls_data.
+          zcl_abappm_persist_apm=>get_instance( )->save(
+            iv_key   = ls_data-keys
+            iv_value = ls_data-value ).
+        ENDLOOP.
 
-    COMMIT WORK AND WAIT.
+        COMMIT WORK.
+      CATCH zcx_abappm_persist_apm INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
-    MESSAGE 'abapGit Backup successfully restored' TYPE 'S'.
+    MESSAGE 'apm Backup successfully restored' TYPE 'S'.
 
   ENDMETHOD.
 
 
   METHOD explain_content.
 
-    DATA lv_descr TYPE string.
-    DATA ls_explanation TYPE ty_explanation.
+    DATA:
+      lv_key_type    TYPE string,
+      lv_name        TYPE string,
+      lv_rest        TYPE string,
+      lv_package     TYPE devclass,
+      lv_user        TYPE uname,
+      lv_descr       TYPE string,
+      ls_explanation TYPE ty_explanation.
 
-    CASE is_data-type.
-      WHEN zcl_abapgit_persistence_db=>c_type_repo.
-        lv_descr       = 'Repo Settings'.
-        ls_explanation = explain_content_repo( is_data ).
+    SPLIT is_data-keys AT ':' INTO lv_key_type lv_name lv_rest.
 
-      WHEN zcl_abapgit_persistence_db=>c_type_user.
-        lv_descr       = 'Personal Settings'.
-        ls_explanation-value = zcl_abapgit_user_record=>get_instance( is_data-value )->get_name( ).
+    CASE lv_key_type.
+      WHEN zif_persist_apm=>c_key_type-package.
+        lv_descr   = 'Package'.
+        lv_package = lv_name.
+        ls_explanation-value = zcl_abapgit_factory=>get_sap_package( lv_package )->read_description( ).
+        IF lv_rest = 'PACKAGE_JSON'.
+          ls_explanation-extra = 'Package JSON'.
+        ELSEIF lv_rest = 'README'.
+          ls_explanation-extra = 'Readme'.
+        ENDIF.
 
-      WHEN zcl_abapgit_persistence_db=>c_type_settings.
-        lv_descr       = 'Global Settings'.
+      WHEN zif_persist_apm=>c_key_type-settings.
+        IF lv_name = zcl_abappm_settings=>c_global.
+          lv_descr = 'Global Settings'.
+        ELSE.
+          lv_descr = 'Personal Settings'.
+          lv_user  = lv_name.
+          ls_explanation-value = zcl_abapgit_user_record=>get_instance( lv_user )->get_name( ).
+        ENDIF.
 
       WHEN OTHERS.
-        IF strlen( is_data-data_str ) >= 250.
-          ls_explanation-value = is_data-data_str(250).
+        IF strlen( is_data-value ) >= 250.
+          ls_explanation-value = is_data-value(250).
         ELSE.
-          ls_explanation-value = is_data-data_str.
+          ls_explanation-value = is_data-value.
         ENDIF.
 
         ls_explanation-value = escape(
@@ -398,31 +403,29 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   METHOD render_stats.
 
     DATA:
-      lv_cnt     TYPE i,
-      lv_online  TYPE i,
-      lv_offline TYPE i,
-      lv_users   TYPE i.
+      lv_key_type TYPE string,
+      lv_name     TYPE string,
+      lv_packages TYPE i,
+      lv_users    TYPE i.
 
     FIELD-SYMBOLS <ls_db_entry> LIKE LINE OF it_db_entries.
 
     LOOP AT it_db_entries ASSIGNING <ls_db_entry>.
-      IF <ls_db_entry>-type = zcl_abapgit_persistence_db=>c_type_repo.
-        FIND FIRST OCCURRENCE OF REGEX '<OFFLINE/>'
-          IN <ls_db_entry>-data_str IGNORING CASE MATCH COUNT lv_cnt.
-        IF lv_cnt > 0.
-          lv_online = lv_online + 1.
-        ELSE.
-          lv_offline = lv_offline + 1.
-        ENDIF.
-      ELSEIF <ls_db_entry>-type = zcl_abapgit_persistence_db=>c_type_user.
-        lv_users = lv_users + 1.
-      ENDIF.
+      SPLIT <ls_db_entry>-keys AT ':' INTO lv_key_type lv_name.
+
+      CASE lv_key_type.
+        WHEN zif_persist_apm=>c_key_type-package.
+          lv_packages = lv_packages + 1.
+        WHEN zif_persist_apm=>c_key_type-settings.
+          IF lv_name <> zcl_abappm_settings=>c_global.
+            lv_users = lv_users + 1.
+          ENDIF.
+      ENDCASE.
     ENDLOOP.
 
     ri_html = zcl_abapgit_html=>create( ).
 
-    ri_html->add( |Repositories: { lv_online + lv_offline } ({ lv_online } online, { lv_offline } offline),| ).
-    ri_html->add( |Users: { lv_users }| ).
+    ri_html->add( |Packages: { lv_packages }, Users: { lv_users }| ).
 
   ENDMETHOD.
 
@@ -431,14 +434,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     ri_html = zcl_abapgit_html_table=>create( me
       )->define_column(
-        iv_column_id = 'type'
-        iv_column_title = 'Type'
-      )->define_column(
-        iv_column_id = 'value'
+        iv_column_id = 'key'
         iv_column_title = 'Key'
       )->define_column(
-        iv_column_id = 'expl'
-        iv_column_title = 'Data'
+        iv_column_id = 'value'
+        iv_column_title = 'Value'
       )->define_column( 'cmd'
       )->render( it_db_entries ).
 
@@ -447,14 +447,9 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_event_handler~on_event.
 
-    DATA ls_db TYPE zif_abapgit_persistence=>ty_content.
-    DATA lo_query TYPE REF TO zcl_abapgit_string_map.
-
-    lo_query = ii_event->query( ).
     CASE ii_event->mv_action.
       WHEN c_action-delete.
-        lo_query->to_abap( CHANGING cs_container = ls_db ).
-        do_delete_entry( ls_db ).
+        do_delete_entry( |{ ii_event->query( )->get( 'KEY' ) }| ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
       WHEN c_action-backup.
         do_backup_db( ).
@@ -486,11 +481,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_renderable~render.
 
-    DATA lt_db_entries TYPE zif_package_json_db=>ty_zabappm.
+    DATA lt_db_entries TYPE zif_abappm_persist_apm=>ty_list.
 
     register_handlers( ).
 
-    lt_db_entries = zcl_abapgit_persistence_db=>get_instance( )->list( ).
+    lt_db_entries = zcl_abappm_persist_apm=>get_instance( )->list( ).
 
     ri_html = zcl_abapgit_html=>create( ).
 
@@ -515,13 +510,13 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     DATA lo_toolbar TYPE REF TO zcl_abapgit_html_toolbar.
 
     CASE iv_column_id.
-      WHEN 'type' OR 'value'.
+      WHEN 'key'.
         rs_render-content = |{ iv_value }|.
-      WHEN 'expl'.
+      WHEN 'value'.
         rs_render-content   = explain_content( is_row ).
         rs_render-css_class = 'data'.
       WHEN 'cmd'.
-        lv_action  = zcl_abapgit_html_action_utils=>dbkey_encode( is_row ).
+        lv_action  = |key={ cl_http_utility=>escape_url( is_row ) }|.
         lo_toolbar = zcl_abapgit_html_toolbar=>create(
           )->add(
             iv_txt = 'Display'

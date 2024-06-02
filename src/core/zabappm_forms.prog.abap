@@ -13,7 +13,7 @@ FORM run.
       " TODO: Authorization check
 
       " Initialize Persistency
-      zcl_abappm_persist_setup=>run( ).
+      zcl_abappm_persist_apm_setup=>install( ).
 
       PERFORM open_gui.
 

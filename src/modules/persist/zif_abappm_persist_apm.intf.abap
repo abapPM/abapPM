@@ -9,13 +9,15 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
   TYPES:
     ty_key TYPE c LENGTH 255,
     BEGIN OF ty_zabappm,
-      key   TYPE ty_key,
+      keys  TYPE ty_key,
       value TYPE string,
       luser TYPE c LENGTH 12,
       ldate TYPE d,
       ltime TYPE t,
     END OF ty_zabappm,
-    ty_list TYPE SORTED TABLE OF ty_zabappm WITH UNIQUE KEY key.
+    ty_list TYPE SORTED TABLE OF ty_zabappm WITH UNIQUE KEY keys.
+
+  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   CONSTANTS:
     c_zapm        TYPE tadir-object VALUE 'ZAPM',
@@ -26,41 +28,42 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
     c_english     TYPE c LENGTH 1 VALUE 'E'.
 
   CONSTANTS:
-    BEGIN OF c_type,
-      package  TYPE ty_zabappm-key VALUE 'PACKAGE',
-      json     TYPE ty_zabappm-key VALUE 'JSON',
-      readme   TYPE ty_zabappm-key VALUE 'README',
-      favicon  TYPE ty_zabappm-key VALUE 'FAVICON', " FUTURE
-      user     TYPE ty_zabappm-key VALUE 'USER',
-      settings TYPE ty_zabappm-key VALUE 'SETTINGS',
-    END OF c_type.
+    BEGIN OF c_key_type,
+      package  TYPE ty_key VALUE 'PACKAGE',
+      settings TYPE ty_key VALUE 'SETTINGS',
+    END OF c_key_type.
 
   METHODS list
     IMPORTING
-      !iv_key       TYPE zif_abappm_persist_apm=>ty_zabappm-key OPTIONAL
+      !iv_filter    TYPE ty_key OPTIONAL
     RETURNING
-      VALUE(result) TYPE zif_abappm_persist_apm=>ty_list
-    RAISING
-      zcx_abappm_persist_apm.
+      VALUE(result) TYPE ty_list.
 
   METHODS load
     IMPORTING
-      !iv_key       TYPE zif_abappm_persist_apm=>ty_zabappm-key
+      !iv_key       TYPE ty_key
     RETURNING
-      VALUE(result) TYPE zif_abappm_persist_apm=>ty_zabappm
+      VALUE(result) TYPE ty_zabappm
     RAISING
       zcx_abappm_persist_apm.
 
   METHODS save
     IMPORTING
-      !iv_key   TYPE zif_abappm_persist_apm=>ty_zabappm-key
-      !iv_value TYPE zif_abappm_persist_apm=>ty_zabappm-value
+      !iv_key   TYPE ty_key
+      !iv_value TYPE ty_zabappm-value
     RAISING
       zcx_abappm_persist_apm.
 
   METHODS delete
     IMPORTING
-      !iv_key TYPE zif_abappm_persist_apm=>ty_zabappm-key
+      !iv_key TYPE ty_key
+    RAISING
+      zcx_abappm_persist_apm.
+
+  METHODS lock
+    IMPORTING
+      !iv_key  TYPE ty_key
+      !iv_mode TYPE enqmode DEFAULT 'E'
     RAISING
       zcx_abappm_persist_apm.
 

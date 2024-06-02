@@ -38,6 +38,12 @@ CLASS zcl_abappm_package_json DEFINITION
       RAISING
         zcx_abappm_package_json.
 
+    CLASS-METHODS list
+      IMPORTING
+        !iv_filter    TYPE string OPTIONAL
+      RETURNING
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_list.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -89,9 +95,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
     ms_package_json-version = iv_version.
     ms_package_json-private = iv_private.
 
-    mv_key = |{ zif_abappm_persist_apm=>c_type-package }:{ mv_package }:{ c_package_json }|.
+    mv_key = |{ zif_abappm_persist_apm=>c_key_type-package }:{ mv_package }:{ c_package_json }|.
 
-    mi_persist = zcl_abappm_persist_apm=>factory( ).
+    mi_persist = zcl_abappm_persist_apm=>get_instance( ).
 
   ENDMETHOD.
 
@@ -136,6 +142,11 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       INSERT ls_instance INTO TABLE gt_instances.
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD list.
+    result = zcl_abappm_persist_apm=>get_instance( )->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%| ).
   ENDMETHOD.
 
 

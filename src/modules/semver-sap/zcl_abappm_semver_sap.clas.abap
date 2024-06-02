@@ -11,6 +11,8 @@ CLASS zcl_abappm_semver_sap DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
+    CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+
     METHODS sap_release_to_semver
       IMPORTING
         release       TYPE cvers-release

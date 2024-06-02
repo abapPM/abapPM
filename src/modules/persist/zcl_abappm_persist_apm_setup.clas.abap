@@ -161,9 +161,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     APPEND INITIAL LINE TO lt_dd27p ASSIGNING <ls_dd27p>.
     <ls_dd27p>-viewname  = zif_abappm_persist_apm=>c_lock.
     <ls_dd27p>-objpos    = '0001'.
-    <ls_dd27p>-viewfield = 'KEY'.
+    <ls_dd27p>-viewfield = 'KEYS'.
     <ls_dd27p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd27p>-fieldname = 'KEY'.
+    <ls_dd27p>-fieldname = 'KEYS'.
     <ls_dd27p>-keyflag   = abap_true.
 
     CALL FUNCTION 'DDIF_ENQU_PUT'
@@ -258,48 +258,53 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ls_dd09l-pufferung = 'P'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname = 'KEY'.
-    <ls_dd03p>-position  = '0001'.
-    <ls_dd03p>-keyflag   = 'X'.
-    <ls_dd03p>-rollname  = 'DEVCLASS'.
-    <ls_dd03p>-datatype  = 'CHAR'.
-    <ls_dd03p>-leng      = '000255'.
-    <ls_dd03p>-ddtext    = 'Key'.
+    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-fieldname  = 'KEYS'. "KEY is not allowed
+    <ls_dd03p>-position   = '0001'.
+    <ls_dd03p>-keyflag    = 'X'.
+    <ls_dd03p>-notnull    = 'X'.
+    <ls_dd03p>-datatype   = 'CHAR'.
+    <ls_dd03p>-leng       = '000255'.
+    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddtext     = 'Key'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname = 'VALUE'.
-    <ls_dd03p>-position  = '0002'.
-    <ls_dd03p>-datatype  = 'STRG'.
-    <ls_dd03p>-ddtext    = 'Record Data'.
+    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-fieldname  = 'VALUE'.
+    <ls_dd03p>-position   = '0002'.
+    <ls_dd03p>-datatype   = 'STRG'.
+    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddtext     = 'Value'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname = 'LUSER'.
-    <ls_dd03p>-position  = '0003'.
-    <ls_dd03p>-rollname  = 'AS4USER'.
-    <ls_dd03p>-datatype  = 'CHAR'.
-    <ls_dd03p>-leng      = '000012'.
-    <ls_dd03p>-ddtext    = 'Last Changed By'.
+    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-fieldname  = 'LUSER'.
+    <ls_dd03p>-position   = '0003'.
+    <ls_dd03p>-rollname   = 'AS4USER'.
+    <ls_dd03p>-datatype   = 'CHAR'.
+    <ls_dd03p>-leng       = '000012'.
+    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddtext     = 'Last Changed By'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname = 'LDATE'.
-    <ls_dd03p>-position  = '0004'.
-    <ls_dd03p>-rollname  = 'AS4DATE'.
-    <ls_dd03p>-datatype  = 'DATS'.
-    <ls_dd03p>-leng      = '000008'.
-    <ls_dd03p>-ddtext    = 'Last Changed On'.
+    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-fieldname  = 'LDATE'.
+    <ls_dd03p>-position   = '0004'.
+    <ls_dd03p>-rollname   = 'AS4DATE'.
+    <ls_dd03p>-datatype   = 'DATS'.
+    <ls_dd03p>-leng       = '000008'.
+    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddtext     = 'Last Changed On'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname   = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname = 'LTIME'.
-    <ls_dd03p>-position  = '0005'.
-    <ls_dd03p>-rollname  = 'AS4TIME'.
-    <ls_dd03p>-datatype  = 'TIMS'.
-    <ls_dd03p>-leng      = '000006'.
-    <ls_dd03p>-ddtext    = 'Last Changed At'.
+    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-fieldname  = 'LTIME'.
+    <ls_dd03p>-position   = '0005'.
+    <ls_dd03p>-rollname   = 'AS4TIME'.
+    <ls_dd03p>-datatype   = 'TIMS'.
+    <ls_dd03p>-leng       = '000006'.
+    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddtext     = 'Last Changed At'.
 
     CALL FUNCTION 'DDIF_TABL_PUT'
       EXPORTING

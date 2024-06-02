@@ -99,27 +99,38 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD call_browser.
 
-    zcl_abapgit_ui_factory=>get_frontend_services( )->execute( iv_document = |{ iv_url }| ).
+    DATA lx_error TYPE REF TO zcx_abapgit_exception.
+
+    TRY.
+        zcl_abapgit_ui_factory=>get_frontend_services( )->execute( iv_document = |{ iv_url }| ).
+      CATCH zcx_abapgit_exception INTO lx_error.
+        zcx_abapgit_exception=>raise(
+          iv_text     = 'Error opening page in external browser'
+          ix_previous = lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
 
   METHOD db_actions.
 
-    DATA ls_db_key TYPE zif_abapgit_persistence=>ty_content.
-    DATA lo_query TYPE REF TO zcl_abapgit_string_map.
+    DATA lv_key TYPE zif_abappm_persist_apm=>ty_key.
 
-    lo_query = ii_event->query( ).
+    lv_key = ii_event->query( )->get( 'KEY' ).
+
     CASE ii_event->mv_action.
-      WHEN zif_abapgit_definitions=>c_action-db_edit.
-        lo_query->to_abap( CHANGING cs_container = ls_db_key ).
-        rs_handled-page  = zcl_abapgit_gui_page_db_entry=>create(
-          is_key       = ls_db_key
-          iv_edit_mode = abap_true ).
+      WHEN zif_abappm_gui_router=>c_action-go_db.
+        rs_handled-page  = zcl_abappm_gui_page_db=>create( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-      WHEN zif_abapgit_definitions=>c_action-db_display.
-        lo_query->to_abap( CHANGING cs_container = ls_db_key ).
-        rs_handled-page  = zcl_abapgit_gui_page_db_entry=>create( ls_db_key ).
+
+      WHEN zif_abappm_gui_router=>c_action-db_display.
+*        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+      WHEN zif_abappm_gui_router=>c_action-db_edit.
+*        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
+*          iv_key       = lv_key
+*          iv_edit_mode = abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
     ENDCASE.
 
@@ -128,62 +139,44 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD general_page_routing.
 
-    DATA: lv_key           TYPE zif_abapgit_persistence=>ty_repo-key,
-          lv_last_repo_key TYPE zif_abapgit_persistence=>ty_repo-key.
-
-    lv_key = ii_event->query( )->get( 'KEY' ).
-
     CASE ii_event->mv_action.
-      WHEN zif_abapgit_definitions=>c_action-abapgit_home.
-        rs_handled-page  = zcl_abapgit_gui_page_repo_over=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
-      WHEN zif_abapgit_definitions=>c_action-go_home.
-        lv_last_repo_key = zcl_abapgit_persistence_user=>get_instance( )->get_repo_show( ).
+      WHEN zif_abappm_gui_router=>c_action-go_home.
+        rs_handled-page  = main_page( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
-        IF lv_last_repo_key IS NOT INITIAL.
-          rs_handled-page  = zcl_abapgit_gui_page_repo_view=>create( lv_last_repo_key ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-        ELSE.
-          rs_handled-page = main_page( ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-        ENDIF.
-      WHEN zif_abapgit_definitions=>c_action-go_db.                          " Go DB util page
-        rs_handled-page  = zcl_abapgit_gui_page_db=>create( ).
+      WHEN zif_abappm_gui_router=>c_action-apm_home.
+        rs_handled-page  = zcl_abappm_gui_page_list=>create( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
+
+      WHEN zif_abappm_gui_router=>c_action-go_debuginfo.
+        rs_handled-page  = zcl_abappm_gui_page_debuginfo=>create( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-      WHEN zif_abapgit_definitions=>c_action-go_debuginfo.                   " Go debug info
-        rs_handled-page  = zcl_abapgit_gui_page_debuginfo=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-      WHEN zif_abapgit_definitions=>c_action-go_settings.                    " Go global settings
-        rs_handled-page  = zcl_abapgit_gui_page_sett_glob=>create( ).
-        rs_handled-state = get_state_settings( ii_event ).
-      WHEN zif_abapgit_definitions=>c_action-go_settings_personal.           " Go personal settings
-        rs_handled-page  = zcl_abapgit_gui_page_sett_pers=>create( ).
-        rs_handled-state = get_state_settings( ii_event ).
-      WHEN zif_abapgit_definitions=>c_action-go_background_run.              " Go background run page
-        rs_handled-page  = zcl_abapgit_gui_page_run_bckg=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-      WHEN zif_abapgit_definitions=>c_action-go_tutorial.                     " Go to tutorial
-        rs_handled-page  = zcl_abapgit_gui_page_tutorial=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-      WHEN zif_abapgit_definitions=>c_action-documentation.                   " abapGit docs
-        zcl_abapgit_services_abapgit=>open_abapgit_wikipage( ).
+
+*      WHEN zif_abappm_gui_router=>c_action-go_settings.
+*        rs_handled-page  = zcl_abapgit_gui_page_sett_glob=>create( ).
+*        rs_handled-state = get_state_settings( ii_event ).
+*      WHEN zif_abappm_gui_router=>c_action-go_settings_personal.
+*        rs_handled-page  = zcl_abapgit_gui_page_sett_pers=>create( ).
+*        rs_handled-state = get_state_settings( ii_event ).
+*      WHEN zif_abappm_gui_router=>c_action-go_tutorial.
+*        rs_handled-page  = zcl_abapgit_gui_page_tutorial=>create( ).
+*        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+      WHEN zif_abappm_gui_router=>c_action-homepage.
+        call_browser( zif_abappm_constants=>c_website ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-go_explore.                      " dotabap
-        zcl_abapgit_services_abapgit=>open_dotabap_homepage( ).
+      WHEN zif_abappm_gui_router=>c_action-documentation.
+        call_browser( zif_abappm_constants=>c_documentation ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-changelog.                       " abapGit full changelog
-        zcl_abapgit_services_abapgit=>open_abapgit_changelog( ).
+      WHEN zif_abappm_gui_router=>c_action-changelog.
+        call_browser( zif_abappm_constants=>c_changelog ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-homepage.                        " abapGit homepage
-        zcl_abapgit_services_abapgit=>open_abapgit_homepage( ).
+      WHEN zif_abappm_gui_router=>c_action-sponsor.
+        call_browser( zif_abappm_constants=>c_sponsor ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-sponsor.                         " abapGit sponsor us
-        zcl_abapgit_services_abapgit=>open_abapgit_homepage( 'sponsor.html' ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-show_hotkeys.                    " show hotkeys
-        zcl_abapgit_ui_factory=>get_gui_services(
-                             )->get_hotkeys_ctl(
-                             )->set_visible( abap_true ).
+
+      WHEN zif_abappm_gui_router=>c_action-show_hotkeys.
+        zcl_abapgit_ui_factory=>get_gui_services( )->get_hotkeys_ctl( )->set_visible( abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
     ENDCASE.
 
@@ -292,16 +285,41 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD main_page.
 
-    DATA lt_repo_all_list TYPE zif_abapgit_repo_srv=>ty_repo_list.
+    DATA:
+      lx_error    TYPE REF TO zcx_abappm_error,
+      lt_list     TYPE zif_abappm_persist_apm=>ty_list,
+      ls_settings TYPE zif_abappm_settings=>ty_settings.
 
-    " if there are no favorites, check if there are any repositories at all
-    " if not, go to tutorial where the user can create the first repository
-    lt_repo_all_list = zcl_abapgit_repo_srv=>get_instance( )->list( ).
-    IF lt_repo_all_list IS NOT INITIAL.
-      ri_page = zcl_abappm_gui_page_list=>create( ).
-    ELSE.
-      ri_page = zcl_abapgit_gui_page_tutorial=>create( ).
-    ENDIF.
+    TRY.
+        " 1. Show last viewed package (if it exists)
+        ls_settings = zcl_abappm_settings=>factory( )->get( ).
+
+        IF ls_settings-last_package IS NOT INITIAL.
+          TRY.
+              zcl_abappm_package_json=>factory( ls_settings-last_package )->load(  ).
+
+              " TODO
+              " ri_page = zcl_abappm_gui_page_package=>create( ls_settings-last_package ).
+              RETURN.
+            CATCH zcx_abappm_package_json.
+              " Remove inconsistent value from settings
+              CLEAR ls_settings-last_package.
+              zcl_abappm_settings=>factory( )->set( ls_settings )->save( ).
+          ENDTRY.
+        ENDIF.
+
+        " 2. Show list of packages
+        lt_list = zcl_abappm_package_json=>list( ).
+        IF lt_list IS NOT INITIAL.
+          ri_page = zcl_abappm_gui_page_list=>create( ).
+        ELSE.
+          " 3. Show tutorial
+          ri_page = zcl_abapgit_gui_page_tutorial=>create( ). " TODO
+        ENDIF.
+
+      CATCH zcx_abappm_error INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -315,16 +333,16 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
     DATA lt_clipboard TYPE STANDARD TABLE OF ty_char600.
 
     CASE ii_event->mv_action.
-      WHEN zif_abapgit_definitions=>c_action-ie_devtools.
+      WHEN zif_abappm_gui_router=>c_action-ie_devtools.
         zcl_abapgit_ui_factory=>get_frontend_services( )->open_ie_devtools( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-clipboard.
+      WHEN zif_abappm_gui_router=>c_action-clipboard.
         lv_clip_content = ii_event->query( )->get( 'CLIPBOARD' ).
         APPEND lv_clip_content TO lt_clipboard.
         zcl_abapgit_ui_factory=>get_frontend_services( )->clipboard_export( lt_clipboard ).
         MESSAGE 'Successfully exported URL to Clipboard.' TYPE 'S'.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abapgit_definitions=>c_action-yank_to_clipboard.
+      WHEN zif_abappm_gui_router=>c_action-yank_to_clipboard.
         lv_clip_content = ii_event->form_data( )->get( 'CLIPBOARD' ).
         APPEND lv_clip_content TO lt_clipboard.
         zcl_abapgit_ui_factory=>get_frontend_services( )->clipboard_export( lt_clipboard ).
@@ -338,7 +356,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   METHOD sap_gui_actions.
 
     CASE ii_event->mv_action.
-      WHEN zif_abapgit_definitions=>c_action-jump.                          " Open object editor
+      WHEN zif_abappm_gui_router=>c_action-jump.                          " Open object editor
         jump_object(
           iv_obj_type   = ii_event->query( )->get( 'TYPE' )
           iv_obj_name   = ii_event->query( )->get( 'NAME' )
@@ -350,15 +368,15 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
-      WHEN zif_abapgit_definitions=>c_action-jump_transport.
+      WHEN zif_abappm_gui_router=>c_action-jump_transport.
         jump_display_transport( |{ ii_event->query( )->get( 'TRANSPORT' ) }| ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
-      WHEN zif_abapgit_definitions=>c_action-jump_user.
+      WHEN zif_abappm_gui_router=>c_action-jump_user.
         jump_display_user( |{ ii_event->query( )->get( 'USER' ) }| ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
-      WHEN zif_abapgit_definitions=>c_action-url.
+      WHEN zif_abappm_gui_router=>c_action-url.
         call_browser( ii_event->query( )->get( 'URL' ) ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
