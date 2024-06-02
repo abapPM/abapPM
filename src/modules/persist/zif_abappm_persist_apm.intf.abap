@@ -7,13 +7,12 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
   TYPES:
-    ty_key TYPE c LENGTH 255,
+    ty_key TYPE c LENGTH 120,
     BEGIN OF ty_zabappm,
-      keys  TYPE ty_key,
-      value TYPE string,
-      luser TYPE c LENGTH 12,
-      ldate TYPE d,
-      ltime TYPE t,
+      keys      TYPE ty_key,
+      value     TYPE string,
+      luser     TYPE as4user,
+      timestamp TYPE timestampl,
     END OF ty_zabappm,
     ty_list TYPE SORTED TABLE OF ty_zabappm WITH UNIQUE KEY keys.
 
@@ -36,6 +35,9 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
   METHODS list
     IMPORTING
       !iv_filter    TYPE ty_key OPTIONAL
+      !iv_from      TYPE timestampl DEFAULT 0
+      !iv_to        TYPE timestampl DEFAULT 99991231000000
+        PREFERRED PARAMETER iv_filter
     RETURNING
       VALUE(result) TYPE ty_list.
 

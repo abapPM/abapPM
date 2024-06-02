@@ -38,8 +38,6 @@ CLASS zcl_abappm_logo DEFINITION
     CLASS-METHODS svg_text
       IMPORTING
         iv_height     TYPE i DEFAULT 25
-        iv_padding    TYPE i DEFAULT 20
-          PREFERRED PARAMETER iv_height
       RETURNING
         VALUE(result) TYPE string.
 
@@ -134,16 +132,15 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
 
 
   METHOD svg_logo_with_text.
-    result = svg_logo( iv_height ) && svg_text(
-      iv_height  = iv_height
-      iv_padding = 20 ).
+    " TODO: Replace with styles
+    result = svg_logo( iv_height ) && |<span>&nbsp;</span>| && svg_text( iv_height - 5 ).
   ENDMETHOD.
 
 
   METHOD svg_text.
 
     result = |<svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 804 331" |
-      && |width="$" height="$" padding-left="$">\n|
+      && |width="$" height="$">\n|
       && |<g transform="translate(0,331) scale(0.1,-0.1)" fill=" " stroke="none">\n|
       && |<path d="M1090 3083 c-121 -19 -259 -65 -360 -120 -387 -211 -593 -624 -551 |
       && |-1103 46 -522 377 -884 881 -965 120 -19 204 -19 313 0 186 32 372 123 542 |
@@ -175,11 +172,6 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
       iv_svg    = result
       iv_ratio  = '2.43'
       iv_height = iv_height ).
-
-    result = replace(
-      val  = result
-      sub  = '$'
-      with = |{ iv_padding }| ).
 
   ENDMETHOD.
 

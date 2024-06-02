@@ -141,7 +141,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-go_home.
-        rs_handled-page  = main_page( ).
+        rs_handled-page  = zcl_abappm_gui_page_list=>create( ). "TODO main_page( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-apm_home.
@@ -287,14 +287,14 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     DATA:
       lx_error    TYPE REF TO zcx_abappm_error,
-      lt_list     TYPE zif_abappm_persist_apm=>ty_list,
+      lt_list     TYPE zif_abappm_package_json=>ty_packages,
       ls_settings TYPE zif_abappm_settings=>ty_settings.
 
     TRY.
         " 1. Show last viewed package (if it exists)
         ls_settings = zcl_abappm_settings=>factory( )->get( ).
 
-        IF ls_settings-last_package IS NOT INITIAL.
+        IF ls_settings-show_last_package = abap_true AND ls_settings-last_package IS NOT INITIAL.
           TRY.
               zcl_abappm_package_json=>factory( ls_settings-last_package )->load(  ).
 

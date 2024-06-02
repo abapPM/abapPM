@@ -17,6 +17,8 @@ CLASS zcl_abappm_settings DEFINITION
 
     CONSTANTS c_global TYPE ty_name VALUE '$GLOBAL$'.
 
+    CLASS-METHODS class_constructor.
+
     CLASS-METHODS factory
       IMPORTING
         !iv_name      TYPE ty_name DEFAULT sy-uname
@@ -53,13 +55,13 @@ CLASS zcl_abappm_settings DEFINITION
     CONSTANTS c_settings TYPE string VALUE 'SETTINGS'.
 
     CLASS-DATA:
+      gi_persist   TYPE REF TO zif_abappm_persist_apm,
       gt_instances TYPE ty_instances.
 
     DATA:
       mv_key      TYPE zif_abappm_persist_apm=>ty_key,
       mv_name     TYPE ty_name,
-      ms_settings TYPE zif_abappm_settings=>ty_settings,
-      mi_persist  TYPE REF TO zif_abappm_persist_apm.
+      ms_settings TYPE zif_abappm_settings=>ty_settings.
 
     CLASS-METHODS check_settings
       IMPORTING
@@ -85,12 +87,12 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD constructor.
+  METHOD class_constructor.
+    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
+  ENDMETHOD.
 
-    DATA:
-      ls_json  TYPE zif_abappm_settings=>ty_settings,
-      li_json  TYPE REF TO zif_abappm_ajson,
-      lx_error TYPE REF TO zcx_abappm_ajson_error.
+
+  METHOD constructor.
 
     IF iv_name IS INITIAL OR strlen( iv_name ) > 12.
       zcx_abappm_error=>raise( |Invalid name: { iv_name }| ).
@@ -99,9 +101,10 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     mv_name = iv_name.
     mv_key  = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ mv_name }|.
 
-    mi_persist = zcl_abappm_persist_apm=>get_instance( ).
-
-    zif_abappm_settings~save( ).
+    TRY.
+        zif_abappm_settings~load( ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -204,7 +207,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        mi_persist->delete( mv_key ).
+        gi_persist->delete( mv_key ).
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
@@ -256,7 +259,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
       lx_error TYPE REF TO zcx_abappm_persist_apm.
 
     TRY.
-        lv_value = mi_persist->load( mv_key )-value.
+        lv_value = gi_persist->load( mv_key )-value.
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
@@ -276,7 +279,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        mi_persist->save(
+        gi_persist->save(
           iv_key   = mv_key
           iv_value = zif_abappm_settings~get_json( ) ).
       CATCH zcx_abappm_persist_apm INTO lx_error.

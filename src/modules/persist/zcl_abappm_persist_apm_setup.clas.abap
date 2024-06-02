@@ -264,7 +264,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     <ls_dd03p>-keyflag    = 'X'.
     <ls_dd03p>-notnull    = 'X'.
     <ls_dd03p>-datatype   = 'CHAR'.
-    <ls_dd03p>-leng       = '000255'.
+    <ls_dd03p>-leng       = '000120'.
     <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
     <ls_dd03p>-ddtext     = 'Key'.
 
@@ -288,21 +288,12 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
     <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname  = 'LDATE'.
+    <ls_dd03p>-fieldname  = 'TIMESTAMP'.
     <ls_dd03p>-position   = '0004'.
-    <ls_dd03p>-rollname   = 'AS4DATE'.
-    <ls_dd03p>-datatype   = 'DATS'.
-    <ls_dd03p>-leng       = '000008'.
-    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
-    <ls_dd03p>-ddtext     = 'Last Changed On'.
-
-    APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
-    <ls_dd03p>-fieldname  = 'LTIME'.
-    <ls_dd03p>-position   = '0005'.
-    <ls_dd03p>-rollname   = 'AS4TIME'.
-    <ls_dd03p>-datatype   = 'TIMS'.
-    <ls_dd03p>-leng       = '000006'.
+    <ls_dd03p>-rollname   = 'TIMESTAMPL'.
+    <ls_dd03p>-datatype   = 'DEC'.
+    <ls_dd03p>-leng       = '000021'.
+    <ls_dd03p>-decimals   = '00007'.
     <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
     <ls_dd03p>-ddtext     = 'Last Changed At'.
 

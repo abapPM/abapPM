@@ -443,7 +443,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     ri_html->add( '<div id="header">' ).
 
     ri_html->add( '<div class="logo">' ).
-    ri_html->add( zcl_abappm_logo=>svg_logo_with_text( 25 ) ). " apm
+    ri_html->add( zcl_abappm_logo=>svg_logo_with_text( 30 ) ). " apm
     ri_html->add( '</div>' ).
 
     ri_html->add( |<div class="page-title"><span class="spacer">&#x25BA;</span>{ lv_page_title }</div>| ).

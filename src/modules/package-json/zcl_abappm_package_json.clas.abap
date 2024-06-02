@@ -13,6 +13,8 @@ CLASS zcl_abappm_package_json DEFINITION
 
     INTERFACES zif_abappm_package_json.
 
+    CLASS-METHODS class_constructor.
+
     CLASS-METHODS factory
       IMPORTING
         !iv_package   TYPE devclass
@@ -40,9 +42,16 @@ CLASS zcl_abappm_package_json DEFINITION
 
     CLASS-METHODS list
       IMPORTING
-        !iv_filter    TYPE string OPTIONAL
+        !iv_filter      TYPE string OPTIONAL
+        !iv_instanciate TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE zif_abappm_persist_apm=>ty_list.
+        VALUE(result)   TYPE zif_abappm_package_json=>ty_packages.
+
+    CLASS-METHODS get_package_from_key
+      IMPORTING
+        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
+      RETURNING
+        VALUE(result) TYPE devclass.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -58,13 +67,13 @@ CLASS zcl_abappm_package_json DEFINITION
       c_package_json TYPE string VALUE 'PACKAGE_JSON'.
 
     CLASS-DATA:
+      gi_persist   TYPE REF TO zif_abappm_persist_apm,
       gt_instances TYPE ty_instances.
 
     DATA:
       mv_key          TYPE zif_abappm_persist_apm=>ty_key,
       mv_package      TYPE devclass,
-      ms_package_json TYPE zif_abappm_package_json_types=>ty_package_json,
-      mi_persist      TYPE REF TO zif_abappm_persist_apm.
+      ms_package_json TYPE zif_abappm_package_json_types=>ty_package_json.
 
     CLASS-METHODS sort_dependencies
       IMPORTING
@@ -79,12 +88,12 @@ ENDCLASS.
 CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
-  METHOD constructor.
+  METHOD class_constructor.
+    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
+  ENDMETHOD.
 
-    DATA:
-      ls_json  TYPE zif_abappm_package_json_types=>ty_package_json,
-      li_json  TYPE REF TO zif_abappm_ajson,
-      lx_error TYPE REF TO zcx_abappm_ajson_error.
+
+  METHOD constructor.
 
     IF zcl_abappm_package_json_valid=>is_valid_sap_package( iv_package ) = abap_false.
       zcx_abappm_package_json=>raise( |Invalid package: { iv_package }| ).
@@ -97,7 +106,10 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     mv_key = |{ zif_abappm_persist_apm=>c_key_type-package }:{ mv_package }:{ c_package_json }|.
 
-    mi_persist = zcl_abappm_persist_apm=>get_instance( ).
+    TRY.
+        zif_abappm_package_json~load( ).
+      CATCH zcx_abappm_package_json ##NO_HANDLER.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -127,6 +139,18 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_package_from_key.
+
+    DATA:
+      lv_prefix TYPE string,
+      lv_suffix TYPE string.
+
+    SPLIT iv_key AT ':' INTO lv_prefix result lv_suffix.
+    result = to_upper( result ).
+
+  ENDMETHOD.
+
+
   METHOD injector.
 
     DATA ls_instance TYPE ty_instance.
@@ -146,7 +170,36 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD list.
-    result = zcl_abappm_persist_apm=>get_instance( )->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%| ).
+
+    DATA:
+      lt_list   TYPE zif_abappm_persist_apm=>ty_list,
+      ls_result LIKE LINE OF result.
+
+    FIELD-SYMBOLS <ls_list> LIKE LINE OF lt_list.
+
+    lt_list = gi_persist->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%| ).
+
+    LOOP AT lt_list ASSIGNING <ls_list>.
+      CLEAR ls_result.
+      ls_result-package        = get_package_from_key( <ls_list>-keys ).
+      ls_result-key            = <ls_list>-keys.
+      ls_result-changed_by     = <ls_list>-luser.
+      ls_result-changed_at_raw = <ls_list>-timestamp.
+      ls_result-changed_at     = zcl_abapgit_gui_chunk_lib=>render_timestamp( <ls_list>-timestamp ).
+
+      IF iv_instanciate = abap_true.
+        TRY.
+            ls_result-instance = factory( ls_result-package )->load( ).
+            ls_result-name     = ls_result-instance->get( )-name.
+            ls_result-version  = ls_result-instance->get( )-version.
+            ls_result-private  = ls_result-instance->get( )-private.
+          CATCH zcx_abappm_package_json ##NO_HANDLER.
+        ENDTRY.
+      ENDIF.
+
+      INSERT ls_result INTO TABLE result.
+    ENDLOOP.
+
   ENDMETHOD.
 
 
@@ -164,7 +217,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
     DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
 
     TRY.
-        mi_persist->delete( mv_key ).
+        gi_persist->delete( mv_key ).
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abappm_package_json=>raise_with_text( lx_error ).
     ENDTRY.
@@ -254,7 +307,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       lx_error TYPE REF TO zcx_abappm_persist_apm.
 
     TRY.
-        lv_value = mi_persist->load( mv_key )-value.
+        lv_value = gi_persist->load( mv_key )-value.
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abappm_package_json=>raise_with_text( lx_error ).
     ENDTRY.
@@ -272,7 +325,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
     zcl_abappm_package_json_valid=>check( ms_package_json ).
 
     TRY.
-        mi_persist->save(
+        gi_persist->save(
           iv_key   = mv_key
           iv_value = zif_abappm_package_json~get_json( ) ).
       CATCH zcx_abappm_persist_apm INTO lx_error.

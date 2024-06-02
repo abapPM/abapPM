@@ -96,9 +96,11 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~list.
     IF iv_filter IS INITIAL.
-      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE result.
+      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE result
+        WHERE timestamp BETWEEN iv_from AND iv_to.
     ELSE.
-      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE result WHERE keys LIKE iv_filter.
+      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE result
+        WHERE timestamp BETWEEN iv_from AND iv_to AND keys LIKE iv_filter.
     ENDIF.
   ENDMETHOD.
 
@@ -150,8 +152,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
       with = cl_abap_char_utilities=>newline
       occ  = 0 ).
     ls_abappm-luser = sy-uname.
-    ls_abappm-ldate = sy-datum.
-    ls_abappm-ltime = sy-uzeit.
+    GET TIME STAMP FIELD ls_abappm-timestamp.
 
     INSERT (zif_persist_apm=>c_tabname) FROM ls_abappm.
     IF sy-subrc <> 0.
