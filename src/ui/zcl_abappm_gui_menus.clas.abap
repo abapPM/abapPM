@@ -91,9 +91,10 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     ro_menu->add(
       iv_txt = 'Registry'
       iv_act = zif_abappm_gui_router=>c_action-registry
-    )->add(
-      iv_txt = 'Tutorial'
-      iv_act = zif_abappm_gui_router=>c_action-go_tutorial
+* FUTURE
+*    )->add(
+*      iv_txt = 'Tutorial'
+*      iv_act = zif_abappm_gui_router=>c_action-go_tutorial
     )->add(
       iv_txt = 'Documentation'
       iv_act = zif_abappm_gui_router=>c_action-documentation

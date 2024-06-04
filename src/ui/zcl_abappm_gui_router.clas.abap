@@ -146,6 +146,8 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD general_page_routing.
 
+    DATA lv_key TYPE zif_abappm_persist_apm=>ty_key.
+
     CASE ii_event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-go_home.
         rs_handled-page  = zcl_abappm_gui_page_list=>create( ). "TODO main_page( ).
@@ -158,12 +160,16 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         rs_handled-page  = zcl_abappm_gui_page_list=>create( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
 
-*      WHEN zif_abappm_gui_router=>c_action-go_settings.
-*        rs_handled-page  = zcl_abapgit_gui_page_sett_glob=>create( ).
-*        rs_handled-state = get_state_settings( ii_event ).
-*      WHEN zif_abappm_gui_router=>c_action-go_settings_personal.
-*        rs_handled-page  = zcl_abapgit_gui_page_sett_pers=>create( ).
-*        rs_handled-state = get_state_settings( ii_event ).
+      WHEN zif_abappm_gui_router=>c_action-go_settings.
+        lv_key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ zif_abappm_settings=>c_global }|.
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+      WHEN zif_abappm_gui_router=>c_action-go_settings_personal.
+        lv_key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ sy-uname }|.
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+* FUTURE
 *      WHEN zif_abappm_gui_router=>c_action-go_tutorial.
 *        rs_handled-page  = zcl_abapgit_gui_page_tutorial=>create( ).
 *        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.

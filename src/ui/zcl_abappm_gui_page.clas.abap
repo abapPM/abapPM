@@ -185,7 +185,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     DATA lo_frontend_serv TYPE REF TO zif_abapgit_frontend_services.
 
-    rv_version = zif_abappm_constants=>c_version. " apm
+    rv_version = zif_abappm_version=>c_version. " apm
 
     IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
       rv_version = rv_version && ` - Standalone Version`.

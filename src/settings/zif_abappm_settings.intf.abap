@@ -7,6 +7,7 @@ INTERFACE zif_abappm_settings PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+
   TYPES:
     BEGIN OF ty_gui_settings,
       adt_jump_enabled TYPE abap_bool,
@@ -45,6 +46,10 @@ INTERFACE zif_abappm_settings PUBLIC.
       list_settings     TYPE ty_list_settings,
       package_settings  TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
     END OF ty_settings.
+
+  TYPES ty_name TYPE uname.
+
+  CONSTANTS c_global TYPE ty_name VALUE '$GLOBAL$'.
 
   METHODS get
     RETURNING

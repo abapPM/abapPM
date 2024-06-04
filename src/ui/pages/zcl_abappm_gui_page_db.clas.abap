@@ -360,7 +360,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         ENDIF.
 
       WHEN zif_persist_apm=>c_key_type-settings.
-        IF lv_name = zcl_abappm_settings=>c_global.
+        IF lv_name = zif_abappm_settings=>c_global.
           lv_descr = 'Global Settings'.
         ELSE.
           lv_descr = 'Personal Settings'.
@@ -432,7 +432,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         WHEN zif_persist_apm=>c_key_type-package.
           lv_packages = lv_packages + 1.
         WHEN zif_persist_apm=>c_key_type-settings.
-          IF lv_name <> zcl_abappm_settings=>c_global.
+          IF lv_name <> zif_abappm_settings=>c_global.
             lv_users = lv_users + 1.
           ENDIF.
       ENDCASE.

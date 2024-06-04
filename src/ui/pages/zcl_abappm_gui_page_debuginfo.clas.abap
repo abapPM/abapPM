@@ -126,7 +126,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
     ri_html->add( '<h2>Environment</h2>' ).
 
     ri_html->add( |<table>| ).
-    ri_html->add( |<tr><td>apm version:    </td><td>{ zif_abappm_constants=>c_version }</td></tr>| ).
+    ri_html->add( |<tr><td>apm version:    </td><td>{ zif_abappm_version=>c_version }</td></tr>| ).
     ri_html->add( |<tr><td>GUI version:    </td><td>{ lv_gui_version }</td></tr>| ).
     ri_html->add( |<tr><td>SY time:        </td><td>{ sy-datum } { sy-uzeit } { sy-tzone }</td></tr>| ).
     ri_html->add( |<tr><td>SY release:     </td><td>{ ls_release-release } SP { ls_release-sp }</td></tr>| ).

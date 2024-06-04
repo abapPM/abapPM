@@ -13,15 +13,11 @@ CLASS zcl_abappm_settings DEFINITION
 
     INTERFACES zif_abappm_settings.
 
-    TYPES ty_name TYPE uname.
-
-    CONSTANTS c_global TYPE ty_name VALUE '$GLOBAL$'.
-
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS factory
       IMPORTING
-        !iv_name      TYPE ty_name DEFAULT sy-uname
+        !iv_name      TYPE zif_abappm_settings=>ty_name DEFAULT sy-uname
       RETURNING
         VALUE(result) TYPE REF TO zif_abappm_settings
       RAISING
@@ -29,12 +25,12 @@ CLASS zcl_abappm_settings DEFINITION
 
     CLASS-METHODS injector
       IMPORTING
-        !iv_name TYPE ty_name
+        !iv_name TYPE zif_abappm_settings=>ty_name
         !ii_mock TYPE REF TO zif_abappm_settings.
 
     METHODS constructor
       IMPORTING
-        !iv_name TYPE ty_name
+        !iv_name TYPE zif_abappm_settings=>ty_name
       RAISING
         zcx_abappm_error.
 
@@ -47,7 +43,7 @@ CLASS zcl_abappm_settings DEFINITION
 
     TYPES:
       BEGIN OF ty_instance,
-        name     TYPE ty_name,
+        name     TYPE zif_abappm_settings=>ty_name,
         instance TYPE REF TO zif_abappm_settings,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY name.
@@ -60,7 +56,7 @@ CLASS zcl_abappm_settings DEFINITION
 
     DATA:
       mv_key      TYPE zif_abappm_persist_apm=>ty_key,
-      mv_name     TYPE ty_name,
+      mv_name     TYPE zif_abappm_settings=>ty_name,
       ms_settings TYPE zif_abappm_settings=>ty_settings.
 
     CLASS-METHODS check_settings
@@ -167,7 +163,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
       <lv_default> TYPE any.
 
     TRY.
-        ls_global  = factory( c_global )->get( ).
+        ls_global  = factory( zif_abappm_settings=>c_global )->get( ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " Just use defaults
     ENDTRY.
@@ -202,7 +198,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
     DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
 
-    IF mv_name = c_global.
+    IF mv_name = zif_abappm_settings=>c_global.
       zcx_abappm_error=>raise( 'Global settings can not be deleted' ).
     ENDIF.
 
@@ -217,7 +213,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
   METHOD zif_abappm_settings~get.
     result = ms_settings.
-    IF mv_name <> c_global.
+    IF mv_name <> zif_abappm_settings=>c_global.
       merge_settings( CHANGING cs_settings = result ).
     ENDIF.
   ENDMETHOD.
