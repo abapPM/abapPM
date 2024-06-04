@@ -13,9 +13,11 @@ CLASS zcl_abappm_gui_page_db DEFINITION
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_event_handler.
-    INTERFACES zif_abapgit_gui_renderable.
     INTERFACES zif_abapgit_gui_menu_provider.
+    INTERFACES zif_abapgit_gui_renderable.
     INTERFACES zif_abapgit_html_table.
+
+    CLASS-METHODS class_constructor.
 
     CLASS-METHODS create
       RETURNING
@@ -32,9 +34,11 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        delete  TYPE string VALUE 'delete',
-        backup  TYPE string VALUE 'backup',
-        restore TYPE string VALUE 'restore',
+        delete     TYPE string VALUE 'delete',
+        backup     TYPE string VALUE 'backup',
+        restore    TYPE string VALUE 'restore',
+        db_display TYPE string VALUE 'db_display',
+        db_edit    TYPE string VALUE 'db_edit',
       END OF c_action.
 
     CONSTANTS c_css_url TYPE string VALUE 'css/page_db.css'.
@@ -45,6 +49,8 @@ CLASS zcl_abappm_gui_page_db DEFINITION
         value TYPE string,
         extra TYPE string,
       END OF ty_explanation.
+
+    CLASS-DATA gi_persist TYPE REF TO zif_abappm_persist_apm.
 
     METHODS register_stylesheet
       RAISING
@@ -95,6 +101,11 @@ ENDCLASS.
 CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
 
+  METHOD class_constructor.
+    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
+  ENDMETHOD.
+
+
   METHOD constructor.
     super->constructor( ).
     register_stylesheet( ).
@@ -132,7 +143,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     FIELD-SYMBOLS:
       <ls_data> LIKE LINE OF lt_data.
 
-    lt_data = zcl_abappm_persist_apm=>get_instance( )->list( ).
+    lt_data = gi_persist->list( ).
 
     lv_text = |Table of Content\n|.
     INSERT lv_text INTO TABLE lt_toc.
@@ -204,12 +215,14 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        zcl_abappm_persist_apm=>get_instance( )->delete( iv_key ).
+        gi_persist->delete( iv_key ).
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 
     COMMIT WORK.
+
+    MESSAGE 'Entry successfully deleted' TYPE 'S'.
 
   ENDMETHOD.
 
@@ -297,15 +310,17 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        lt_data_old = zcl_abappm_persist_apm=>get_instance( )->list( ).
+        gi_persist->lock( ls_data-keys ).
+
+        lt_data_old = gi_persist->list( ).
         LOOP AT lt_data_old INTO ls_data.
-          zcl_abappm_persist_apm=>get_instance( )->delete( ls_data-keys ).
+          gi_persist->delete( ls_data-keys ).
         ENDLOOP.
 
         COMMIT WORK.
 
         LOOP AT lt_data INTO ls_data.
-          zcl_abappm_persist_apm=>get_instance( )->save(
+          gi_persist->save(
             iv_key   = ls_data-keys
             iv_value = ls_data-value ).
         ENDLOOP.
@@ -434,11 +449,17 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     ri_html = zcl_abapgit_html_table=>create( me
       )->define_column(
-        iv_column_id = 'key'
+        iv_column_id = 'keys'
         iv_column_title = 'Key'
       )->define_column(
         iv_column_id = 'value'
         iv_column_title = 'Value'
+      )->define_column(
+        iv_column_id = 'luser'
+        iv_column_title = 'Last Changed By'
+      )->define_column(
+        iv_column_id = 'timestamp'
+        iv_column_title = 'Last Changed At'
       )->define_column( 'cmd'
       )->render( it_db_entries ).
 
@@ -447,9 +468,21 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_event_handler~on_event.
 
+    DATA lv_key TYPE zif_abappm_persist_apm=>ty_key.
+
+    lv_key = ii_event->query( )->get( 'KEY' ).
+
     CASE ii_event->mv_action.
+      WHEN c_action-db_display.
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+      WHEN c_action-db_edit.
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
+          iv_key       = lv_key
+          iv_edit_mode = abap_true ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN c_action-delete.
-        do_delete_entry( |{ ii_event->query( )->get( 'KEY' ) }| ).
+        do_delete_entry( lv_key ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
       WHEN c_action-backup.
         do_backup_db( ).
@@ -485,7 +518,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     register_handlers( ).
 
-    lt_db_entries = zcl_abappm_persist_apm=>get_instance( )->list( ).
+    lt_db_entries = gi_persist->list( ).
 
     ri_html = zcl_abapgit_html=>create( ).
 
@@ -506,24 +539,37 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_html_table~render_cell.
 
-    DATA lv_action  TYPE string.
-    DATA lo_toolbar TYPE REF TO zcl_abapgit_html_toolbar.
+    DATA:
+      lv_action    TYPE string,
+      lo_toolbar   TYPE REF TO zcl_abapgit_html_toolbar,
+      lv_user      TYPE syuname,
+      lv_timestamp TYPE timestampl.
+
+    FIELD-SYMBOLS <lv_key> TYPE zif_abappm_persist_apm=>ty_key.
 
     CASE iv_column_id.
-      WHEN 'key'.
+      WHEN 'keys'.
         rs_render-content = |{ iv_value }|.
       WHEN 'value'.
         rs_render-content   = explain_content( is_row ).
         rs_render-css_class = 'data'.
+      WHEN 'luser'.
+        lv_user             = iv_value.
+        rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_user_name( lv_user )->render( ).
+      WHEN 'timestamp'.
+        lv_timestamp        = iv_value.
+        rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_timestamp( lv_timestamp ).
+        rs_render-css_class = 'data'.
       WHEN 'cmd'.
-        lv_action  = |key={ cl_http_utility=>escape_url( is_row ) }|.
+        ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO <lv_key>.
+        lv_action  = |key={ cl_http_utility=>escape_url( |{ <lv_key> }| ) }|.
         lo_toolbar = zcl_abapgit_html_toolbar=>create(
           )->add(
             iv_txt = 'Display'
-            iv_act = |{ zif_abapgit_definitions=>c_action-db_display }?{ lv_action }|
+            iv_act = |{ c_action-db_display }?{ lv_action }|
           )->add(
             iv_txt = 'Edit'
-            iv_act = |{ zif_abapgit_definitions=>c_action-db_edit }?{ lv_action }|
+            iv_act = |{ c_action-db_edit }?{ lv_action }|
           )->add(
             iv_txt = 'Delete'
             iv_act = |{ c_action-delete }?{ lv_action }| ).

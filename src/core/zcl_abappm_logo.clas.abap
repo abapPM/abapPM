@@ -132,7 +132,7 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
 
 
   METHOD svg_logo_with_text.
-    " TODO: Replace with styles
+    " TODO: Replace gap with styles to avoid underline on hover
     result = svg_logo( iv_height ) && |<span>&nbsp;</span>| && svg_text( iv_height - 5 ).
   ENDMETHOD.
 

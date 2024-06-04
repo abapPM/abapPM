@@ -25,7 +25,7 @@ CLASS zcl_abappm_gui_router DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS db_actions
+    METHODS utility_actions
       IMPORTING
         !ii_event         TYPE REF TO zif_abapgit_gui_event
       RETURNING
@@ -144,31 +144,6 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD db_actions.
-
-    DATA lv_key TYPE zif_abappm_persist_apm=>ty_key.
-
-    lv_key = ii_event->query( )->get( 'KEY' ).
-
-    CASE ii_event->mv_action.
-      WHEN zif_abappm_gui_router=>c_action-go_db.
-        rs_handled-page  = zcl_abappm_gui_page_db=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-
-      WHEN zif_abappm_gui_router=>c_action-db_display.
-        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-
-      WHEN zif_abappm_gui_router=>c_action-db_edit.
-        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
-          iv_key       = lv_key
-          iv_edit_mode = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
-    ENDCASE.
-
-  ENDMETHOD.
-
-
   METHOD general_page_routing.
 
     CASE ii_event->mv_action.
@@ -176,13 +151,12 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         rs_handled-page  = zcl_abappm_gui_page_list=>create( ). "TODO main_page( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
+      WHEN zif_abappm_gui_router=>c_action-go_back.
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back.
+
       WHEN zif_abappm_gui_router=>c_action-apm_home.
         rs_handled-page  = zcl_abappm_gui_page_list=>create( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
-
-      WHEN zif_abappm_gui_router=>c_action-go_debuginfo.
-        rs_handled-page  = zcl_abappm_gui_page_debuginfo=>create( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
 *      WHEN zif_abappm_gui_router=>c_action-go_settings.
 *        rs_handled-page  = zcl_abapgit_gui_page_sett_glob=>create( ).
@@ -408,13 +382,27 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD utility_actions.
+
+    CASE ii_event->mv_action.
+      WHEN zif_abappm_gui_router=>c_action-go_db.
+        rs_handled-page  = zcl_abappm_gui_page_db=>create( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+      WHEN zif_abappm_gui_router=>c_action-go_debuginfo.
+        rs_handled-page  = zcl_abappm_gui_page_debuginfo=>create( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+    ENDCASE.
+
+  ENDMETHOD.
+
+
   METHOD zif_abapgit_gui_event_handler~on_event.
 
     IF rs_handled-state IS INITIAL.
       rs_handled = general_page_routing( ii_event ).
     ENDIF.
     IF rs_handled-state IS INITIAL.
-      rs_handled = db_actions( ii_event ).
+      rs_handled = utility_actions( ii_event ).
     ENDIF.
     IF rs_handled-state IS INITIAL.
       rs_handled = sap_gui_actions( ii_event ).

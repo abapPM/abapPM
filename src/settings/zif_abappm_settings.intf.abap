@@ -8,36 +8,41 @@ INTERFACE zif_abappm_settings PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
   TYPES:
+    BEGIN OF ty_gui_settings,
+      adt_jump_enabled TYPE abap_bool,
+      max_lines        TYPE i,
+      icon_scaling     TYPE c LENGTH 1,
+      ui_theme         TYPE string,
+      label_colors     TYPE string,
+    END OF ty_gui_settings,
+
+    BEGIN OF ty_keyboard_settings,
+      link_hints_enabled TYPE abap_bool,
+      link_hint_key      TYPE c LENGTH 1,
+    END OF ty_keyboard_settings,
+
+    BEGIN OF ty_list_settings,
+      filter           TYPE string,
+      only_favorites   TYPE abap_bool,
+      show_details     TYPE abap_bool, " FIXME: JS action doesn't work in AG either
+      order_by         TYPE string,
+      order_descending TYPE abap_bool,
+    END OF ty_list_settings,
+
     BEGIN OF ty_package_settings,
       package         TYPE devclass,
       favorite        TYPE abap_bool,
       write_protected TYPE abap_bool,
       labels          TYPE string_table,
-    END OF ty_package_settings.
+    END OF ty_package_settings,
 
-  TYPES:
     BEGIN OF ty_settings,
       registry          TYPE string,
       last_package      TYPE devclass,
       show_last_package TYPE abap_bool,
-      BEGIN OF gui_settings,
-        adt_jump_enabled TYPE abap_bool,
-        max_lines        TYPE i,
-        icon_scaling     TYPE c LENGTH 1,
-        ui_theme         TYPE string,
-        label_colors     TYPE string,
-      END OF gui_settings,
-      BEGIN OF keyboard_settings,
-        link_hints_enabled TYPE abap_bool,
-        link_hint_key      TYPE c LENGTH 1,
-      END OF keyboard_settings,
-      BEGIN OF list_settings,
-        filter           TYPE string,
-        only_favorites   TYPE abap_bool,
-        show_details     TYPE abap_bool,
-        order_by         TYPE string,
-        order_descending TYPE abap_bool,
-      END OF list_settings,
+      gui_settings      TYPE ty_gui_settings,
+      keyboard_settings TYPE ty_keyboard_settings,
+      list_settings     TYPE ty_list_settings,
       package_settings  TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
     END OF ty_settings.
 

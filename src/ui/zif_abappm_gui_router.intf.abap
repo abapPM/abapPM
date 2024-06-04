@@ -14,8 +14,6 @@ INTERFACE zif_abappm_gui_router PUBLIC.
       apm_publish          TYPE string VALUE 'apm_publish',
       changelog            TYPE string VALUE 'changelog',
       clipboard            TYPE string VALUE 'clipboard',
-      db_display           TYPE string VALUE 'db_display',
-      db_edit              TYPE string VALUE 'db_edit',
       documentation        TYPE string VALUE 'documentation',
       go_back              TYPE string VALUE 'go_back',
       go_db                TYPE string VALUE 'go_db',

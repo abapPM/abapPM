@@ -154,9 +154,12 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
     ls_abappm-luser = sy-uname.
     GET TIME STAMP FIELD ls_abappm-timestamp.
 
-    INSERT (zif_persist_apm=>c_tabname) FROM ls_abappm.
+    UPDATE (zif_persist_apm=>c_tabname) FROM ls_abappm.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise( |Error saving { iv_key }| ).
+      INSERT (zif_persist_apm=>c_tabname) FROM ls_abappm.
+      IF sy-subrc <> 0.
+        zcx_abappm_persist_apm=>raise( |Error saving { iv_key }| ).
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.

@@ -165,7 +165,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     ri_html->add( '</td>' ).
 
     ri_html->add( '<td class="center">' ).
-    ri_html->add( '<div class="logo">' ).
+    ri_html->add( '<div class="logo" style="text-decoration:none">' ).
     ri_html->add_a( iv_act   = zif_abapgit_definitions=>c_action-homepage
                     iv_title = iv_time
                     iv_txt   = zcl_abappm_logo=>svg_logo_with_text( 20 ) ). " apm
@@ -443,10 +443,15 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     ri_html->add( '<div id="header">' ).
 
     ri_html->add( '<div class="logo">' ).
-    ri_html->add( zcl_abappm_logo=>svg_logo_with_text( 30 ) ). " apm
+    ri_html->add_a(
+      iv_act = zif_abappm_gui_router=>c_action-apm_home
+      iv_txt = zcl_abappm_logo=>svg_logo_with_text( 28 ) ).
     ri_html->add( '</div>' ).
 
-    ri_html->add( |<div class="page-title"><span class="spacer">&#x25BA;</span>{ lv_page_title }</div>| ).
+    " TODO: add inline-style to page-title
+    ri_html->add( '<div class="page-title" style="vertical-align:top">' ).
+    ri_html->add( |<span class="spacer">&#x25BA;</span>{ lv_page_title }| ).
+    ri_html->add( '</div>' ).
 
     IF lo_page_menu IS BOUND.
       ri_html->add( '<div class="float-right">' ).

@@ -52,8 +52,8 @@ CLASS zcl_abappm_gui_factory IMPLEMENTATION.
       lo_html_preprocessor->preserve_css( 'css/ag-icons.css' ).
       lo_html_preprocessor->preserve_css( 'css/common.css' ).
 
-      CREATE OBJECT li_router TYPE zcl_abappm_gui_router. " apm
-      CREATE OBJECT li_hotkey_ctl TYPE zcl_abapgit_gui_hotkey_ctl.
+      CREATE OBJECT li_router TYPE zcl_abappm_gui_router. " apm: routing
+      CREATE OBJECT li_hotkey_ctl TYPE zcl_abappm_gui_hotkey_ctl. " apm: settings
 
       CREATE OBJECT go_gui
         EXPORTING
