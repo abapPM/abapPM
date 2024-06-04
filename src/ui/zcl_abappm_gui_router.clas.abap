@@ -25,6 +25,14 @@ CLASS zcl_abappm_gui_router DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    METHODS command_dialogs
+      IMPORTING
+        !ii_event         TYPE REF TO zif_abapgit_gui_event
+      RETURNING
+        VALUE(rs_handled) TYPE zif_abapgit_gui_event_handler=>ty_handling_result
+      RAISING
+        zcx_abapgit_exception.
+
     METHODS utility_actions
       IMPORTING
         !ii_event         TYPE REF TO zif_abapgit_gui_event
@@ -140,6 +148,23 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
           iv_text     = 'Error opening page in external browser'
           ix_previous = lx_error ).
     ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD command_dialogs.
+
+    CASE ii_event->mv_action.
+      WHEN zif_abappm_gui_router=>c_action-apm_init.
+        rs_handled-page  = zcl_abappm_gui_dlg_init=>create( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+      WHEN zif_abappm_gui_router=>c_action-apm_install.
+        "rs_handled-page  = zcl_abappm_gui_dlg_install=>create( ).
+        "rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+      WHEN zif_abappm_gui_router=>c_action-apm_publish.
+        "rs_handled-page  = zcl_abappm_gui_dlg_publish=>create( ).
+        "rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+    ENDCASE.
 
   ENDMETHOD.
 
@@ -406,6 +431,9 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     IF rs_handled-state IS INITIAL.
       rs_handled = general_page_routing( ii_event ).
+    ENDIF.
+    IF rs_handled-state IS INITIAL.
+      rs_handled = command_dialogs( ii_event ).
     ENDIF.
     IF rs_handled-state IS INITIAL.
       rs_handled = utility_actions( ii_event ).

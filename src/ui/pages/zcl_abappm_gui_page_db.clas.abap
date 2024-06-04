@@ -453,7 +453,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         iv_column_title = 'Key'
       )->define_column(
         iv_column_id = 'value'
-        iv_column_title = 'Value'
+        iv_column_title = 'Description'
       )->define_column(
         iv_column_id = 'luser'
         iv_column_title = 'Last Changed By'

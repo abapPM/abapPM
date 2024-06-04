@@ -58,6 +58,10 @@ INTERFACE zif_abappm_package_json PUBLIC.
     RAISING
       zcx_abappm_package_json.
 
+  METHODS exists
+    RETURNING
+      VALUE(result) TYPE abap_bool.
+
   METHODS load
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_package_json

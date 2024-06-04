@@ -355,7 +355,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       <ls_package>  LIKE LINE OF rt_packages,
       <ls_settings> LIKE LINE OF mt_pack_settings.
 
-    rt_packages = zcl_abappm_package_json=>list( ).
+    rt_packages = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
 
     LOOP AT rt_packages ASSIGNING <ls_package>.
       READ TABLE mt_pack_settings ASSIGNING <ls_settings>

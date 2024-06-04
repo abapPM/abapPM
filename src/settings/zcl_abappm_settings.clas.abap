@@ -4,7 +4,7 @@ CLASS zcl_abappm_settings DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* Settings
+* apm Settings
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -153,22 +153,29 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
   METHOD initialize_global_settings.
 
-    DATA lv_global_key TYPE zif_abappm_settings=>ty_name.
+    DATA:
+      li_global TYPE REF TO zif_abappm_settings,
+      ls_global TYPE zif_abappm_settings=>ty_settings.
 
-    lv_global_key = get_setting_key( zif_abappm_settings=>c_global ).
+    li_global = factory( zif_abappm_settings=>c_global ).
 
     " Check if global settings exist already
     TRY.
-        factory( lv_global_key )->load( ).
-        RETURN.
-      CATCH zcx_abappm_persist_apm.
+        ls_global = li_global->load( )->get( ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
+
+    IF ls_global IS NOT INITIAL.
+      RETURN.
+    ENDIF.
+
+    li_global->set( get_default( ) ).
 
     " Save defaults to global settings
     TRY.
         gi_persist->save(
-          iv_key   = |{ lv_global_key }|
-          iv_value = factory( lv_global_key )->get_json( ) ).
+          iv_key   = get_setting_key( zif_abappm_settings=>c_global )
+          iv_value = li_global->get_json( ) ).
       CATCH zcx_abappm_persist_apm.
         zcx_abappm_error=>raise( 'Error saving global defaults' ).
     ENDTRY.
@@ -299,11 +306,13 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
     TRY.
         lv_value = gi_persist->load( mv_key )-value.
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
+      CATCH zcx_abappm_persist_apm ##NO_HANDLER.
     ENDTRY.
 
-    zif_abappm_settings~set_json( lv_value ).
+    IF lv_value IS NOT INITIAL.
+      zif_abappm_settings~set_json( lv_value ).
+    ENDIF.
+
     result = me.
 
   ENDMETHOD.
