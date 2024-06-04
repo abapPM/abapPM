@@ -49,8 +49,16 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
 
     CLASS-DATA gi_persist TYPE REF TO zif_abappm_persist_apm.
 
-    DATA ms_data TYPE zif_abappm_persist_apm=>ty_zabappm.
-    DATA mv_edit_mode TYPE abap_bool.
+    DATA:
+      ms_data      TYPE zif_abappm_persist_apm=>ty_zabappm,
+      ms_previous  TYPE zif_abappm_persist_apm=>ty_zabappm,
+      mv_edit_mode TYPE abap_bool.
+
+    METHODS load_entry
+      IMPORTING
+        !iv_key TYPE zif_abappm_persist_apm=>ty_key
+      RAISING
+        zcx_abapgit_exception.
 
     METHODS register_stylesheet
       RAISING
@@ -74,13 +82,13 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       IMPORTING
         ii_html TYPE REF TO zif_abapgit_html.
 
-    CLASS-METHODS render_entry_tag
+    METHODS render_entry_tag
       IMPORTING
         is_key         TYPE zif_abappm_persist_apm=>ty_zabappm
       RETURNING
         VALUE(rv_html) TYPE string.
 
-    CLASS-METHODS dbcontent_decode
+    METHODS dbcontent_decode
       IMPORTING
         io_form_data      TYPE REF TO zcl_abapgit_string_map
       RETURNING
@@ -88,13 +96,15 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    CLASS-METHODS validate_json
+    METHODS validate_and_pretty_json
       IMPORTING
-        iv_value TYPE string
+        iv_value       TYPE string
+      RETURNING
+        VALUE(rv_json) TYPE string
       RAISING
         zcx_abapgit_exception.
 
-    CLASS-METHODS do_update
+    METHODS do_update
       IMPORTING
         is_content TYPE zif_abappm_persist_apm=>ty_zabappm
       RAISING
@@ -113,20 +123,10 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
 
   METHOD constructor.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
     super->constructor( ).
-
     register_stylesheet( ).
     mv_edit_mode = iv_edit_mode.
-
-    TRY.
-        ms_data = gi_persist->load( iv_key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abapgit_exception=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    load_entry( iv_key ).
   ENDMETHOD.
 
 
@@ -159,7 +159,9 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     ASSERT is_content-keys IS NOT INITIAL.
 
-    validate_json( is_content-value ).
+    " Validation might raise expection but we want to keep the edited (inconsistent) value
+    ms_data-value = is_content-value.
+    ms_data-value = validate_and_pretty_json( is_content-value ).
 
     TRY.
         gi_persist->save(
@@ -172,6 +174,19 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     COMMIT WORK.
 
     MESSAGE 'Entry successfully saved' TYPE 'S'.
+
+  ENDMETHOD.
+
+
+  METHOD load_entry.
+
+    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
+
+    TRY.
+        ms_data = gi_persist->load( iv_key ).
+      CATCH zcx_abappm_persist_apm INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -235,12 +250,14 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD validate_json.
+  METHOD validate_and_pretty_json.
 
     DATA lx_error TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        zcl_abappm_ajson=>new( )->parse( iv_value ).
+        rv_json = zcl_abappm_ajson=>new( )->parse(
+          iv_json            = iv_value
+          iv_keep_item_order = abap_true )->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
@@ -256,6 +273,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
       WHEN c_action-update.
         do_update( dbcontent_decode( ii_event->form_data( ) ) ).
+        mv_edit_mode = abap_false.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
     ENDCASE.
 
@@ -263,6 +281,8 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
+
+    DATA lv_txt TYPE string.
 
     CREATE OBJECT ro_toolbar.
 
@@ -273,8 +293,13 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
         iv_typ = zif_abapgit_html=>c_action_type-onclick
         iv_opt = zif_abapgit_html=>c_html_opt-strong ).
     ELSE.
+      IF mv_edit_mode = abap_true.
+        lv_txt = 'Display'.
+      ELSE.
+        lv_txt = 'Edit'.
+      ENDIF.
       ro_toolbar->add(
-        iv_txt = 'Edit'
+        iv_txt = lv_txt
         iv_act = |{ c_action-switch_mode }| ).
     ENDIF.
 
@@ -298,16 +323,9 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_renderable~render.
 
-    DATA:
-      lx_error        TYPE REF TO zcx_abappm_persist_apm,
-      lv_raw_db_value TYPE zif_abappm_persist_apm=>ty_zabappm-value.
+    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
 
     register_handlers( ).
-
-    TRY.
-        lv_raw_db_value = gi_persist->load( ms_data-keys )-value.
-      CATCH zcx_abappm_persist_apm ##NO_HANDLER.
-    ENDTRY.
 
     ri_html = zcl_abapgit_html=>create( ).
 
@@ -323,11 +341,11 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
       ENDTRY.
 
       render_edit(
-        iv_raw_db_value = lv_raw_db_value
+        iv_raw_db_value = ms_data-value
         ii_html         = ri_html ).
     ELSE.
       render_view(
-        iv_raw_db_value = lv_raw_db_value
+        iv_raw_db_value = ms_data-value
         ii_html         = ri_html ).
     ENDIF.
 

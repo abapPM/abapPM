@@ -279,9 +279,10 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     ENDIF.
 
     TRY.
+        " Save complete JSON including empty values for easy editing
         gi_persist->save(
           iv_key   = mv_key
-          iv_value = zif_abappm_settings~get_json( ) ).
+          iv_value = zif_abappm_settings~get_json( abap_true ) ).
       CATCH zcx_abappm_persist_apm INTO lx_error.
         zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.

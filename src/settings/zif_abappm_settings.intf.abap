@@ -24,7 +24,7 @@ INTERFACE zif_abappm_settings PUBLIC.
     BEGIN OF ty_list_settings,
       filter           TYPE string,
       only_favorites   TYPE abap_bool,
-      show_details     TYPE abap_bool, " FIXME: JS action doesn't work in AG either
+      " show_details     TYPE abap_bool, " uses JS windows.localStorage
       order_by         TYPE string,
       order_descending TYPE abap_bool,
     END OF ty_list_settings,
