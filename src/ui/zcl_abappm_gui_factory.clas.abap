@@ -46,7 +46,7 @@ CLASS zcl_abappm_gui_factory IMPLEMENTATION.
     DATA lo_html_preprocessor TYPE REF TO zcl_abapgit_gui_html_processor.
 
     IF go_gui IS INITIAL.
-      li_asset_man = zcl_abapgit_ui_factory=>get_asset_manager( ). " apm
+      li_asset_man = zcl_abapgit_ui_factory=>get_asset_manager( ).
 
       CREATE OBJECT lo_html_preprocessor EXPORTING ii_asset_man = li_asset_man.
       lo_html_preprocessor->preserve_css( 'css/ag-icons.css' ).

@@ -1,6 +1,6 @@
 CLASS zcl_abappm_gui_page_list DEFINITION
   PUBLIC
-  INHERITING FROM zcl_abapgit_gui_component
+  INHERITING FROM zcl_abappm_gui_component
   FINAL
   CREATE PRIVATE.
 
@@ -36,9 +36,13 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        select       TYPE string VALUE 'select',
-        apply_filter TYPE string VALUE 'apply_filter',
-        label_filter TYPE string VALUE 'label_filter',
+        select           TYPE string VALUE 'select',
+        apply_filter     TYPE string VALUE 'apply_filter',
+        label_filter     TYPE string VALUE 'label_filter',
+        toggle_favorites TYPE string VALUE 'toggle_favorites',
+        favorite_package TYPE string VALUE 'favorite_package',
+        change_order_by  TYPE string VALUE 'change_order_by',
+        direction        TYPE string VALUE 'direction',
       END OF c_action,
       c_label_filter_prefix TYPE string VALUE 'label:',
       c_raw_field_suffix    TYPE string VALUE '_RAW' ##NO_TEXT.
@@ -145,6 +149,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
     METHODS render_filter_help_hint
       RETURNING
         VALUE(rv_html) TYPE string.
+
+    METHODS load_settings
+      RAISING
+        zcx_abapgit_exception.
 
     METHODS save_settings
       RAISING
@@ -271,11 +279,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_add_tz         = abap_true
       iv_allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'KEY'
-      iv_display_name   = 'Key'
-      iv_css_class      = 'ro-detail'
-      iv_allow_order_by = abap_true
-    )->add_column(
       iv_tech_name      = 'GO'
       iv_css_class      = 'ro-go wmin'
       iv_allow_order_by = abap_false ).
@@ -306,12 +309,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     super->constructor( ).
 
-    TRY.
-        ms_list_settings = zcl_abappm_settings=>factory( )->get( )-list_settings.
-        mt_pack_settings = zcl_abappm_settings=>factory( )->get( )-package_settings.
-      CATCH zcx_abappm_error INTO lx_error.
-        zcx_abapgit_exception=>raise_with_text( lx_error ).
-    ENDTRY.
+    load_settings( ).
 
     " Overwrite setting
     IF iv_only_favorites = abap_true.
@@ -333,6 +331,20 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_page_title         = 'Package List'
       ii_page_menu_provider = lo_component
       ii_child_component    = lo_component ).
+
+  ENDMETHOD.
+
+
+  METHOD load_settings.
+
+    TRY.
+        ms_settings = zcl_abappm_settings=>factory( )->load( )->get( ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
+        " Settings don't exist (yet)
+    ENDTRY.
+
+    ms_list_settings = ms_settings-list_settings.
+    mt_pack_settings = ms_settings-package_settings.
 
   ENDMETHOD.
 
@@ -369,116 +381,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
 
   METHOD render_action_toolbar.
-
-*    CONSTANTS:
-*      lc_dummy_key     TYPE string VALUE `?key=#`,
-*      lc_offline_class TYPE string VALUE `action_offline_repo`,
-*      lc_online_class  TYPE string VALUE `action_online_repo`,
-*      lc_action_class  TYPE string VALUE `action_link`.
-*
-*    DATA lo_toolbar TYPE REF TO zcl_abapgit_html_toolbar.
-*    DATA lo_toolbar_more_sub TYPE REF TO zcl_abapgit_html_toolbar.
-*
-*    CREATE OBJECT lo_toolbar EXPORTING iv_id = 'toolbar-ovp'.
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Pull|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-git_pull }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_online_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Stage|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-go_stage }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_online_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Patch|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-go_patch }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_online_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Diff|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-go_repo_diff }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_online_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Check|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-repo_code_inspector }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Import|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-zip_import }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_offline_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Export|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-zip_export }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_offline_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |Settings|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-repo_settings }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    CREATE OBJECT lo_toolbar_more_sub EXPORTING iv_id = 'toolbar-ovp-more_sub'.
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt      = |Stage by Transport|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-go_stage_transport }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_online_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt      = |Export by Transport|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-zip_export_transport }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class } { lc_offline_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt = 'Danger'
-*      iv_typ = zif_abapgit_html=>c_action_type-separator ).
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt   = |Remove Repository|
-*      iv_title = |Remove abapGit's records of the repository (the system's |
-*              && |development objects will remain unaffected)|
-*      iv_act   = |{ zif_abapgit_definitions=>c_action-repo_remove }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt      = |Remove Objects|
-*      iv_title    = |Delete all development objects belonging to this package |
-*                 && |(and subpackages) from the system, but keep repository in abapGit|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-repo_delete_objects }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar_more_sub->add(
-*      iv_txt      = |Uninstall|
-*      iv_title    = |Delete all development objects belonging to this package |
-*                 && |(and subpackages) from the system, and remove the repository from abapGit|
-*      iv_act      = |{ zif_abapgit_definitions=>c_action-repo_purge }{ lc_dummy_key }|
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    lo_toolbar->add(
-*      iv_txt      = |More|
-*      io_sub      = lo_toolbar_more_sub
-*      iv_class    = |{ lc_action_class }|
-*      iv_li_class = |{ lc_action_class }| ).
-*
-*    ri_html = lo_toolbar->render( iv_right = abap_true ).
-
+    " FUTURE
   ENDMETHOD.
 
 
@@ -506,7 +409,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ri_html->add( ri_html->a(
       iv_txt   = |<i id="icon-filter-favorite" class="icon icon-check { lv_icon_class }"></i> Only Favorites|
       iv_class = 'command'
-      iv_act   = |{ zif_abapgit_definitions=>c_action-toggle_favorites }| ) ).
+      iv_act   = |{ c_action-toggle_favorites }| ) ).
     ri_html->add( ri_html->a(
       iv_txt   = '<i id="icon-filter-detail" class="icon icon-check"></i> Detail'
       iv_act   = |gHelper.toggleRepoListDetail()|
@@ -537,7 +440,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     ii_html->add( |<div class="repo-overview-toolbar">| ).
     ii_html->add( render_filter_bar( ) ).
-*    ii_html->add( render_action_toolbar( ) ).
+    " FUTURE
+    " ii_html->add( render_action_toolbar( ) ).
     ii_html->add( |</div>| ).
 
   ENDMETHOD.
@@ -610,7 +514,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       ii_html->add( |(Only favorites are shown. {
         ii_html->a(
           iv_txt   = |Show All|
-          iv_act   = |{ zif_abapgit_definitions=>c_action-toggle_favorites }?force_state={ abap_false }| )
+          iv_act   = |{ c_action-toggle_favorites }?force_state={ abap_false }| )
       })| ).
       ii_html->add( `</td></tr>` ).
       ii_html->add( `</tfoot>` ).
@@ -645,7 +549,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       lv_fav_tr_class = ''.
     ENDIF.
 
-    ii_html->add( |<tr{ lv_fav_tr_class } data-key="{ is_package-key }">| ).
+    ii_html->add( |<tr{ lv_fav_tr_class } data-key="{ is_package-package }">| ).
 
     " Favorite
     lv_favorite_icon = ii_html->icon(
@@ -656,7 +560,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ii_html->td(
       iv_class   = 'wmin'
       iv_content = ii_html->a(
-        iv_act = |{ zif_abapgit_definitions=>c_action-repo_toggle_fav }?key={ is_package-key }|
+        iv_act = |{ c_action-favorite_package }?package={ is_package-package }|
         iv_txt = lv_favorite_icon ) ).
 
     " Package
@@ -684,13 +588,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ii_html->td(
       ii_html->a(
         iv_txt = is_package-name
-        iv_act = |{ c_action-select }?key={ is_package-key }| ) ).
+        iv_act = |{ c_action-select }?package={ is_package-package }| ) ).
 
     " Version
     ii_html->td(
       ii_html->a(
         iv_txt = is_package-version
-        iv_act = |{ c_action-select }?key={ is_package-key }| ) && lv_lock ).
+        iv_act = |{ c_action-select }?package={ is_package-package }| ) && lv_lock ).
 
     " Details: changed by
     ii_html->td(
@@ -704,18 +608,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_class   = 'ro-detail'
       iv_content = |{ is_package-changed_at }| ).
 
-    " Details: key
-    ii_html->td(
-      iv_class   = 'ro-detail'
-      iv_content = |{ is_package-key }| ).
-
     " Go-to action
     ii_html->td(
       iv_class   = 'ro-go wmin'
       iv_content = ii_html->a(
         iv_title = 'Open'
         iv_txt   = '&rtrif;'
-        iv_act   = |{ c_action-select }?key={ is_package-key }| ) ).
+        iv_act   = |{ c_action-select }?package={ is_package-package }| ) ).
 
     ii_html->add( `</tr>` ).
 
@@ -772,29 +671,25 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_event_handler~on_event.
 
-    DATA lv_key TYPE zif_abapgit_persistence=>ty_value.
+    DATA lv_package TYPE devclass.
 
-    lv_key = ii_event->query( )->get( 'KEY' ).
+    lv_package = ii_event->query( )->get( 'PACKAGE' ).
 
     CASE ii_event->mv_action.
       WHEN c_action-select.
 
-*        zcl_abapgit_persistence_user=>get_instance( )->set_repo_show( lv_key ).
-*
-*        TRY.
-*            zcl_abapgit_repo_srv=>get_instance( )->get( lv_key )->refresh( ).
-*          CATCH zcx_abapgit_exception ##NO_HANDLER.
-*        ENDTRY.
-*
-*        rs_handled-page  = zcl_abapgit_gui_page_repo_view=>create( lv_key ).
-*        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+        ms_settings-last_package = lv_package.
+        save_settings( ).
 
-      WHEN zif_abapgit_definitions=>c_action-change_order_by.
+*        rs_handled-page  = zcl_abapgit_gui_page_package=>create( lv_package ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+      WHEN c_action-change_order_by.
 
         set_order_by( ii_event->query( )->get( 'ORDERBY' ) ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
-      WHEN zif_abapgit_definitions=>c_action-toggle_favorites.
+      WHEN c_action-toggle_favorites.
 
         IF ii_event->query( )->has( 'FORCE_STATE' ) = abap_true.
           ms_list_settings-only_favorites = ii_event->query( )->get( 'FORCE_STATE' ).
@@ -804,7 +699,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         save_settings( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
-      WHEN zif_abapgit_definitions=>c_action-direction.
+      WHEN c_action-direction.
 
         set_order_direction( boolc( ii_event->query( )->get( 'DIRECTION' ) = 'DESCENDING' ) ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
@@ -836,7 +731,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ls_hotkey_action-ui_component = 'Package List'.
 
     ls_hotkey_action-description   = |Settings|.
-    ls_hotkey_action-action = zif_abappm_gui_router=>c_action-go_settings_personal.
+    ls_hotkey_action-action = zif_abappm_gui_router=>c_action-go_settings.
     ls_hotkey_action-hotkey = |x|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
@@ -869,14 +764,23 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ro_toolbar = zcl_abapgit_html_toolbar=>create( 'toolbar-main' ).
 
     ro_toolbar->add(
-      iv_txt = zcl_abapgit_gui_buttons=>settings( )
+      iv_txt = zcl_abapgit_html=>icon( 'file' ) && ' Init'
+      iv_act = zif_abappm_gui_router=>c_action-apm_init
+    )->add(
+      iv_txt = zcl_abapgit_html=>icon( 'download-solid' ) && ' Install'
+      iv_act = zif_abappm_gui_router=>c_action-apm_install
+    )->add(
+      iv_txt = zcl_abapgit_html=>icon( 'upload-solid' ) && ' Publish'
+      iv_act = zif_abappm_gui_router=>c_action-apm_publish
+    )->add(
+      iv_txt = zcl_abappm_gui_buttons=>settings( )
       iv_act = zif_abappm_gui_router=>c_action-go_settings_personal
     )->add(
-      iv_txt = zcl_abapgit_gui_buttons=>advanced( )
-      io_sub = zcl_abapgit_gui_menus=>advanced( )
+      iv_txt = zcl_abappm_gui_buttons=>advanced( )
+      io_sub = zcl_abappm_gui_menus=>advanced( )
     )->add(
-      iv_txt = zcl_abapgit_gui_buttons=>help( )
-      io_sub = zcl_abapgit_gui_menus=>help( ) ).
+      iv_txt = zcl_abappm_gui_buttons=>help( )
+      io_sub = zcl_abappm_gui_menus=>help( ) ).
 
   ENDMETHOD.
 

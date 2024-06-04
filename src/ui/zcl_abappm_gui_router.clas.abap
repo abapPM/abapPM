@@ -12,6 +12,7 @@ CLASS zcl_abappm_gui_router DEFINITION
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_event_handler.
+    INTERFACES zif_abappm_gui_router.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -33,6 +34,14 @@ CLASS zcl_abappm_gui_router DEFINITION
         zcx_abapgit_exception.
 
     METHODS sap_gui_actions
+      IMPORTING
+        !ii_event         TYPE REF TO zif_abapgit_gui_event
+      RETURNING
+        VALUE(rs_handled) TYPE zif_abapgit_gui_event_handler=>ty_handling_result
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS browser_actions
       IMPORTING
         !ii_event         TYPE REF TO zif_abapgit_gui_event
       RETURNING
@@ -97,6 +106,29 @@ ENDCLASS.
 CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
 
+  METHOD browser_actions.
+
+    CASE ii_event->mv_action.
+      WHEN zif_abappm_gui_router=>c_action-homepage.
+        call_browser( zif_abappm_constants=>c_website ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+      WHEN zif_abappm_gui_router=>c_action-registry.
+        call_browser( zif_abappm_constants=>c_registry ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+      WHEN zif_abappm_gui_router=>c_action-documentation.
+        call_browser( zif_abappm_constants=>c_documentation ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+      WHEN zif_abappm_gui_router=>c_action-changelog.
+        call_browser( zif_abappm_constants=>c_changelog ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+      WHEN zif_abappm_gui_router=>c_action-sponsor.
+        call_browser( zif_abappm_constants=>c_sponsor ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+    ENDCASE.
+
+  ENDMETHOD.
+
+
   METHOD call_browser.
 
     DATA lx_error TYPE REF TO zcx_abapgit_exception.
@@ -124,13 +156,13 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-db_display.
-*        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-db_edit.
-*        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
-*          iv_key       = lv_key
-*          iv_edit_mode = abap_true ).
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
+          iv_key       = lv_key
+          iv_edit_mode = abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
     ENDCASE.
 
@@ -162,21 +194,8 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 *        rs_handled-page  = zcl_abapgit_gui_page_tutorial=>create( ).
 *        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
-      WHEN zif_abappm_gui_router=>c_action-homepage.
-        call_browser( zif_abappm_constants=>c_website ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abappm_gui_router=>c_action-documentation.
-        call_browser( zif_abappm_constants=>c_documentation ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abappm_gui_router=>c_action-changelog.
-        call_browser( zif_abappm_constants=>c_changelog ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abappm_gui_router=>c_action-sponsor.
-        call_browser( zif_abappm_constants=>c_sponsor ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-
       WHEN zif_abappm_gui_router=>c_action-show_hotkeys.
-        zcl_abapgit_ui_factory=>get_gui_services( )->get_hotkeys_ctl( )->set_visible( abap_true ).
+        zcl_abappm_gui_factory=>get_gui_services( )->get_hotkeys_ctl( )->set_visible( abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
     ENDCASE.
 
@@ -186,7 +205,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   METHOD get_state_settings.
 
     " Bookmark current page before jumping to any settings page
-    IF ii_event->mv_current_page_name CP 'ZCL_ABAPGIT_GUI_PAGE_SETT_*'.
+    IF ii_event->mv_current_page_name CP 'ZCL_ABAPPM_GUI_PAGE_SETT_*'.
       rv_state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
     ELSE.
       rv_state = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
@@ -201,7 +220,11 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
       lv_adt_link         TYPE string,
       lv_adt_jump_enabled TYPE abap_bool.
 
-    lv_adt_jump_enabled = zcl_abapgit_persist_factory=>get_settings( )->read( )->get_adt_jump_enabled( ).
+    TRY.
+        lv_adt_jump_enabled = zcl_abappm_settings=>factory( )->load( )->get( )-gui_settings-adt_jump_enabled.
+      CATCH zcx_abappm_error ##NO_HANDLER.
+    ENDTRY.
+
     IF lv_adt_jump_enabled = abap_true.
       TRY.
           lv_adt_link = zcl_abapgit_adt_link=>link_transport( iv_transport ).
@@ -395,6 +418,9 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
     ENDIF.
     IF rs_handled-state IS INITIAL.
       rs_handled = sap_gui_actions( ii_event ).
+    ENDIF.
+    IF rs_handled-state IS INITIAL.
+      rs_handled = browser_actions( ii_event ).
     ENDIF.
     IF rs_handled-state IS INITIAL.
       rs_handled = other_utilities( ii_event ).

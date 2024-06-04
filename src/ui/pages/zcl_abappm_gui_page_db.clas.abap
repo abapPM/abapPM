@@ -1,6 +1,6 @@
 CLASS zcl_abappm_gui_page_db DEFINITION
   PUBLIC
-  INHERITING FROM zcl_abapgit_gui_component
+  INHERITING FROM zcl_abappm_gui_component
   FINAL
   CREATE PUBLIC.
 

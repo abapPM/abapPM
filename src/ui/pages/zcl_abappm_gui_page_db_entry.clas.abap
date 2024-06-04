@@ -1,6 +1,6 @@
 CLASS zcl_abappm_gui_page_db_entry DEFINITION
   PUBLIC
-  INHERITING FROM zcl_abapgit_gui_component
+  INHERITING FROM zcl_abappm_gui_component
   FINAL
   CREATE PUBLIC.
 
@@ -18,7 +18,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
 
     CLASS-METHODS create
       IMPORTING
-        !is_key        TYPE zif_abappm_persist_apm=>ty_zabappm
+        !iv_key        TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode  TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(ri_page) TYPE REF TO zif_abapgit_gui_renderable
@@ -27,7 +27,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
 
     METHODS constructor
       IMPORTING
-        !is_key       TYPE zif_abappm_persist_apm=>ty_zabappm
+        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abapgit_exception.
@@ -126,10 +126,18 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD constructor.
 
+    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
+
     super->constructor( ).
+
     register_stylesheet( ).
     mv_edit_mode = iv_edit_mode.
-    ms_key       = is_key.
+
+    TRY.
+        ms_key = zcl_abappm_persist_apm=>get_instance( )->load( iv_key ).
+      CATCH zcx_abappm_persist_apm INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -141,7 +149,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     CREATE OBJECT lo_component
       EXPORTING
         iv_edit_mode = iv_edit_mode
-        is_key       = is_key.
+        iv_key       = iv_key.
 
     ri_page = zcl_abapgit_gui_page_hoc=>create(
       iv_extra_css_url       = c_css_url
