@@ -774,7 +774,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_act = zif_abappm_gui_router=>c_action-apm_publish
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>settings( )
-      iv_act = zif_abappm_gui_router=>c_action-go_settings_personal
+      io_sub = zcl_abappm_gui_menus=>settings( )
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>advanced( )
       io_sub = zcl_abappm_gui_menus=>advanced( )

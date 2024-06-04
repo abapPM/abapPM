@@ -31,7 +31,31 @@ CLASS zcl_abapgit_object_abap DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CONSTANTS:
+      " Package manifest
+      BEGIN OF c_package_json_file,
+        obj_name  TYPE c LENGTH 7 VALUE 'package',
+        sep1      TYPE c LENGTH 1 VALUE '.',
+        obj_type  TYPE c LENGTH 4 VALUE 'abap',
+        sep2      TYPE c LENGTH 1 VALUE '.',
+        extension TYPE c LENGTH 4 VALUE 'json',
+      END OF c_package_json_file.
+
+    CONSTANTS c_key_type TYPE string VALUE 'PACKAGE'.
+    CONSTANTS c_package_json TYPE string VALUE 'PACKAGE_JSON'.
+
     DATA mv_package TYPE devclass.
+    DATA mv_key TYPE zif_persist_apm=>ty_key.
+
+    CLASS-METHODS table_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS get_package_key
+      IMPORTING
+        !iv_package   TYPE devclass
+      RETURNING
+        VALUE(result) TYPE zif_persist_apm=>ty_key.
 
 ENDCLASS.
 
@@ -49,6 +73,22 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       io_i18n_params = io_i18n_params ).
 
     mv_package = is_item-obj_name.
+    mv_key     = get_package_key( mv_package ).
+
+  ENDMETHOD.
+
+
+  METHOD get_package_key.
+    result = |{ c_key_type }:{ iv_package }:{ c_package_json }|.
+  ENDMETHOD.
+
+
+  METHOD table_exists.
+
+    DATA lv_tabname TYPE dd02l-tabname.
+
+    SELECT SINGLE tabname FROM dd02l INTO lv_tabname WHERE tabname = lif_persist_apm=>c_tabname.
+    result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
 
@@ -60,13 +100,11 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~delete.
 
-    DATA lx_error TYPE REF TO zcx_package_json.
+    IF table_exists( ) = abap_false.
+      EXIT.
+    ENDIF.
 
-    TRY.
-        zcl_package_json=>factory( mv_package )->delete( ).
-      CATCH zcx_package_json INTO lx_error.
-        zcx_abapgit_exception=>raise_with_text( lx_error ).
-    ENDTRY.
+    lcl_persist_apm=>get_instance( )->delete( mv_key ).
 
   ENDMETHOD.
 
@@ -75,11 +113,15 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
     DATA:
       lv_json  TYPE string,
-      lx_error TYPE REF TO zcx_package_json.
+      lx_error TYPE REF TO zcx_abappm_package_json.
+
+    IF table_exists( ) = abap_false.
+      EXIT.
+    ENDIF.
 
     TRY.
         lv_json = mo_files->read_string(
-          iv_ext = |{ zif_package_json_types=>c_package_json_file-extension }| ).
+          iv_ext = |{ c_package_json_file-extension }| ).
       CATCH zcx_abapgit_exception.
         " Most probably file not found -> ignore
         RETURN.
@@ -87,23 +129,23 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
     zcl_abapgit_utils=>check_eol( lv_json ).
 
-    TRY.
-        zcl_package_json=>factory( mv_package )->set_json( lv_json )->save( ).
-      CATCH zcx_package_json INTO lx_error.
-        zcx_abapgit_exception=>raise_with_text( lx_error ).
-    ENDTRY.
+    lcl_persist_apm=>get_instance( )->save(
+      iv_key   = mv_key
+      iv_value = lv_json ).
 
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~exists.
 
-    TRY.
-        zcl_package_json=>factory( mv_package )->load( ).
-        rv_bool = abap_true.
-      CATCH zcx_package_json.
-        rv_bool = abap_false.
-    ENDTRY.
+    DATA lv_json TYPE string.
+
+    IF table_exists( ) = abap_false.
+      EXIT.
+    ENDIF.
+
+    lv_json = lcl_persist_apm=>get_instance( )->load( mv_key )-value.
+    rv_bool = boolc( lv_json IS NOT INITIAL ).
 
   ENDMETHOD.
 
@@ -134,7 +176,11 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
 
   METHOD zif_abapgit_object~is_locked.
-    RETURN.
+
+    rv_is_locked = exists_a_lock_entry_for(
+      iv_lock_object = 'EZABAPPM'
+      iv_argument    = |{ mv_key }| ).
+
   ENDMETHOD.
 
 
@@ -146,7 +192,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~map_filename_to_object.
 
-    IF iv_filename <> zif_package_json_types=>c_package_json_file.
+    IF iv_filename <> c_package_json_file.
       zcx_abapgit_exception=>raise( |Unexpected filename for apm package: { iv_filename }| ).
     ENDIF.
 
@@ -164,24 +210,27 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
     " Packages have a fixed filename so that the repository can be installed to a different
     " package(-hierarchy) on the client and not show up as a different package in the repo.
-    cv_filename = zif_package_json_types=>c_package_json_file.
+    cv_filename = c_package_json_file.
 
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~serialize.
 
-    DATA li_package_json TYPE REF TO zif_package_json.
+    DATA lv_json TYPE string.
 
-    TRY.
-        li_package_json = zcl_package_json=>factory( mv_package )->load( ).
-      CATCH zcx_package_json.
-        RETURN. " ignore errors
-    ENDTRY.
+    IF table_exists( ) = abap_false.
+      EXIT.
+    ENDIF.
+
+    lv_json = lcl_persist_apm=>get_instance( )->load( mv_key )-value.
+    IF lv_json IS INITIAL.
+      RETURN.
+    ENDIF.
 
     mo_files->add_string(
-      iv_ext    = |{ zif_package_json_types=>c_package_json_file-extension }|
-      iv_string = li_package_json->get_json( ) ).
+      iv_ext    = |{ c_package_json_file-extension }|
+      iv_string = lv_json ).
 
   ENDMETHOD.
 ENDCLASS.

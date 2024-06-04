@@ -34,6 +34,16 @@ CLASS zcl_abappm_settings DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS initialize_global_settings
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS get_setting_key
+      IMPORTING
+        !iv_name      TYPE zif_abappm_settings=>ty_name
+      RETURNING
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_key.
+
     CLASS-METHODS get_default
       RETURNING
         VALUE(result) TYPE zif_abappm_settings=>ty_settings.
@@ -95,11 +105,14 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     ENDIF.
 
     mv_name = iv_name.
-    mv_key  = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ mv_name }|.
+    mv_key  = get_setting_key( mv_name ).
 
     TRY.
         zif_abappm_settings~load( ).
-      CATCH zcx_abappm_error ##NO_HANDLER.
+      CATCH zcx_abappm_error.
+        IF mv_name = zif_abappm_settings=>c_global.
+          ms_settings = get_default( ).
+        ENDIF.
     ENDTRY.
 
   ENDMETHOD.
@@ -130,6 +143,36 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD get_default.
     " Default values for settings
     result-registry = zif_abappm_constants=>c_registry.
+  ENDMETHOD.
+
+
+  METHOD get_setting_key.
+    result = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ iv_name }|.
+  ENDMETHOD.
+
+
+  METHOD initialize_global_settings.
+
+    DATA lv_global_key TYPE zif_abappm_settings=>ty_name.
+
+    lv_global_key = get_setting_key( zif_abappm_settings=>c_global ).
+
+    " Check if global settings exist already
+    TRY.
+        factory( lv_global_key )->load( ).
+        RETURN.
+      CATCH zcx_abappm_persist_apm.
+    ENDTRY.
+
+    " Save defaults to global settings
+    TRY.
+        gi_persist->save(
+          iv_key   = |{ lv_global_key }|
+          iv_value = factory( lv_global_key )->get_json( ) ).
+      CATCH zcx_abappm_persist_apm.
+        zcx_abappm_error=>raise( 'Error saving global defaults' ).
+    ENDTRY.
+
   ENDMETHOD.
 
 

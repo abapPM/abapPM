@@ -12,8 +12,9 @@ FORM run.
   TRY.
       " TODO: Authorization check
 
-      " Initialize Persistency
+      " Initialize persistence and global settings
       zcl_abappm_persist_apm_setup=>install( ).
+      zcl_abappm_settings=>initialize_global_settings( ).
 
       PERFORM open_gui.
 
@@ -21,7 +22,7 @@ FORM run.
       MESSAGE lx_error TYPE 'E'.
   ENDTRY.
 
-ENDFORM.                    "run
+ENDFORM.
 
 FORM open_gui RAISING zcx_abapgit_exception.
 

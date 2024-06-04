@@ -24,8 +24,6 @@ CLASS zcl_abappm_gui_menus DEFINITION
         VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
 
     CLASS-METHODS settings
-      IMPORTING
-        !iv_act        TYPE string
       RETURNING
         VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
 
@@ -115,11 +113,9 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     ro_menu->add(
       iv_txt = 'Global'
       iv_act = zif_abappm_gui_router=>c_action-go_settings
-      iv_cur = boolc( iv_act = zif_abappm_gui_router=>c_action-go_settings )
     )->add(
       iv_txt = 'Personal'
-      iv_act = zif_abappm_gui_router=>c_action-go_settings_personal
-      iv_cur = boolc( iv_act = zif_abappm_gui_router=>c_action-go_settings_personal ) ).
+      iv_act = zif_abappm_gui_router=>c_action-go_settings_personal ).
 
   ENDMETHOD.
 ENDCLASS.
