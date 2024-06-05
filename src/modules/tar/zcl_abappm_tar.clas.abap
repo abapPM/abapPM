@@ -44,7 +44,9 @@ CLASS zcl_abappm_tar DEFINITION
     "! Load archive
     METHODS load
       IMPORTING
-        !iv_tar TYPE xstring
+        !iv_tar       TYPE xstring
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
         zcx_abappm_tar.
 
@@ -74,19 +76,23 @@ CLASS zcl_abappm_tar DEFINITION
     "! Append file to archive
     METHODS append
       IMPORTING
-        !iv_name     TYPE string
-        !iv_content  TYPE xsequence
-        !iv_date     TYPE d OPTIONAL
-        !iv_time     TYPE t OPTIONAL
-        !iv_mode     TYPE i OPTIONAL
-        !iv_typeflag TYPE c OPTIONAL
+        !iv_name      TYPE string
+        !iv_content   TYPE xsequence
+        !iv_date      TYPE d OPTIONAL
+        !iv_time      TYPE t OPTIONAL
+        !iv_mode      TYPE i OPTIONAL
+        !iv_typeflag  TYPE c OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
         zcx_abappm_tar.
 
     "! Delete file from archive
     METHODS delete
       IMPORTING
-        !iv_name TYPE string
+        !iv_name      TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
         zcx_abappm_tar.
 
@@ -311,6 +317,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       zcx_abappm_tar=>raise( 'Error adding file (data)' ).
     ENDIF.
 
+    result = me.
+
   ENDMETHOD.
 
 
@@ -353,6 +361,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       zcx_abappm_tar=>raise( 'Error deleting file (data)' ).
     ENDIF.
 
+    result = me.
+
   ENDMETHOD.
 
 
@@ -371,7 +381,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD gunzip.
-    cl_abap_gzip=>decompress_binary(
+    cl_abap_gzip=>decompress_binary_with_header(
       EXPORTING
         gzip_in = iv_gzip
       IMPORTING
@@ -380,7 +390,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD gzip.
-    cl_abap_gzip=>compress_binary(
+    cl_abap_gzip=>compress_binary_with_header(
       EXPORTING
         raw_in   = iv_tar
       IMPORTING
@@ -479,6 +489,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
       INSERT ls_data INTO TABLE mt_data.
     ENDDO.
+
+    result = me.
 
   ENDMETHOD.
 

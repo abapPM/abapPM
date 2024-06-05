@@ -159,8 +159,8 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         rs_handled-page  = zcl_abappm_gui_dlg_init=>create( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN zif_abappm_gui_router=>c_action-apm_install.
-        "rs_handled-page  = zcl_abappm_gui_dlg_install=>create( ).
-        "rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+        rs_handled-page  = zcl_abappm_gui_dlg_install=>create( ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN zif_abappm_gui_router=>c_action-apm_publish.
         "rs_handled-page  = zcl_abappm_gui_dlg_publish=>create( ).
         "rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.

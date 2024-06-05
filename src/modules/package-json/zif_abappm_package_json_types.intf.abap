@@ -84,23 +84,26 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
     END OF ty_package_json.
 
   TYPES:
-    " Full manifest (fetched with "accept: application/json" in HTTP headers)
-    BEGIN OF ty_manifest.
-      INCLUDE TYPE ty_package_json.
-  TYPES:
-    BEGIN OF dist,
+    BEGIN OF ty_dist,
       file_count    TYPE i,
       integrity     TYPE string,
       shasum        TYPE string,
       signatures    TYPE STANDARD TABLE OF ty_signature WITH DEFAULT KEY,
       tarball       TYPE string,
       unpacked_size TYPE i,
-    END OF dist,
-  END OF ty_manifest.
+    END OF ty_dist.
+
+  TYPES:
+    " Full manifest (fetched with "accept: application/json" in HTTP headers)
+    BEGIN OF ty_manifest.
+      INCLUDE TYPE ty_package_json.
+  TYPES:
+      dist TYPE ty_dist,
+    END OF ty_manifest.
 
   TYPES:
     " Abbreviated manifest (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
-    BEGIN OF ty_package_json_abbreviated,
+    BEGIN OF ty_manifest_abbreviated,
       name                  TYPE string,
       version               TYPE string,
       dependencies          TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
@@ -111,8 +114,9 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
       os                    TYPE string_table,
       cpu                   TYPE string_table,
       db                    TYPE string_table,
+      dist                  TYPE ty_dist,
       deprecated            TYPE abap_bool,
-    END OF ty_package_json_abbreviated.
+    END OF ty_manifest_abbreviated.
 
   CONSTANTS:
     " Package name specs
