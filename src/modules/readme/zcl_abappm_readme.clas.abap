@@ -33,7 +33,6 @@ CLASS zcl_abappm_readme DEFINITION
       IMPORTING
         !iv_package  TYPE devclass
         !iv_markdown TYPE string OPTIONAL
-        !iv_private  TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_readme.
 

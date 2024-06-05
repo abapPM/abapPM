@@ -28,8 +28,9 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
 
   CONSTANTS:
     BEGIN OF c_key_type,
-      package  TYPE ty_key VALUE 'PACKAGE',
-      settings TYPE ty_key VALUE 'SETTINGS',
+      package   TYPE ty_key VALUE 'PACKAGE',
+      settings  TYPE ty_key VALUE 'SETTINGS',
+      packument TYPE ty_key VALUE 'PACKUMENT',
     END OF c_key_type.
 
   METHODS list

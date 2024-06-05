@@ -42,6 +42,8 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
     END OF ty_user.
 
   TYPES:
+    " Full manifest (fetched with "accept: application/json" in HTTP headers)
+    " This type mirrors the package.abap.json schema
     BEGIN OF ty_package_json,
       name                  TYPE string,
       version               TYPE string,
@@ -77,49 +79,40 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
       cpu                   TYPE string_table,
       db                    TYPE string_table,
       private               TYPE abap_bool,
-      BEGIN OF dist,
-        file_count    TYPE i,
-        integrity     TYPE string,
-        shasum        TYPE string,
-        signatures    TYPE STANDARD TABLE OF ty_signature WITH DEFAULT KEY,
-        tarball       TYPE string,
-        unpacked_size TYPE i,
-      END OF dist,
+      deprecated            TYPE abap_bool,
       readme                TYPE string,
     END OF ty_package_json.
 
   TYPES:
-    BEGIN OF ty_version,
-      key     TYPE string,
-      version TYPE ty_package_json,
-    END OF ty_version.
+    " Full manifest (fetched with "accept: application/json" in HTTP headers)
+    BEGIN OF ty_manifest.
+      INCLUDE TYPE ty_package_json.
+  TYPES:
+    BEGIN OF dist,
+      file_count    TYPE i,
+      integrity     TYPE string,
+      shasum        TYPE string,
+      signatures    TYPE STANDARD TABLE OF ty_signature WITH DEFAULT KEY,
+      tarball       TYPE string,
+      unpacked_size TYPE i,
+    END OF dist,
+  END OF ty_manifest.
 
   TYPES:
-    BEGIN OF ty_manifest,
-      _id         TYPE string,
-      _rev        TYPE string,
-      name        TYPE string,
-      description TYPE string,
-      dist_tags   TYPE STANDARD TABLE OF ty_generic WITH KEY key,
-      time        TYPE STANDARD TABLE OF ty_generic WITH KEY key,
-      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
-      maintainers TYPE STANDARD TABLE OF ty_person WITH KEY name,
-      readme      TYPE string,
-      users       TYPE STANDARD TABLE OF ty_user WITH KEY name,
-      homepage    TYPE string,
-      BEGIN OF bugs,
-        url   TYPE ty_uri,
-        email TYPE ty_email,
-      END OF bugs,
-      license     TYPE string,
-      keywords    TYPE string_table,
-      author      TYPE ty_person,
-      BEGIN OF repository,
-        type      TYPE string,
-        url       TYPE ty_uri,
-        directory TYPE string,
-      END OF repository,
-    END OF ty_manifest.
+    " Abbreviated manifest (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
+    BEGIN OF ty_package_json_abbreviated,
+      name                  TYPE string,
+      version               TYPE string,
+      dependencies          TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      dev_dependencies      TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      optional_dependencies TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      bundle_dependencies   TYPE string_table,
+      engines               TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      os                    TYPE string_table,
+      cpu                   TYPE string_table,
+      db                    TYPE string_table,
+      deprecated            TYPE abap_bool,
+    END OF ty_package_json_abbreviated.
 
   CONSTANTS:
     " Package name specs
