@@ -3,14 +3,14 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ABAPPM_GUI_PAGE_PACKAGE</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_HTML_FORM_UTILS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>apm - GUI Package View</DESCRIPT>
+    <DESCRIPT>apm - GUI HTML Form Utilities</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
-    <RSTAT>K</RSTAT>
+    <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
    </VSEOCLASS>
   </asx:values>
  </asx:abap>

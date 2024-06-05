@@ -7,9 +7,10 @@ CLASS zcl_abappm_gui_page DEFINITION
 ************************************************************************
 * apm GUI Page
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* adapter: gui_component, settings, title, and footer
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_modal.
@@ -52,7 +53,7 @@ CLASS zcl_abappm_gui_page DEFINITION
 
   PRIVATE SECTION.
 
-    DATA mo_settings TYPE REF TO zcl_abapgit_settings.
+    DATA ms_settings TYPE zif_abappm_settings=>ty_settings. " apm
     DATA mx_error TYPE REF TO zcx_abapgit_exception.
     DATA mo_exception_viewer TYPE REF TO zcl_abapgit_exception_viewer.
 
@@ -143,7 +144,6 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
   METHOD constructor.
 
     super->constructor( ).
-    mo_settings = zcl_abapgit_persist_factory=>get_settings( )->read( ).
     ms_control-page_layout = c_page_layout-centered.
 
   ENDMETHOD.
@@ -231,7 +231,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     " Themes
     ii_html->add( '<link rel="stylesheet" type="text/css" href="css/theme-default.css">' ). " Theme basis
-    CASE mo_settings->get_ui_theme( ).
+    CASE ms_settings-gui_settings-ui_theme.
       WHEN zcl_abapgit_settings=>c_ui_theme-dark.
         ii_html->add( '<link rel="stylesheet" type="text/css" href="css/theme-dark.css">' ).
       WHEN zcl_abapgit_settings=>c_ui_theme-belize.
@@ -261,10 +261,10 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     header_script_links( ri_html ).
 
     " Overwrite the automatic icon scaling done in zcl_abapgit_html=>icon
-    CASE mo_settings->get_icon_scaling( ).
-      WHEN mo_settings->c_icon_scaling-large.
+    CASE ms_settings-gui_settings-icon_scaling.
+      WHEN 'large'. "mo_settings->c_icon_scaling-large.
         ri_html->add( '<style>.icon { font-size: 200% }</style>' ).
-      WHEN mo_settings->c_icon_scaling-small.
+      WHEN 'small'. "mo_settings->c_icon_scaling-small.
         ri_html->add( '<style>.icon.large { font-size: inherit }</style>' ).
     ENDCASE.
 
@@ -394,9 +394,9 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     DATA: lv_link_hint_key TYPE c LENGTH 1.
 
-    lv_link_hint_key = mo_settings->get_link_hint_key( ).
+    lv_link_hint_key = ms_settings-keyboard_settings-link_hint_key.
 
-    IF mo_settings->get_link_hints_enabled( ) = abap_true AND lv_link_hint_key IS NOT INITIAL.
+    IF ms_settings-keyboard_settings-link_hints_enabled = abap_true AND lv_link_hint_key IS NOT INITIAL.
 
       ii_html->add( |activateLinkHints("{ lv_link_hint_key }");| ).
       ii_html->add( |setInitialFocusWithQuerySelector('#header', false);| ).

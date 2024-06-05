@@ -6,9 +6,10 @@ CLASS zcl_abappm_gui_component DEFINITION
 ************************************************************************
 * apm GUI Component
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* adpated: gui_services
   PUBLIC SECTION.
 
     CONSTANTS:
@@ -60,7 +61,7 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
   METHOD gui_services.
     IF mi_gui_services IS NOT BOUND.
-      mi_gui_services = zcl_abappm_gui_factory=>get_gui_services( ).
+      mi_gui_services = zcl_abappm_gui_factory=>get_gui_services( ). " apm
     ENDIF.
     ri_gui_services = mi_gui_services.
   ENDMETHOD.

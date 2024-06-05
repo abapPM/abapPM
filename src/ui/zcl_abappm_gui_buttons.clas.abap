@@ -6,7 +6,7 @@ CLASS zcl_abappm_gui_buttons DEFINITION
 ************************************************************************
 * apm GUI Buttons
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.

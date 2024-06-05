@@ -6,7 +6,7 @@ CLASS zcl_abappm_gui_menus DEFINITION
 ************************************************************************
 * apm GUI Menus
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
@@ -73,11 +73,14 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
 
   METHOD experimental.
 
-    IF zcl_abapgit_persist_factory=>get_settings( )->read( )->get_experimental_features( ) IS NOT INITIAL.
-      io_menu->add(
-        iv_txt = zcl_abappm_gui_buttons=>experimental( )
-        iv_act = zif_abappm_gui_router=>c_action-go_settings ).
-    ENDIF.
+    TRY.
+        IF zcl_abappm_settings=>factory( )->get( )-experimental_features IS NOT INITIAL. "apm
+          io_menu->add(
+            iv_txt = zcl_abappm_gui_buttons=>experimental( )
+            iv_act = zif_abappm_gui_router=>c_action-go_settings ).
+        ENDIF.
+      CATCH zcx_abappm_error ##NO_HANDLER.
+    ENDTRY.
 
   ENDMETHOD.
 

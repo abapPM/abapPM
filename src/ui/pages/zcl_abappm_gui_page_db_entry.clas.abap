@@ -23,6 +23,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       IMPORTING
         !iv_key        TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode  TYPE abap_bool DEFAULT abap_false
+        !iv_validate   TYPE abap_bool DEFAULT abap_true
       RETURNING
         VALUE(ri_page) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
@@ -32,6 +33,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       IMPORTING
         !iv_key       TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode TYPE abap_bool DEFAULT abap_false
+        !iv_validate  TYPE abap_bool DEFAULT abap_true
       RAISING
         zcx_abapgit_exception.
 
@@ -52,7 +54,8 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
     DATA:
       ms_data      TYPE zif_abappm_persist_apm=>ty_zabappm,
       ms_previous  TYPE zif_abappm_persist_apm=>ty_zabappm,
-      mv_edit_mode TYPE abap_bool.
+      mv_edit_mode TYPE abap_bool,
+      mv_validate  TYPE abap_bool.
 
     METHODS load_entry
       IMPORTING
@@ -126,6 +129,11 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     super->constructor( ).
     register_stylesheet( ).
     mv_edit_mode = iv_edit_mode.
+    mv_validate  = iv_validate.
+    " TODO: Auto-detect based on content
+    IF iv_key CP '*README'.
+      mv_validate = abap_false.
+    ENDIF.
     load_entry( iv_key ).
   ENDMETHOD.
 
@@ -161,7 +169,10 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     " Validation might raise expection but we want to keep the edited (inconsistent) value
     ms_data-value = is_content-value.
-    ms_data-value = validate_and_pretty_json( is_content-value ).
+
+    IF mv_validate = abap_true.
+      ms_data-value = validate_and_pretty_json( is_content-value ).
+    ENDIF.
 
     TRY.
         gi_persist->save(

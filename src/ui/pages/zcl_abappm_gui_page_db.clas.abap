@@ -420,17 +420,20 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     DATA:
       lv_key_type TYPE string,
       lv_name     TYPE string,
+      lv_suffix   TYPE string,
       lv_packages TYPE i,
       lv_users    TYPE i.
 
     FIELD-SYMBOLS <ls_db_entry> LIKE LINE OF it_db_entries.
 
     LOOP AT it_db_entries ASSIGNING <ls_db_entry>.
-      SPLIT <ls_db_entry>-keys AT ':' INTO lv_key_type lv_name.
+      SPLIT <ls_db_entry>-keys AT ':' INTO lv_key_type lv_name lv_suffix.
 
       CASE lv_key_type.
         WHEN zif_persist_apm=>c_key_type-package.
-          lv_packages = lv_packages + 1.
+          IF lv_suffix = zcl_abappm_package_json=>c_package_json.
+            lv_packages = lv_packages + 1.
+          ENDIF.
         WHEN zif_persist_apm=>c_key_type-settings.
           IF lv_name <> zif_abappm_settings=>c_global.
             lv_users = lv_users + 1.

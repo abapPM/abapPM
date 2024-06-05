@@ -7,9 +7,10 @@ CLASS zcl_abappm_gui_page_hoc DEFINITION
 ************************************************************************
 * apm GUI Page HOC
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* adapter: gui_page
   PUBLIC SECTION.
 
     CLASS-METHODS create

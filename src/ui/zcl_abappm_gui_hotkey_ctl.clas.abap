@@ -7,9 +7,10 @@ CLASS zcl_abappm_gui_hotkey_ctl DEFINITION
 ************************************************************************
 * apm GUI Hotkey Controller
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* adpated: gui_component and settings
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_hotkeys.
@@ -21,6 +22,7 @@ CLASS zcl_abappm_gui_hotkey_ctl DEFINITION
     CLASS-METHODS should_show_hint
       RETURNING
         VALUE(rv_yes) TYPE abap_bool.
+
     METHODS constructor
       RAISING
         zcx_abapgit_exception.
@@ -53,7 +55,7 @@ CLASS zcl_abappm_gui_hotkey_ctl IMPLEMENTATION.
     super->constructor( ).
 
     TRY.
-        ms_keyboard_settings = zcl_abappm_settings=>factory( )->get( )-keyboard_settings.
+        ms_keyboard_settings = zcl_abappm_settings=>factory( )->get( )-keyboard_settings. " apm
       CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 

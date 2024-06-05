@@ -51,9 +51,9 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
       END OF c_event .
 
     DATA:
-      mo_form           TYPE REF TO zcl_abapgit_html_form,
+      mo_form           TYPE REF TO zcl_abappm_html_form,
       mo_form_data      TYPE REF TO zcl_abapgit_string_map,
-      mo_form_util      TYPE REF TO zcl_abapgit_html_form_utils,
+      mo_form_util      TYPE REF TO zcl_abappm_html_form_utils,
       mo_validation_log TYPE REF TO zcl_abapgit_string_map.
 
     METHODS validate_form
@@ -66,7 +66,7 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
 
     METHODS get_form_schema
       RETURNING
-        VALUE(ro_form) TYPE REF TO zcl_abapgit_html_form.
+        VALUE(ro_form) TYPE REF TO zcl_abappm_html_form.
 
     METHODS choose_labels
       RAISING
@@ -101,7 +101,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     CREATE OBJECT mo_validation_log.
     CREATE OBJECT mo_form_data.
     mo_form = get_form_schema( ).
-    mo_form_util = zcl_abapgit_html_form_utils=>create( mo_form ).
+    mo_form_util = zcl_abappm_html_form_utils=>create( mo_form ).
   ENDMETHOD.
 
 
@@ -120,7 +120,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
   METHOD get_form_schema.
 
-    ro_form = zcl_abapgit_html_form=>create(
+    ro_form = zcl_abappm_html_form=>create(
                 iv_form_id   = 'init-package-form'
                 iv_help_page = 'https://docs.abappm.com/' ). " TODO
 

@@ -21,6 +21,7 @@ INTERFACE zif_abappm_package_json PUBLIC.
       package         TYPE devclass,
       name            TYPE string,
       version         TYPE string,
+      description     TYPE string,
       private         TYPE abap_bool,
       changed_by      TYPE as4user,
       changed_at      TYPE string,

@@ -136,6 +136,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       RETURNING
         VALUE(ri_html) TYPE REF TO zif_abapgit_html.
 
+    METHODS render_registry
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html.
+
     METHODS build_table_scheme
       RETURNING
         VALUE(rt_tab_scheme) TYPE zif_abapgit_definitions=>ty_col_spec_tt.
@@ -266,6 +270,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_tech_name      = 'VERSION'
       iv_display_name   = 'Version'
       iv_css_class      = 'version'
+      iv_allow_order_by = abap_true
+    )->add_column(
+      iv_tech_name      = 'DESCRIPTION'
+      iv_display_name   = 'Description'
+      iv_css_class      = 'description'
       iv_allow_order_by = abap_true
     )->add_column(
       iv_tech_name      = 'CHANGED_BY'
@@ -440,6 +449,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     ii_html->add( |<div class="repo-overview-toolbar">| ).
     ii_html->add( render_filter_bar( ) ).
+    ii_html->add( render_registry( ) ).
     " FUTURE
     " ii_html->add( render_action_toolbar( ) ).
     ii_html->add( |</div>| ).
@@ -460,6 +470,22 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       io_label_colors     = mo_label_colors
       iv_clickable_action = c_action-label_filter ) ).
     ii_html->add( |</div>| ).
+
+  ENDMETHOD.
+
+
+  METHOD render_registry.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    ri_html->add( '<span style="float:right">' ).
+    ri_html->add( '<span class="transport-box">' ).
+    ri_html->add_a(
+      iv_title = 'Registry'
+      iv_txt   = ms_settings-registry
+      iv_act   = |{ zif_abapgit_definitions=>c_action-url }?url={ ms_settings-registry }| ).
+    ri_html->add( '</span>' ).
+    ri_html->add( '</span>').
 
   ENDMETHOD.
 
@@ -596,6 +622,12 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         iv_txt = is_package-version
         iv_act = |{ c_action-select }?package={ is_package-package }| ) && lv_lock ).
 
+    " Description
+    ii_html->td(
+      ii_html->a(
+        iv_txt = is_package-description
+        iv_act = |{ c_action-select }?package={ is_package-package }| ) ).
+
     " Details: changed by
     ii_html->td(
       iv_class   = 'ro-detail'
@@ -681,7 +713,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         ms_settings-last_package = lv_package.
         save_settings( ).
 
-*        rs_handled-page  = zcl_abapgit_gui_page_package=>create( lv_package ).
+        rs_handled-page  = zcl_abappm_gui_page_package=>create( lv_package ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN c_action-change_order_by.
@@ -789,6 +821,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     DATA lt_packages TYPE zif_abappm_package_json=>ty_packages.
 
+    register_handlers( ).
+
     mo_label_colors = zcl_abapgit_repo_labels=>split_colors_into_map( ms_settings-gui_settings-label_colors ).
 
     lt_packages = prepare_packages( ).
@@ -807,7 +841,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     register_deferred_script( render_scripts( ) ).
     register_deferred_script( zcl_abapgit_gui_chunk_lib=>render_repo_palette( c_action-select ) ).
-    register_handlers( ).
 
   ENDMETHOD.
 ENDCLASS.

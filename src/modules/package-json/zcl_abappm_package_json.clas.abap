@@ -13,6 +13,9 @@ CLASS zcl_abappm_package_json DEFINITION
 
     INTERFACES zif_abappm_package_json.
 
+    CONSTANTS:
+      c_package_json TYPE string VALUE 'PACKAGE_JSON'.
+
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS factory
@@ -68,9 +71,6 @@ CLASS zcl_abappm_package_json DEFINITION
         instance TYPE REF TO zif_abappm_package_json,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
-
-    CONSTANTS:
-      c_package_json TYPE string VALUE 'PACKAGE_JSON'.
 
     CLASS-DATA:
       gi_persist   TYPE REF TO zif_abappm_persist_apm,
@@ -188,7 +188,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     FIELD-SYMBOLS <ls_list> LIKE LINE OF lt_list.
 
-    lt_list = gi_persist->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%| ).
+    lt_list = gi_persist->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%:{ c_package_json }| ).
 
     LOOP AT lt_list ASSIGNING <ls_list>.
       CLEAR ls_result.
@@ -201,9 +201,10 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       IF iv_instanciate = abap_true.
         TRY.
             ls_result-instance = factory( ls_result-package )->load( ).
-            ls_result-name     = ls_result-instance->get( )-name.
-            ls_result-version  = ls_result-instance->get( )-version.
-            ls_result-private  = ls_result-instance->get( )-private.
+            ls_result-name        = ls_result-instance->get( )-name.
+            ls_result-version     = ls_result-instance->get( )-version.
+            ls_result-description = ls_result-instance->get( )-description.
+            ls_result-private     = ls_result-instance->get( )-private.
           CATCH zcx_abappm_package_json ##NO_HANDLER.
         ENDTRY.
       ENDIF.

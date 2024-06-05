@@ -38,13 +38,14 @@ INTERFACE zif_abappm_settings PUBLIC.
     END OF ty_package_settings,
 
     BEGIN OF ty_settings,
-      registry          TYPE string,
-      last_package      TYPE devclass,
-      show_last_package TYPE abap_bool,
-      gui_settings      TYPE ty_gui_settings,
-      keyboard_settings TYPE ty_keyboard_settings,
-      list_settings     TYPE ty_list_settings,
-      package_settings  TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
+      registry              TYPE string,
+      last_package          TYPE devclass,
+      show_last_package     TYPE abap_bool,
+      experimental_features TYPE string,
+      gui_settings          TYPE ty_gui_settings,
+      keyboard_settings     TYPE ty_keyboard_settings,
+      list_settings         TYPE ty_list_settings,
+      package_settings      TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
     END OF ty_settings.
 
   TYPES ty_name TYPE uname.
