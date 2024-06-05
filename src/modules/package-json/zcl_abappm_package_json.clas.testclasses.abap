@@ -233,14 +233,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
       && |  "cpu": [],\n|
       && |  "db": [],\n|
       && |  "private": false,\n|
-      && |  "dist": \{\n|
-      && |    "fileCount": 0,\n|
-      && |    "integrity": "",\n|
-      && |    "shasum": "",\n|
-      && |    "signatures": [],\n|
-      && |    "tarball": "",\n|
-      && |    "unpackedSize": 0\n|
-      && |  \},\n|
+      && |  "deprecated": false,\n|
       && |  "readme": ""\n|
       && |\}|.
 

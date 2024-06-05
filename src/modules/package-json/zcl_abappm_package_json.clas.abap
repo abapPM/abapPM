@@ -299,6 +299,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
           IF ms_package_json-private = abap_false.
             li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/private' ) ).
           ENDIF.
+          IF ms_package_json-deprecated = abap_false.
+            li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/deprecated' ) ).
+          ENDIF.
         ENDIF.
 
         result = li_json->stringify( 2 ).
