@@ -77,11 +77,36 @@ CLASS zcl_abappm_pacote DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    METHODS check_result
+      IMPORTING
+        !iv_json TYPE string
+      RAISING
+        zcx_abappm_pacote.
+
 ENDCLASS.
 
 
 
 CLASS zcl_abappm_pacote IMPLEMENTATION.
+
+
+  METHOD check_result.
+
+    DATA:
+      lv_error TYPE string,
+      lx_error TYPE REF TO zcx_abappm_ajson_error.
+
+    TRY.
+        lv_error = zcl_abappm_ajson=>parse( iv_json )->get_string( '/error' ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_pacote=>raise_with_text( lx_error ).
+    ENDTRY.
+
+    IF lv_error IS NOT INITIAL.
+      zcx_abappm_pacote=>raise( lv_error ).
+    ENDIF.
+
+  ENDMETHOD.
 
 
   METHOD class_constructor.
@@ -257,6 +282,8 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         zcx_abappm_pacote=>raise_with_text( lx_error ).
     ENDTRY.
 
+    check_result( result ).
+
   ENDMETHOD.
 
 
@@ -266,10 +293,13 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
     TRY.
         result = get_agent( mv_registry )->request( |{ mv_registry }/{ ms_pacote-name }| )->cdata( ).
-        ms_pacote-packument = result.
       CATCH zcx_abapgit_exception INTO lx_error.
         zcx_abappm_pacote=>raise_with_text( lx_error ).
     ENDTRY.
+
+    check_result( result ).
+
+    ms_pacote-packument = result.
 
   ENDMETHOD.
 
@@ -300,7 +330,8 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     DATA lx_error TYPE REF TO zcx_abapgit_exception.
 
     TRY.
-        result = get_agent( mv_registry )->request( |{ mv_registry }/{ ms_pacote-name }/-/{ iv_filename }| )->data( ).
+        " TODO: Error check (HTTP status)
+        result = get_agent( mv_registry )->request( iv_filename )->data( ).
 
       CATCH zcx_abapgit_exception INTO lx_error.
         zcx_abappm_pacote=>raise_with_text( lx_error ).

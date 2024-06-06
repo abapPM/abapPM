@@ -41,8 +41,10 @@ CLASS zcl_abapgit_object_abap DEFINITION
         extension TYPE c LENGTH 4 VALUE 'json',
       END OF c_package_json_file.
 
-    CONSTANTS c_key_type TYPE string VALUE 'PACKAGE'.
-    CONSTANTS c_package_json TYPE string VALUE 'PACKAGE_JSON'.
+    CONSTANTS:
+      c_key_type     TYPE string VALUE 'PACKAGE',
+      c_package_json TYPE string VALUE 'PACKAGE_JSON',
+      c_readme       TYPE string VALUE 'README'.
 
     DATA mv_package TYPE devclass.
     DATA mv_key TYPE zif_persist_apm=>ty_key.
@@ -52,6 +54,12 @@ CLASS zcl_abapgit_object_abap DEFINITION
         VALUE(result) TYPE abap_bool.
 
     CLASS-METHODS get_package_key
+      IMPORTING
+        !iv_package   TYPE devclass
+      RETURNING
+        VALUE(result) TYPE zif_persist_apm=>ty_key.
+
+    CLASS-METHODS get_readme_key
       IMPORTING
         !iv_package   TYPE devclass
       RETURNING
@@ -83,6 +91,11 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_readme_key.
+    result = |{ c_key_type }:{ iv_package }:{ c_readme }|.
+  ENDMETHOD.
+
+
   METHOD table_exists.
 
     DATA lv_tabname TYPE dd02l-tabname.
@@ -94,7 +107,13 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
 
   METHOD zif_abapgit_object~changed_by.
-    RETURN.
+
+    IF table_exists( ) = abap_false.
+      EXIT.
+    ENDIF.
+
+    rv_user = lcl_persist_apm=>get_instance( )->load( mv_key )-luser.
+
   ENDMETHOD.
 
 
@@ -105,6 +124,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
     ENDIF.
 
     lcl_persist_apm=>get_instance( )->delete( mv_key ).
+    lcl_persist_apm=>get_instance( )->delete( get_readme_key( mv_package ) ).
 
   ENDMETHOD.
 
@@ -126,8 +146,6 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
         " Most probably file not found -> ignore
         RETURN.
     ENDTRY.
-
-    zcl_abapgit_utils=>check_eol( lv_json ).
 
     lcl_persist_apm=>get_instance( )->save(
       iv_key   = mv_key

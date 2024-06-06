@@ -28,14 +28,23 @@ CLASS zcl_abappm_command_install DEFINITION
         !iv_registry     TYPE string
         !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
       RETURNING
-        VALUE(result)    TYPE zif_abappm_package_json_types=>ty_manifest_abbreviated
+        VALUE(result)    TYPE zif_abappm_package_json_types=>ty_manifest
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS get_packument_from_registry
+      IMPORTING
+        !iv_registry     TYPE string
+        !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
+      RETURNING
+        VALUE(result)    TYPE zif_abappm_pacote=>ty_packument
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS get_tarball_from_registry
       IMPORTING
         !iv_registry  TYPE string
-        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest_abbreviated
+        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
@@ -45,7 +54,7 @@ CLASS zcl_abappm_command_install DEFINITION
       IMPORTING
         !iv_package      TYPE devclass
         !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
-        !iv_tarball TYPE xstring
+        !iv_tarball      TYPE xstring
       RAISING
         zcx_abappm_error.
 
@@ -86,18 +95,44 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       lx_ajson_error  TYPE REF TO zcx_abappm_ajson_error,
       lv_manifest     TYPE string.
 
+    " The abbreviated manifest would be sufficient for installer
+    " however we also want to get the description and readme
     TRY.
         lv_manifest = zcl_abappm_pacote=>factory(
           iv_registry = iv_registry
-          iv_name     = is_package_json-name )->manifest(
-            iv_version     = is_package_json-version
-            iv_abbreviated = abap_true ).
+          iv_name     = is_package_json-name )->manifest( is_package_json-version ).
       CATCH zcx_abappm_pacote INTO lx_pacote_error.
         zcx_abappm_error=>raise_with_text( lx_pacote_error ).
     ENDTRY.
 
     TRY.
         zcl_abappm_ajson=>parse( lv_manifest )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
+      CATCH zcx_abappm_ajson_error INTO lx_ajson_error.
+        zcx_abappm_error=>raise_with_text( lx_ajson_error ).
+    ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD get_packument_from_registry.
+
+    DATA:
+      lx_pacote_error TYPE REF TO zcx_abappm_pacote,
+      lx_ajson_error  TYPE REF TO zcx_abappm_ajson_error,
+      lv_packument    TYPE string.
+
+    " The abbreviated manifest would be sufficient for installer
+    " however we also want to get the description and readme
+    TRY.
+        lv_packument = zcl_abappm_pacote=>factory(
+          iv_registry = iv_registry
+          iv_name     = is_package_json-name )->packument( ).
+      CATCH zcx_abappm_pacote INTO lx_pacote_error.
+        zcx_abappm_error=>raise_with_text( lx_pacote_error ).
+    ENDTRY.
+
+    TRY.
+        zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
       CATCH zcx_abappm_ajson_error INTO lx_ajson_error.
         zcx_abappm_error=>raise_with_text( lx_ajson_error ).
     ENDTRY.
@@ -112,7 +147,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     TRY.
         result = zcl_abappm_pacote=>factory(
           iv_registry = iv_registry
-          iv_name     = is_manifest-name )->manifest( is_manifest-dist-tarball ).
+          iv_name     = is_manifest-name )->tarball( is_manifest-dist-tarball ).
       CATCH zcx_abappm_pacote INTO lx_error.
         zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
@@ -147,18 +182,26 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   METHOD run.
 
     DATA:
-      ls_manifest TYPE zif_abappm_package_json_types=>ty_manifest_abbreviated,
-      lv_tarball  TYPE xstring.
+      ls_manifest     TYPE zif_abappm_package_json_types=>ty_manifest,
+      ls_package_json TYPE zif_abappm_package_json_types=>ty_package_json,
+      ls_packument    TYPE zif_abappm_pacote=>ty_packument,
+      lv_tarball      TYPE xstring.
 
     " 1. Check if something else is already installed
     check_package(
       iv_package = iv_package
       iv_name    = is_package_json-name ).
 
-    " 2. Get manifest (abbreviated is sufficient for installer)
+    " 2. Get manifest
     ls_manifest = get_manifest_from_registry(
       iv_registry     = iv_registry
       is_package_json = is_package_json ).
+
+    " 2b. Registry currently returns readme only on packument level (not in manifest)
+    ls_packument = get_packument_from_registry(
+      iv_registry     = iv_registry
+      is_package_json = is_package_json ).
+    ls_manifest-readme = ls_packument-readme.
 
     " 3. Get tarball
     lv_tarball = get_tarball_from_registry(
@@ -170,6 +213,14 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       iv_package      = iv_package
       is_package_json = is_package_json
       iv_tarball      = lv_tarball ).
+
+    " 5. Save package.abap.json and readme
+    ls_package_json = is_package_json.
+    MOVE-CORRESPONDING ls_manifest TO ls_package_json.
+
+    zcl_abappm_command_init=>run(
+      iv_package      = iv_package
+      is_package_json = ls_package_json ).
 
     MESSAGE 'Package successfully installed' TYPE 'S'.
 

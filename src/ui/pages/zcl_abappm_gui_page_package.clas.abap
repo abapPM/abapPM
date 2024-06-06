@@ -173,6 +173,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     mv_view              = c_default-view.
     ms_markdown-path     = c_default-path.
     ms_markdown-filename = c_default-filename.
+    ms_markdown-data     = get_markdown_data( ).
 
     gui_services( )->cache_asset(
       iv_type    = 'image'

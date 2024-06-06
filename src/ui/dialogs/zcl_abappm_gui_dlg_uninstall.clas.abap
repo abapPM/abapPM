@@ -1,4 +1,4 @@
-CLASS zcl_abappm_gui_dlg_install DEFINITION
+CLASS zcl_abappm_gui_dlg_uninstall DEFINITION
   PUBLIC
   INHERITING FROM zcl_abappm_gui_component
   FINAL
@@ -32,15 +32,12 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
     CONSTANTS:
       BEGIN OF c_id,
         package TYPE string VALUE 'package',
-        name    TYPE string VALUE 'name',
-        version TYPE string VALUE 'version',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_event,
-        choose_package  TYPE string VALUE 'choose-package',
-        create_package  TYPE string VALUE 'create-package',
-        install_package TYPE string VALUE 'install-package',
+        choose_package    TYPE string VALUE 'choose-package',
+        uninstall_package TYPE string VALUE 'uninstall-package',
       END OF c_event .
 
     DATA:
@@ -66,7 +63,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
+CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -90,12 +87,12 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
   METHOD create.
 
-    DATA lo_component TYPE REF TO zcl_abappm_gui_dlg_install.
+    DATA lo_component TYPE REF TO zcl_abappm_gui_dlg_uninstall.
 
     CREATE OBJECT lo_component.
 
     ri_page = zcl_abappm_gui_page_hoc=>create(
-      iv_page_title      = 'Install Package'
+      iv_page_title      = 'Uninstall Package'
       ii_child_component = lo_component ).
 
   ENDMETHOD.
@@ -104,7 +101,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
   METHOD get_form_schema.
 
     ro_form = zcl_abappm_html_form=>create(
-                iv_form_id   = 'install-package-form'
+                iv_form_id   = 'uninstall-package-form'
                 iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     ro_form->text(
@@ -113,29 +110,14 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       iv_required    = abap_true
       iv_upper_case  = abap_true
       iv_label       = 'Package'
-      iv_hint        = 'SAP package (should be a dedicated one)'
+      iv_hint        = 'SAP package'
       iv_placeholder = 'Z... / $...'
-      iv_max         = 30
-    )->text(
-      iv_name        = c_id-name
-      iv_required    = abap_true
-      iv_label       = 'Name'
-      iv_hint        = 'Name of the package'
-      iv_min         = zif_abappm_package_json_types=>c_package_name-min_length
-      iv_max         = zif_abappm_package_json_types=>c_package_name-max_length
-    )->text(
-      iv_name        = c_id-version
-      iv_required    = abap_true
-      iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)' ).
+      iv_max         = 30 ).
 
     ro_form->command(
-      iv_label       = 'Install Package'
+      iv_label       = 'Uninstall Package'
       iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
-      iv_action      = c_event-install_package
-    )->command(
-      iv_label       = 'Create Package'
-      iv_action      = c_event-create_package
+      iv_action      = c_event-uninstall_package
     )->command(
       iv_label       = 'Back'
       iv_action      = zif_abapgit_definitions=>c_action-go_back ).
@@ -171,18 +153,6 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       ENDTRY.
     ENDIF.
 
-    IF zcl_package_json_valid=>is_valid_name( io_form_data->get( c_id-name ) ) = abap_false.
-      ro_validation_log->set(
-        iv_key = c_id-name
-        iv_val = 'Invalid name' ).
-    ENDIF.
-
-    IF zcl_package_json_valid=>is_valid_version( io_form_data->get( c_id-version ) ) = abap_false.
-      ro_validation_log->set(
-        iv_key = c_id-version
-        iv_val = 'Invalid version' ).
-    ENDIF.
-
   ENDMETHOD.
 
 
@@ -196,19 +166,6 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     mo_form_data = mo_form_util->normalize( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
-      WHEN c_event-create_package.
-
-        mo_form_data->set(
-          iv_key = c_id-package
-          iv_val = zcl_abapgit_services_repo=>create_package(
-            iv_prefill_package = |{ mo_form_data->get( c_id-package ) }| ) ).
-        IF mo_form_data->get( c_id-package ) IS NOT INITIAL.
-          mo_validation_log = validate_form( mo_form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
-        ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-        ENDIF.
-
       WHEN c_event-choose_package.
 
         mo_form_data->set(
@@ -221,23 +178,17 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
           rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_event-install_package.
+      WHEN c_event-uninstall_package.
 
         mo_validation_log = validate_form( mo_form_data ).
 
         IF mo_validation_log->is_empty( ) = abap_true.
           mo_form_data->to_abap( CHANGING cs_container = ls_params ).
 
-          MOVE-CORRESPONDING ls_params TO ls_package_json.
-
           TRY.
-              zcl_abappm_command_install=>run(
-                iv_registry     = mv_registry
-                iv_package      = ls_params-package
-                is_package_json = ls_package_json ).
+              zcl_abappm_command_uninstall=>run( ls_params-package ).
 
-              rs_handled-page  = zcl_abappm_gui_page_package=>create( ls_params-package ).
-              rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
+              rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back.
             CATCH zcx_abappm_error INTO lx_error.
               zcx_abapgit_exception=>raise_with_text( lx_error ).
           ENDTRY.

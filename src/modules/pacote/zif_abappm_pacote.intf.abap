@@ -19,17 +19,18 @@ INTERFACE zif_abappm_pacote PUBLIC.
     " Full packument (as fetched from registry)
     " Some fields are hoisted from latest version to root
     " TODO: Check if this needs to happen in client or if its provided by registry already
+    " TODO: Does not work with generics since ajson expects structure for example "time": { ... }
     BEGIN OF ty_packument,
       _id         TYPE string,
       _rev        TYPE string,
       name        TYPE string,
       description TYPE string,
-      dist_tags   TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
-      time        TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
-      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
+*      dist_tags   TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
+*      time        TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
+*      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
       maintainers TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
       readme      TYPE string,
-      users       TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_user WITH KEY name,
+*      users       TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_user WITH KEY name,
       homepage    TYPE string,
       BEGIN OF bugs,
         url   TYPE zif_abappm_package_json_types=>ty_uri,

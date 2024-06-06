@@ -43,6 +43,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
         favorite_package TYPE string VALUE 'favorite_package',
         change_order_by  TYPE string VALUE 'change_order_by',
         direction        TYPE string VALUE 'direction',
+        refresh          TYPE string VALUE 'refresh',
       END OF c_action,
       c_label_filter_prefix TYPE string VALUE 'label:',
       c_raw_field_suffix    TYPE string VALUE '_RAW' ##NO_TEXT.
@@ -708,6 +709,9 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     lv_package = ii_event->query( )->get( 'PACKAGE' ).
 
     CASE ii_event->mv_action.
+      WHEN c_action-refresh.
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+
       WHEN c_action-select.
 
         ms_settings-last_package = lv_package.
@@ -762,30 +766,55 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     ls_hotkey_action-ui_component = 'Package List'.
 
-    ls_hotkey_action-description   = |Settings|.
-    ls_hotkey_action-action = zif_abappm_gui_router=>c_action-go_settings.
-    ls_hotkey_action-hotkey = |x|.
+    ls_hotkey_action-description = |Settings|.
+    ls_hotkey_action-action      = zif_abappm_gui_router=>c_action-go_settings.
+    ls_hotkey_action-hotkey      = |x|.
+    INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
+
+    ls_hotkey_action-description = |Refresh|.
+    ls_hotkey_action-action      = c_action-refresh.
+    ls_hotkey_action-hotkey      = |r|.
+    INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
+
+    ls_hotkey_action-description = |Init|.
+    ls_hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_init.
+    ls_hotkey_action-hotkey      = |t|.
+    INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
+
+    ls_hotkey_action-description = |Install|.
+    ls_hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_install.
+    ls_hotkey_action-hotkey      = |i|.
+    INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
+
+    ls_hotkey_action-description = |Publish|.
+    ls_hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_publish.
+    ls_hotkey_action-hotkey      = |p|.
+    INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
+
+    ls_hotkey_action-description = |Uninstall|.
+    ls_hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_uninstall.
+    ls_hotkey_action-hotkey      = |u|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
     " registered/handled in js
     ls_hotkey_action-description = |Previous Package|.
-    ls_hotkey_action-action = `#`.
-    ls_hotkey_action-hotkey = |4|.
+    ls_hotkey_action-action      = `#`.
+    ls_hotkey_action-hotkey      = |4|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
     ls_hotkey_action-description = |Next Package|.
-    ls_hotkey_action-action = `##`.
-    ls_hotkey_action-hotkey = |6|.
+    ls_hotkey_action-action      = `##`.
+    ls_hotkey_action-hotkey      = |6|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
     ls_hotkey_action-description = |Show Package|.
-    ls_hotkey_action-action = `###`.
-    ls_hotkey_action-hotkey = |Enter|.
+    ls_hotkey_action-action      = `###`.
+    ls_hotkey_action-hotkey      = |Enter|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
     ls_hotkey_action-description = |Focus Filter|.
-    ls_hotkey_action-action = `####`.
-    ls_hotkey_action-hotkey = |f|.
+    ls_hotkey_action-action      = `####`.
+    ls_hotkey_action-hotkey      = |f|.
     INSERT ls_hotkey_action INTO TABLE rt_hotkey_actions.
 
   ENDMETHOD.
@@ -805,8 +834,14 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_txt = zcl_abapgit_html=>icon( 'upload-solid' ) && ' Publish'
       iv_act = zif_abappm_gui_router=>c_action-apm_publish
     )->add(
+      iv_txt = zcl_abapgit_html=>icon( 'times-solid' ) && ' Uninstall'
+      iv_act = zif_abappm_gui_router=>c_action-apm_uninstall
+    )->add(
       iv_txt = zcl_abappm_gui_buttons=>settings( )
       io_sub = zcl_abappm_gui_menus=>settings( )
+    )->add(
+      iv_txt = zcl_abapgit_html=>icon( 'redo-alt-solid' )
+      iv_act = c_action-refresh
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>advanced( )
       io_sub = zcl_abappm_gui_menus=>advanced( )
