@@ -107,6 +107,12 @@ CLASS zcl_abappm_gui_router DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    METHODS toggle_favorite
+      IMPORTING
+        !iv_package TYPE csequence
+      RAISING
+        zcx_abapgit_exception.
+
 ENDCLASS.
 
 
@@ -201,6 +207,10 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 *      WHEN zif_abappm_gui_router=>c_action-go_tutorial.
 *        rs_handled-page  = zcl_abapgit_gui_page_tutorial=>create( ).
 *        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+      WHEN zif_abappm_gui_router=>c_action-favorite_package.
+        toggle_favorite( ii_event->query( )->get( 'PACKAGE' ) ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN zif_abappm_gui_router=>c_action-show_hotkeys.
         zcl_abappm_gui_factory=>get_gui_services( )->get_hotkeys_ctl( )->set_visible( abap_true ).
@@ -412,6 +422,35 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD toggle_favorite.
+
+    DATA:
+      lx_error    TYPE REF TO zcx_abappm_error,
+      ls_settings TYPE zif_abappm_settings=>ty_settings,
+      ls_package  TYPE zif_abappm_settings=>ty_package_settings.
+
+    FIELD-SYMBOLS <ls_package> TYPE zif_abappm_settings=>ty_package_settings.
+
+    TRY.
+        ls_settings = zcl_abappm_settings=>factory( )->load( )->get( ).
+
+        READ TABLE ls_settings-package_settings ASSIGNING <ls_package> WITH KEY package = iv_package.
+        IF sy-subrc = 0.
+          <ls_package>-favorite = boolc( <ls_package>-favorite = abap_false ).
+        ELSE.
+          ls_package-package  = iv_package.
+          ls_package-favorite = abap_true.
+          INSERT ls_package INTO TABLE ls_settings-package_settings.
+        ENDIF.
+
+        zcl_abappm_settings=>factory( )->set( ls_settings )->save( ).
+      CATCH zcx_abappm_error INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 

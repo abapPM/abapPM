@@ -357,6 +357,8 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
     TRY.
         li_json = zcl_abappm_ajson=>parse( iv_json ).
+        " TODO: packageSettings does not map to package_setting
+        " Looks like a ajson bug
         li_json->to_abap(
           EXPORTING
             iv_corresponding = abap_true

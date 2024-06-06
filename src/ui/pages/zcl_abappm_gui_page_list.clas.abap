@@ -40,7 +40,6 @@ CLASS zcl_abappm_gui_page_list DEFINITION
         apply_filter     TYPE string VALUE 'apply_filter',
         label_filter     TYPE string VALUE 'label_filter',
         toggle_favorites TYPE string VALUE 'toggle_favorites',
-        favorite_package TYPE string VALUE 'favorite_package',
         change_order_by  TYPE string VALUE 'change_order_by',
         direction        TYPE string VALUE 'direction',
         refresh          TYPE string VALUE 'refresh',
@@ -77,7 +76,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       CHANGING
         ct_packages TYPE zif_abappm_package_json=>ty_packages.
 
-    METHODS render_repo_list
+    METHODS render_package_list
       IMPORTING
         ii_html     TYPE REF TO zif_abapgit_html
         it_packages TYPE zif_abappm_package_json=>ty_packages
@@ -162,7 +161,6 @@ CLASS zcl_abappm_gui_page_list DEFINITION
     METHODS save_settings
       RAISING
         zcx_abapgit_exception.
-
 ENDCLASS.
 
 
@@ -475,6 +473,21 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_package_list.
+
+    ii_html->add( |<table>| ).
+
+    render_table_header( ii_html ).
+    render_table_body(
+      ii_html     = ii_html
+      it_packages = it_packages ).
+    render_table_footer( ii_html ).
+
+    ii_html->add( |</table>| ).
+
+  ENDMETHOD.
+
+
   METHOD render_registry.
 
     ri_html = zcl_abapgit_html=>create( ).
@@ -487,21 +500,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_act   = |{ zif_abapgit_definitions=>c_action-url }?url={ ms_settings-registry }| ).
     ri_html->add( '</span>' ).
     ri_html->add( '</span>').
-
-  ENDMETHOD.
-
-
-  METHOD render_repo_list.
-
-    ii_html->add( |<table>| ).
-
-    render_table_header( ii_html ).
-    render_table_body(
-      ii_html     = ii_html
-      it_packages = it_packages ).
-    render_table_footer( ii_html ).
-
-    ii_html->add( |</table>| ).
 
   ENDMETHOD.
 
@@ -563,14 +561,24 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   METHOD render_table_item.
 
     DATA:
-      lv_is_online_repo TYPE abap_bool,
-      lv_repo_type_icon TYPE string,
-      lv_favorite_icon  TYPE string,
-      lv_fav_tr_class   TYPE string,
-      lv_lock           TYPE string.
+      lv_is_online_repo   TYPE abap_bool,
+      lv_repo_type_icon   TYPE string,
+      lv_favorite_icon    TYPE string,
+      lv_fav_tr_class     TYPE string,
+      lv_lock             TYPE string,
+      lx_error            TYPE REF TO zcx_abappm_error,
+      ls_settings         TYPE zif_abappm_settings=>ty_settings,
+      ls_package_settings TYPE zif_abappm_settings=>ty_package_settings.
+
+    TRY.
+        ls_settings = zcl_abappm_settings=>factory( )->load( )->get( ).
+        READ TABLE ls_settings-package_settings INTO ls_package_settings WITH KEY package = is_package-package.
+      CATCH zcx_abappm_error INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
 
     " Start of row
-    IF is_package-favorite = abap_true.
+    IF ls_package_settings-favorite = abap_true.
       lv_fav_tr_class = ' class="favorite"'.
     ELSE.
       lv_fav_tr_class = ''.
@@ -587,11 +595,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ii_html->td(
       iv_class   = 'wmin'
       iv_content = ii_html->a(
-        iv_act = |{ c_action-favorite_package }?package={ is_package-package }|
+        iv_act = |{ zif_abappm_gui_router=>c_action-favorite_package }?package={ is_package-package }|
         iv_txt = lv_favorite_icon ) ).
 
     " Package
-    IF is_package-write_protected = abap_true.
+    IF ls_package_settings-write_protected = abap_true.
       lv_lock = ii_html->icon(
         iv_name  = 'lock/grey70'
         iv_class = 'm-em5-sides'
@@ -606,7 +614,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     IF mt_all_labels IS NOT INITIAL.
       ii_html->td(
         iv_content = zcl_abapgit_gui_chunk_lib=>render_label_list(
-          it_labels       = is_package-labels
+          it_labels       = ls_package_settings-labels
           io_label_colors = mo_label_colors )
         iv_class   = 'labels' ).
     ENDIF.
@@ -869,7 +877,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ri_html->add( |<div class="repo-overview">| ).
     render_header_bar( ri_html ).
     render_header_label_list( ri_html ).
-    render_repo_list(
+    render_package_list(
       ii_html     = ri_html
       it_packages = lt_packages ).
     ri_html->add( |</div>| ).
