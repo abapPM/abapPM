@@ -390,7 +390,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       ls_explanation-extra = | ({ ls_explanation-extra })|.
     ENDIF.
 
-    rv_text = |{ lv_descr }<strong>{ ls_explanation-value }</strong>{ ls_explanation-extra }|.
+    rv_text = |{ lv_descr }<br/><strong>{ ls_explanation-value }</strong><br/>{ ls_explanation-extra }|.
 
     IF strlen( rv_text ) >= 250.
       rv_text = rv_text(250) && '...'.

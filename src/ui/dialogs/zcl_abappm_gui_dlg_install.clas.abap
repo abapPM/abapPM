@@ -24,16 +24,18 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
-        package TYPE devclass,
-        name    TYPE string,
-        version TYPE string,
+        package   TYPE devclass,
+        name      TYPE string,
+        version   TYPE string,
+        only_deps TYPE abap_bool,
       END OF ty_params.
 
     CONSTANTS:
       BEGIN OF c_id,
-        package TYPE string VALUE 'package',
-        name    TYPE string VALUE 'name',
-        version TYPE string VALUE 'version',
+        package   TYPE string VALUE 'package',
+        name      TYPE string VALUE 'name',
+        version   TYPE string VALUE 'version',
+        only_deps TYPE string VALUE 'only_deps',
       END OF c_id.
 
     CONSTANTS:
@@ -127,7 +129,10 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       iv_name        = c_id-version
       iv_required    = abap_true
       iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)' ).
+      iv_hint        = 'Semantic version (x.y.z)'
+    )->checkbox(
+      iv_name        = c_id-only_deps
+      iv_label       = 'Install Only Dependencies' ).
 
     ro_form->command(
       iv_label       = 'Install Package'
@@ -232,9 +237,10 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
           TRY.
               zcl_abappm_command_install=>run(
-                iv_registry     = mv_registry
-                iv_package      = ls_params-package
-                is_package_json = ls_package_json ).
+                iv_registry          = mv_registry
+                iv_package           = ls_params-package
+                is_package_json      = ls_package_json
+                iv_only_dependencies = ls_params-only_deps ).
 
               rs_handled-page  = zcl_abappm_gui_page_package=>create( ls_params-package ).
               rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.

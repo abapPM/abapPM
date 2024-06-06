@@ -7,9 +7,10 @@ CLASS zcl_abappm_command_install DEFINITION
 
     CLASS-METHODS run
       IMPORTING
-        !iv_registry     TYPE string
-        !iv_package      TYPE devclass
-        !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !iv_registry          TYPE string
+        !iv_package           TYPE devclass
+        !is_package_json      TYPE zif_abappm_package_json_types=>ty_package_json
+        !iv_only_dependencies TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
@@ -55,6 +56,13 @@ CLASS zcl_abappm_command_install DEFINITION
         !iv_package      TYPE devclass
         !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
         !iv_tarball      TYPE xstring
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS install_dependencies
+      IMPORTING
+        !iv_package      TYPE devclass
+        !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
       RAISING
         zcx_abappm_error.
 
@@ -155,6 +163,23 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD install_dependencies.
+
+    SUBMIT zapm_import_two
+      WITH p_pack = iv_package
+      WITH p_log  = abap_false
+      WITH p_test = abap_false
+      AND RETURN.
+
+*            WITH p_defrul ...
+*            WITH p_notest ...
+*            WITH p_pretty ...
+*            WITH so_name ...
+*            WITH so_type ...
+
+  ENDMETHOD.
+
+
   METHOD install_package.
 
     DATA lx_error TYPE REF TO zcx_abapinst_exception.
@@ -187,40 +212,51 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       ls_packument    TYPE zif_abappm_pacote=>ty_packument,
       lv_tarball      TYPE xstring.
 
-    " 1. Check if something else is already installed
-    check_package(
-      iv_package = iv_package
-      iv_name    = is_package_json-name ).
+    IF iv_only_dependencies = abap_false.
+      " 1. Check if something else is already installed
+      check_package(
+        iv_package = iv_package
+        iv_name    = is_package_json-name ).
 
-    " 2. Get manifest
-    ls_manifest = get_manifest_from_registry(
-      iv_registry     = iv_registry
+      " 2. Get manifest
+      ls_manifest = get_manifest_from_registry(
+        iv_registry     = iv_registry
+        is_package_json = is_package_json ).
+
+      " 2b. Registry currently returns readme only on packument level (not in manifest)
+      ls_packument = get_packument_from_registry(
+        iv_registry     = iv_registry
+        is_package_json = is_package_json ).
+      ls_manifest-readme = ls_packument-readme.
+
+      " 3. Get tarball
+      lv_tarball = get_tarball_from_registry(
+        iv_registry = iv_registry
+        is_manifest = ls_manifest ).
+
+      " 4. Pass tarball to installer
+      install_package(
+        iv_package      = iv_package
+        is_package_json = is_package_json
+        iv_tarball      = lv_tarball ).
+    ENDIF.
+
+    " 5. The real magic... dependencies
+    " Warning: Currently requires dependcies to be installed globally already
+    " They  are then copied and renamed into the target package
+    install_dependencies(
+      iv_package      = iv_package
       is_package_json = is_package_json ).
 
-    " 2b. Registry currently returns readme only on packument level (not in manifest)
-    ls_packument = get_packument_from_registry(
-      iv_registry     = iv_registry
-      is_package_json = is_package_json ).
-    ls_manifest-readme = ls_packument-readme.
+    IF iv_only_dependencies = abap_false.
+      " 6. Save package.abap.json and readme
+      ls_package_json = is_package_json.
+      MOVE-CORRESPONDING ls_manifest TO ls_package_json.
 
-    " 3. Get tarball
-    lv_tarball = get_tarball_from_registry(
-      iv_registry = iv_registry
-      is_manifest = ls_manifest ).
-
-    " 4. Pass tarball to installer
-    install_package(
-      iv_package      = iv_package
-      is_package_json = is_package_json
-      iv_tarball      = lv_tarball ).
-
-    " 5. Save package.abap.json and readme
-    ls_package_json = is_package_json.
-    MOVE-CORRESPONDING ls_manifest TO ls_package_json.
-
-    zcl_abappm_command_init=>run(
-      iv_package      = iv_package
-      is_package_json = ls_package_json ).
+      zcl_abappm_command_init=>run(
+        iv_package      = iv_package
+        is_package_json = ls_package_json ).
+    ENDIF.
 
     MESSAGE 'Package successfully installed' TYPE 'S'.
 
