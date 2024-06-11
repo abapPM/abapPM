@@ -79,7 +79,6 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
       cpu                   TYPE string_table,
       db                    TYPE string_table,
       private               TYPE abap_bool,
-      deprecated            TYPE abap_bool,
       readme                TYPE string,
     END OF ty_package_json.
 
@@ -98,7 +97,8 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
     BEGIN OF ty_manifest.
       INCLUDE TYPE ty_package_json.
   TYPES:
-      dist TYPE ty_dist,
+      dist       TYPE ty_dist,
+      deprecated TYPE abap_bool,
     END OF ty_manifest.
 
   TYPES:

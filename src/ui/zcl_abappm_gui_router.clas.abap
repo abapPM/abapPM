@@ -332,30 +332,30 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
       ls_settings TYPE zif_abappm_settings=>ty_settings.
 
     TRY.
-        " 1. Show last viewed package (if it exists)
+        " Prio 1: Show last viewed package (if it exists)
         ls_settings = zcl_abappm_settings=>factory( )->get( ).
 
         IF ls_settings-show_last_package = abap_true AND ls_settings-last_package IS NOT INITIAL.
           TRY.
               zcl_abappm_package_json=>factory( ls_settings-last_package )->load(  ).
 
-              " TODO
-              " ri_page = zcl_abappm_gui_page_package=>create( ls_settings-last_package ).
+              ri_page = zcl_abappm_gui_page_package=>create( ls_settings-last_package ).
               RETURN.
-            CATCH zcx_abappm_package_json.
+            CATCH zcx_abappm_error.
               " Remove inconsistent value from settings
               CLEAR ls_settings-last_package.
               zcl_abappm_settings=>factory( )->set( ls_settings )->save( ).
           ENDTRY.
         ENDIF.
 
-        " 2. Show list of packages
+        " Prio 2: Show list of packages
         lt_list = zcl_abappm_package_json=>list( ).
         IF lt_list IS NOT INITIAL.
           ri_page = zcl_abappm_gui_page_list=>create( ).
         ELSE.
-          " 3. Show tutorial
-          ri_page = zcl_abapgit_gui_page_tutorial=>create( ). " TODO
+          " Prio 3: Show tutorial
+          " ri_page = zcl_abapgit_gui_page_tutorial=>create( ). " TODO
+          zcl_abappm_roadmap=>planned( ).
         ENDIF.
 
       CATCH zcx_abappm_error INTO lx_error.
@@ -377,18 +377,14 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
       WHEN zif_abappm_gui_router=>c_action-ie_devtools.
         zcl_abapgit_ui_factory=>get_frontend_services( )->open_ie_devtools( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-clipboard.
         lv_clip_content = ii_event->query( )->get( 'CLIPBOARD' ).
         APPEND lv_clip_content TO lt_clipboard.
         zcl_abapgit_ui_factory=>get_frontend_services( )->clipboard_export( lt_clipboard ).
-        MESSAGE 'Successfully exported URL to Clipboard.' TYPE 'S'.
+        MESSAGE 'Successfully exported to clipboard' TYPE 'S'.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
-      WHEN zif_abappm_gui_router=>c_action-yank_to_clipboard.
-        lv_clip_content = ii_event->form_data( )->get( 'CLIPBOARD' ).
-        APPEND lv_clip_content TO lt_clipboard.
-        zcl_abapgit_ui_factory=>get_frontend_services( )->clipboard_export( lt_clipboard ).
-        MESSAGE 'Successfully exported to Clipboard.' TYPE 'S'.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
     ENDCASE.
 
   ENDMETHOD.

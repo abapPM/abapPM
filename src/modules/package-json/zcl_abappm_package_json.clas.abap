@@ -13,9 +13,6 @@ CLASS zcl_abappm_package_json DEFINITION
 
     INTERFACES zif_abappm_package_json.
 
-    CONSTANTS:
-      c_package_json TYPE string VALUE 'PACKAGE_JSON'.
-
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS factory
@@ -27,7 +24,7 @@ CLASS zcl_abappm_package_json DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abappm_package_json
       RAISING
-        zcx_abappm_package_json.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
@@ -41,7 +38,7 @@ CLASS zcl_abappm_package_json DEFINITION
         !iv_version TYPE string OPTIONAL
         !iv_private TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_package_json.
+        zcx_abappm_error.
 
     CLASS-METHODS list
       IMPORTING
@@ -102,7 +99,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   METHOD constructor.
 
     IF zcl_abappm_package_json_valid=>is_valid_sap_package( iv_package ) = abap_false.
-      zcx_abappm_package_json=>raise( |Invalid package: { iv_package }| ).
+      zcx_abappm_error=>raise( |Invalid package: { iv_package }| ).
     ENDIF.
 
     mv_package              = iv_package.
@@ -114,7 +111,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     TRY.
         zif_abappm_package_json~load( ).
-      CATCH zcx_abappm_package_json ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -158,7 +155,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD get_package_key.
-    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ c_package_json }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ zif_abappm_persist_apm=>c_key_extra-package_json }|.
   ENDMETHOD.
 
 
@@ -188,13 +185,14 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     FIELD-SYMBOLS <ls_list> LIKE LINE OF lt_list.
 
-    lt_list = gi_persist->list( |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_filter }%:{ c_package_json }| ).
+    lt_list = gi_persist->list( zif_abappm_persist_apm=>c_key_type-package && |:{ iv_filter }%:|
+      && zif_abappm_persist_apm=>c_key_extra-package_json ).
 
     LOOP AT lt_list ASSIGNING <ls_list>.
       CLEAR ls_result.
-      ls_result-package        = get_package_from_key( <ls_list>-keys ).
       ls_result-key            = <ls_list>-keys.
-      ls_result-changed_by     = <ls_list>-luser.
+      ls_result-package        = get_package_from_key( <ls_list>-keys ).
+      ls_result-changed_by     = <ls_list>-user.
       ls_result-changed_at_raw = <ls_list>-timestamp.
       ls_result-changed_at     = zcl_abapgit_gui_chunk_lib=>render_timestamp( <ls_list>-timestamp ).
 
@@ -204,8 +202,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
             ls_result-name        = ls_result-instance->get( )-name.
             ls_result-version     = ls_result-instance->get( )-version.
             ls_result-description = ls_result-instance->get( )-description.
+            ls_result-type        = ls_result-instance->get( )-type.
             ls_result-private     = ls_result-instance->get( )-private.
-          CATCH zcx_abappm_package_json ##NO_HANDLER.
+          CATCH zcx_abappm_error ##NO_HANDLER.
         ENDTRY.
       ENDIF.
 
@@ -225,27 +224,17 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD zif_abappm_package_json~delete.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        gi_persist->delete( mv_key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_package_json=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    gi_persist->delete( mv_key ).
   ENDMETHOD.
 
 
   METHOD zif_abappm_package_json~exists.
-
     TRY.
         gi_persist->load( mv_key ).
         result = abap_true.
-      CATCH zcx_abappm_persist_apm.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
-
   ENDMETHOD.
 
 
@@ -299,9 +288,6 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
           IF ms_package_json-private = abap_false.
             li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/private' ) ).
           ENDIF.
-          IF ms_package_json-deprecated = abap_false.
-            li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/deprecated' ) ).
-          ENDIF.
         ENDIF.
 
         result = li_json->stringify( 2 ).
@@ -312,53 +298,25 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD zif_abappm_package_json~is_valid.
-
-    DATA:
-      lt_errors TYPE string_table,
-      lx_error  TYPE REF TO zcx_abappm_persist_apm.
-
     TRY.
-        lt_errors = zcl_abappm_package_json_valid=>check( ms_package_json ).
-        result = boolc( lt_errors IS INITIAL ).
-      CATCH zcx_abappm_package_json.
+        result = boolc( zcl_abappm_package_json_valid=>check( ms_package_json ) IS INITIAL ).
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_package_json~load.
-
-    DATA:
-      lv_value TYPE string,
-      lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        lv_value = gi_persist->load( mv_key )-value.
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_package_json=>raise_with_text( lx_error ).
-    ENDTRY.
-
-    zif_abappm_package_json~set_json( lv_value ).
+    zif_abappm_package_json~set_json( gi_persist->load( mv_key )-value ).
     result = me.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_package_json~save.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
     zcl_abappm_package_json_valid=>check( ms_package_json ).
-
-    TRY.
-        gi_persist->save(
-          iv_key   = mv_key
-          iv_value = zif_abappm_package_json~get_json( ) ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_package_json=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    gi_persist->save(
+      iv_key   = mv_key
+      iv_value = zif_abappm_package_json~get_json( ) ).
   ENDMETHOD.
 
 
@@ -370,6 +328,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD zif_abappm_package_json~set_json.
+
+    " TODO: AJSON does not allow for mapping of ABAP to JSON objects like { "user1", "user2", ... }
+    " A table would map to an array [ "user1", "user2", ... ]
 
     TYPES:
       " Copy of schema but without dependencies (instead of array)
@@ -404,6 +365,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
         cpu                  TYPE string_table,
         db                   TYPE string_table,
         private              TYPE abap_bool,
+        deprecated           TYPE abap_bool,
         BEGIN OF dist,
           file_count    TYPE i,
           integrity     TYPE string,
@@ -453,8 +415,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
         zcl_abappm_package_json_valid=>check( ls_json ).
 
         ms_package_json = sort_dependencies( ls_json ).
+
       CATCH zcx_abappm_ajson_error INTO lx_error.
-        zcx_abappm_package_json=>raise_with_text( lx_error ).
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
     result = me.

@@ -10,7 +10,7 @@ CLASS zcl_abappm_html_form DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adapter: gui_services
+* adapted: gui_services
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_html_form.

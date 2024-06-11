@@ -202,12 +202,12 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD get_json_data.
 
-    DATA lx_error TYPE REF TO zcx_abappm_package_json.
+    DATA lx_error TYPE REF TO zcx_abappm_error.
 
     TRY.
         " Always load data since it can be edited in another page
         rv_json = zcl_abappm_package_json=>factory( mv_package )->load( )->get_json( ).
-      CATCH zcx_abappm_package_json INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 
@@ -231,12 +231,12 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD get_markdown_data.
 
-    DATA lx_error TYPE REF TO zcx_abappm_readme.
+    DATA lx_error TYPE REF TO zcx_abappm_error.
 
     TRY.
         " Always load data since it can be edited in another page
         rv_markdown = zcl_abappm_readme=>factory( mv_package )->load( )->get( ).
-      CATCH zcx_abappm_readme INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 

@@ -10,7 +10,7 @@ CLASS zcl_abappm_gui_page DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adapter: gui_component, settings, title, and footer
+* adapted: gui_component, settings, title, and footer
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_modal.

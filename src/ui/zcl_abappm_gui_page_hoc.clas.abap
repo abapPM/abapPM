@@ -10,7 +10,7 @@ CLASS zcl_abappm_gui_page_hoc DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adapter: gui_page
+* adapted: gui_page
   PUBLIC SECTION.
 
     CLASS-METHODS create

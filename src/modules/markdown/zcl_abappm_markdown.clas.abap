@@ -10,7 +10,7 @@ CLASS zcl_abappm_markdown DEFINITION
 * Copyright (c) 2015 Guilherme Maeda
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* Added by Marc Bernard:
+* Added by apm:
 * - Option to render href and img src links with different root
 * - Option to use sapevent for launching links in external browser
 * - Option to set root path for internal links
@@ -31,32 +31,38 @@ CLASS zcl_abappm_markdown DEFINITION
         VALUE(text)   TYPE clike
       RETURNING
         VALUE(markup) TYPE string.
+
     METHODS set_breaks_enabled
       IMPORTING
         VALUE(breaks_enabled) TYPE clike
       RETURNING
         VALUE(this)           TYPE REF TO zcl_abappm_markdown.
+
     METHODS set_markup_escaped
       IMPORTING
         VALUE(markup_escaped) TYPE clike
       RETURNING
         VALUE(this)           TYPE REF TO zcl_abappm_markdown.
+
     METHODS set_urls_linked
       IMPORTING
         VALUE(urls_linked) TYPE clike
       RETURNING
         VALUE(this)        TYPE REF TO zcl_abappm_markdown.
+
     METHODS set_safe_mode
       IMPORTING
         !iv_safe_mode TYPE clike
       RETURNING
         VALUE(this)   TYPE REF TO zcl_abappm_markdown.
+
     METHODS constructor
       IMPORTING
         !root_href TYPE string OPTIONAL
         !root_img  TYPE string OPTIONAL
         !path      TYPE string OPTIONAL
         !sapevent  TYPE abap_bool DEFAULT abap_false.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -64,8 +70,7 @@ CLASS zcl_abappm_markdown DEFINITION
       BEGIN OF ty_element_attribute,
         name  TYPE string,
         value TYPE string,
-      END OF ty_element_attribute.
-    TYPES:
+      END OF ty_element_attribute,
       ty_t_element_attribute TYPE STANDARD TABLE OF ty_element_attribute WITH KEY name.
 
     TYPES:
@@ -75,8 +80,7 @@ CLASS zcl_abappm_markdown DEFINITION
         attributes TYPE ty_t_element_attribute,
         text       TYPE string,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ty_element0.
-    TYPES:
+      END OF ty_element0,
       ty_t_element0 TYPE STANDARD TABLE OF ty_element0 WITH DEFAULT KEY.
 
     TYPES:
@@ -87,8 +91,7 @@ CLASS zcl_abappm_markdown DEFINITION
         text       TYPE string,
         texts      TYPE ty_t_element0,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ty_element1.
-    TYPES:
+      END OF ty_element1,
       ty_t_element1 TYPE STANDARD TABLE OF ty_element1 WITH DEFAULT KEY.
 
     TYPES:
@@ -99,8 +102,7 @@ CLASS zcl_abappm_markdown DEFINITION
         text       TYPE string,
         texts      TYPE ty_t_element1,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ty_element2.
-    TYPES:
+      END OF ty_element2,
       ty_t_element2 TYPE STANDARD TABLE OF ty_element2 WITH DEFAULT KEY.
 
     TYPES:
@@ -111,8 +113,7 @@ CLASS zcl_abappm_markdown DEFINITION
         text       TYPE string,
         texts      TYPE ty_t_element2,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ty_element3.
-    TYPES:
+      END OF ty_element3,
       ty_t_element3 TYPE STANDARD TABLE OF ty_element3 WITH DEFAULT KEY.
 
     TYPES:
@@ -123,8 +124,7 @@ CLASS zcl_abappm_markdown DEFINITION
         text       TYPE string,
         texts      TYPE ty_t_element3,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ty_element4.
-    TYPES:
+      END OF ty_element4,
       ty_t_element4 TYPE STANDARD TABLE OF ty_element4 WITH DEFAULT KEY.
 
     TYPES:
@@ -188,7 +188,7 @@ CLASS zcl_abappm_markdown DEFINITION
         element  TYPE ty_element,
       END OF ty_inline.
 
-    ">>> MBT
+    ">>> apm
     DATA:
       BEGIN OF config,
         root_href TYPE string,
@@ -197,7 +197,7 @@ CLASS zcl_abappm_markdown DEFINITION
         path      TYPE string,
         path_util TYPE REF TO zcl_abappm_markdown_path,
       END OF config.
-    "<<< MBT
+    "<<< apm
 
     DATA breaks_enabled TYPE abap_bool.
     DATA markup_escaped TYPE abap_bool.
@@ -207,7 +207,7 @@ CLASS zcl_abappm_markdown DEFINITION
     DATA unmarked_block_types TYPE REF TO lcl_string_array.
     DATA inline_types TYPE REF TO lcl_hashmap.
     "DATA inline_marker_list TYPE string VALUE '!"*_&[:<>`~\\' ##NO_TEXT
-    DATA inline_marker_list TYPE string VALUE '!"*_&[:<>`~\\=^' ##NO_TEXT.
+    DATA inline_marker_list TYPE string VALUE '!"*_&[:<>`~\\=^' ##NO_TEXT. " apm
     DATA definition_data TYPE REF TO lcl_hashmap.
     DATA special_characters TYPE REF TO lcl_string_array.
     DATA strong_regex TYPE REF TO lcl_hashmap.
@@ -501,13 +501,13 @@ CLASS zcl_abappm_markdown DEFINITION
       RETURNING
         VALUE(r_inline) TYPE ty_inline.
 
-    ">>> MBT
+    ">>> apm
     METHODS inline_highlight
       IMPORTING
         !excerpt        TYPE ty_excerpt
       RETURNING
         VALUE(r_inline) TYPE ty_inline.
-    "<<< MBT
+    "<<< apm
 
     METHODS unmarked_text
       IMPORTING
@@ -546,7 +546,7 @@ CLASS zcl_abappm_markdown DEFINITION
       RETURNING
         VALUE(r_element) TYPE ty_element.
 
-    ">>> MBT
+    ">>> apm
     METHODS _adjust_link
       IMPORTING
         !root           TYPE string
@@ -577,7 +577,7 @@ CLASS zcl_abappm_markdown DEFINITION
         !element      TYPE any
       RETURNING
         VALUE(markup) TYPE string.
-    "<<< MBT
+    "<<< apm
 ENDCLASS.
 
 
@@ -649,7 +649,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     CONCATENATE r_block-markup %_newline line-body INTO r_block-markup.
 
-    FIND REGEX '-->\s*$' IN line-text.  "<<<MBT
+    FIND REGEX '-->\s*$' IN line-text.  " apm
     IF sy-subrc = 0.
       r_block-closed = abap_true.
     ENDIF.
@@ -676,7 +676,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       r_block-element-name = 'pre'.
       r_block-element-handler = 'element'.
       r_block-element-text-name = 'code'.
-      r_block-element-text-handler = 'syntax_highlighter'."<<< MBT
+      r_block-element-text-handler = 'syntax_highlighter'. " apm
     ENDIF.
   ENDMETHOD.                    "block_Fenced_Code
 
@@ -738,7 +738,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     CONDENSE r_block-element-text-text.
     r_block-element-handler = 'line'.
 
-    ">>> MBT
+    ">>> apm
     FIND REGEX ' \{(#[\w-]*)\}' IN r_block-element-text-text IGNORING CASE
       MATCH OFFSET lv_pos SUBMATCHES lv_id.
     IF sy-subrc = 0.
@@ -766,7 +766,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       <attribute>-name = 'id'.
       <attribute>-value = lv_id.
     ENDIF.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.                    "block_Header
 
 
@@ -794,14 +794,14 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF sy-subrc = 0.
       r_block-indent = line-indent.
 
-      ">>> MBT
+      ">>> apm
       " We could distinguish between *,+,- lists
       "IF lv_name = 'ul'
       "  r_block-pattern = |[{ lv_m1(1) }]|
       "ELSE
       r_block-pattern = lv_pattern.
       "ENDIF
-      "<<< MBT
+      "<<< apm
 
       r_block-element-name = lv_name.
       r_block-element-handler = 'elements'.
@@ -923,7 +923,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
       r_block-name = lv_m1.
       r_block-depth = 0.
-      r_block-markup = _adjust_markup( line-text ). "<<< MBT
+      r_block-markup = _adjust_markup( line-text ). " apm
 
       lv_remainder = line-text+lv_length.
       lv_remainder_trimmed = trim( lv_remainder ).
@@ -982,10 +982,10 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       CLEAR r_block-interrupted.
     ENDIF.
 
-    ">>> MBT
+    ">>> apm
     lv_body = _adjust_markup( line-body ).
     CONCATENATE r_block-markup %_newline lv_body INTO r_block-markup.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.                    "block_Markup_Continue
 
 
@@ -1261,14 +1261,14 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     FIELD-SYMBOLS <method> LIKE LINE OF lo_objdescr->methods.
 
-    ">>> MBT
+    ">>> apm
     config-root_href = root_href.
     config-root_img  = root_img.
     config-path      = path.
     config-sapevent  = sapevent.
 
     CREATE OBJECT config-path_util.
-    "<<< MBT
+    "<<< apm
 
     "#
     "# Lines
@@ -1362,7 +1362,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     lo_sa->append( 'Emphasis' ).
     lo_sa ?= inline_types->new( '`' ).
     lo_sa->append( 'Code' ).
-    ">>> MBT
+    ">>> apm
     lo_sa ?= inline_types->new( '~' ).
     lo_sa->append( 'Strikethrough' ).
     lo_sa->append( 'Emphasis' ). "subscript
@@ -1370,7 +1370,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     lo_sa->append( 'Emphasis' ). "superscript
     lo_sa ?= inline_types->new( '=' ).
     lo_sa->append( 'Highlight' ).
-    "<<< MBT
+    "<<< apm
     lo_sa ?= inline_types->new( '\' ).
     lo_sa->append( 'EscapeSequence' ).
     "#
@@ -1481,9 +1481,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     lo_sa = safe_links_whitelist.
     lo_sa->append( 'http://' ).
     lo_sa->append( 'https://' ).
-* >>> MBT
-    lo_sa->append( 'sapevent:' ).
-* <<< MBT
+    lo_sa->append( 'sapevent:' ). " apm
     lo_sa->append( 'ftp://' ).
     lo_sa->append( 'ftps://' ).
     lo_sa->append( 'mailto:' ).
@@ -1523,12 +1521,12 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       CHANGING
         to   = ls_element ).
 
-    ">>> MBT
+    ">>> apm
     " Always sanitise
     " IF safe_mode IS NOT INITIAL
     ls_element = sanitise_element( ls_element ).
     " ENDIF
-    "<<< MBT
+    "<<< apm
 
     ASSIGN COMPONENT 'TEXT' OF STRUCTURE ls_element TO <text>.
     ASSERT sy-subrc = 0.
@@ -1544,13 +1542,13 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF <text> IS NOT INITIAL OR ls_element-texts IS NOT INITIAL OR ls_element-lines IS NOT INITIAL.
       markup = |{ markup }>|.
 
-      ">>> MBT
+      ">>> apm
       IF ls_element-handler = 'syntax_highlighter'.
         ASSIGN COMPONENT 'ATTRIBUTES' OF STRUCTURE <text> TO <attributes>.
         ASSERT sy-subrc = 0.
         <attributes> = ls_element-attributes.
       ENDIF.
-      "<<< MBT
+      "<<< apm
 
       IF ls_element-handler IS NOT INITIAL.
         lv_method_name = ls_element-handler.
@@ -1622,13 +1620,13 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     READ TABLE r_element-attributes WITH KEY name = attribute ASSIGNING <attribute>.
     CHECK sy-subrc = 0.
 
-    ">>> MBT
+    ">>> apm
     IF attribute = 'href'.
       <attribute>-value = _adjust_a_href( <attribute>-value ).
     ELSEIF attribute = 'src'.
       <attribute>-value = _adjust_img_src( <attribute>-value ).
     ENDIF.
-    "<<< MBT
+    "<<< apm
 
     " Check for allowed protocols
     LOOP AT safe_links_whitelist->data ASSIGNING <scheme>.
@@ -1779,7 +1777,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF lv_emphasis IS INITIAL AND lo_regex->data IS NOT INITIAL.
       FIND REGEX lo_regex->data IN excerpt-text SUBMATCHES lv_m0 lv_m1.
       IF sy-subrc = 0.
-        ">>> MBT
+        ">>> apm
         CASE lv_marker.
           WHEN '~'.
             IF lv_m0+1(1) = ` `.
@@ -1796,7 +1794,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
           WHEN OTHERS.
             lv_emphasis = 'em'.
         ENDCASE.
-        "<<< MBT
+        "<<< apm
       ENDIF.
     ENDIF.
 
@@ -1862,7 +1860,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     READ TABLE ls_link-element-attributes ASSIGNING <attribute_from>
       WITH KEY name = 'href'.
     IF sy-subrc = 0.
-      <attribute>-value = _adjust_img_src( <attribute_from>-value ). "<<< MBT
+      <attribute>-value = _adjust_img_src( <attribute_from>-value ). " apm
       DELETE ls_link-element-attributes WHERE name = 'href'.
     ENDIF.
 
@@ -1918,7 +1916,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 *^[(]((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^'']*''))?[)]
 
     "FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''))?\s*[)])'
-    FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''|\([^\)]*\)))?\s*[)])' "<<< MBT
+    FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''|\([^\)]*\)))?\s*[)])' " apm
       IN lv_remainder SUBMATCHES lv_m0 lv_m1 lv_m2.
     IF sy-subrc = 0.
       APPEND INITIAL LINE TO r_inline-element-attributes ASSIGNING <attribute>.
@@ -1961,7 +1959,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       lo_def_val ?= lo_def_map->get( 'url' ).
       APPEND INITIAL LINE TO r_inline-element-attributes ASSIGNING <attribute>.
       <attribute>-name = 'href'.
-      <attribute>-value = _adjust_a_href( lo_def_val->data ). "<<< MBT
+      <attribute>-value = _adjust_a_href( lo_def_val->data ). " apm
 
       lv_exists = lo_def_map->exists( 'title' ).
       IF lv_exists IS NOT INITIAL.
@@ -1996,7 +1994,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     IF lv_m0 IS NOT INITIAL.
       r_inline-extent = strlen( lv_m0 ).
-      r_inline-markup = _adjust_markup( lv_m0 ). "<<< MBT
+      r_inline-markup = _adjust_markup( lv_m0 ). " apm
     ENDIF.
   ENDMETHOD.                    "inline_Markup
 
@@ -2116,14 +2114,14 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       CONCATENATE markup(lv_fdpos) markup+lv_pos_to INTO markup.
     ENDIF.
 
-    ">>> MBT
+    ">>> apm
     " Task lists
     IF markup CP '[ ]*'.
       markup = |<input type="checkbox" disabled="disabled">{ markup+3 }|.
     ELSEIF markup CP '[X]*'.
       markup = |<input type="checkbox" disabled="disabled" checked="checked">{ markup+3 }|.
     ENDIF.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.                    "li
 
 
@@ -2471,7 +2469,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
 
   METHOD syntax_highlighter.
-    ">>> MBT
+    ">>> apm
     DATA:
       lv_language TYPE string,
       ls_element  TYPE ty_element.
@@ -2502,7 +2500,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
           allow_quotes = abap_true ).
       ENDIF.
     ENDIF.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.
 
 
@@ -2563,7 +2561,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
 
   METHOD _adjust_a_href.
-    ">>> MBT
+    ">>> apm
     r_source = _adjust_link(
       root   = config-root_href
       source = source ).
@@ -2572,21 +2570,21 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF config-sapevent = abap_true AND r_source CP 'http*'.
       r_source = 'sapevent:url?url=' && r_source.
     ENDIF.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.
 
 
   METHOD _adjust_img_src.
-    ">>> MBT
+    ">>> apm
     r_source = _adjust_link(
       root   = config-root_img
       source = source ).
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.
 
 
   METHOD _adjust_link.
-    ">>> MBT
+    ">>> apm
     r_source = source.
 
     CHECK root IS NOT INITIAL
@@ -2603,12 +2601,12 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     ENDIF.
 
     r_source = root && config-path_util->normalize( r_source ).
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.
 
 
   METHOD _adjust_markup.
-    ">>> MBT
+    ">>> apm
     DATA:
       lt_matches TYPE match_result_tab,
       lv_href    TYPE string,
@@ -2647,7 +2645,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       lv_url = _adjust_img_src( lv_href ).
       REPLACE lv_href IN r_source WITH lv_url.
     ENDLOOP.
-    "<<< MBT
+    "<<< apm
   ENDMETHOD.
 
 

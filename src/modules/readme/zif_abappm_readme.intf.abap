@@ -7,6 +7,7 @@ INTERFACE zif_abappm_readme PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   TYPES:
     BEGIN OF ty_readme,
@@ -16,8 +17,6 @@ INTERFACE zif_abappm_readme PUBLIC.
     END OF ty_readme.
   TYPES:
     ty_readmes TYPE STANDARD TABLE OF ty_readme WITH KEY key.
-
-  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   METHODS get
     RETURNING
@@ -29,7 +28,7 @@ INTERFACE zif_abappm_readme PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_readme
     RAISING
-      zcx_abappm_readme.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -39,14 +38,14 @@ INTERFACE zif_abappm_readme PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_readme
     RAISING
-      zcx_abappm_readme.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      zcx_abappm_readme.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      zcx_abappm_readme.
+      zcx_abappm_error.
 
 ENDINTERFACE.

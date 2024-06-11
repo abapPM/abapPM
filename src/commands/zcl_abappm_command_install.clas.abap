@@ -77,21 +77,16 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     DATA:
       lv_name         TYPE string,
-      li_package_json TYPE REF TO zif_abappm_package_json,
-      lx_error        TYPE REF TO zcx_abappm_package_json.
+      li_package_json TYPE REF TO zif_abappm_package_json.
 
-    TRY.
-        li_package_json = zcl_abappm_package_json=>factory( iv_package ).
+    li_package_json = zcl_abappm_package_json=>factory( iv_package ).
 
-        IF li_package_json->exists( ) = abap_true.
-          lv_name = li_package_json->get( )-name.
-          IF lv_name <> iv_name.
-            zcx_abappm_error=>raise( |{ iv_package } already contains a package { lv_name }| ).
-          ENDIF.
-        ENDIF.
-      CATCH zcx_abappm_package_json INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    IF li_package_json->exists( ) = abap_true.
+      lv_name = li_package_json->get( )-name.
+      IF lv_name <> iv_name.
+        zcx_abappm_error=>raise( |{ iv_package } already contains a package { lv_name }| ).
+      ENDIF.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -99,19 +94,14 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   METHOD get_manifest_from_registry.
 
     DATA:
-      lx_pacote_error TYPE REF TO zcx_abappm_pacote,
-      lx_ajson_error  TYPE REF TO zcx_abappm_ajson_error,
-      lv_manifest     TYPE string.
+      lx_ajson_error TYPE REF TO zcx_abappm_ajson_error,
+      lv_manifest    TYPE string.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    TRY.
-        lv_manifest = zcl_abappm_pacote=>factory(
-          iv_registry = iv_registry
-          iv_name     = is_package_json-name )->manifest( is_package_json-version ).
-      CATCH zcx_abappm_pacote INTO lx_pacote_error.
-        zcx_abappm_error=>raise_with_text( lx_pacote_error ).
-    ENDTRY.
+    lv_manifest = zcl_abappm_pacote=>factory(
+      iv_registry = iv_registry
+      iv_name     = is_package_json-name )->manifest( is_package_json-version ).
 
     TRY.
         zcl_abappm_ajson=>parse( lv_manifest )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
@@ -125,19 +115,14 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   METHOD get_packument_from_registry.
 
     DATA:
-      lx_pacote_error TYPE REF TO zcx_abappm_pacote,
-      lx_ajson_error  TYPE REF TO zcx_abappm_ajson_error,
-      lv_packument    TYPE string.
+      lx_ajson_error TYPE REF TO zcx_abappm_ajson_error,
+      lv_packument   TYPE string.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    TRY.
-        lv_packument = zcl_abappm_pacote=>factory(
-          iv_registry = iv_registry
-          iv_name     = is_package_json-name )->packument( ).
-      CATCH zcx_abappm_pacote INTO lx_pacote_error.
-        zcx_abappm_error=>raise_with_text( lx_pacote_error ).
-    ENDTRY.
+    lv_packument = zcl_abappm_pacote=>factory(
+      iv_registry = iv_registry
+      iv_name     = is_package_json-name )->packument( ).
 
     TRY.
         zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
@@ -149,17 +134,9 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
 
   METHOD get_tarball_from_registry.
-
-    DATA lx_error TYPE REF TO zcx_abappm_pacote.
-
-    TRY.
-        result = zcl_abappm_pacote=>factory(
-          iv_registry = iv_registry
-          iv_name     = is_manifest-name )->tarball( is_manifest-dist-tarball ).
-      CATCH zcx_abappm_pacote INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    result = zcl_abappm_pacote=>factory(
+      iv_registry = iv_registry
+      iv_name     = is_manifest-name )->tarball( is_manifest-dist-tarball ).
   ENDMETHOD.
 
 
@@ -184,7 +161,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     DATA lx_error TYPE REF TO zcx_abapinst_exception.
 
-    " TODO: The installed needs to be moved to the ZCL_ABAPPM_ namespace
+    " TODO: The installer needs to be moved to the ZCL_ABAPPM_ namespace
     " TODO: Currently hardcoded to $-packages and prefix folder logic
     TRY.
         zcl_abapinst_installer=>install(

@@ -10,10 +10,9 @@ INTERFACE zif_abappm_package_json PUBLIC.
 *
 * https://www.npmjs.com/package/@npmcli/package-json
 ************************************************************************
+  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   INTERFACES zif_abappm_package_json_types.
-
-  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   TYPES:
     BEGIN OF ty_package,
@@ -22,6 +21,7 @@ INTERFACE zif_abappm_package_json PUBLIC.
       name            TYPE string,
       version         TYPE string,
       description     TYPE string,
+      type            TYPE string,
       private         TYPE abap_bool,
       changed_by      TYPE as4user,
       changed_at      TYPE string,
@@ -49,7 +49,7 @@ INTERFACE zif_abappm_package_json PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      zcx_abappm_package_json.
+      zcx_abappm_error.
 
   METHODS set_json
     IMPORTING
@@ -57,7 +57,7 @@ INTERFACE zif_abappm_package_json PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      zcx_abappm_package_json.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -67,15 +67,15 @@ INTERFACE zif_abappm_package_json PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      zcx_abappm_package_json.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      zcx_abappm_package_json.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      zcx_abappm_package_json.
+      zcx_abappm_error.
 
   METHODS is_valid
     RETURNING

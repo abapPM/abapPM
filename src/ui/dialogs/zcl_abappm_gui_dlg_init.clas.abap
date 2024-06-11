@@ -43,12 +43,12 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
       END OF c_id.
 
     CONSTANTS:
-      BEGIN OF c_event,
+      BEGIN OF c_action,
         choose_package TYPE string VALUE 'choose-package',
         choose_labels  TYPE string VALUE 'choose-labels',
         create_package TYPE string VALUE 'create-package',
         init_package   TYPE string VALUE 'init-package',
-      END OF c_event .
+      END OF c_action .
 
     DATA:
       mo_form           TYPE REF TO zcl_abappm_html_form,
@@ -126,7 +126,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
     ro_form->text(
       iv_name        = c_id-package
-      iv_side_action = c_event-choose_package
+      iv_side_action = c_action-choose_package
       iv_required    = abap_true
       iv_upper_case  = abap_true
       iv_label       = 'Package'
@@ -150,7 +150,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
       iv_label       = 'Description'
     )->text(
       iv_name        = c_id-labels
-      iv_side_action = c_event-choose_labels
+      iv_side_action = c_action-choose_labels
       iv_label       = |Labels (comma-separated, allowed chars: "{ zcl_abapgit_repo_labels=>c_allowed_chars }")|
       iv_hint        = 'Comma-separated labels for grouping and repo organization (optional)'
     )->checkbox(
@@ -184,10 +184,10 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     ro_form->command(
       iv_label       = 'Init Package'
       iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
-      iv_action      = c_event-init_package
+      iv_action      = c_action-init_package
     )->command(
       iv_label       = 'Create Package'
-      iv_action      = c_event-create_package
+      iv_action      = c_action-create_package
     )->command(
       iv_label       = 'Back'
       iv_action      = zif_abapgit_definitions=>c_action-go_back ).
@@ -256,7 +256,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     mo_form_data = mo_form_util->normalize( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
-      WHEN c_event-create_package.
+      WHEN c_action-create_package.
 
         mo_form_data->set(
           iv_key = c_id-package
@@ -269,7 +269,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
           rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_event-choose_package.
+      WHEN c_action-choose_package.
 
         mo_form_data->set(
           iv_key = c_id-package
@@ -281,12 +281,12 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
           rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_event-choose_labels.
+      WHEN c_action-choose_labels.
 
         choose_labels( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
-      WHEN c_event-init_package.
+      WHEN c_action-init_package.
 
         mo_validation_log = validate_form( mo_form_data ).
 

@@ -1,12 +1,12 @@
 INTERFACE zif_abappm_settings PUBLIC.
 
-
 ************************************************************************
-* Settings
+* apm Settings
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
   TYPES:
     BEGIN OF ty_gui_settings,
@@ -16,12 +16,10 @@ INTERFACE zif_abappm_settings PUBLIC.
       ui_theme         TYPE string,
       label_colors     TYPE string,
     END OF ty_gui_settings,
-
     BEGIN OF ty_keyboard_settings,
       link_hints_enabled TYPE abap_bool,
       link_hint_key      TYPE c LENGTH 1,
     END OF ty_keyboard_settings,
-
     BEGIN OF ty_list_settings,
       filter           TYPE string,
       only_favorites   TYPE abap_bool,
@@ -29,14 +27,14 @@ INTERFACE zif_abappm_settings PUBLIC.
       order_by         TYPE string,
       order_descending TYPE abap_bool,
     END OF ty_list_settings,
-
     BEGIN OF ty_package_settings,
       package         TYPE devclass,
       favorite        TYPE abap_bool,
       write_protected TYPE abap_bool,
       labels          TYPE string_table,
-    END OF ty_package_settings,
+    END OF ty_package_settings.
 
+  TYPES:
     BEGIN OF ty_settings,
       registry              TYPE string,
       last_package          TYPE devclass,
@@ -50,7 +48,9 @@ INTERFACE zif_abappm_settings PUBLIC.
 
   TYPES ty_name TYPE uname.
 
-  CONSTANTS c_global TYPE ty_name VALUE '$GLOBAL$'.
+  CONSTANTS:
+    c_registry TYPE string VALUE 'https://registry.abappm.com',
+    c_global   TYPE ty_name VALUE '$GLOBAL$'.
 
   METHODS get
     RETURNING
@@ -60,7 +60,9 @@ INTERFACE zif_abappm_settings PUBLIC.
     IMPORTING
       !iv_complete  TYPE abap_bool DEFAULT abap_false
     RETURNING
-      VALUE(result) TYPE string.
+      VALUE(result) TYPE string
+    RAISING
+      zcx_abappm_error.
 
   METHODS set
     IMPORTING

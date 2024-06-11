@@ -6,12 +6,12 @@ CLASS ltcl_tar_tests DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT F
     METHODS:
       setup,
       null FOR TESTING,
-      filename FOR TESTING RAISING zcx_abappm_tar,
-      checksum FOR TESTING RAISING zcx_abappm_tar,
+      filename FOR TESTING RAISING zcx_abappm_error,
+      checksum FOR TESTING RAISING zcx_abappm_error,
       octal FOR TESTING,
       pad FOR TESTING,
-      unixtime FOR TESTING RAISING zcx_abappm_tar,
-      xstring FOR TESTING RAISING zcx_abappm_tar.
+      unixtime FOR TESTING RAISING zcx_abappm_error,
+      xstring FOR TESTING RAISING zcx_abappm_error.
 
 ENDCLASS.
 

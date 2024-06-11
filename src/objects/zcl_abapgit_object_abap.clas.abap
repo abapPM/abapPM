@@ -39,29 +39,33 @@ CLASS zcl_abapgit_object_abap DEFINITION
         obj_type  TYPE c LENGTH 4 VALUE 'abap',
         sep2      TYPE c LENGTH 1 VALUE '.',
         extension TYPE c LENGTH 4 VALUE 'json',
-      END OF c_package_json_file.
+      END OF c_package_json_file,
+      BEGIN OF c_readme_file,
+        obj_name  TYPE c LENGTH 7 VALUE 'package',
+        sep1      TYPE c LENGTH 1 VALUE '.',
+        obj_type  TYPE c LENGTH 4 VALUE 'abap',
+        sep2      TYPE c LENGTH 1 VALUE '.',
+        extension TYPE c LENGTH 4 VALUE 'md',
+      END OF c_readme_file.
 
     CONSTANTS:
-      c_key_type     TYPE string VALUE 'PACKAGE',
-      c_package_json TYPE string VALUE 'PACKAGE_JSON',
-      c_readme       TYPE string VALUE 'README'.
+      c_key_type TYPE string VALUE 'PACKAGE',
+      BEGIN OF c_key_extra,
+        package_json TYPE string VALUE 'PACKAGE_JSON',
+        readme       TYPE string VALUE 'README',
+      END OF c_key_extra.
 
     DATA mv_package TYPE devclass.
-    DATA mv_key TYPE zif_persist_apm=>ty_key.
 
     CLASS-METHODS table_exists
       RETURNING
         VALUE(result) TYPE abap_bool.
 
-    CLASS-METHODS get_package_key
-      IMPORTING
-        !iv_package   TYPE devclass
+    METHODS get_package_key
       RETURNING
         VALUE(result) TYPE zif_persist_apm=>ty_key.
 
-    CLASS-METHODS get_readme_key
-      IMPORTING
-        !iv_package   TYPE devclass
+    METHODS get_readme_key
       RETURNING
         VALUE(result) TYPE zif_persist_apm=>ty_key.
 
@@ -81,18 +85,17 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       io_i18n_params = io_i18n_params ).
 
     mv_package = is_item-obj_name.
-    mv_key     = get_package_key( mv_package ).
 
   ENDMETHOD.
 
 
   METHOD get_package_key.
-    result = |{ c_key_type }:{ iv_package }:{ c_package_json }|.
+    result = |{ c_key_type }:{ mv_package }:{ c_key_extra-package_json }|.
   ENDMETHOD.
 
 
   METHOD get_readme_key.
-    result = |{ c_key_type }:{ iv_package }:{ c_readme }|.
+    result = |{ c_key_type }:{ mv_package }:{ c_key_extra-readme }|.
   ENDMETHOD.
 
 
@@ -112,7 +115,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       EXIT.
     ENDIF.
 
-    rv_user = lcl_persist_apm=>get_instance( )->load( mv_key )-luser.
+    rv_user = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-luser.
 
   ENDMETHOD.
 
@@ -123,24 +126,25 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       EXIT.
     ENDIF.
 
-    lcl_persist_apm=>get_instance( )->delete( mv_key ).
-    lcl_persist_apm=>get_instance( )->delete( get_readme_key( mv_package ) ).
+    lcl_persist_apm=>get_instance( )->delete( get_package_key( ) ).
+    lcl_persist_apm=>get_instance( )->delete( get_readme_key( ) ).
+
+    tadir_delete( ).
 
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~deserialize.
 
-    DATA:
-      lv_json  TYPE string,
-      lx_error TYPE REF TO zcx_abappm_package_json.
+    DATA lv_data TYPE string.
 
     IF table_exists( ) = abap_false.
       EXIT.
     ENDIF.
 
+    " Package JSON
     TRY.
-        lv_json = mo_files->read_string(
+        lv_data = mo_files->read_string(
           iv_ext = |{ c_package_json_file-extension }| ).
       CATCH zcx_abapgit_exception.
         " Most probably file not found -> ignore
@@ -148,22 +152,37 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
     ENDTRY.
 
     lcl_persist_apm=>get_instance( )->save(
-      iv_key   = mv_key
-      iv_value = lv_json ).
+      iv_key   = get_package_key( )
+      iv_value = lv_data ).
+
+    " Readme
+    TRY.
+        lv_data = mo_files->read_string(
+          iv_ext = |{ c_readme_file-extension }| ).
+      CATCH zcx_abapgit_exception.
+        " Most probably file not found -> ignore
+        RETURN.
+    ENDTRY.
+
+    lcl_persist_apm=>get_instance( )->save(
+      iv_key   = get_readme_key( )
+      iv_value = lv_data ).
+
+    tadir_insert( iv_package ).
 
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~exists.
 
-    DATA lv_json TYPE string.
+    DATA lv_data TYPE string.
 
     IF table_exists( ) = abap_false.
       EXIT.
     ENDIF.
 
-    lv_json = lcl_persist_apm=>get_instance( )->load( mv_key )-value.
-    rv_bool = boolc( lv_json IS NOT INITIAL ).
+    lv_data = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-value.
+    rv_bool = boolc( lv_data IS NOT INITIAL ).
 
   ENDMETHOD.
 
@@ -194,11 +213,9 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
 
   METHOD zif_abapgit_object~is_locked.
-
     rv_is_locked = exists_a_lock_entry_for(
       iv_lock_object = 'EZABAPPM'
-      iv_argument    = |{ mv_key }| ).
-
+      iv_argument    = |{ get_package_key( ) }| ).
   ENDMETHOD.
 
 
@@ -210,7 +227,11 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~map_filename_to_object.
 
-    IF iv_filename <> c_package_json_file.
+    IF iv_filename NP '*.abap.*'.
+      RETURN.
+    ENDIF.
+
+    IF iv_filename <> c_package_json_file AND iv_filename <> c_readme_file.
       zcx_abapgit_exception=>raise( |Unexpected filename for apm package: { iv_filename }| ).
     ENDIF.
 
@@ -235,20 +256,29 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~serialize.
 
-    DATA lv_json TYPE string.
+    DATA lv_data TYPE string.
 
     IF table_exists( ) = abap_false.
       EXIT.
     ENDIF.
 
-    lv_json = lcl_persist_apm=>get_instance( )->load( mv_key )-value.
-    IF lv_json IS INITIAL.
-      RETURN.
+    " Package JSON
+    lv_data = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-value.
+    IF lv_data IS NOT INITIAL.
+
+      mo_files->add_string(
+        iv_ext    = |{ c_package_json_file-extension }|
+        iv_string = lv_data ).
     ENDIF.
 
-    mo_files->add_string(
-      iv_ext    = |{ c_package_json_file-extension }|
-      iv_string = lv_json ).
+    " Readme
+    lv_data = lcl_persist_apm=>get_instance( )->load( get_readme_key( ) )-value.
+    IF lv_data IS NOT INITIAL.
+
+      mo_files->add_string(
+        iv_ext    = |{ c_readme_file-extension }|
+        iv_string = lv_data ).
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.

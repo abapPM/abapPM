@@ -9,7 +9,7 @@ CLASS ltcl_package_json DEFINITION FOR TESTING RISK LEVEL HARMLESS
       IMPORTING
         iv_args TYPE string
       RAISING
-        zcx_abappm_package_json.
+        zcx_abappm_error.
 
     METHODS test_valid
       IMPORTING
@@ -27,13 +27,13 @@ CLASS ltcl_package_json DEFINITION FOR TESTING RISK LEVEL HARMLESS
     METHODS:
       valid_packages FOR TESTING,
       invalid_packages FOR TESTING,
-      get_complete FOR TESTING RAISING zcx_abappm_package_json,
-      get_package FOR TESTING RAISING zcx_abappm_package_json,
-      set_package FOR TESTING RAISING zcx_abappm_package_json,
-      get_persons FOR TESTING RAISING zcx_abappm_package_json,
-      set_persons FOR TESTING RAISING zcx_abappm_package_json,
-      dependencies_json_to_abap FOR TESTING RAISING zcx_abappm_package_json,
-      dependencies_abap_to_json FOR TESTING RAISING zcx_abappm_package_json.
+      get_complete FOR TESTING RAISING zcx_abappm_error,
+      get_package FOR TESTING RAISING zcx_abappm_error,
+      set_package FOR TESTING RAISING zcx_abappm_error,
+      get_persons FOR TESTING RAISING zcx_abappm_error,
+      set_persons FOR TESTING RAISING zcx_abappm_error,
+      dependencies_json_to_abap FOR TESTING RAISING zcx_abappm_error,
+      dependencies_abap_to_json FOR TESTING RAISING zcx_abappm_error.
 
 ENDCLASS.
 
@@ -64,14 +64,14 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD test_valid.
 
-    DATA lx_error TYPE REF TO zcx_abappm_package_json.
+    DATA lx_error TYPE REF TO zcx_abappm_error.
 
     TRY.
         init_test( iv_args ).
         IF mi_package->is_valid( ) = abap_false.
           cl_abap_unit_assert=>fail( |Invalid but expected valid: { iv_args }| ).
         ENDIF.
-      CATCH zcx_abappm_package_json INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         cl_abap_unit_assert=>fail( lx_error->get_text( ) ).
     ENDTRY.
 
@@ -83,7 +83,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
         IF mi_package->is_valid( ) = abap_true.
           cl_abap_unit_assert=>fail( |Valid but expected invalid: { iv_args }| ).
         ENDIF.
-      CATCH zcx_abappm_package_json.
+      CATCH zcx_abappm_error.
     ENDTRY.
   ENDMETHOD.
 
@@ -233,7 +233,6 @@ CLASS ltcl_package_json IMPLEMENTATION.
       && |  "cpu": [],\n|
       && |  "db": [],\n|
       && |  "private": false,\n|
-      && |  "deprecated": false,\n|
       && |  "readme": ""\n|
       && |\}|.
 

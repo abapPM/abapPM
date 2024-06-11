@@ -48,11 +48,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       c_raw_field_suffix    TYPE string VALUE '_RAW' ##NO_TEXT.
 
     DATA:
-      mt_all_labels    TYPE string_table,
-      mo_label_colors  TYPE REF TO zcl_abapgit_string_map,
-      ms_settings      TYPE zif_abappm_settings=>ty_settings,
-      ms_list_settings TYPE zif_abappm_settings=>ty_settings-list_settings,
-      mt_pack_settings TYPE zif_abappm_settings=>ty_settings-package_settings.
+      mt_packages     TYPE zif_abappm_package_json=>ty_packages,
+      mt_all_labels   TYPE string_table,
+      mo_label_colors TYPE REF TO zcl_abapgit_string_map,
+      ms_settings     TYPE zif_abappm_settings=>ty_settings.
 
     METHODS set_order_by
       IMPORTING
@@ -80,6 +79,14 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       IMPORTING
         ii_html     TYPE REF TO zif_abapgit_html
         it_packages TYPE zif_abappm_package_json=>ty_packages
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS render_package_palette
+      IMPORTING
+        iv_action      TYPE string
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
@@ -154,6 +161,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       RETURNING
         VALUE(rv_html) TYPE string.
 
+    METHODS load_package_list
+      RAISING
+        zcx_abapgit_exception.
+
     METHODS load_settings
       RAISING
         zcx_abapgit_exception.
@@ -161,6 +172,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
     METHODS save_settings
       RAISING
         zcx_abapgit_exception.
+
 ENDCLASS.
 
 
@@ -175,14 +187,15 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     DATA lv_filter_label TYPE string.
     FIELD-SYMBOLS <ls_package> LIKE LINE OF ct_packages.
 
-    IF ms_list_settings-filter IS INITIAL.
+    IF ms_settings-list_settings-filter IS INITIAL.
       RETURN.
     ENDIF.
 
     lv_pfxl = strlen( c_label_filter_prefix ).
 
-    IF strlen( ms_list_settings-filter ) > lv_pfxl AND ms_list_settings-filter+0(lv_pfxl) = c_label_filter_prefix.
-      lv_filter_label = ms_list_settings-filter+lv_pfxl.
+    IF strlen( ms_settings-list_settings-filter ) > lv_pfxl AND
+        ms_settings-list_settings-filter+0(lv_pfxl) = c_label_filter_prefix.
+      lv_filter_label = ms_settings-list_settings-filter+lv_pfxl.
       IF lv_filter_label = 'all'.
         DELETE ct_packages WHERE labels IS INITIAL.
       ELSEIF lv_filter_label = 'none'.
@@ -198,10 +211,10 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       ENDIF.
     ELSE. " Regular filter
       DELETE ct_packages WHERE
-            package    NS ms_list_settings-filter
-        AND name       NS ms_list_settings-filter
-        AND version    NS ms_list_settings-filter
-        AND changed_by NS ms_list_settings-filter.
+            package    NS ms_settings-list_settings-filter
+        AND name       NS ms_settings-list_settings-filter
+        AND version    NS ms_settings-list_settings-filter
+        AND changed_by NS ms_settings-list_settings-filter.
     ENDIF.
 
   ENDMETHOD.
@@ -218,17 +231,17 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ls_sort-astext     = abap_true.
     INSERT ls_sort INTO TABLE lt_sort.
 
-    IF ms_list_settings-order_by IS NOT INITIAL.
+    IF ms_settings-list_settings-order_by IS NOT INITIAL.
       CLEAR ls_sort.
 
-      IF ms_list_settings-order_by = 'CHANGED_AT'.
-        ls_sort-name = ms_list_settings-order_by && c_raw_field_suffix.
+      IF ms_settings-list_settings-order_by = 'CHANGED_AT'.
+        ls_sort-name = ms_settings-list_settings-order_by && c_raw_field_suffix.
       ELSE.
-        ls_sort-name   = ms_list_settings-order_by.
+        ls_sort-name   = ms_settings-list_settings-order_by.
         ls_sort-astext = abap_true.
       ENDIF.
 
-      ls_sort-descending = ms_list_settings-order_descending.
+      ls_sort-descending = ms_settings-list_settings-order_descending.
       INSERT ls_sort INTO TABLE lt_sort.
     ENDIF.
 
@@ -317,11 +330,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     super->constructor( ).
 
+    load_package_list( ).
+
     load_settings( ).
 
     " Overwrite setting
     IF iv_only_favorites = abap_true.
-      ms_list_settings-only_favorites = abap_true.
+      ms_settings-list_settings-only_favorites = abap_true.
     ENDIF.
 
   ENDMETHOD.
@@ -343,17 +358,17 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD load_settings.
+  METHOD load_package_list.
+    mt_packages = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+  ENDMETHOD.
 
+
+  METHOD load_settings.
     TRY.
         ms_settings = zcl_abappm_settings=>factory( )->load( )->get( ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " Settings don't exist (yet)
     ENDTRY.
-
-    ms_list_settings = ms_settings-list_settings.
-    mt_pack_settings = ms_settings-package_settings.
-
   ENDMETHOD.
 
 
@@ -361,12 +376,12 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     FIELD-SYMBOLS:
       <ls_package>  LIKE LINE OF rt_packages,
-      <ls_settings> LIKE LINE OF mt_pack_settings.
+      <ls_settings> LIKE LINE OF ms_settings-package_settings.
 
-    rt_packages = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+    rt_packages = mt_packages.
 
     LOOP AT rt_packages ASSIGNING <ls_package>.
-      READ TABLE mt_pack_settings ASSIGNING <ls_settings>
+      READ TABLE ms_settings-package_settings ASSIGNING <ls_settings>
         WITH TABLE KEY package = <ls_package>-package.
       IF sy-subrc = 0.
         <ls_package>-favorite        = <ls_settings>-favorite.
@@ -375,7 +390,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    IF ms_list_settings-only_favorites = abap_true.
+    IF ms_settings-list_settings-only_favorites = abap_true.
       DELETE rt_packages WHERE favorite = abap_false.
     ENDIF.
 
@@ -403,11 +418,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ri_html->add( zcl_abapgit_gui_chunk_lib=>render_text_input(
       iv_name      = |filter|
       iv_label     = |Filter: { render_filter_help_hint( ) }|
-      iv_value     = ms_list_settings-filter ) ).
+      iv_value     = ms_settings-list_settings-filter ) ).
     ri_html->add( |<input type="submit" class="hidden-submit">| ).
     ri_html->add( |</form>| ).
 
-    IF ms_list_settings-only_favorites = abap_true.
+    IF ms_settings-list_settings-only_favorites = abap_true.
       lv_icon_class = `blue`.
     ELSE.
       lv_icon_class = `grey`.
@@ -488,6 +503,46 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_package_palette.
+
+    DATA:
+      lv_size     TYPE i,
+      lv_json     TYPE string,
+      lt_packages LIKE mt_packages.
+
+    FIELD-SYMBOLS <ls_package> LIKE LINE OF lt_packages.
+
+    lt_packages = mt_packages.
+    lv_size = lines( lt_packages ).
+    SORT lt_packages BY description AS TEXT.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    ri_html->add( 'var repoCatalog = [' ).
+    LOOP AT lt_packages ASSIGNING <ls_package>.
+      lv_json = |\{|
+        && | key: "{ <ls_package>-package }",|
+        && | isOffline: "",|
+        && | displayName: "{ escape(
+                               val    = <ls_package>-description
+                               format = cl_abap_format=>e_html_js ) }"|
+        && | \}|.
+      IF sy-tabix < lv_size.
+        lv_json = lv_json && ','.
+      ENDIF.
+      ri_html->add( lv_json ).
+    ENDLOOP.
+    ri_html->add( '];' ).
+
+    ri_html->add( |var gGoRepoPalette = new CommandPalette(createRepoCatalogEnumerator(repoCatalog, "{
+      iv_action }"), \{| ).
+    ri_html->add( '  toggleKey: "F2",' ).
+    ri_html->add( '  hotkeyDescription: "Go to Package"' ).
+    ri_html->add( '});' ).
+
+  ENDMETHOD.
+
+
   METHOD render_registry.
 
     ri_html = zcl_abapgit_html=>create( ).
@@ -533,7 +588,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_table_footer.
 
-    IF ms_list_settings-only_favorites = abap_true.
+    IF ms_settings-list_settings-only_favorites = abap_true.
       ii_html->add( `<tfoot>` ).
       ii_html->add( `<tr><td colspan="100%">` ).
       ii_html->add( |(Only favorites are shown. {
@@ -552,8 +607,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     ii_html->add( zcl_abapgit_gui_chunk_lib=>render_table_header(
       it_col_spec         = build_table_scheme( )
-      iv_order_by         = ms_list_settings-order_by
-      iv_order_descending = ms_list_settings-order_descending ) ).
+      iv_order_by         = ms_settings-list_settings-order_by
+      iv_order_descending = ms_settings-list_settings-order_descending ) ).
 
   ENDMETHOD.
 
@@ -608,7 +663,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     ii_html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name(
       iv_package        = is_package-package
-      iv_suppress_title = boolc( NOT ms_list_settings-only_favorites = abap_true ) )  ).
+      iv_suppress_title = boolc( NOT ms_settings-list_settings-only_favorites = abap_true ) )  ).
 
     " Labels
     IF mt_all_labels IS NOT INITIAL.
@@ -642,7 +697,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_class   = 'ro-detail'
       ii_content = zcl_abapgit_gui_chunk_lib=>render_user_name(
         iv_username = is_package-changed_by
-        iv_suppress_title = boolc( NOT ms_list_settings-only_favorites = abap_true ) ) ).
+        iv_suppress_title = boolc( NOT ms_settings-list_settings-only_favorites = abap_true ) ) ).
 
     " Details: changed at
     ii_html->td(
@@ -666,9 +721,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     DATA lx_error TYPE REF TO zcx_abappm_error.
 
-    ms_settings-list_settings    = ms_list_settings.
-    ms_settings-package_settings = mt_pack_settings.
-
     TRY.
         zcl_abappm_settings=>factory( )->set( ms_settings )->save( ).
       CATCH zcx_abappm_error INTO lx_error.
@@ -684,28 +736,28 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     READ TABLE it_postdata ASSIGNING <lv_postdata> INDEX 1.
     IF sy-subrc = 0.
-      FIND FIRST OCCURRENCE OF REGEX `filter=(.*)`
+      FIND FIRST OCCURRENCE OF REGEX 'filter=(.*)'
         IN <lv_postdata>
-        SUBMATCHES ms_list_settings-filter.
+        SUBMATCHES ms_settings-list_settings-filter.
     ENDIF.
 
-    ms_list_settings-filter = condense( ms_list_settings-filter ).
+    ms_settings-list_settings-filter = condense( ms_settings-list_settings-filter ).
     save_settings( ).
 
   ENDMETHOD.
 
 
   METHOD set_order_by.
-    IF ms_list_settings-order_by <> iv_order_by.
+    IF ms_settings-list_settings-order_by <> iv_order_by.
       set_order_direction( abap_false ). " Reset ordering
     ENDIF.
-    ms_list_settings-order_by = iv_order_by.
+    ms_settings-list_settings-order_by = iv_order_by.
     save_settings( ).
   ENDMETHOD.
 
 
   METHOD set_order_direction.
-    ms_list_settings-order_descending = iv_order_descending.
+    ms_settings-list_settings-order_descending = iv_order_descending.
     save_settings( ).
   ENDMETHOD.
 
@@ -736,9 +788,9 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       WHEN c_action-toggle_favorites.
 
         IF ii_event->query( )->has( 'FORCE_STATE' ) = abap_true.
-          ms_list_settings-only_favorites = ii_event->query( )->get( 'FORCE_STATE' ).
+          ms_settings-list_settings-only_favorites = ii_event->query( )->get( 'FORCE_STATE' ).
         ELSE.
-          ms_list_settings-only_favorites = boolc( ms_list_settings-only_favorites = abap_false ).
+          ms_settings-list_settings-only_favorites = boolc( ms_settings-list_settings-only_favorites = abap_false ).
         ENDIF.
         save_settings( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
@@ -756,9 +808,9 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       WHEN c_action-label_filter.
 
         IF ii_event->mv_getdata IS NOT INITIAL.
-          ms_list_settings-filter = c_label_filter_prefix && ii_event->mv_getdata.
+          ms_settings-list_settings-filter = c_label_filter_prefix && ii_event->mv_getdata.
         ELSE.
-          CLEAR ms_list_settings-filter. " Unexpected request
+          CLEAR ms_settings-list_settings-filter. " Unexpected request
         ENDIF.
         save_settings( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
@@ -883,7 +935,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ri_html->add( |</div>| ).
 
     register_deferred_script( render_scripts( ) ).
-    register_deferred_script( zcl_abapgit_gui_chunk_lib=>render_repo_palette( c_action-select ) ).
+    register_deferred_script( render_package_palette( c_action-select ) ).
 
   ENDMETHOD.
 ENDCLASS.

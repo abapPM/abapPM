@@ -81,18 +81,13 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA:
       lv_name         TYPE string,
-      li_package_json TYPE REF TO zif_abappm_package_json,
-      lx_error        TYPE REF TO zcx_abappm_package_json.
+      li_package_json TYPE REF TO zif_abappm_package_json.
 
-    TRY.
-        li_package_json = zcl_abappm_package_json=>factory( iv_package ).
+    li_package_json = zcl_abappm_package_json=>factory( iv_package ).
 
-        IF li_package_json->exists( ) = abap_false.
-          zcx_abappm_error=>raise( |{ iv_package } does not exist or is not initialized| ).
-        ENDIF.
-      CATCH zcx_abappm_package_json INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    IF li_package_json->exists( ) = abap_false.
+      zcx_abappm_error=>raise( |{ iv_package } does not exist or is not initialized| ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -140,34 +135,21 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
 
   METHOD get_package_json.
-
-    DATA lx_error TYPE REF TO zcx_abappm_package_json.
-
-    TRY.
-        result = zcl_abappm_package_json=>factory( iv_package )->load( )->get( ).
-      CATCH zcx_abappm_package_json INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    result = zcl_abappm_package_json=>factory( iv_package )->load( )->get( ).
   ENDMETHOD.
 
 
   METHOD get_packument_from_registry.
 
     DATA:
-      lx_pacote_error TYPE REF TO zcx_abappm_pacote,
-      lx_ajson_error  TYPE REF TO zcx_abappm_ajson_error,
-      lv_packument    TYPE string.
+      lx_ajson_error TYPE REF TO zcx_abappm_ajson_error,
+      lv_packument   TYPE string.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    TRY.
-        lv_packument = zcl_abappm_pacote=>factory(
-          iv_registry = iv_registry
-          iv_name     = is_package_json-name )->packument( ).
-      CATCH zcx_abappm_pacote INTO lx_pacote_error.
-        zcx_abappm_error=>raise_with_text( lx_pacote_error ).
-    ENDTRY.
+    lv_packument = zcl_abappm_pacote=>factory(
+      iv_registry = iv_registry
+      iv_name     = is_package_json-name )->packument( ).
 
     TRY.
         zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
@@ -179,15 +161,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
 
   METHOD get_readme.
-
-    DATA lx_error TYPE REF TO zcx_abappm_readme.
-
-    TRY.
-        result = zcl_abappm_readme=>factory( iv_package )->load( )->get( ).
-      CATCH zcx_abappm_readme INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    result = zcl_abappm_readme=>factory( iv_package )->load( )->get( ).
   ENDMETHOD.
 
 

@@ -43,20 +43,13 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
   METHOD check_package.
 
-    DATA:
-      li_package_json TYPE REF TO zif_abappm_package_json,
-      lx_error        TYPE REF TO zcx_abappm_package_json.
+    DATA li_package_json TYPE REF TO zif_abappm_package_json.
 
-    TRY.
-        li_package_json = zcl_abappm_package_json=>factory( iv_package ).
+    li_package_json = zcl_abappm_package_json=>factory( iv_package ).
 
-        IF li_package_json->exists( ) = abap_false.
-          zcx_abappm_error=>raise( |Package { iv_package } does not exist| ).
-        ENDIF.
-
-      CATCH zcx_abappm_package_json INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    IF li_package_json->exists( ) = abap_false.
+      zcx_abappm_error=>raise( |Package { iv_package } does not exist| ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -115,6 +108,8 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
     DATA lx_error TYPE REF TO zcx_abapinst_exception.
 
+    " TODO: The installer needs to be moved to the ZCL_ABAPPM_ namespace
+    " TODO: Currently hardcoded to $-packages and prefix folder logic
     TRY.
         zcl_abapinst_installer=>uninstall(
           iv_apm  = abap_true

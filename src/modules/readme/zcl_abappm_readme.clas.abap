@@ -22,7 +22,7 @@ CLASS zcl_abappm_readme DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abappm_readme
       RAISING
-        zcx_abappm_readme.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
@@ -34,7 +34,7 @@ CLASS zcl_abappm_readme DEFINITION
         !iv_package  TYPE devclass
         !iv_markdown TYPE string OPTIONAL
       RAISING
-        zcx_abappm_readme.
+        zcx_abappm_error.
 
     CLASS-METHODS get_package_key
       IMPORTING
@@ -57,9 +57,6 @@ CLASS zcl_abappm_readme DEFINITION
         instance TYPE REF TO zif_abappm_readme,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
-
-    CONSTANTS:
-      c_readme TYPE string VALUE 'README'.
 
     CLASS-DATA:
       gi_persist   TYPE REF TO zif_abappm_persist_apm,
@@ -84,7 +81,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
   METHOD constructor.
 
 *    IF zcl_readme_valid=>is_valid_sap_package( iv_package ) = abap_false.
-*      zcx_readme=>raise( |Invalid package: { iv_package }| ).
+*      zcx_error=>raise( |Invalid package: { iv_package }| ).
 *    ENDIF.
 
     mv_package         = iv_package.
@@ -93,7 +90,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
     TRY.
         zif_abappm_readme~load( ).
-      CATCH zcx_abappm_readme ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -135,7 +132,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
 
   METHOD get_package_key.
-    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ c_readme }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ zif_abappm_persist_apm=>c_key_extra-package_readme }|.
   ENDMETHOD.
 
 
@@ -158,27 +155,17 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
 
   METHOD zif_abappm_readme~delete.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        gi_persist->delete( ms_readme-key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_readme=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    gi_persist->delete( ms_readme-key ).
   ENDMETHOD.
 
 
   METHOD zif_abappm_readme~exists.
-
     TRY.
         gi_persist->load( ms_readme-key ).
         result = abap_true.
-      CATCH zcx_abappm_persist_apm.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
-
   ENDMETHOD.
 
 
@@ -188,32 +175,15 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
 
   METHOD zif_abappm_readme~load.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        ms_readme-markdown = gi_persist->load( ms_readme-key )-value.
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_readme=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    ms_readme-markdown = gi_persist->load( ms_readme-key )-value.
     result = me.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_readme~save.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        gi_persist->save(
-          iv_key   = ms_readme-key
-          iv_value = zif_abappm_readme~get( ) ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_readme=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    gi_persist->save(
+      iv_key   = ms_readme-key
+      iv_value = zif_abappm_readme~get( ) ).
   ENDMETHOD.
 
 

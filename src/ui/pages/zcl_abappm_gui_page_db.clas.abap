@@ -44,12 +44,6 @@ CLASS zcl_abappm_gui_page_db DEFINITION
     CONSTANTS c_css_url TYPE string VALUE 'css/page_db.css'.
     CONSTANTS c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
 
-    TYPES:
-      BEGIN OF ty_explanation,
-        value TYPE string,
-        extra TYPE string,
-      END OF ty_explanation.
-
     CLASS-DATA gi_persist TYPE REF TO zif_abappm_persist_apm.
 
     METHODS register_stylesheet
@@ -83,14 +77,6 @@ CLASS zcl_abappm_gui_page_db DEFINITION
         zcx_abapgit_exception.
 
     CLASS-METHODS do_restore_db
-      RAISING
-        zcx_abapgit_exception.
-
-    METHODS explain_content
-      IMPORTING
-        !is_data       TYPE zif_abappm_persist_apm=>ty_zabappm
-      RETURNING
-        VALUE(rv_text) TYPE string
       RAISING
         zcx_abapgit_exception.
 
@@ -161,7 +147,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         name    = lv_filename
         content = zcl_abapgit_convert=>string_to_xstring_utf8( <ls_data>-value ) ).
 
-      lv_text = explain_content( <ls_data> ).
+      " FIXME: lv_text = gi_persist->explain_content( <ls_data>-keys ).
       REPLACE '<strong>' IN lv_text WITH ''.
       REPLACE '</strong>' IN lv_text WITH ''.
       lv_text = |{ <ls_data>-keys },{ lv_text }\n|.
@@ -196,7 +182,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     DATA:
       lv_answer TYPE c LENGTH 1,
-      lx_error  TYPE REF TO zcx_abappm_persist_apm.
+      lx_error  TYPE REF TO zcx_abappm_error.
 
     ASSERT iv_key IS NOT INITIAL.
 
@@ -216,7 +202,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     TRY.
         gi_persist->delete( iv_key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 
@@ -236,11 +222,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       lv_path     TYPE string,
       lv_key      TYPE zif_abappm_persist_apm=>ty_key,
       lv_data     TYPE xstring,
+      ls_data     TYPE zif_abappm_persist_apm=>ty_list_item,
       lt_data     TYPE zif_abappm_persist_apm=>ty_list,
       lt_data_old TYPE zif_abappm_persist_apm=>ty_list,
-      ls_data     TYPE zif_abappm_persist_apm=>ty_zabappm,
       li_fe_serv  TYPE REF TO zif_abapgit_frontend_services,
-      lx_error    TYPE REF TO zcx_abappm_persist_apm.
+      lx_error    TYPE REF TO zcx_abappm_error.
 
     FIELD-SYMBOLS:
       <ls_zipfile> LIKE LINE OF lo_zip->files.
@@ -326,75 +312,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         ENDLOOP.
 
         COMMIT WORK.
-      CATCH zcx_abappm_persist_apm INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 
     MESSAGE 'apm Backup successfully restored' TYPE 'S'.
-
-  ENDMETHOD.
-
-
-  METHOD explain_content.
-
-    DATA:
-      lv_key_type    TYPE string,
-      lv_name        TYPE string,
-      lv_rest        TYPE string,
-      lv_package     TYPE devclass,
-      lv_user        TYPE uname,
-      lv_descr       TYPE string,
-      ls_explanation TYPE ty_explanation.
-
-    SPLIT is_data-keys AT ':' INTO lv_key_type lv_name lv_rest.
-
-    CASE lv_key_type.
-      WHEN zif_persist_apm=>c_key_type-package.
-        lv_descr   = 'Package'.
-        lv_package = lv_name.
-        ls_explanation-value = zcl_abapgit_factory=>get_sap_package( lv_package )->read_description( ).
-        IF lv_rest = 'PACKAGE_JSON'.
-          ls_explanation-extra = 'Package JSON'.
-        ELSEIF lv_rest = 'README'.
-          ls_explanation-extra = 'Readme'.
-        ENDIF.
-
-      WHEN zif_persist_apm=>c_key_type-settings.
-        IF lv_name = zif_abappm_settings=>c_global.
-          lv_descr = 'Global Settings'.
-        ELSE.
-          lv_descr = 'Personal Settings'.
-          lv_user  = lv_name.
-          ls_explanation-value = zcl_abapgit_user_record=>get_instance( lv_user )->get_name( ).
-        ENDIF.
-
-      WHEN OTHERS.
-        IF strlen( is_data-value ) >= 250.
-          ls_explanation-value = is_data-value(250).
-        ELSE.
-          ls_explanation-value = is_data-value.
-        ENDIF.
-
-        ls_explanation-value = escape(
-          val    = ls_explanation-value
-          format = cl_abap_format=>e_html_attr ).
-        ls_explanation-value = |<pre>{ ls_explanation-value }</pre>|.
-
-    ENDCASE.
-
-    IF ls_explanation-value IS NOT INITIAL.
-      lv_descr = |{ lv_descr }: |.
-    ENDIF.
-
-    IF ls_explanation-extra IS NOT INITIAL.
-      ls_explanation-extra = | ({ ls_explanation-extra })|.
-    ENDIF.
-
-    rv_text = |{ lv_descr }<br/><strong>{ ls_explanation-value }</strong><br/>{ ls_explanation-extra }|.
-
-    IF strlen( rv_text ) >= 250.
-      rv_text = rv_text(250) && '...'.
-    ENDIF.
 
   ENDMETHOD.
 
@@ -427,18 +349,17 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     FIELD-SYMBOLS <ls_db_entry> LIKE LINE OF it_db_entries.
 
     LOOP AT it_db_entries ASSIGNING <ls_db_entry>.
-      SPLIT <ls_db_entry>-keys AT ':' INTO lv_key_type lv_name lv_suffix.
-
-      CASE lv_key_type.
-        WHEN zif_persist_apm=>c_key_type-package.
-          IF lv_suffix = zcl_abappm_package_json=>c_package_json.
-            lv_packages = lv_packages + 1.
-          ENDIF.
-        WHEN zif_persist_apm=>c_key_type-settings.
-          IF lv_name <> zif_abappm_settings=>c_global.
-            lv_users = lv_users + 1.
-          ENDIF.
-      ENDCASE.
+" FIXME:
+*      CASE <ls_db_entry>-key_type.
+*        WHEN zif_persist_apm=>c_key_type-package.
+*          IF <ls_db_entry>-key_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
+*            lv_packages = lv_packages + 1.
+*          ENDIF.
+*        WHEN zif_persist_apm=>c_key_type-settings.
+*          IF <ls_db_entry>-key_extra <> zif_abappm_persist_apm=>c_key_extra-global_settings.
+*            lv_users = lv_users + 1.
+*          ENDIF.
+*      ENDCASE.
     ENDLOOP.
 
     ri_html = zcl_abapgit_html=>create( ).
@@ -550,11 +471,13 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     FIELD-SYMBOLS <lv_key> TYPE zif_abappm_persist_apm=>ty_key.
 
+    ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO <lv_key>.
+
     CASE iv_column_id.
       WHEN 'keys'.
         rs_render-content = |{ iv_value }|.
       WHEN 'value'.
-        rs_render-content   = explain_content( is_row ).
+        " FIXME: rs_render-content   = gi_persist->explain_formatted( <lv_key> ).
         rs_render-css_class = 'data'.
       WHEN 'luser'.
         lv_user             = iv_value.
@@ -564,7 +487,6 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_timestamp( lv_timestamp ).
         rs_render-css_class = 'data'.
       WHEN 'cmd'.
-        ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO <lv_key>.
         lv_action  = |key={ cl_http_utility=>escape_url( |{ <lv_key> }| ) }|.
         lo_toolbar = zcl_abapgit_html_toolbar=>create(
           )->add(

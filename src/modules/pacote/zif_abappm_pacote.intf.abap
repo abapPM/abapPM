@@ -12,7 +12,7 @@ INTERFACE zif_abappm_pacote PUBLIC.
   TYPES:
     BEGIN OF ty_version,
       key     TYPE string,
-      version TYPE zif_abappm_package_json_types=>ty_package_json,
+      version TYPE zif_abappm_package_json_types=>ty_manifest,
     END OF ty_version.
 
   TYPES:
@@ -25,12 +25,12 @@ INTERFACE zif_abappm_pacote PUBLIC.
       _rev        TYPE string,
       name        TYPE string,
       description TYPE string,
-*      dist_tags   TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
-*      time        TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
-*      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
+*      dist_tags   TYPE STANDARD TABLE OF zif_package_json_types=>ty_generic WITH KEY key,
+*      time        TYPE STANDARD TABLE OF zif_package_json_types=>ty_generic WITH KEY key,
+      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
       maintainers TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
       readme      TYPE string,
-*      users       TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_user WITH KEY name,
+*      users       TYPE STANDARD TABLE OF zif_package_json_types=>ty_user WITH KEY name,
       homepage    TYPE string,
       BEGIN OF bugs,
         url   TYPE zif_abappm_package_json_types=>ty_uri,
@@ -66,7 +66,7 @@ INTERFACE zif_abappm_pacote PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -76,15 +76,15 @@ INTERFACE zif_abappm_pacote PUBLIC.
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS manifest
     IMPORTING
@@ -93,13 +93,13 @@ INTERFACE zif_abappm_pacote PUBLIC.
     RETURNING
       VALUE(result)  TYPE string
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS packument
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
   METHODS tarball
     IMPORTING
@@ -107,6 +107,6 @@ INTERFACE zif_abappm_pacote PUBLIC.
     RETURNING
       VALUE(result) TYPE xstring
     RAISING
-      zcx_abappm_pacote.
+      zcx_abappm_error.
 
 ENDINTERFACE.

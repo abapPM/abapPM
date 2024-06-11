@@ -1,11 +1,11 @@
-INTERFACE lif_persist_apm.
-
 ************************************************************************
 * apm Persistence
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+INTERFACE lif_persist_apm.
+
   TYPES:
     ty_key TYPE c LENGTH 120,
     BEGIN OF ty_zabappm,
@@ -58,12 +58,6 @@ ENDINTERFACE.
 
 CLASS lcl_persist_apm DEFINITION.
 
-************************************************************************
-* apm Persistence
-*
-* Copyright 2024 apm.to Inc. <https://apm.to>
-* SPDX-License-Identifier: MIT
-************************************************************************
   PUBLIC SECTION.
 
     INTERFACES lif_persist_apm.
@@ -101,7 +95,6 @@ CLASS lcl_persist_apm IMPLEMENTATION.
   ENDMETHOD.
 
 
-
 * <SIGNATURE>---------------------------------------------------------------------------------------+
 * | Static Public Method lcl_persist_apm=>INJECTOR
 * +-------------------------------------------------------------------------------------------------+
@@ -111,6 +104,7 @@ CLASS lcl_persist_apm IMPLEMENTATION.
     go_instance = ii_mock.
   ENDMETHOD.
 
+
 * <SIGNATURE>---------------------------------------------------------------------------------------+
 * | Instance Public Method lcl_persist_apm->lif_persist_apm~DELETE
 * +-------------------------------------------------------------------------------------------------+
@@ -118,12 +112,10 @@ CLASS lcl_persist_apm IMPLEMENTATION.
 * | [!CX!] ZCX_PERSIST_APM
 * +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD lif_persist_apm~delete.
-
     DELETE FROM (lif_persist_apm=>c_tabname) WHERE keys = iv_key.
     IF sy-subrc <> 0.
       zcx_abapgit_exception=>raise( |Error deleting { iv_key }| ).
     ENDIF.
-
   ENDMETHOD.
 
 

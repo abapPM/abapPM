@@ -37,7 +37,6 @@ INTERFACE zif_abappm_gui_router PUBLIC.
       show_hotkeys         TYPE string VALUE 'show_hotkeys',
       sponsor              TYPE string VALUE 'sponsor',
       url                  TYPE string VALUE 'url',
-      yank_to_clipboard    TYPE string VALUE 'yank_to_clipboard',
     END OF c_action.
 
 ENDINTERFACE.

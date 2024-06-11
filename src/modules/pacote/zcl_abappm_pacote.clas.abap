@@ -23,7 +23,7 @@ CLASS zcl_abappm_pacote DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abappm_pacote
       RAISING
-        zcx_abappm_pacote.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
@@ -36,7 +36,7 @@ CLASS zcl_abappm_pacote DEFINITION
         !iv_name      TYPE string
         !iv_packument TYPE string OPTIONAL
       RAISING
-        zcx_abappm_pacote.
+        zcx_abappm_error.
 
     CLASS-METHODS get_packument_key
       IMPORTING
@@ -75,13 +75,22 @@ CLASS zcl_abappm_pacote DEFINITION
       RETURNING
         VALUE(result)   TYPE REF TO zif_abapgit_http_agent
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
+
+    METHODS request
+      IMPORTING
+        !iv_url         TYPE string
+        !iv_abbreviated TYPE abap_bool DEFAULT abap_false
+      RETURNING
+        VALUE(result)   TYPE REF TO zif_abapgit_http_response
+      RAISING
+        zcx_abappm_error.
 
     METHODS check_result
       IMPORTING
         !iv_json TYPE string
       RAISING
-        zcx_abappm_pacote.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -99,11 +108,11 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     TRY.
         lv_error = zcl_abappm_ajson=>parse( iv_json )->get_string( '/error' ).
       CATCH zcx_abappm_ajson_error INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
     IF lv_error IS NOT INITIAL.
-      zcx_abappm_pacote=>raise( lv_error ).
+      zcx_abappm_error=>raise( lv_error ).
     ENDIF.
 
   ENDMETHOD.
@@ -117,7 +126,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
   METHOD constructor.
 
     IF iv_registry <> 'https://registry.abappm.com'.
-      zcx_abappm_pacote=>raise( 'Only works with registry.abappm.com' ).
+      zcx_abappm_error=>raise( 'Only works with registry.abappm.com' ).
     ENDIF.
 
     mv_registry = iv_registry.
@@ -130,7 +139,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
     TRY.
         zif_abappm_pacote~load( ).
-      CATCH zcx_abappm_pacote ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -162,29 +171,36 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
   METHOD get_agent.
 
-    DATA lv_url TYPE string.
+    DATA:
+      lx_error TYPE REF TO zcx_abapgit_exception,
+      lv_url   TYPE string.
 
-    result = zcl_abapgit_factory=>get_http_agent( ).
+    TRY.
+        result = zcl_abapgit_factory=>get_http_agent( ).
 
-    IF iv_abbreviated = abap_true.
-      result->global_headers( )->set(
-        iv_key = 'Accept'
-        iv_val = 'application/vnd.npm.install-v1+json' ).
-    ELSE.
-      result->global_headers( )->set(
-      iv_key = 'Accept'
-      iv_val = 'application/json' ).
-    ENDIF.
+        IF iv_abbreviated = abap_true.
+          result->global_headers( )->set(
+            iv_key = 'Accept'
+            iv_val = 'application/vnd.npm.install-v1+json' ).
+        ELSE.
+          result->global_headers( )->set(
+            iv_key = 'Accept'
+            iv_val = 'application/json' ).
+        ENDIF.
 
-    " Login manager requires git-like url so we add some dummy repo
-    lv_url = iv_url && '/apm/apm.git'.
+        " Login manager requires git-like url so we add some dummy repo
+        lv_url = iv_url && '/apm/apm.git'.
 
-    " Get auth token from repo
-    IF zcl_abapgit_login_manager=>get( lv_url ) IS NOT INITIAL.
-      result->global_headers( )->set(
-        iv_key = 'Authorization'
-        iv_val = zcl_abapgit_login_manager=>get( lv_url ) ).
-    ENDIF.
+        " Get auth token from repo
+        IF zcl_abapgit_login_manager=>get( lv_url ) IS NOT INITIAL.
+          result->global_headers( )->set(
+            iv_key = 'Authorization'
+            iv_val = zcl_abapgit_login_manager=>get( lv_url ) ).
+        ENDIF.
+
+      CATCH zcx_abapgit_exception INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -224,28 +240,31 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abappm_pacote~delete.
+  METHOD request.
 
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
+    DATA lx_error TYPE REF TO zcx_abapgit_exception.
 
     TRY.
-        gi_persist->delete( ms_pacote-key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
+        result = get_agent( mv_registry )->request( iv_url ).
+      CATCH zcx_abapgit_exception INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD zif_abappm_pacote~exists.
+  METHOD zif_abappm_pacote~delete.
+    gi_persist->delete( ms_pacote-key ).
+  ENDMETHOD.
 
+
+  METHOD zif_abappm_pacote~exists.
     TRY.
         gi_persist->load( ms_pacote-key ).
         result = abap_true.
-      CATCH zcx_abappm_persist_apm.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
-
   ENDMETHOD.
 
 
@@ -255,67 +274,30 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
 
   METHOD zif_abappm_pacote~load.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        ms_pacote-packument = gi_persist->load( ms_pacote-key )-value.
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    ms_pacote-packument = gi_persist->load( ms_pacote-key )-value.
     result = me.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_pacote~manifest.
-
-    DATA lx_error TYPE REF TO zcx_abapgit_exception.
-
-    TRY.
-        result = get_agent(
-          iv_url         = mv_registry
-          iv_abbreviated = iv_abbreviated )->request( |{ mv_registry }/{ ms_pacote-name }/{ iv_version }| )->cdata( ).
-
-      CATCH zcx_abapgit_exception INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    result = request(
+      iv_url         = |{ mv_registry }/{ ms_pacote-name }/{ iv_version }|
+      iv_abbreviated = iv_abbreviated )->cdata( ).
     check_result( result ).
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_pacote~packument.
-
-    DATA lx_error TYPE REF TO zcx_abapgit_exception.
-
-    TRY.
-        result = get_agent( mv_registry )->request( |{ mv_registry }/{ ms_pacote-name }| )->cdata( ).
-      CATCH zcx_abapgit_exception INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    result = request( |{ mv_registry }/{ ms_pacote-name }| )->cdata( ).
     check_result( result ).
-
     ms_pacote-packument = result.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_pacote~save.
-
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        gi_persist->save(
-          iv_key   = ms_pacote-key
-          iv_value = zif_abappm_pacote~get( ) ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    gi_persist->save(
+      iv_key   = ms_pacote-key
+      iv_value = zif_abappm_pacote~get( ) ).
   ENDMETHOD.
 
 
@@ -326,16 +308,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
 
   METHOD zif_abappm_pacote~tarball.
-
-    DATA lx_error TYPE REF TO zcx_abapgit_exception.
-
-    TRY.
-        " TODO: Error check (HTTP status)
-        result = get_agent( mv_registry )->request( iv_filename )->data( ).
-
-      CATCH zcx_abapgit_exception INTO lx_error.
-        zcx_abappm_pacote=>raise_with_text( lx_error ).
-    ENDTRY.
-
+    " TODO: Error check (HTTP status)
+    result = request( iv_filename )->data( ).
   ENDMETHOD.
 ENDCLASS.

@@ -9,7 +9,7 @@ CLASS zcl_abappm_html_form_utils DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adapter: html_form
+* adapted: html_form
   PUBLIC SECTION.
 
     CLASS-METHODS create

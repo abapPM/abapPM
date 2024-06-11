@@ -39,11 +39,11 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
       END OF c_id.
 
     CONSTANTS:
-      BEGIN OF c_event,
+      BEGIN OF c_action,
         choose_package  TYPE string VALUE 'choose-package',
         create_package  TYPE string VALUE 'create-package',
         install_package TYPE string VALUE 'install-package',
-      END OF c_event .
+      END OF c_action .
 
     DATA:
       mv_registry       TYPE string,
@@ -111,7 +111,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
     ro_form->text(
       iv_name        = c_id-package
-      iv_side_action = c_event-choose_package
+      iv_side_action = c_action-choose_package
       iv_required    = abap_true
       iv_upper_case  = abap_true
       iv_label       = 'Package'
@@ -137,10 +137,10 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     ro_form->command(
       iv_label       = 'Install Package'
       iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
-      iv_action      = c_event-install_package
+      iv_action      = c_action-install_package
     )->command(
       iv_label       = 'Create Package'
-      iv_action      = c_event-create_package
+      iv_action      = c_action-create_package
     )->command(
       iv_label       = 'Back'
       iv_action      = zif_abapgit_definitions=>c_action-go_back ).
@@ -201,7 +201,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     mo_form_data = mo_form_util->normalize( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
-      WHEN c_event-create_package.
+      WHEN c_action-create_package.
 
         mo_form_data->set(
           iv_key = c_id-package
@@ -214,7 +214,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
           rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_event-choose_package.
+      WHEN c_action-choose_package.
 
         mo_form_data->set(
           iv_key = c_id-package
@@ -226,7 +226,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
           rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_event-install_package.
+      WHEN c_action-install_package.
 
         mo_validation_log = validate_form( mo_form_data ).
 

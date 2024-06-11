@@ -9,7 +9,7 @@ CLASS zcl_abappm_gui_component DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adpated: gui_services
+* adapted: gui_services
   PUBLIC SECTION.
 
     CONSTANTS:

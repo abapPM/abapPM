@@ -1,18 +1,18 @@
-CLASS zcx_abappm_readme DEFINITION
+CLASS zcx_abappm_error DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
 
 ************************************************************************
-* Readme Error
+* Error
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES if_t100_message.
     INTERFACES if_t100_dyn_msg.
+    INTERFACES if_t100_message.
 
     CLASS-DATA null TYPE string.
 
@@ -28,13 +28,13 @@ CLASS zcx_abappm_readme DEFINITION
     "! Raise exception with text
     "! @parameter iv_text | Text
     "! @parameter ix_previous | Previous exception
-    "! @raising zcx_abappm_readme | Exception
+    "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise
       IMPORTING
         !iv_text     TYPE clike
         !ix_previous TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_readme.
+        zcx_abappm_error.
 
     "! Raise exception with T100 message
     "! <p>
@@ -47,7 +47,7 @@ CLASS zcx_abappm_readme DEFINITION
     "! @parameter iv_msgv3 | Message variable 3
     "! @parameter iv_msgv4 | Message variable 4
     "! @parameter ix_previous | Previous exception
-    "! @raising zcx_abappm_readme | Exception
+    "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise_t100
       IMPORTING
         VALUE(iv_msgid) TYPE symsgid DEFAULT sy-msgid
@@ -58,16 +58,16 @@ CLASS zcx_abappm_readme DEFINITION
         VALUE(iv_msgv4) TYPE symsgv DEFAULT sy-msgv4
         !ix_previous    TYPE REF TO cx_root OPTIONAL
       RAISING
-        zcx_abappm_readme.
+        zcx_abappm_error.
 
     "! Raise with text from previous exception
     "! @parameter ix_previous | Previous exception
-    "! @raising zcx_abappm_readme | Exception
+    "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise_with_text
       IMPORTING
         !ix_previous TYPE REF TO cx_root
       RAISING
-        zcx_abappm_readme.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -84,20 +84,26 @@ ENDCLASS.
 
 
 
-CLASS zcx_abappm_readme IMPLEMENTATION.
+CLASS zcx_abappm_error IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
-    CALL METHOD super->constructor
-      EXPORTING
-        previous = previous.
-    me->null = null .
+
+    super->constructor( previous = previous ).
+
+    if_t100_dyn_msg~msgv1 = msgv1.
+    if_t100_dyn_msg~msgv2 = msgv2.
+    if_t100_dyn_msg~msgv3 = msgv3.
+    if_t100_dyn_msg~msgv4 = msgv4.
+
     CLEAR me->textid.
+
     IF textid IS INITIAL.
       if_t100_message~t100key = if_t100_message=>default_textid.
     ELSE.
       if_t100_message~t100key = textid.
     ENDIF.
+
   ENDMETHOD.
 
 
@@ -136,7 +142,7 @@ CLASS zcx_abappm_readme IMPLEMENTATION.
       ls_t100_key-attr4 = 'IF_T100_DYN_MSG~MSGV4'.
     ENDIF.
 
-    RAISE EXCEPTION TYPE zcx_abappm_readme
+    RAISE EXCEPTION TYPE zcx_abappm_error
       EXPORTING
         textid   = ls_t100_key
         msgv1    = iv_msgv1

@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZABAPPM_PACKAGE_JSON</NAME>
+    <NAME>ZABAPPM_SETTINGS</NAME>
     <SUBC>I</SUBC>
     <RLOAD>E</RLOAD>
     <UCCHECK>X</UCCHECK>
@@ -11,8 +11,8 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>apm - Package JSON</ENTRY>
-     <LENGTH>36</LENGTH>
+     <ENTRY>apm - Settings</ENTRY>
+     <LENGTH>14</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

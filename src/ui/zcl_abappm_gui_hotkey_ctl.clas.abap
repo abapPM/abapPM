@@ -10,7 +10,7 @@ CLASS zcl_abappm_gui_hotkey_ctl DEFINITION
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* adpated: gui_component and settings
+* adapted: gui_component and settings
   PUBLIC SECTION.
 
     INTERFACES zif_abapgit_gui_hotkeys.

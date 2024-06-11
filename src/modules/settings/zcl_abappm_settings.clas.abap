@@ -142,7 +142,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
   METHOD get_default.
     " Default values for settings
-    result-registry = zif_abappm_constants=>c_registry.
+    result-registry = zif_abappm_settings=>c_registry.
   ENDMETHOD.
 
 
@@ -172,13 +172,9 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     li_global->set( get_default( ) ).
 
     " Save defaults to global settings
-    TRY.
-        gi_persist->save(
-          iv_key   = get_setting_key( zif_abappm_settings=>c_global )
-          iv_value = li_global->get_json( ) ).
-      CATCH zcx_abappm_persist_apm.
-        zcx_abappm_error=>raise( 'Error saving global defaults' ).
-    ENDTRY.
+    gi_persist->save(
+      iv_key   = get_setting_key( zif_abappm_settings=>c_global )
+      iv_value = li_global->get_json( ) ).
 
   ENDMETHOD.
 
@@ -246,17 +242,11 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
   METHOD zif_abappm_settings~delete.
 
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
     IF mv_name = zif_abappm_settings=>c_global.
       zcx_abappm_error=>raise( 'Global settings can not be deleted' ).
     ENDIF.
 
-    TRY.
-        gi_persist->delete( mv_key ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    gi_persist->delete( mv_key ).
 
   ENDMETHOD.
 
@@ -287,7 +277,8 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
         ENDIF.
 
         result = li_json->stringify( 2 ).
-      CATCH zcx_abappm_ajson_error.
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -299,52 +290,34 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
 
   METHOD zif_abappm_settings~load.
-
-    DATA:
-      lv_value TYPE string,
-      lx_error TYPE REF TO zcx_abappm_persist_apm.
-
-    TRY.
-        lv_value = gi_persist->load( mv_key )-value.
-      CATCH zcx_abappm_persist_apm ##NO_HANDLER.
-    ENDTRY.
-
-    IF lv_value IS NOT INITIAL.
-      zif_abappm_settings~set_json( lv_value ).
-    ENDIF.
-
+    zif_abappm_settings~set_json( gi_persist->load( mv_key )-value ).
     result = me.
-
   ENDMETHOD.
 
 
   METHOD zif_abappm_settings~save.
 
-    DATA lx_error TYPE REF TO zcx_abappm_persist_apm.
-
     IF zif_abappm_settings~is_valid( ) = abap_false.
       zcx_abappm_error=>raise( 'Invalid settings' ).
     ENDIF.
 
-    TRY.
-        " Save complete JSON including empty values for easy editing
-        gi_persist->save(
-          iv_key   = mv_key
-          iv_value = zif_abappm_settings~get_json( abap_true ) ).
-      CATCH zcx_abappm_persist_apm INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    " Save complete JSON including empty values for easy editing
+    gi_persist->save(
+      iv_key   = mv_key
+      iv_value = zif_abappm_settings~get_json( abap_true ) ).
 
   ENDMETHOD.
 
 
   METHOD zif_abappm_settings~set.
+
     IF check_settings( is_settings ) IS NOT INITIAL.
       zcx_abappm_error=>raise( 'Invalid settings' ).
     ENDIF.
 
     MOVE-CORRESPONDING is_settings TO ms_settings.
     result = me.
+
   ENDMETHOD.
 
 

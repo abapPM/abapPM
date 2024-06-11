@@ -13,22 +13,22 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
 
     CLASS-METHODS install
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
     CLASS-METHODS uninstall
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CLASS-METHODS table_create
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
     CLASS-METHODS table_delete
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
     CLASS-METHODS table_exists
       RETURNING
@@ -36,11 +36,11 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
 
     CLASS-METHODS lock_create
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
     CLASS-METHODS lock_delete
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
     CLASS-METHODS lock_exists
       RETURNING
@@ -53,7 +53,7 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
         !iv_no_ask               TYPE abap_bool DEFAULT abap_true
         !iv_no_ask_delete_append TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_persist_apm.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -112,9 +112,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ENDTRY.
 
     IF sy-subrc = 5.
-      zcx_abappm_persist_apm=>raise( |{ iv_objtype } { iv_objname } has dependencies and must be deleted manually| ).
+      zcx_abappm_error=>raise( |{ iv_objtype } { iv_objname } has dependencies and must be deleted manually| ).
     ELSEIF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise( |Error deleting { iv_objtype } { iv_objname }| ).
+      zcx_abappm_error=>raise( |Error deleting { iv_objtype } { iv_objname }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -181,7 +181,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise_t100( ).
+      zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
     lv_obj_name = zif_abappm_persist_apm=>c_lock.
@@ -197,7 +197,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise_t100( ).
+      zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_ENQU_ACTIVATE'
@@ -208,7 +208,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise( |Error activating { zif_abappm_persist_apm=>c_lock }| ).
+      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_lock }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -312,7 +312,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise_t100( ).
+      zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
     lv_obj_name = zif_abappm_persist_apm=>c_tabname.
@@ -328,7 +328,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise_t100( ).
+      zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_TABL_ACTIVATE'
@@ -342,7 +342,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0 OR lv_subrc <> 0.
-      zcx_abappm_persist_apm=>raise( |Error activating { zif_abappm_persist_apm=>c_tabname }| ).
+      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_tabname }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -365,7 +365,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF ls_dd02l
       WHERE tabname = zif_abappm_persist_apm=>c_tabname AND as4local = 'A' AND as4vers = '0000'.
     IF sy-subrc <> 0.
-      zcx_abappm_persist_apm=>raise( |Table { zif_abappm_persist_apm=>c_tabname } not found| ).
+      zcx_abappm_error=>raise( |Table { zif_abappm_persist_apm=>c_tabname } not found| ).
     ENDIF.
 
     CALL FUNCTION 'DD_EXISTS_DATA'
