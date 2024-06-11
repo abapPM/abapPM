@@ -158,12 +158,12 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
   METHOD read_package.
 
     DATA:
-      lx_error        TYPE REF TO zcx_abappm_package_json,
+      lx_error        TYPE REF TO zcx_abappm_error,
       ls_package_json TYPE zif_abappm_package_json_types=>ty_package_json.
 
     TRY.
         ls_package_json = zcl_abappm_package_json=>factory( iv_package )->get( ).
-      CATCH zcx_abappm_package_json INTO lx_error.
+      CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
 

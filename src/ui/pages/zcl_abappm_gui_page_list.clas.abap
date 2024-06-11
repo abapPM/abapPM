@@ -77,8 +77,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     METHODS render_package_list
       IMPORTING
-        ii_html     TYPE REF TO zif_abapgit_html
-        it_packages TYPE zif_abappm_package_json=>ty_packages
+        ii_html TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
@@ -100,8 +99,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     METHODS render_table_body
       IMPORTING
-        ii_html     TYPE REF TO zif_abapgit_html
-        it_packages TYPE zif_abappm_package_json=>ty_packages
+        ii_html TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
@@ -493,9 +491,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ii_html->add( |<table>| ).
 
     render_table_header( ii_html ).
-    render_table_body(
-      ii_html     = ii_html
-      it_packages = it_packages ).
+    render_table_body( ii_html ).
     render_table_footer( ii_html ).
 
     ii_html->add( |</table>| ).
@@ -525,7 +521,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         && | isOffline: "",|
         && | displayName: "{ escape(
                                val    = <ls_package>-description
-                               format = cl_abap_format=>e_html_js ) }"|
+                               format = cl_abap_format=>e_html_js ) } ({ <ls_package>-package })"|
         && | \}|.
       IF sy-tabix < lv_size.
         lv_json = lv_json && ','.
@@ -534,8 +530,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ENDLOOP.
     ri_html->add( '];' ).
 
-    ri_html->add( |var gGoRepoPalette = new CommandPalette(createRepoCatalogEnumerator(repoCatalog, "{
-      iv_action }"), \{| ).
+    ri_html->add( 'var gGoRepoPalette = new CommandPalette(' ).
+    ri_html->add( |  createRepoCatalogEnumerator(repoCatalog, "{ iv_action }"), \{| ).
     ri_html->add( '  toggleKey: "F2",' ).
     ri_html->add( '  hotkeyDescription: "Go to Package"' ).
     ri_html->add( '});' ).
@@ -571,11 +567,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_table_body.
 
-    FIELD-SYMBOLS <ls_package> LIKE LINE OF it_packages.
+    FIELD-SYMBOLS <ls_package> LIKE LINE OF mt_packages.
 
     ii_html->add( '<tbody>' ).
 
-    LOOP AT it_packages ASSIGNING <ls_package>.
+    LOOP AT mt_packages ASSIGNING <ls_package>.
       render_table_item(
         ii_html    = ii_html
         is_package = <ls_package> ).
@@ -678,19 +674,19 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     ii_html->td(
       ii_html->a(
         iv_txt = is_package-name
-        iv_act = |{ c_action-select }?package={ is_package-package }| ) ).
+        iv_act = |{ c_action-select }?key={ is_package-package }| ) ).
 
     " Version
     ii_html->td(
       ii_html->a(
         iv_txt = is_package-version
-        iv_act = |{ c_action-select }?package={ is_package-package }| ) && lv_lock ).
+        iv_act = |{ c_action-select }?key={ is_package-package }| ) && lv_lock ).
 
     " Description
     ii_html->td(
       ii_html->a(
         iv_txt = is_package-description
-        iv_act = |{ c_action-select }?package={ is_package-package }| ) ).
+        iv_act = |{ c_action-select }?key={ is_package-package }| ) ).
 
     " Details: changed by
     ii_html->td(
@@ -710,7 +706,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_content = ii_html->a(
         iv_title = 'Open'
         iv_txt   = '&rtrif;'
-        iv_act   = |{ c_action-select }?package={ is_package-package }| ) ).
+        iv_act   = |{ c_action-select }?key={ is_package-package }| ) ).
 
     ii_html->add( `</tr>` ).
 
@@ -766,7 +762,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     DATA lv_package TYPE devclass.
 
-    lv_package = ii_event->query( )->get( 'PACKAGE' ).
+    lv_package = ii_event->query( )->get( 'KEY' ).
 
     CASE ii_event->mv_action.
       WHEN c_action-refresh.
@@ -774,7 +770,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
       WHEN c_action-select.
 
-        ms_settings-last_package = lv_package.
+          ms_settings-last_package = lv_package.
         save_settings( ).
 
         rs_handled-page  = zcl_abappm_gui_page_package=>create( lv_package ).
@@ -914,24 +910,18 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_renderable~render.
 
-    DATA lt_packages TYPE zif_abappm_package_json=>ty_packages.
-
     register_handlers( ).
 
     mo_label_colors = zcl_abapgit_repo_labels=>split_colors_into_map( ms_settings-gui_settings-label_colors ).
 
-    lt_packages = prepare_packages( ).
+    load_package_list( ).
 
     ri_html = zcl_abapgit_html=>create( ).
-
-    zcl_abapgit_exit=>get_instance( )->wall_message_list( ri_html ).
 
     ri_html->add( |<div class="repo-overview">| ).
     render_header_bar( ri_html ).
     render_header_label_list( ri_html ).
-    render_package_list(
-      ii_html     = ri_html
-      it_packages = lt_packages ).
+    render_package_list( ri_html ).
     ri_html->add( |</div>| ).
 
     register_deferred_script( render_scripts( ) ).
