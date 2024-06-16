@@ -70,6 +70,12 @@ CLASS zcl_abappm_gui_page_package DEFINITION
     DATA mv_view TYPE string.
     DATA ms_markdown TYPE ty_markdown.
 
+    METHODS build_main_toolbar
+      RETURNING
+        VALUE(ro_toolbar) TYPE REF TO zcl_abapgit_html_toolbar
+      RAISING
+        zcx_abapgit_exception.
+
     METHODS get_markdown_data
       RETURNING
         VALUE(rv_markdown) TYPE string
@@ -158,6 +164,17 @@ ENDCLASS.
 
 
 CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
+
+
+  METHOD build_main_toolbar.
+
+    CREATE OBJECT ro_toolbar EXPORTING iv_id = 'toolbar-package'.
+
+    ro_toolbar->add(
+      iv_txt = 'Edit'
+      iv_act = |{ zif_abapgit_definitions=>c_action-git_pull }?key={ mv_package }| ).
+
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -633,10 +650,9 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     DATA:
       lo_file_menu   TYPE REF TO zcl_abapgit_html_toolbar,
       lo_readme_menu TYPE REF TO zcl_abapgit_html_toolbar,
-      lo_json_menu   TYPE REF TO zcl_abapgit_html_toolbar,
       lv_act         TYPE string.
 
-    FIELD-SYMBOLS: <ls_markdown> TYPE ty_markdown.
+    FIELD-SYMBOLS <ls_markdown> TYPE ty_markdown.
 
     CREATE OBJECT lo_readme_menu EXPORTING iv_id = 'readme'.
 
@@ -651,19 +667,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
      )->add(
       iv_txt = 'Raw'
       iv_chk = boolc( mv_view = c_action-view_readme_raw )
-      iv_act = c_action-view_readme_raw
-    )->add(
-      iv_txt = 'Edit'
-      iv_act = c_action-edit_readme ).
-
-    CREATE OBJECT lo_json_menu EXPORTING iv_id = 'json'.
-
-    lo_json_menu->add(
-      iv_txt = 'Display'
-      iv_act = c_action-view_json
-    )->add(
-      iv_txt = 'Edit'
-      iv_act = c_action-edit_json ).
+      iv_act = c_action-view_readme_raw ).
 
     CREATE OBJECT ro_toolbar.
 
@@ -671,8 +675,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
       iv_txt = 'Readme'
       io_sub = lo_readme_menu
     )->add(
-      iv_txt = 'package.abap.json'
-      io_sub = lo_json_menu
+      iv_txt = 'Manifest'
+      iv_act = c_action-view_json
     )->add(
       iv_txt = 'Back'
       iv_act = zif_abapgit_definitions=>c_action-go_back ).
@@ -686,17 +690,24 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     ri_html = zcl_abapgit_html=>create( ).
 
-    ri_html->add( `<div class="repo">` ).
+    ri_html->add( '<div class="paddings">' ).
+    ri_html->add( '<table class="w100"><tr>' ).
+    ri_html->add( '<td>' ).
     ri_html->add( zcl_abapgit_gui_chunk_lib=>render_package_name( mv_package ) ).
-    ri_html->add( `</div>` ).
+    ri_html->add( '</td>' ).
+    ri_html->add( '<td class="right">' ).
+    ri_html->add( build_main_toolbar( )->render( iv_right = abap_true ) ).
+    ri_html->add( '</td>' ).
+    ri_html->add( '</tr></table>' ).
+    ri_html->add( '</div>' ).
 
     ri_html->add( render_styles( ) ).
 
-    ri_html->add( `<div class="markdown">` ).
+    ri_html->add( '<div class="markdown">' ).
     ri_html->add( render_header( ) ).
     ri_html->add( render_markdown( ) ).
     ri_html->add( render_footer( ) ).
-    ri_html->add( `</div>` ).
+    ri_html->add( '</div>' ).
 
   ENDMETHOD.
 ENDCLASS.

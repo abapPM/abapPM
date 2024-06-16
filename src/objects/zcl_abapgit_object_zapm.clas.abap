@@ -1,4 +1,4 @@
-CLASS zcl_abapgit_object_abap DEFINITION
+CLASS zcl_abapgit_object_zapm DEFINITION
   PUBLIC
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
@@ -32,21 +32,10 @@ CLASS zcl_abapgit_object_abap DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
-      " Package manifest
-      BEGIN OF c_package_json_file,
-        obj_name  TYPE c LENGTH 7 VALUE 'package',
-        sep1      TYPE c LENGTH 1 VALUE '.',
-        obj_type  TYPE c LENGTH 4 VALUE 'abap',
-        sep2      TYPE c LENGTH 1 VALUE '.',
-        extension TYPE c LENGTH 4 VALUE 'json',
-      END OF c_package_json_file,
-      BEGIN OF c_readme_file,
-        obj_name  TYPE c LENGTH 7 VALUE 'package',
-        sep1      TYPE c LENGTH 1 VALUE '.',
-        obj_type  TYPE c LENGTH 4 VALUE 'abap',
-        sep2      TYPE c LENGTH 1 VALUE '.',
-        extension TYPE c LENGTH 4 VALUE 'md',
-      END OF c_readme_file.
+      " Must match zcl_apm_abapgit_ext but we don't want a dependency between classes
+      " which could cause problems when merging into standalone version
+      c_int_package_json TYPE string VALUE 'package.zapm.json',
+      c_int_readme       TYPE string VALUE 'package.zapm.readme.md'.
 
     CONSTANTS:
       c_key_type TYPE string VALUE 'PACKAGE',
@@ -55,11 +44,8 @@ CLASS zcl_abapgit_object_abap DEFINITION
         readme       TYPE string VALUE 'README',
       END OF c_key_extra.
 
+    DATA mv_is_installed TYPE abap_bool.
     DATA mv_package TYPE devclass.
-
-    CLASS-METHODS table_exists
-      RETURNING
-        VALUE(result) TYPE abap_bool.
 
     METHODS get_package_key
       RETURNING
@@ -73,7 +59,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abapgit_object_abap IMPLEMENTATION.
+CLASS zcl_abapgit_object_zapm IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -84,7 +70,13 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       io_files       = io_files
       io_i18n_params = io_i18n_params ).
 
-    mv_package = is_item-obj_name.
+    mv_package = replace(
+      val  = is_item-obj_name
+      sub  = '%'
+      with = '$'
+      occ  = 0 ).
+
+    mv_is_installed = lcl_persist_apm=>is_installed( ).
 
   ENDMETHOD.
 
@@ -99,21 +91,9 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD table_exists.
-
-    DATA lv_tabname TYPE dd02l-tabname.
-
-    SELECT SINGLE tabname FROM dd02l INTO lv_tabname WHERE tabname = lif_persist_apm=>c_tabname.
-    result = boolc( sy-subrc = 0 ).
-
-  ENDMETHOD.
-
-
   METHOD zif_abapgit_object~changed_by.
 
-    IF table_exists( ) = abap_false.
-      EXIT.
-    ENDIF.
+    CHECK mv_is_installed = abap_true.
 
     rv_user = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-luser.
 
@@ -122,9 +102,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~delete.
 
-    IF table_exists( ) = abap_false.
-      EXIT.
-    ENDIF.
+    CHECK mv_is_installed = abap_true.
 
     lcl_persist_apm=>get_instance( )->delete( get_package_key( ) ).
     lcl_persist_apm=>get_instance( )->delete( get_readme_key( ) ).
@@ -138,18 +116,11 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
     DATA lv_data TYPE string.
 
-    IF table_exists( ) = abap_false.
-      EXIT.
-    ENDIF.
+    CHECK mv_is_installed = abap_true.
 
     " Package JSON
-    TRY.
-        lv_data = mo_files->read_string(
-          iv_ext = |{ c_package_json_file-extension }| ).
-      CATCH zcx_abapgit_exception.
-        " Most probably file not found -> ignore
-        RETURN.
-    ENDTRY.
+    lv_data = mo_files->read_string(
+      iv_ext = 'json' ).
 
     lcl_persist_apm=>get_instance( )->save(
       iv_key   = get_package_key( )
@@ -158,15 +129,16 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
     " Readme
     TRY.
         lv_data = mo_files->read_string(
-          iv_ext = |{ c_readme_file-extension }| ).
-      CATCH zcx_abapgit_exception.
-        " Most probably file not found -> ignore
-        RETURN.
-    ENDTRY.
+          iv_ext   = 'md'
+          iv_extra = 'readme' ).
 
-    lcl_persist_apm=>get_instance( )->save(
-      iv_key   = get_readme_key( )
-      iv_value = lv_data ).
+        lcl_persist_apm=>get_instance( )->save(
+          iv_key   = get_readme_key( )
+          iv_value = lv_data ).
+
+      CATCH zcx_abapgit_exception ##NO_HANDLER.
+        " Most probably file not found -> ignore
+    ENDTRY.
 
     tadir_insert( iv_package ).
 
@@ -175,14 +147,9 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~exists.
 
-    DATA lv_data TYPE string.
+    CHECK mv_is_installed = abap_true.
 
-    IF table_exists( ) = abap_false.
-      EXIT.
-    ENDIF.
-
-    lv_data = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-value.
-    rv_bool = boolc( lv_data IS NOT INITIAL ).
+    rv_bool = boolc( lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-value IS NOT INITIAL ).
 
   ENDMETHOD.
 
@@ -214,7 +181,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~is_locked.
     rv_is_locked = exists_a_lock_entry_for(
-      iv_lock_object = 'EZABAPPM'
+      iv_lock_object = |{ lif_persist_apm=>c_lock }|
       iv_argument    = |{ get_package_key( ) }| ).
   ENDMETHOD.
 
@@ -227,11 +194,7 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
   METHOD zif_abapgit_object~map_filename_to_object.
 
-    IF iv_filename NP '*.abap.*'.
-      RETURN.
-    ENDIF.
-
-    IF iv_filename <> c_package_json_file AND iv_filename <> c_readme_file.
+    IF iv_filename <> c_int_package_json AND iv_filename <> c_int_readme.
       zcx_abapgit_exception=>raise( |Unexpected filename for apm package: { iv_filename }| ).
     ENDIF.
 
@@ -242,14 +205,25 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
       iv_create_if_not_exists = abap_false
       iv_path                 = iv_path ).
 
+    " Logical transport objects don't allow $ so we replace them with %
+    cs_item-obj_name = replace(
+      val  = cs_item-obj_name
+      sub  = '$'
+      with = '%'
+      occ  = 0 ).
+
   ENDMETHOD.
 
 
   METHOD zif_abapgit_object~map_object_to_filename.
 
-    " Packages have a fixed filename so that the repository can be installed to a different
-    " package(-hierarchy) on the client and not show up as a different package in the repo.
-    cv_filename = c_package_json_file.
+    IF iv_ext = '*'.
+      cv_filename = 'package.zapm.*'.
+    ELSEIF iv_extra IS INITIAL.
+      cv_filename = c_int_package_json.
+    ELSEIF iv_extra = 'readme'.
+      cv_filename = c_int_readme.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -258,25 +232,22 @@ CLASS zcl_abapgit_object_abap IMPLEMENTATION.
 
     DATA lv_data TYPE string.
 
-    IF table_exists( ) = abap_false.
-      EXIT.
-    ENDIF.
+    CHECK mv_is_installed = abap_true.
 
     " Package JSON
     lv_data = lcl_persist_apm=>get_instance( )->load( get_package_key( ) )-value.
     IF lv_data IS NOT INITIAL.
-
       mo_files->add_string(
-        iv_ext    = |{ c_package_json_file-extension }|
+        iv_ext    = 'json'
         iv_string = lv_data ).
     ENDIF.
 
     " Readme
     lv_data = lcl_persist_apm=>get_instance( )->load( get_readme_key( ) )-value.
     IF lv_data IS NOT INITIAL.
-
       mo_files->add_string(
-        iv_ext    = |{ c_readme_file-extension }|
+        iv_ext    = 'md'
+        iv_extra  = 'readme'
         iv_string = lv_data ).
     ENDIF.
 
