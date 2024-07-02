@@ -50,6 +50,8 @@ CLASS zcl_abappm_gui_page_package DEFINITION
         edit_readme          TYPE string VALUE 'edit_readme',
         view_json            TYPE string VALUE 'view_json',
         edit_json            TYPE string VALUE 'edit_json',
+        view_dependencies    TYPE string VALUE 'view_dependencies',
+        edit_dependencies    TYPE string VALUE 'edit_dependencies',
       END OF c_action.
 
     CONSTANTS:
@@ -82,17 +84,29 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS get_markdown_rendered
+    METHODS render_markdown
       RETURNING
-        VALUE(rv_html) TYPE string
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
-    METHODS get_markdown_source
+    METHODS render_markdown_source
       IMPORTING
         !iv_raw        TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(rv_html) TYPE string
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS get_dependencies_data
+      RETURNING
+        VALUE(rs_package_json) TYPE zif_abappm_package_json_types=>ty_package_json
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS render_dependencies
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
@@ -102,9 +116,9 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS get_json_rendered
+    METHODS render_json
       RETURNING
-        VALUE(rv_html) TYPE string
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
@@ -140,7 +154,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS render_markdown
+    METHODS render_content
       RETURNING
         VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
@@ -168,11 +182,24 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD build_main_toolbar.
 
+    DATA lv_action TYPE string.
+
     CREATE OBJECT ro_toolbar EXPORTING iv_id = 'toolbar-package'.
+
+    CASE mv_view.
+      WHEN c_action-view_readme_rendered OR c_action-view_readme_source OR c_action-view_readme_raw.
+        lv_action = c_action-edit_readme.
+      WHEN c_action-view_dependencies.
+        lv_action = c_action-edit_dependencies.
+      WHEN c_action-view_json.
+        lv_action = c_action-edit_json.
+      WHEN OTHERS.
+        ASSERT 0 = 1.
+    ENDCASE.
 
     ro_toolbar->add(
       iv_txt = 'Edit'
-      iv_act = |{ zif_abapgit_definitions=>c_action-git_pull }?key={ mv_package }| ).
+      iv_act = |{ lv_action }?key={ mv_package }| ).
 
   ENDMETHOD.
 
@@ -217,6 +244,20 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_dependencies_data.
+
+    DATA lx_error TYPE REF TO zcx_abappm_error.
+
+    TRY.
+        " Always load data since it can be edited in another page
+        rs_package_json = zcl_abappm_package_json=>factory( mv_package )->load( )->get( ).
+      CATCH zcx_abappm_error INTO lx_error.
+        zcx_abapgit_exception=>raise_with_text( lx_error ).
+    ENDTRY.
+
+  ENDMETHOD.
+
+
   METHOD get_json_data.
 
     DATA lx_error TYPE REF TO zcx_abappm_error.
@@ -231,21 +272,6 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_json_rendered.
-
-    DATA:
-      lo_highlighter TYPE REF TO zcl_abapgit_syntax_highlighter,
-      lv_formatted   TYPE string.
-
-    " Create syntax highlighter
-    lo_highlighter = zcl_abapgit_syntax_factory=>create( '*.json' ).
-    lv_formatted   = lo_highlighter->process_line( get_json_data( ) ).
-
-    rv_html = |<pre class="syntax-hl">{ lv_formatted }</pre>|.
-
-  ENDMETHOD.
-
-
   METHOD get_markdown_data.
 
     DATA lx_error TYPE REF TO zcx_abappm_error.
@@ -256,106 +282,6 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
       CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD get_markdown_rendered.
-
-    DATA:
-      lo_markdown TYPE REF TO zcl_abappm_markdown,
-      lv_url      TYPE string,
-      lv_branch   TYPE string,
-      lv_html     TYPE string.
-
-    ms_markdown-data = get_markdown_data( ).
-
-    " TODO url/branch mapping
-    "lv_url = mo_repo->get_url( ).
-    "REPLACE REGEX '\.git$' IN lv_url WITH ''.
-    "lv_branch = zcl_abapgit_git_branch_list=>get_display_name( mo_repo->get_selected_branch( ) ).
-
-    CREATE OBJECT lo_markdown
-      EXPORTING
-        root_href = get_root_href(
-                       iv_url    = lv_url
-                       iv_branch = lv_branch )
-        root_img  = get_root_img(
-                       iv_url    = lv_url
-                       iv_branch = lv_branch )
-        path      = ms_markdown-path
-        sapevent  = abap_true.
-
-    lv_html = lo_markdown->text( ms_markdown-data ).
-
-    " Links to markdown files
-    "lv_html = replace_markdown_href(
-    "  iv_html      = lv_html
-    "  iv_root_href = |{ lv_url }/blob/{ lv_branch }| ).
-
-    " Emoji
-    rv_html = zcl_abappm_markdown_emoji=>create( )->format_emoji( lv_html ).
-
-  ENDMETHOD.
-
-
-  METHOD get_markdown_source.
-
-    DATA:
-      lv_num       TYPE i,
-      lv_language  TYPE string,
-      lv_codeblock TYPE string,
-      lv_markdown  TYPE string,
-      lv_markup    TYPE string,
-      lt_lines     TYPE TABLE OF string.
-
-    FIELD-SYMBOLS <lv_line> TYPE string.
-
-    lv_markdown = get_markdown_data( ).
-
-    IF iv_raw = abap_true.
-      lv_markdown = escape(
-        val    = lv_markdown
-        format = cl_abap_format=>e_html_text ).
-    ENDIF.
-
-    " Same style as diffs
-    rv_html = |<table class="diff_tab" id="{ ms_markdown-filename }"\n|.
-
-    SPLIT lv_markdown AT cl_abap_char_utilities=>newline INTO TABLE lt_lines.
-
-    lv_language = 'markdown'.
-
-    LOOP AT lt_lines ASSIGNING <lv_line>.
-      lv_num = sy-tabix.
-
-      IF iv_raw = abap_true.
-        lv_markup = <lv_line>.
-      ELSE.
-        " Detect code block
-        FIND REGEX '^```\s*(.*)' IN <lv_line> SUBMATCHES lv_codeblock.
-        IF sy-subrc = 0.
-          lv_language = 'codeblock'. " falls back to txt
-        ENDIF.
-
-        lv_markup = zcl_abappm_markdown_syn=>process(
-          iv_source   = <lv_line>
-          iv_language = lv_language ).
-
-        IF lv_codeblock IS NOT INITIAL.
-          lv_language = lv_codeblock.
-        ELSE.
-          lv_language = 'markdown'.
-        ENDIF.
-      ENDIF.
-
-      rv_html = rv_html && |  <tr class="diff_line">\n|
-        && |    <td class="num" line-num="{ lv_num }"></td>\n|
-        && |    <td class="code">{ lv_markup }</td>\n|
-        && |  </tr>\n|.
-    ENDLOOP.
-
-    rv_html = rv_html && |</table>\n|.
 
   ENDMETHOD.
 
@@ -439,6 +365,59 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_content.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    ri_html->add( '<div class="content syntax-hl">' ).
+
+    CASE mv_view.
+      WHEN c_action-view_readme_rendered.
+        ri_html->add( render_markdown( ) ).
+      WHEN c_action-view_readme_source.
+        ri_html->add( render_markdown_source( abap_false ) ).
+      WHEN c_action-view_readme_raw.
+        ri_html->add( render_markdown_source( abap_true ) ).
+      WHEN c_action-view_dependencies.
+        ri_html->add( render_dependencies( ) ).
+      WHEN c_action-view_json.
+        ri_html->add( render_json( ) ).
+      WHEN OTHERS.
+        ASSERT 0 = 1.
+    ENDCASE.
+
+    ri_html->add( '</div>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_dependencies.
+
+    DATA:
+      ls_package_json TYPE zif_abappm_package_json_types=>ty_package_json,
+      ls_dependency   TYPE zif_abappm_package_json_types=>ty_dependency.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    ls_package_json = get_dependencies_data( ).
+
+    ri_html->add( '<div class="html">' ).
+
+    IF ls_package_json-dependencies IS NOT INITIAL.
+      ri_html->add( |<h2>Dependencies ({ lines( ls_package_json-dependencies ) })</h2>| ).
+
+      LOOP AT ls_package_json-dependencies INTO ls_dependency.
+        ri_html->add( |<span class="transport-box">{ ls_dependency-name }: { ls_dependency-range }</span>| ).
+        " TODO: Display status of dependency
+        " Is it installed and if yes in which version?
+      ENDLOOP.
+    ENDIF.
+
+    ri_html->add( '</div>' ).
+
+  ENDMETHOD.
+
+
   METHOD render_footer.
 
     ri_html = zcl_abapgit_html=>create( ).
@@ -454,7 +433,6 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       ri_html->add( '<div class="dummydiv success">' ).
       ri_html->add( 'Readme not found' ).
-      ri_html->add( '</div>' ).
 
     ELSE.
 
@@ -467,37 +445,136 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         " path / path / path / filename
         ri_html->add( |{ ms_markdown-path+1 }{ ms_markdown-filename }| ).
       ENDIF..
-      ri_html->add( '</div>' ).
 
     ENDIF.
+
+    ri_html->add( '</div>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_json.
+
+    DATA:
+      lo_highlighter TYPE REF TO zcl_abapgit_syntax_highlighter,
+      lv_formatted   TYPE string.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    " Create syntax highlighter
+    lo_highlighter = zcl_abapgit_syntax_factory=>create( '*.json' ).
+    lv_formatted   = lo_highlighter->process_line( get_json_data( ) ).
+
+    ri_html->add( '<div class="source">' ).
+    ri_html->add( |<pre class="syntax-hl">{ lv_formatted }</pre>| ).
+    ri_html->add( '</div>' ).
 
   ENDMETHOD.
 
 
   METHOD render_markdown.
 
+    DATA:
+      lo_markdown TYPE REF TO zcl_abappm_markdown,
+      lv_url      TYPE string,
+      lv_branch   TYPE string,
+      lv_html     TYPE string.
+
     ri_html = zcl_abapgit_html=>create( ).
 
-    ri_html->add( '<div class="content syntax-hl">' ).
+    ms_markdown-data = get_markdown_data( ).
 
-    CASE mv_view.
-      WHEN c_action-view_readme_rendered.
-        ri_html->add( '<div class="html">' ).
-        ri_html->add( get_markdown_rendered( ) ).
-      WHEN c_action-view_readme_source.
-        ri_html->add( '<div class="source">' ).
-        ri_html->add( get_markdown_source( abap_false ) ).
-      WHEN c_action-view_readme_raw.
-        ri_html->add( '<div class="source">' ).
-        ri_html->add( get_markdown_source( abap_true ) ).
-      WHEN c_action-view_json.
-        ri_html->add( '<div class="source">' ).
-        ri_html->add( get_json_rendered( ) ).
-      WHEN OTHERS.
-        ASSERT 0 = 1.
-    ENDCASE.
+    " TODO url/branch mapping
+    "lv_url = mo_repo->get_url( ).
+    "REPLACE REGEX '\.git$' IN lv_url WITH ''.
+    "lv_branch = zcl_abapgit_git_branch_list=>get_display_name( mo_repo->get_selected_branch( ) ).
 
+    CREATE OBJECT lo_markdown
+      EXPORTING
+        root_href = get_root_href(
+                       iv_url    = lv_url
+                       iv_branch = lv_branch )
+        root_img  = get_root_img(
+                       iv_url    = lv_url
+                       iv_branch = lv_branch )
+        path      = ms_markdown-path
+        sapevent  = abap_true.
+
+    lv_html = lo_markdown->text( ms_markdown-data ).
+
+    " Links to markdown files
+    "lv_html = replace_markdown_href(
+    "  iv_html      = lv_html
+    "  iv_root_href = |{ lv_url }/blob/{ lv_branch }| ).
+
+    " Emoji
+    ri_html->add( '<div class="html">' ).
+    ri_html->add( zcl_abappm_markdown_emoji=>create( )->format_emoji( lv_html ) ).
     ri_html->add( '</div>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_markdown_source.
+
+    DATA:
+      lv_num       TYPE i,
+      lv_language  TYPE string,
+      lv_codeblock TYPE string,
+      lv_markdown  TYPE string,
+      lv_markup    TYPE string,
+      lt_lines     TYPE TABLE OF string.
+
+    FIELD-SYMBOLS <lv_line> TYPE string.
+
+    ri_html = zcl_abapgit_html=>create( ).
+
+    lv_markdown = get_markdown_data( ).
+
+    IF iv_raw = abap_true.
+      lv_markdown = escape(
+        val    = lv_markdown
+        format = cl_abap_format=>e_html_text ).
+    ENDIF.
+
+    " Same style as diffs
+    ri_html->add( '<div class="source">' ).
+    ri_html->add( |<table class="diff_tab" id="{ ms_markdown-filename }">| ).
+
+    SPLIT lv_markdown AT cl_abap_char_utilities=>newline INTO TABLE lt_lines.
+
+    lv_language = 'markdown'.
+
+    LOOP AT lt_lines ASSIGNING <lv_line>.
+      lv_num = sy-tabix.
+
+      IF iv_raw = abap_true.
+        lv_markup = <lv_line>.
+      ELSE.
+        " Detect code block
+        FIND REGEX '^```\s*(.*)' IN <lv_line> SUBMATCHES lv_codeblock.
+        IF sy-subrc = 0.
+          lv_language = 'codeblock'. " falls back to txt
+        ENDIF.
+
+        lv_markup = zcl_abappm_markdown_syn=>process(
+          iv_source   = <lv_line>
+          iv_language = lv_language ).
+
+        IF lv_codeblock IS NOT INITIAL.
+          lv_language = lv_codeblock.
+        ELSE.
+          lv_language = 'markdown'.
+        ENDIF.
+      ENDIF.
+
+      ri_html->add( '<tr class="diff_line">' ).
+      ri_html->add( |<td class="num" line-num="{ lv_num }"></td>| ).
+      ri_html->add( |<td class="code">{ lv_markup }</td>| ).
+      ri_html->add( '</tr>' ).
+    ENDLOOP.
+
+    ri_html->add( '</table>' ).
     ri_html->add( '</div>' ).
 
   ENDMETHOD.
@@ -622,7 +699,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD zif_abapgit_gui_event_handler~on_event.
 
     CASE ii_event->mv_action.
-      WHEN c_action-view_readme_rendered OR c_action-view_readme_source OR c_action-view_readme_raw OR c_action-view_json.
+      WHEN c_action-view_readme_rendered OR c_action-view_readme_source OR c_action-view_readme_raw
+        OR c_action-view_dependencies OR c_action-view_json.
 
         mv_view = ii_event->mv_action.
 
@@ -675,6 +753,9 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
       iv_txt = 'Readme'
       io_sub = lo_readme_menu
     )->add(
+      iv_txt = 'Dependencies'
+      iv_act = c_action-view_dependencies
+    )->add(
       iv_txt = 'Manifest'
       iv_act = c_action-view_json
     )->add(
@@ -705,7 +786,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     ri_html->add( '<div class="markdown">' ).
     ri_html->add( render_header( ) ).
-    ri_html->add( render_markdown( ) ).
+    ri_html->add( render_content( ) ).
     ri_html->add( render_footer( ) ).
     ri_html->add( '</div>' ).
 
