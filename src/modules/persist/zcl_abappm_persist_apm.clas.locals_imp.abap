@@ -31,11 +31,15 @@ CLASS lcl_persist_utils IMPLEMENTATION.
 
   METHOD get_user_description.
 
-    DATA ls_user_address TYPE addr3_val.
+    DATA:
+      lv_username     TYPE xubname,
+      ls_user_address TYPE addr3_val.
+
+    lv_username = iv_username.
 
     CALL FUNCTION 'SUSR_USER_ADDRESS_READ'
       EXPORTING
-        user_name              = |{ iv_username }|
+        user_name              = lv_username
       IMPORTING
         user_address           = ls_user_address
       EXCEPTIONS

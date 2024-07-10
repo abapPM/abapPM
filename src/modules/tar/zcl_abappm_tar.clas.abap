@@ -25,6 +25,7 @@ CLASS zcl_abappm_tar DEFINITION
         unixtime TYPE i,
         size     TYPE i,
         typeflag TYPE c LENGTH 1,
+        content  TYPE xstring,
       END OF ty_file,
       ty_files TYPE STANDARD TABLE OF ty_file WITH KEY name.
 
@@ -66,7 +67,7 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    "! List the contents of an archive
+    "! List the table of contents of an archive (no data)
     METHODS list
       RETURNING
         VALUE(result) TYPE ty_files

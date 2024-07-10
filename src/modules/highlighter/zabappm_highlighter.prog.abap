@@ -7,4 +7,4 @@
 * https://abappm.com/-/web/detail/highlighter
 *************************************************************************
 
-IMPORT '*' TO 'z$1_abappm$2' FROM 'highlighter'.
+IMPORT '*' TO 'z$1_abappm$2' FROM 'syntax-highlighter'.

@@ -50,7 +50,7 @@ INTERFACE zif_abappm_settings PUBLIC.
 
   CONSTANTS:
     c_registry TYPE string VALUE 'https://registry.abappm.com',
-    c_global   TYPE ty_name VALUE '$GLOBAL$'.
+    c_global   TYPE ty_name VALUE zif_abappm_persist_apm=>c_key_name-global_settings.
 
   METHODS get
     RETURNING

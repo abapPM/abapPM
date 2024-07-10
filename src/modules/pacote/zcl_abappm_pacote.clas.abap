@@ -125,8 +125,8 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF iv_registry <> 'https://registry.abappm.com'.
-      zcx_abappm_error=>raise( 'Only works with registry.abappm.com' ).
+    IF iv_registry NP 'https://*.abappm.com'.
+      zcx_abappm_error=>raise( 'Only works with abappm.com' ).
     ENDIF.
 
     mv_registry = iv_registry.
@@ -189,7 +189,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         ENDIF.
 
         " Login manager requires git-like url so we add some dummy repo
-        lv_url = iv_url && '/apm/apm.git'.
+        lv_url = iv_url && '/apm/apm'.
 
         " Get auth token from repo
         IF zcl_abapgit_login_manager=>get( lv_url ) IS NOT INITIAL.

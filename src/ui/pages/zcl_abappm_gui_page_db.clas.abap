@@ -80,6 +80,12 @@ CLASS zcl_abappm_gui_page_db DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    CLASS-METHODS explain_key_formatted
+      IMPORTING
+        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
@@ -321,6 +327,25 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD explain_key_formatted.
+
+    DATA ls_explained TYPE zcl_abappm_persist_apm=>ty_explained.
+
+    ls_explained = zcl_abappm_persist_apm=>explain_key( iv_key ).
+
+    IF ls_explained-key_type IS NOT INITIAL.
+      ls_explained-key_type = |{ ls_explained-key_type }: |.
+    ENDIF.
+
+    IF ls_explained-extra IS NOT INITIAL.
+      ls_explained-extra = | ({ ls_explained-extra })|.
+    ENDIF.
+
+    result = |{ ls_explained-key_type }<br/><strong>{ ls_explained-description }</strong><br/>{ ls_explained-extra }|.
+
+  ENDMETHOD.
+
+
   METHOD register_stylesheet.
 
     DATA lo_buf TYPE REF TO zcl_abapgit_string_buffer.
@@ -349,17 +374,16 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     FIELD-SYMBOLS <ls_db_entry> LIKE LINE OF it_db_entries.
 
     LOOP AT it_db_entries ASSIGNING <ls_db_entry>.
-" FIXME:
-*      CASE <ls_db_entry>-key_type.
-*        WHEN zif_persist_apm=>c_key_type-package.
-*          IF <ls_db_entry>-key_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
-*            lv_packages = lv_packages + 1.
-*          ENDIF.
-*        WHEN zif_persist_apm=>c_key_type-settings.
-*          IF <ls_db_entry>-key_extra <> zif_abappm_persist_apm=>c_key_extra-global_settings.
-*            lv_users = lv_users + 1.
-*          ENDIF.
-*      ENDCASE.
+      CASE <ls_db_entry>-key_type.
+        WHEN zif_persist_apm=>c_key_type-package.
+          IF <ls_db_entry>-key_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
+            lv_packages = lv_packages + 1.
+          ENDIF.
+        WHEN zif_persist_apm=>c_key_type-settings.
+          IF <ls_db_entry>-key_name <> zif_abappm_persist_apm=>c_key_name-global_settings.
+            lv_users = lv_users + 1.
+          ENDIF.
+      ENDCASE.
     ENDLOOP.
 
     ri_html = zcl_abapgit_html=>create( ).
@@ -373,18 +397,20 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     ri_html = zcl_abapgit_html_table=>create( me
       )->define_column(
-        iv_column_id = 'keys'
+        iv_column_id    = 'keys'
         iv_column_title = 'Key'
       )->define_column(
-        iv_column_id = 'value'
+        iv_column_id    = 'value'
         iv_column_title = 'Description'
       )->define_column(
-        iv_column_id = 'luser'
+        iv_column_id    = 'user'
         iv_column_title = 'Last Changed By'
       )->define_column(
-        iv_column_id = 'timestamp'
+        iv_column_id    = 'timestamp'
         iv_column_title = 'Last Changed At'
-      )->define_column( 'cmd'
+      )->define_column(
+        iv_column_id    = 'cmd'
+        iv_column_title = 'Commands'
       )->render( it_db_entries ).
 
   ENDMETHOD.
@@ -398,12 +424,14 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-db_display.
-        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create( lv_key ).
+        rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
+          iv_key          = lv_key
+          iv_edit_mode    = abap_false ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN c_action-db_edit.
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
-          iv_key       = lv_key
-          iv_edit_mode = abap_true ).
+          iv_key          = lv_key
+          iv_edit_mode    = abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
       WHEN c_action-delete.
         do_delete_entry( lv_key ).
@@ -421,7 +449,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    CREATE OBJECT ro_toolbar.
+    ro_toolbar = zcl_abapgit_html_toolbar=>create( 'main' ).
 
     ro_toolbar->add(
       iv_txt = 'Backup'
@@ -472,14 +500,16 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     FIELD-SYMBOLS <lv_key> TYPE zif_abappm_persist_apm=>ty_key.
 
     ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO <lv_key>.
+    ASSERT sy-subrc = 0.
 
     CASE iv_column_id.
       WHEN 'keys'.
         rs_render-content = |{ iv_value }|.
       WHEN 'value'.
-        " FIXME: rs_render-content   = gi_persist->explain_formatted( <lv_key> ).
+        " FIXME:
+        rs_render-content   = explain_key_formatted( <lv_key> ).
         rs_render-css_class = 'data'.
-      WHEN 'luser'.
+      WHEN 'user'.
         lv_user             = iv_value.
         rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_user_name( lv_user )->render( ).
       WHEN 'timestamp'.

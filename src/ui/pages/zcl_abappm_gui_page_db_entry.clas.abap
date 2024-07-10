@@ -17,19 +17,12 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
     INTERFACES zif_abapgit_gui_renderable.
     INTERFACES zif_abapgit_gui_page_title.
 
-    CONSTANTS:
-      BEGIN OF c_content_type,
-        json     TYPE string VALUE 'json',
-        markdown TYPE string VALUE 'markdown',
-      END OF c_content_type.
-
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS create
       IMPORTING
         !iv_key          TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode    TYPE abap_bool DEFAULT abap_false
-        !iv_content_type TYPE string DEFAULT c_content_type-json
       RETURNING
         VALUE(ri_page)   TYPE REF TO zif_abapgit_gui_renderable
       RAISING
@@ -39,7 +32,6 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       IMPORTING
         !iv_key          TYPE zif_abappm_persist_apm=>ty_key
         !iv_edit_mode    TYPE abap_bool
-        !iv_content_type TYPE string
       RAISING
         zcx_abapgit_exception.
 
@@ -65,7 +57,9 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
 
     METHODS load_entry
       IMPORTING
-        !iv_key TYPE zif_abappm_persist_apm=>ty_key
+        !iv_key        TYPE zif_abappm_persist_apm=>ty_key
+      RETURNING
+        VALUE(rs_data) TYPE zif_abappm_persist_apm=>ty_zabappm
       RAISING
         zcx_abapgit_exception.
 
@@ -77,29 +71,27 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       RETURNING
         VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
-        zcx_abapgit_exception .
+        zcx_abapgit_exception.
 
     METHODS render_view
-      IMPORTING
-        iv_raw_db_value TYPE zif_abappm_persist_apm=>ty_zabappm-value
-        ii_html         TYPE REF TO zif_abapgit_html
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
     METHODS render_edit
-      IMPORTING
-        iv_raw_db_value TYPE zif_abappm_persist_apm=>ty_zabappm-value
-        ii_html         TYPE REF TO zif_abapgit_html
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
 
     METHODS render_header
-      IMPORTING
-        ii_html TYPE REF TO zif_abapgit_html.
+      RETURNING
+        VALUE(ri_html) TYPE REF TO zif_abapgit_html
+      RAISING
+        zcx_abapgit_exception.
 
-    METHODS render_entry_tag
-      IMPORTING
-        is_key         TYPE zif_abappm_persist_apm=>ty_zabappm
+    METHODS get_entry_tag
       RETURNING
         VALUE(rv_html) TYPE string.
 
@@ -144,9 +136,8 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     register_stylesheet( ).
 
     mv_edit_mode    = iv_edit_mode.
-    mv_content_type = iv_content_type.
-
-    load_entry( iv_key ).
+    mv_content_type = zcl_abappm_persist_apm=>explain_key( iv_key )-content_type.
+    ms_data         = load_entry( iv_key ).
 
   ENDMETHOD.
 
@@ -157,9 +148,8 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     CREATE OBJECT lo_component
       EXPORTING
-        iv_key          = iv_key
-        iv_edit_mode    = iv_edit_mode
-        iv_content_type = iv_content_type.
+        iv_key       = iv_key
+        iv_edit_mode = iv_edit_mode.
 
     ri_page = zcl_abappm_gui_page_hoc=>create(
       iv_extra_css_url       = c_css_url
@@ -184,7 +174,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     " Validation might raise expection but we want to keep the edited (inconsistent) value
     ms_data-value = is_content-value.
 
-    IF mv_content_type = c_content_type-json.
+    IF mv_content_type = zcl_abappm_persist_apm=>c_content_type-json.
       ms_data-value = validate_and_pretty_json( is_content-value ).
     ENDIF.
 
@@ -203,12 +193,20 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_entry_tag.
+    rv_html =
+      |<dl class="entry-tag">| &&
+      |<div><dt>Key</dt><dd>{ ms_data-keys }</dd></div>| &&
+      |</dl>|.
+  ENDMETHOD.
+
+
   METHOD load_entry.
 
     DATA lx_error TYPE REF TO zcx_abappm_error.
 
     TRY.
-        ms_data = gi_persist->load( iv_key ).
+        rs_data = gi_persist->load( iv_key ).
       CATCH zcx_abappm_error INTO lx_error.
         zcx_abapgit_exception=>raise_with_text( lx_error ).
     ENDTRY.
@@ -236,59 +234,53 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     DATA lv_value TYPE string.
 
-    ii_html->add( |<form id="{ c_edit_form_id }" method="post" action="sapevent:{ c_action-update }">| ).
-    ii_html->add( |<input type="hidden" name="keys" value="{ ms_data-keys }">| ).
+    ri_html = zcl_abapgit_html=>create( ).
 
-    IF mv_content_type = c_content_type-json.
-      lv_value = escape(
-        val    = iv_raw_db_value
-        format = cl_abap_format=>e_html_attr ).
-      ii_html->add( |<textarea rows="30" cols="200" name="value" id="editor">{ iv_raw_db_value }</textarea>| ).
+    ri_html->add( |<form id="{ c_edit_form_id }" method="post" action="sapevent:{ c_action-update }">| ).
+    ri_html->add( |<input type="hidden" name="keys" value="{ escape(
+      val    = ms_data-keys
+      format = cl_abap_format=>e_html_attr ) }">| ).
+
+    lv_value = escape(
+      val    = ms_data-value
+      format = cl_abap_format=>e_html_text ).
+
+    IF mv_content_type = zcl_abappm_persist_apm=>c_content_type-json.
+      ri_html->add( |<textarea rows="40" cols="200" name="value" id="editor">{ lv_value }</textarea>| ).
       " TODO: Replace with
       " ii_html->add( |<json-editor value="{ lv_value }" indent="2"></json-editor>| ).
     ELSE.
-      ii_html->add( |<textarea rows="30" cols="200" name="value" id="editor">{ iv_raw_db_value }</textarea>| ).
+      ri_html->add( |<textarea rows="40" cols="200" name="value" id="editor">{ lv_value }</textarea>| ).
     ENDIF.
 
-    ii_html->add( '</form>' ).
-
-  ENDMETHOD.
-
-
-  METHOD render_entry_tag.
-
-    rv_html =
-      |<dl class="entry-tag">| &&
-      |<div><dt>Key</dt><dd>{ is_key-keys }</dd></div>| &&
-      |</dl>|.
+    ri_html->add( '</form>' ).
 
   ENDMETHOD.
 
 
   METHOD render_header.
+    ri_html = zcl_abapgit_html=>create( ).
 
-    ii_html->add( '<div class="toolbar">' ).
-    ii_html->add( render_entry_tag( ms_data ) ).
-    ii_html->add( '</div>' ).
-
+    ri_html->add( '<div class="toolbar">' ).
+    ri_html->add( get_entry_tag( ) ).
+    ri_html->add( '</div>' ).
   ENDMETHOD.
 
 
   METHOD render_scripts.
-
     ri_html = zcl_abapgit_html=>create( ).
 
     ri_html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
-*    ri_html->add( lcl_json_editor=>get_javascript( ) ).
-
+    " TODO: Replace with
+    " ri_html->add( lcl_json_editor=>get_javascript( ) ).
   ENDMETHOD.
 
 
   METHOD render_view.
+    ri_html = zcl_abapgit_html=>create( ).
 
     " Better not to use syntax highlighter so we see the actual, unmodified data
-    ii_html->add( |<pre class="syntax-hl">{ iv_raw_db_value }</pre>| ).
-
+    ri_html->add( |<pre class="syntax-hl">{ ms_data-value }</pre>| ).
   ENDMETHOD.
 
 
@@ -311,11 +303,11 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-switch_mode.
-        mv_edit_mode = boolc( mv_edit_mode = abap_false ).
+        mv_edit_mode     = boolc( mv_edit_mode = abap_false ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
       WHEN c_action-update.
         do_update( dbcontent_decode( ii_event->form_data( ) ) ).
-        mv_edit_mode = abap_false.
+        mv_edit_mode     = abap_false.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
     ENDCASE.
 
@@ -326,7 +318,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     DATA lv_txt TYPE string.
 
-    CREATE OBJECT ro_toolbar.
+    ro_toolbar = zcl_abapgit_html_toolbar=>create( 'main' ).
 
     IF mv_edit_mode = abap_true.
       ro_toolbar->add(
@@ -373,22 +365,19 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     ri_html->add( '<div class="db-entry">' ).
 
-    render_header( ri_html ).
+    ri_html->add( render_header( ) ).
 
     IF mv_edit_mode = abap_true.
       TRY.
           gi_persist->lock( ms_data-keys ).
         CATCH zcx_abappm_error INTO lx_error.
+          mv_edit_mode = abap_false.
           zcx_abapgit_exception=>raise_with_text( lx_error ).
       ENDTRY.
 
-      render_edit(
-        iv_raw_db_value = ms_data-value
-        ii_html         = ri_html ).
+      ri_html->add( render_edit( ) ).
     ELSE.
-      render_view(
-        iv_raw_db_value = ms_data-value
-        ii_html         = ri_html ).
+      ri_html->add( render_view( ) ).
     ENDIF.
 
     ri_html->add( '</div>' ).

@@ -3,6 +3,10 @@ CLASS ltcl_tar_tests DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT F
   PRIVATE SECTION.
     DATA mo_cut TYPE REF TO zcl_abappm_tar.
 
+    " TODO:
+    " So far tests cover only helper methods but it needs tests to validated the tar methods
+    " We know it works based on tests using program Z_TAR_TESTER and tar files
+    " created with unix tar binary :-)
     METHODS:
       setup,
       null FOR TESTING,

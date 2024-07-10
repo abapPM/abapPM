@@ -138,7 +138,6 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
     result = boolc(
       lv_db IS INITIAL OR
-      lv_db = zif_abappm_package_json_types=>c_db-adabas_d OR
       lv_db = zif_abappm_package_json_types=>c_db-db2 OR
       lv_db = zif_abappm_package_json_types=>c_db-db400 OR
       lv_db = zif_abappm_package_json_types=>c_db-db6 OR
@@ -262,9 +261,9 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
   METHOD is_valid_version.
     " Check if it is a semantic version
     TRY.
-        zcl_abappm_semver=>create( iv_version ).
+        zcl_semver=>create( iv_version ).
         result = abap_true.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_semver_error.
         result = abap_false.
     ENDTRY.
   ENDMETHOD.
@@ -273,9 +272,9 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
   METHOD is_valid_version_range.
     " Check if it is a semantic version range
     TRY.
-        zcl_abappm_semver_range=>create( iv_range ).
+        zcl_semver_range=>create( iv_range ).
         result = abap_true.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_semver_error.
         result = abap_false.
     ENDTRY.
   ENDMETHOD.

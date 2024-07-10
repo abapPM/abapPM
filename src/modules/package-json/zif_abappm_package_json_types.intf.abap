@@ -200,7 +200,6 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
   CONSTANTS:
     " Database platforms
     BEGIN OF c_db,
-      adabas_d TYPE string VALUE 'adabas-d',
       db2      TYPE string VALUE 'db2',
       db400    TYPE string VALUE 'db400',
       db6      TYPE string VALUE 'db6',

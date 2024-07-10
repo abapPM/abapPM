@@ -23,11 +23,14 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
       user      TYPE as4user,
       timestamp TYPE timestampl,
     END OF ty_list_item,
-    ty_list TYPE SORTED TABLE OF ty_list_item WITH UNIQUE KEY keys,
+    ty_list TYPE SORTED TABLE OF ty_list_item WITH UNIQUE KEY keys.
+
+  TYPES:
     BEGIN OF ty_explained,
-      key_type    TYPE string,
-      description TYPE string,
-      extra       TYPE string,
+      key_type     TYPE string,
+      description  TYPE string,
+      extra        TYPE string,
+      content_type TYPE string,
     END OF ty_explained.
 
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
@@ -46,11 +49,20 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
       settings  TYPE ty_key VALUE 'SETTINGS',
       packument TYPE ty_key VALUE 'PACKUMENT',
     END OF c_key_type,
+    BEGIN OF c_key_name,
+      global_settings TYPE ty_key VALUE '$GLOBAL$',
+    END OF c_key_name,
     BEGIN OF c_key_extra,
-      package_json    TYPE ty_key VALUE 'PACKAGE_JSON',
-      package_readme  TYPE ty_key VALUE 'README',
-      global_settings TYPE ty_key VALUE 'GLOBAL',
+      package_json   TYPE ty_key VALUE 'PACKAGE_JSON',
+      package_readme TYPE ty_key VALUE 'README',
     END OF c_key_extra.
+
+  CONSTANTS:
+    BEGIN OF c_content_type,
+      json     TYPE string VALUE 'json',
+      markdown TYPE string VALUE 'markdown',
+      text     TYPE string VALUE 'text',
+    END OF c_content_type.
 
   METHODS list
     IMPORTING
@@ -86,22 +98,6 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
     IMPORTING
       !iv_key  TYPE ty_key
       !iv_mode TYPE enqmode DEFAULT 'E'
-    RAISING
-      zcx_abappm_error.
-
-  METHODS explain
-    IMPORTING
-      !iv_key       TYPE ty_key
-    RETURNING
-      VALUE(result) TYPE ty_explained
-    RAISING
-      zcx_abappm_error.
-
-  METHODS explain_formatted
-    IMPORTING
-      !iv_key       TYPE ty_key
-    RETURNING
-      VALUE(result) TYPE string
     RAISING
       zcx_abappm_error.
 

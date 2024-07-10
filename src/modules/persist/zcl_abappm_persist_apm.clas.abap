@@ -23,9 +23,15 @@ CLASS zcl_abappm_persist_apm DEFINITION
 
     CLASS-METHODS validate_key
       IMPORTING
-        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
+        !iv_key       TYPE clike
       RETURNING
         VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS explain_key
+      IMPORTING
+        !iv_key       TYPE clike
+      RETURNING
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_explained.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -37,6 +43,51 @@ ENDCLASS.
 
 
 CLASS zcl_abappm_persist_apm IMPLEMENTATION.
+
+
+  METHOD explain_key.
+
+    DATA:
+      lv_key_type TYPE string,
+      lv_name     TYPE string,
+      lv_extra    TYPE string.
+
+    SPLIT iv_key AT ':' INTO lv_key_type lv_name lv_extra.
+
+    CASE lv_key_type.
+      WHEN zif_abappm_persist_apm=>c_key_type-package.
+        result-key_type    = 'Package'.
+        result-description = lcl_persist_utils=>get_package_description( lv_name ).
+
+        IF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
+          result-extra        = 'Package JSON'.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-json.
+        ELSEIF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_readme.
+          result-extra        = 'Readme'.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-markdown.
+        ELSE.
+          " Should not happen. Open issue
+          result-extra        = 'Unknown key extra'.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-text.
+        ENDIF.
+
+      WHEN zif_abappm_persist_apm=>c_key_type-settings.
+        IF lv_name = zif_abappm_persist_apm=>c_key_name-global_settings.
+          result-key_type    = 'Global Settings'.
+          result-description = 'For All Users'.
+        ELSE.
+          result-key_type    = 'Personal Settings'.
+          result-description = lcl_persist_utils=>get_user_description( lv_name ).
+        ENDIF.
+        result-content_type = zif_abappm_persist_apm=>c_content_type-json.
+
+      WHEN OTHERS.
+        result-key_type     = 'Unknown type of key'.
+        result-content_type = zif_abappm_persist_apm=>c_content_type-text.
+
+    ENDCASE.
+
+  ENDMETHOD.
 
 
   METHOD get_instance.
@@ -73,64 +124,6 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Error deleting { iv_key }| ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD zif_abappm_persist_apm~explain.
-
-    DATA:
-      lv_key_type TYPE string,
-      lv_name     TYPE string,
-      lv_extra    TYPE string.
-
-    SPLIT iv_key AT ':' INTO lv_key_type lv_name lv_extra.
-
-    CASE lv_key_type.
-      WHEN zif_abappm_persist_apm=>c_key_type-package.
-        result-key_type    = 'Package'.
-        result-description = lcl_persist_utils=>get_package_description( lv_name ).
-
-        IF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
-          result-extra = 'Package JSON'.
-        ELSEIF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_readme.
-          result-extra = 'Readme'.
-        ELSE.
-          " Should not happen. Open issue
-          result-extra = 'Unknown key extra'.
-        ENDIF.
-
-      WHEN zif_abappm_persist_apm=>c_key_type-settings.
-        IF lv_name = zif_abappm_persist_apm=>c_key_extra-global_settings.
-          result-key_type = 'Global Settings'.
-        ELSE.
-          result-key_type = 'Personal Settings'.
-          result-description = lcl_persist_utils=>get_user_description( lv_name ).
-        ENDIF.
-
-      WHEN OTHERS.
-        result-key_type = 'Unknown type of key'.
-
-    ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD zif_abappm_persist_apm~explain_formatted.
-
-    DATA ls_explained TYPE zif_abappm_persist_apm~ty_explained.
-
-    ls_explained = zif_abappm_persist_apm~explain( iv_key ).
-
-    IF ls_explained-key_type IS NOT INITIAL.
-      ls_explained-key_type = |{ ls_explained-key_type }: |.
-    ENDIF.
-
-    IF ls_explained-extra IS NOT INITIAL.
-      ls_explained-extra = | ({ ls_explained-extra })|.
-    ENDIF.
-
-    result = |{ ls_explained-key_type }<br/><strong>{ ls_explained-description }</strong><br/>{ ls_explained-extra }|.
 
   ENDMETHOD.
 

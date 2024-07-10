@@ -22,6 +22,18 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CLASS-METHODS logo_create
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS logo_delete
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS logo_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     CLASS-METHODS table_create
       RAISING
         zcx_abappm_error.
@@ -121,6 +133,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
 
   METHOD install.
+
+    IF logo_exists( ) = abap_false.
+      logo_create( ).
+    ENDIF.
 
     IF table_exists( ) = abap_false.
       table_create( ).
@@ -226,6 +242,75 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     DATA lv_viewname TYPE dd25l-viewname.
 
     SELECT SINGLE viewname FROM dd25l INTO lv_viewname WHERE viewname = zif_abappm_persist_apm=>c_lock.
+    result = boolc( sy-subrc = 0 ).
+
+  ENDMETHOD.
+
+
+  METHOD logo_create.
+
+    DATA:
+      ls_objh  TYPE objh,
+      ls_objt  TYPE objt,
+      ls_objs  TYPE objs,
+      ls_objsl TYPE objsl.
+
+    ls_objh-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objh-objecttype = 'L'.
+    ls_objh-objcateg   = 'APPL'.
+    ls_objh-checkid    = 'L'.
+    ls_objh-objnamelen = '30'.
+    ls_objh-objtransp  = '2'.
+    ls_objh-luser      = sy-uname.
+    ls_objh-ldate      = sy-datum.
+    ls_objh-objcharset = '1'.
+
+    ls_objt-language   = zif_abappm_persist_apm=>c_english.
+    ls_objt-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objt-objecttype = 'L'.
+    ls_objt-ddtext     = 'apm'.
+
+    ls_objs-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objs-objecttype = 'L'.
+    ls_objs-tabname    = zif_abappm_persist_apm=>c_tabname.
+    ls_objs-ddic       = abap_true.
+    ls_objs-prim_table = abap_true.
+
+    ls_objsl-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objsl-objecttype = 'L'.
+    ls_objsl-trwcount   = '01'.
+    ls_objsl-tpgmid     = 'R3TR'.
+    ls_objsl-tobject    = 'TABU'.
+    ls_objsl-tobj_name  = zif_abappm_persist_apm=>c_tabname.
+    ls_objsl-tobjkey    = '/&/*'.
+    ls_objsl-masknlen   = 7.
+    ls_objsl-maskklen   = 2.
+    ls_objsl-prim_table = abap_true.
+
+    INSERT objh FROM ls_objh.
+    INSERT objt FROM ls_objt.
+    INSERT objs FROM ls_objs.
+    INSERT objsl FROM ls_objsl.
+
+  ENDMETHOD.
+
+
+  METHOD logo_delete.
+
+    DELETE FROM objh WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    DELETE FROM objt WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    DELETE FROM objs WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    DELETE FROM objsl WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+
+  ENDMETHOD.
+
+
+  METHOD logo_exists.
+
+    DATA lv_logo TYPE objh-objectname.
+
+    SELECT SINGLE objectname FROM objh INTO lv_logo
+      WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
@@ -412,6 +497,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     IF table_exists( ) = abap_true.
       table_delete( ).
+    ENDIF.
+
+    IF logo_exists( ) = abap_true.
+      logo_delete( ).
     ENDIF.
 
   ENDMETHOD.

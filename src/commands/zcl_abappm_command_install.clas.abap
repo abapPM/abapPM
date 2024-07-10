@@ -200,6 +200,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
         iv_registry     = iv_registry
         is_package_json = is_package_json ).
 
+      " FUTURE: The following should become obsolete when registry keeps readme for all versions
       " 2b. Registry currently returns readme only on packument level (not in manifest)
       ls_packument = get_packument_from_registry(
         iv_registry     = iv_registry
@@ -220,7 +221,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " 5. The real magic... dependencies
     " Warning: Currently requires dependcies to be installed globally already
-    " They  are then copied and renamed into the target package
+    " They are then copied and renamed into the target package
     install_dependencies(
       iv_package      = iv_package
       is_package_json = is_package_json ).
