@@ -54,13 +54,13 @@ CLASS zcl_abappm_pacote DEFINITION
       IMPORTING
         !iv_json      TYPE string
       RETURNING
-        VALUE(result) TYPE zif_pacote=>ty_packument
+        VALUE(result) TYPE zif_abappm_pacote=>ty_packument
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS convert_packument_to_json
       IMPORTING
-        !is_packument TYPE zif_pacote=>ty_packument
+        !is_packument TYPE zif_abappm_pacote=>ty_packument
       RETURNING
         VALUE(result) TYPE string
       RAISING

@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
+INTERFACE zif_abappm_pacote PUBLIC.
 
 
 ************************************************************************
@@ -12,7 +12,7 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
   TYPES:
     BEGIN OF ty_version,
       key     TYPE string,
-      version TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST,
+      version TYPE zif_abappm_package_json_types=>ty_manifest,
     END OF ty_version.
 
   TYPES:
@@ -31,23 +31,23 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     BEGIN OF ty_packument,
       name          TYPE string,
       description   TYPE string,
-      dist_tags     TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_GENERIC WITH KEY key,
-      time          TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_TIME WITH KEY key,
+      dist_tags     TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
+      time          TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_time WITH KEY key,
       versions      TYPE STANDARD TABLE OF ty_version WITH KEY key,
-      maintainers   TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PERSON WITH KEY name,
+      maintainers   TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
       readme        TYPE string,
-      users         TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_USER WITH KEY name,
+      users         TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_user WITH KEY name,
       homepage      TYPE string,
       BEGIN OF bugs,
-        url   TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_URI,
-        email TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_EMAIL,
+        url   TYPE zif_abappm_package_json_types=>ty_uri,
+        email TYPE zif_abappm_package_json_types=>ty_email,
       END OF bugs,
       license       TYPE string,
       keywords      TYPE string_table,
-      author        TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PERSON,
+      author        TYPE zif_abappm_package_json_types=>ty_person,
       BEGIN OF repository,
         type      TYPE string,
-        url       TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_URI,
+        url       TYPE zif_abappm_package_json_types=>ty_uri,
         directory TYPE string,
       END OF repository,
       __id          TYPE string,
@@ -58,11 +58,11 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
 
   TYPES:
     BEGIN OF ty_pacote,
-      key       TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
+      key       TYPE zif_abappm_persist_apm=>ty_key,
       name      TYPE string,
       json      TYPE string,
       packument TYPE ty_packument,
-      instance  TYPE REF TO ZIF_ABAPPM_PACOTE,
+      instance  TYPE REF TO zif_abappm_pacote,
     END OF ty_pacote.
   TYPES:
     ty_pacotes TYPE STANDARD TABLE OF ty_pacote WITH KEY key.
@@ -79,17 +79,17 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     IMPORTING
       !is_packument TYPE ty_packument
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set_json
     IMPORTING
       !iv_json      TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -97,17 +97,17 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS manifest
     IMPORTING
@@ -116,13 +116,13 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     RETURNING
       VALUE(result)  TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS packument
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS tarball
     IMPORTING
@@ -130,6 +130,6 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     RETURNING
       VALUE(result) TYPE xstring
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
 ENDINTERFACE.

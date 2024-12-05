@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID DEFINITION
+CLASS zcl_abappm_package_json_valid DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
@@ -13,9 +13,9 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID DEFINITION
 
     CLASS-METHODS check
       IMPORTING
-        !is_manifest TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST
+        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
       RETURNING
-        VALUE(result)    TYPE string_table.
+        VALUE(result) TYPE string_table.
 
     CLASS-METHODS is_valid_package_type
       IMPORTING
@@ -94,7 +94,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
+CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
 
   METHOD check.
@@ -123,9 +123,9 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
 
     result = boolc(
       lv_cpu IS INITIAL OR
-      lv_cpu = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_CPU-X86_64 OR
-      lv_cpu = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_CPU-POWER_PC OR
-      lv_cpu = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_CPU-SPARC ).
+      lv_cpu = zif_abappm_package_json_types=>c_cpu-x86_64 OR
+      lv_cpu = zif_abappm_package_json_types=>c_cpu-power_pc OR
+      lv_cpu = zif_abappm_package_json_types=>c_cpu-sparc ).
 
   ENDMETHOD.
 
@@ -138,15 +138,15 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
 
     result = boolc(
       lv_db IS INITIAL OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-DB2 OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-DB400 OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-DB6 OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-HDB OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-INFORMIX OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-MSSQL OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-ORACLE OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-SAP_DB OR
-      lv_db = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_DB-SYBASE ).
+      lv_db = zif_abappm_package_json_types=>c_db-db2 OR
+      lv_db = zif_abappm_package_json_types=>c_db-db400 OR
+      lv_db = zif_abappm_package_json_types=>c_db-db6 OR
+      lv_db = zif_abappm_package_json_types=>c_db-hdb OR
+      lv_db = zif_abappm_package_json_types=>c_db-informix OR
+      lv_db = zif_abappm_package_json_types=>c_db-mssql OR
+      lv_db = zif_abappm_package_json_types=>c_db-oracle OR
+      lv_db = zif_abappm_package_json_types=>c_db-sap_db OR
+      lv_db = zif_abappm_package_json_types=>c_db-sybase ).
 
   ENDMETHOD.
 
@@ -171,8 +171,8 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
 
     result = boolc(
       iv_engine IS INITIAL OR
-      iv_engine = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_ENGINE-ABAP OR
-      iv_engine = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_ENGINE-APM ).
+      iv_engine = zif_abappm_package_json_types=>c_engine-abap OR
+      iv_engine = zif_abappm_package_json_types=>c_engine-apm ).
 
   ENDMETHOD.
 
@@ -180,10 +180,10 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
   METHOD is_valid_name.
     " https://www.npmjs.com/package/validate-npm-package-name
     IF strlen( iv_name )
-      BETWEEN ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_PACKAGE_NAME-MIN_LENGTH
-          AND ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_PACKAGE_NAME-MAX_LENGTH.
+      BETWEEN zif_abappm_package_json_types=>c_package_name-min_length
+          AND zif_abappm_package_json_types=>c_package_name-max_length.
 
-      FIND REGEX ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_PACKAGE_NAME-REGEX IN iv_name RESPECTING CASE.
+      FIND REGEX zif_abappm_package_json_types=>c_package_name-regex IN iv_name RESPECTING CASE.
       result = boolc( sy-subrc =  0 ).
     ELSE.
       result = abap_false.
@@ -199,13 +199,13 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
 
     result = boolc(
       lv_os IS INITIAL OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-AIX OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-HP_UX OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-LINUX OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-MS_WINDOWS OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-OS_390 OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-OS_400 OR
-      lv_os = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_OS-SOLARIS ).
+      lv_os = zif_abappm_package_json_types=>c_os-aix OR
+      lv_os = zif_abappm_package_json_types=>c_os-hp_ux OR
+      lv_os = zif_abappm_package_json_types=>c_os-linux OR
+      lv_os = zif_abappm_package_json_types=>c_os-ms_windows OR
+      lv_os = zif_abappm_package_json_types=>c_os-os_390 OR
+      lv_os = zif_abappm_package_json_types=>c_os-os_400 OR
+      lv_os = zif_abappm_package_json_types=>c_os-solaris ).
 
   ENDMETHOD.
 
@@ -214,8 +214,8 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON_VALID IMPLEMENTATION.
 
     result = boolc(
       iv_type IS INITIAL OR
-      iv_type = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_PACKAGE_TYPE-COMMON_ABAP OR
-      iv_type = ZIF_ABAPPM_PACKAGE_JSON_TYPES=>C_PACKAGE_TYPE-MODULE ).
+      iv_type = zif_abappm_package_json_types=>c_package_type-common_abap OR
+      iv_type = zif_abappm_package_json_types=>c_package_type-module ).
 
   ENDMETHOD.
 

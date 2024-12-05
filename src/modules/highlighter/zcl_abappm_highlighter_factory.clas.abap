@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_HIGHLIGHTER_FACTORY DEFINITION
+CLASS zcl_abappm_highlighter_factory DEFINITION
   PUBLIC
   ABSTRACT
   CREATE PUBLIC.
@@ -10,7 +10,7 @@ CLASS ZCL_ABAPPM_HIGHLIGHTER_FACTORY DEFINITION
         !iv_filename       TYPE string
         !iv_hidden_chars   TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(ro_instance) TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER.
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_highlighter.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -18,28 +18,28 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_HIGHLIGHTER_FACTORY IMPLEMENTATION.
+CLASS zcl_abappm_highlighter_factory IMPLEMENTATION.
 
 
   METHOD create.
 
     " Create instance of highlighter dynamically dependent on syntax type
     IF iv_filename CP '*.abap'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_abap.
     ELSEIF iv_filename CP '*.xml' OR iv_filename CP '*.html'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_XML.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_xml.
     ELSEIF iv_filename CP '*.css'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_CSS.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_css.
     ELSEIF iv_filename CP '*.js'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_JS.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_js.
     ELSEIF iv_filename CP '*.json' OR iv_filename CP '*.jsonc'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_JSON.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_json.
     ELSEIF iv_filename CP '*.txt' OR iv_filename CP '*.ini'  OR iv_filename CP '*.text'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_TXT.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_txt.
     ELSEIF iv_filename CP '*.md' OR iv_filename CP '*.markdown'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_MD.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_md.
     ELSEIF iv_filename CP '*.diff'.
-      CREATE OBJECT ro_instance TYPE ZCL_ABAPPM_HIGHLIGHTER_DIFF.
+      CREATE OBJECT ro_instance TYPE zcl_abappm_highlighter_diff.
     ELSE.
       CLEAR ro_instance.
     ENDIF.

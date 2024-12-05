@@ -2,13 +2,13 @@ CLASS lcl_http_response DEFINITION FINAL.
 
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_HTTP_RESPONSE.
+    INTERFACES zif_abappm_http_response.
 
     CLASS-METHODS create
       IMPORTING
         ii_client          TYPE REF TO if_http_client
       RETURNING
-        VALUE(ri_response) TYPE REF TO ZIF_ABAPPM_HTTP_RESPONSE.
+        VALUE(ri_response) TYPE REF TO zif_abappm_http_response.
 
   PRIVATE SECTION.
 
@@ -27,25 +27,25 @@ CLASS lcl_http_response IMPLEMENTATION.
     ri_response ?= lo_response.
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CLOSE.
+  METHOD zif_abappm_http_response~close.
     mi_client->close( ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~IS_OK.
+  METHOD zif_abappm_http_response~is_ok.
     DATA lv_code TYPE i.
-    lv_code = ZIF_ABAPPM_HTTP_RESPONSE~CODE( ).
+    lv_code = zif_abappm_http_response~code( ).
     rv_yes = boolc( lv_code >= 200 AND lv_code < 300 ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~DATA.
+  METHOD zif_abappm_http_response~data.
     rv_data = mi_response->get_data( ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CDATA.
+  METHOD zif_abappm_http_response~cdata.
     rv_data = mi_response->get_cdata( ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CODE.
+  METHOD zif_abappm_http_response~code.
     DATA lv_msg TYPE string ##NEEDED.
     mi_response->get_status(
       IMPORTING
@@ -53,23 +53,23 @@ CLASS lcl_http_response IMPLEMENTATION.
         code   = rv_code ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~JSON.
+  METHOD zif_abappm_http_response~json.
 
-    DATA lx_error TYPE REF TO ZCX_ABAPPM_AJSON_ERROR.
+    DATA lx_error TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        ri_json = ZCL_ABAPPM_AJSON=>PARSE( ZIF_ABAPPM_HTTP_RESPONSE~CDATA( ) ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO lx_error.
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( lx_error ).
+        ri_json = zcl_abappm_ajson=>parse( zif_abappm_http_response~cdata( ) ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~ERROR.
+  METHOD zif_abappm_http_response~error.
     rv_message = mi_response->get_cdata( ).
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~HEADERS.
+  METHOD zif_abappm_http_response~headers.
 
     DATA lt_headers TYPE tihttpnvp.
 

@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SETTINGS DEFINITION
+CLASS zcl_abappm_settings DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,106 +11,106 @@ CLASS ZCL_ABAPPM_SETTINGS DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_SETTINGS.
+    INTERFACES zif_abappm_settings.
 
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS factory
       IMPORTING
-        !iv_name      TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME DEFAULT sy-uname
+        !iv_name      TYPE zif_abappm_settings=>ty_name DEFAULT sy-uname
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_SETTINGS
+        VALUE(result) TYPE REF TO zif_abappm_settings
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
-        !iv_name TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME
-        !ii_mock TYPE REF TO ZIF_ABAPPM_SETTINGS.
+        !iv_name TYPE zif_abappm_settings=>ty_name
+        !ii_mock TYPE REF TO zif_abappm_settings.
 
     METHODS constructor
       IMPORTING
-        !iv_name TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME
+        !iv_name TYPE zif_abappm_settings=>ty_name
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS initialize_global_settings
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS get_setting_key
       IMPORTING
-        !iv_name      TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME
+        !iv_name      TYPE zif_abappm_settings=>ty_name
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY.
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_key.
 
     CLASS-METHODS get_default
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS.
+        VALUE(result) TYPE zif_abappm_settings=>ty_settings.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     TYPES:
       BEGIN OF ty_instance,
-        name     TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME,
-        instance TYPE REF TO ZIF_ABAPPM_SETTINGS,
+        name     TYPE zif_abappm_settings=>ty_name,
+        instance TYPE REF TO zif_abappm_settings,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY name.
 
     CONSTANTS c_settings TYPE string VALUE 'SETTINGS'.
 
     CLASS-DATA:
-      gi_persist   TYPE REF TO ZIF_ABAPPM_PERSIST_APM,
+      gi_persist   TYPE REF TO zif_abappm_persist_apm,
       gt_instances TYPE ty_instances.
 
     DATA:
-      mv_key      TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
-      mv_name     TYPE ZIF_ABAPPM_SETTINGS=>TY_NAME,
-      ms_settings TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS.
+      mv_key      TYPE zif_abappm_persist_apm=>ty_key,
+      mv_name     TYPE zif_abappm_settings=>ty_name,
+      ms_settings TYPE zif_abappm_settings=>ty_settings.
 
     CLASS-METHODS check_settings
       IMPORTING
-        !is_settings  TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS
+        !is_settings  TYPE zif_abappm_settings=>ty_settings
       RETURNING
         VALUE(result) TYPE string_table.
 
     CLASS-METHODS merge_settings
       CHANGING
-        !cs_settings TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS.
+        !cs_settings TYPE zif_abappm_settings=>ty_settings.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
+CLASS zcl_abappm_settings IMPLEMENTATION.
 
 
   METHOD check_settings.
-    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( is_settings-registry ) = abap_false.
+    IF zcl_abappm_package_json_valid=>is_valid_url( is_settings-registry ) = abap_false.
       INSERT |Invalid registry URL: { is_settings-registry }| INTO TABLE result.
     ENDIF.
   ENDMETHOD.
 
 
   METHOD class_constructor.
-    gi_persist = ZCL_ABAPPM_PERSIST_APM=>GET_INSTANCE( ).
+    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
   ENDMETHOD.
 
 
   METHOD constructor.
 
     IF iv_name IS INITIAL OR strlen( iv_name ) > 12.
-      ZCX_ABAPPM_ERROR=>RAISE( |Invalid name: { iv_name }| ).
+      zcx_abappm_error=>raise( |Invalid name: { iv_name }| ).
     ENDIF.
 
     mv_name = iv_name.
     mv_key  = get_setting_key( mv_name ).
 
     TRY.
-        ZIF_ABAPPM_SETTINGS~LOAD( ).
-      CATCH ZCX_ABAPPM_ERROR.
-        IF mv_name = ZIF_ABAPPM_SETTINGS=>C_GLOBAL.
+        zif_abappm_settings~load( ).
+      CATCH zcx_abappm_error.
+        IF mv_name = zif_abappm_settings=>c_global.
           ms_settings = get_default( ).
         ENDIF.
     ENDTRY.
@@ -128,7 +128,7 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <ls_instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE ZCL_ABAPPM_SETTINGS
+      CREATE OBJECT result TYPE zcl_abappm_settings
         EXPORTING
           iv_name = iv_name.
 
@@ -142,27 +142,27 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
 
   METHOD get_default.
     " Default values for settings
-    result-registry = ZIF_ABAPPM_SETTINGS=>C_REGISTRY.
+    result-registry = zif_abappm_settings=>c_registry.
   ENDMETHOD.
 
 
   METHOD get_setting_key.
-    result = |{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-SETTINGS }:{ iv_name }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ iv_name }|.
   ENDMETHOD.
 
 
   METHOD initialize_global_settings.
 
     DATA:
-      li_global TYPE REF TO ZIF_ABAPPM_SETTINGS,
-      ls_global TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS.
+      li_global TYPE REF TO zif_abappm_settings,
+      ls_global TYPE zif_abappm_settings=>ty_settings.
 
-    li_global = factory( ZIF_ABAPPM_SETTINGS=>C_GLOBAL ).
+    li_global = factory( zif_abappm_settings=>c_global ).
 
     " Check if global settings exist already
     TRY.
         ls_global = li_global->load( )->get( ).
-      CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
     IF ls_global IS NOT INITIAL.
@@ -173,7 +173,7 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
 
     " Save defaults to global settings
     gi_persist->save(
-      iv_key   = get_setting_key( ZIF_ABAPPM_SETTINGS=>C_GLOBAL )
+      iv_key   = get_setting_key( zif_abappm_settings=>c_global )
       iv_value = li_global->get_json( ) ).
 
   ENDMETHOD.
@@ -200,8 +200,8 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
   METHOD merge_settings.
 
     DATA:
-      ls_global  TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS,
-      ls_default TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS.
+      ls_global  TYPE zif_abappm_settings=>ty_settings,
+      ls_default TYPE zif_abappm_settings=>ty_settings.
 
     FIELD-SYMBOLS:
       <lv_value>   TYPE any,
@@ -209,8 +209,8 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
       <lv_default> TYPE any.
 
     TRY.
-        ls_global  = factory( ZIF_ABAPPM_SETTINGS=>C_GLOBAL )->get( ).
-      CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
+        ls_global  = factory( zif_abappm_settings=>c_global )->get( ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
         " Just use defaults
     ENDTRY.
 
@@ -240,10 +240,10 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~DELETE.
+  METHOD zif_abappm_settings~delete.
 
-    IF mv_name = ZIF_ABAPPM_SETTINGS=>C_GLOBAL.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Global settings can not be deleted' ).
+    IF mv_name = zif_abappm_settings=>c_global.
+      zcx_abappm_error=>raise( 'Global settings can not be deleted' ).
     ENDIF.
 
     gi_persist->delete( mv_key ).
@@ -251,68 +251,68 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~GET.
+  METHOD zif_abappm_settings~get.
     result = ms_settings.
-    IF mv_name <> ZIF_ABAPPM_SETTINGS=>C_GLOBAL.
+    IF mv_name <> zif_abappm_settings=>c_global.
       merge_settings( CHANGING cs_settings = result ).
     ENDIF.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~GET_JSON.
+  METHOD zif_abappm_settings~get_json.
 
     DATA:
-      li_json  TYPE REF TO ZIF_ABAPPM_AJSON,
-      lx_error TYPE REF TO ZCX_ABAPPM_AJSON_ERROR.
+      li_json  TYPE REF TO zif_abappm_ajson,
+      lx_error TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        li_json = ZCL_ABAPPM_AJSON=>NEW( )->keep_item_order( )->set(
+        li_json = zcl_abappm_ajson=>new( )->keep_item_order( )->set(
           iv_path = '/'
-          iv_val  = ZIF_ABAPPM_SETTINGS~GET( ) ).
+          iv_val  = zif_abappm_settings~get( ) ).
 
-        li_json = li_json->map( ZCL_ABAPPM_AJSON_MAPPING=>CREATE_TO_CAMEL_CASE( ) ).
+        li_json = li_json->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
 
         IF iv_complete = abap_false.
           li_json = li_json->filter( lcl_ajson_filters=>create_empty_filter( ) ).
         ENDIF.
 
         result = li_json->stringify( 2 ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO lx_error.
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( lx_error ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~IS_VALID.
+  METHOD zif_abappm_settings~is_valid.
     result = boolc( check_settings( ms_settings ) IS INITIAL ).
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~LOAD.
-    ZIF_ABAPPM_SETTINGS~SET_JSON( gi_persist->load( mv_key )-value ).
+  METHOD zif_abappm_settings~load.
+    zif_abappm_settings~set_json( gi_persist->load( mv_key )-value ).
     result = me.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~SAVE.
+  METHOD zif_abappm_settings~save.
 
-    IF ZIF_ABAPPM_SETTINGS~IS_VALID( ) = abap_false.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Invalid settings' ).
+    IF zif_abappm_settings~is_valid( ) = abap_false.
+      zcx_abappm_error=>raise( 'Invalid settings' ).
     ENDIF.
 
     " Save complete JSON including empty values for easy editing
     gi_persist->save(
       iv_key   = mv_key
-      iv_value = ZIF_ABAPPM_SETTINGS~GET_JSON( abap_true ) ).
+      iv_value = zif_abappm_settings~get_json( abap_true ) ).
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~SET.
+  METHOD zif_abappm_settings~set.
 
     IF check_settings( is_settings ) IS NOT INITIAL.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Invalid settings' ).
+      zcx_abappm_error=>raise( 'Invalid settings' ).
     ENDIF.
 
     MOVE-CORRESPONDING is_settings TO ms_settings.
@@ -321,15 +321,15 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_SETTINGS~SET_JSON.
+  METHOD zif_abappm_settings~set_json.
 
     DATA:
-      li_json  TYPE REF TO ZIF_ABAPPM_AJSON,
-      ls_json  TYPE ZIF_ABAPPM_SETTINGS=>TY_SETTINGS,
-      lx_error TYPE REF TO ZCX_ABAPPM_AJSON_ERROR.
+      li_json  TYPE REF TO zif_abappm_ajson,
+      ls_json  TYPE zif_abappm_settings=>ty_settings,
+      lx_error TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        li_json = ZCL_ABAPPM_AJSON=>PARSE( iv_json ).
+        li_json = zcl_abappm_ajson=>parse( iv_json ).
         " TODO: packageSettings does not map to package_setting
         " Looks like a ajson bug
         li_json->to_abap(
@@ -339,12 +339,12 @@ CLASS ZCL_ABAPPM_SETTINGS IMPLEMENTATION.
             ev_container     = ls_json ).
 
         IF check_settings( ls_json ) IS NOT INITIAL.
-          ZCX_ABAPPM_ERROR=>RAISE( 'Invalid settings' ).
+          zcx_abappm_error=>raise( 'Invalid settings' ).
         ENDIF.
 
         MOVE-CORRESPONDING ls_json TO ms_settings.
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO lx_error.
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( lx_error ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
     result = me.

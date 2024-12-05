@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_PERSIST_APM DEFINITION
+CLASS zcl_abappm_persist_apm DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,15 +11,15 @@ CLASS ZCL_ABAPPM_PERSIST_APM DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_PERSIST_APM.
+    INTERFACES zif_abappm_persist_apm.
 
     CLASS-METHODS get_instance
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_PERSIST_APM.
+        VALUE(result) TYPE REF TO zif_abappm_persist_apm.
 
     CLASS-METHODS injector
       IMPORTING
-        !ii_mock TYPE REF TO ZIF_ABAPPM_PERSIST_APM.
+        !ii_mock TYPE REF TO zif_abappm_persist_apm.
 
     CLASS-METHODS validate_key
       IMPORTING
@@ -31,18 +31,18 @@ CLASS ZCL_ABAPPM_PERSIST_APM DEFINITION
       IMPORTING
         !iv_key       TYPE clike
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PERSIST_APM=>TY_EXPLAINED.
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_explained.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CLASS-DATA go_instance TYPE REF TO ZIF_ABAPPM_PERSIST_APM.
+    CLASS-DATA go_instance TYPE REF TO zif_abappm_persist_apm.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
+CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
 
   METHOD explain_key.
@@ -55,35 +55,35 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
     SPLIT iv_key AT ':' INTO lv_key_type lv_name lv_extra.
 
     CASE lv_key_type.
-      WHEN ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKAGE.
+      WHEN zif_abappm_persist_apm=>c_key_type-package.
         result-key_type    = 'Package'.
         result-description = lcl_persist_utils=>get_package_description( lv_name ).
 
-        IF lv_extra = ZIF_ABAPPM_PERSIST_APM=>C_KEY_EXTRA-PACKAGE_JSON.
+        IF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
           result-extra        = 'Package JSON'.
-          result-content_type = ZIF_ABAPPM_PERSIST_APM=>C_CONTENT_TYPE-JSON.
-        ELSEIF lv_extra = ZIF_ABAPPM_PERSIST_APM=>C_KEY_EXTRA-PACKAGE_README.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-json.
+        ELSEIF lv_extra = zif_abappm_persist_apm=>c_key_extra-package_readme.
           result-extra        = 'Readme'.
-          result-content_type = ZIF_ABAPPM_PERSIST_APM=>C_CONTENT_TYPE-MARKDOWN.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-markdown.
         ELSE.
           " Should not happen. Open issue
           result-extra        = 'Unknown key extra'.
-          result-content_type = ZIF_ABAPPM_PERSIST_APM=>C_CONTENT_TYPE-TEXT.
+          result-content_type = zif_abappm_persist_apm=>c_content_type-text.
         ENDIF.
 
-      WHEN ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-SETTINGS.
-        IF lv_name = ZIF_ABAPPM_PERSIST_APM=>C_KEY_NAME-GLOBAL_SETTINGS.
+      WHEN zif_abappm_persist_apm=>c_key_type-settings.
+        IF lv_name = zif_abappm_persist_apm=>c_key_name-global_settings.
           result-key_type    = 'Global Settings'.
           result-description = 'For All Users'.
         ELSE.
           result-key_type    = 'Personal Settings'.
           result-description = lcl_persist_utils=>get_user_description( lv_name ).
         ENDIF.
-        result-content_type = ZIF_ABAPPM_PERSIST_APM=>C_CONTENT_TYPE-JSON.
+        result-content_type = zif_abappm_persist_apm=>c_content_type-json.
 
       WHEN OTHERS.
         result-key_type     = 'Unknown type of key'.
-        result-content_type = ZIF_ABAPPM_PERSIST_APM=>C_CONTENT_TYPE-TEXT.
+        result-content_type = zif_abappm_persist_apm=>c_content_type-text.
 
     ENDCASE.
 
@@ -92,7 +92,7 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
 
   METHOD get_instance.
     IF go_instance IS INITIAL.
-      CREATE OBJECT go_instance TYPE ZCL_ABAPPM_PERSIST_APM.
+      CREATE OBJECT go_instance TYPE zcl_abappm_persist_apm.
     ENDIF.
     result = go_instance.
   ENDMETHOD.
@@ -112,26 +112,26 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
     SPLIT iv_key AT ':' INTO lv_key_type lv_rest.
 
     result = boolc( sy-subrc = 0 AND
-      ( lv_key_type = ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKAGE OR
-        lv_key_type = ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-SETTINGS ) ).
+      ( lv_key_type = zif_abappm_persist_apm=>c_key_type-package OR
+        lv_key_type = zif_abappm_persist_apm=>c_key_type-settings ) ).
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PERSIST_APM~DELETE.
+  METHOD zif_abappm_persist_apm~delete.
 
     DELETE FROM (zif_persist_apm=>c_tabname) WHERE keys = iv_key.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( |Error deleting { iv_key }| ).
+      zcx_abappm_error=>raise( |Error deleting { iv_key }| ).
     ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PERSIST_APM~LIST.
+  METHOD zif_abappm_persist_apm~list.
 
     DATA:
-      lt_data   TYPE STANDARD TABLE OF ZIF_ABAPPM_PERSIST_APM=>TY_ZABAPPM WITH DEFAULT KEY,
+      lt_data   TYPE STANDARD TABLE OF zif_abappm_persist_apm=>ty_zabappm WITH DEFAULT KEY,
       ls_result LIKE LINE OF result.
 
     FIELD-SYMBOLS <ls_data> LIKE LINE OF lt_data.
@@ -159,15 +159,15 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PERSIST_APM~LOAD.
+  METHOD zif_abappm_persist_apm~load.
     SELECT SINGLE * FROM (zif_persist_apm=>c_tabname) INTO result WHERE keys = iv_key.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( |Error loading { iv_key }| ).
+      zcx_abappm_error=>raise( |Error loading { iv_key }| ).
     ENDIF.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PERSIST_APM~LOCK.
+  METHOD zif_abappm_persist_apm~lock.
 
     DATA lv_dummy_update_function TYPE funcname.
 
@@ -180,7 +180,7 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
         system_failure = 2
         OTHERS         = 3.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE_T100( ).
+      zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
     lv_dummy_update_function = lcl_persist_utils=>get_update_function( ).
@@ -191,12 +191,12 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PERSIST_APM~SAVE.
+  METHOD zif_abappm_persist_apm~save.
 
-    DATA ls_abappm TYPE ZIF_ABAPPM_PERSIST_APM=>TY_ZABAPPM.
+    DATA ls_abappm TYPE zif_abappm_persist_apm=>ty_zabappm.
 
     IF validate_key( iv_key ) = abap_false.
-      ZCX_ABAPPM_ERROR=>RAISE( |Invalid key { iv_key }| ).
+      zcx_abappm_error=>raise( |Invalid key { iv_key }| ).
     ENDIF.
 
     ls_abappm-keys  = iv_key.
@@ -212,7 +212,7 @@ CLASS ZCL_ABAPPM_PERSIST_APM IMPLEMENTATION.
     IF sy-subrc <> 0.
       INSERT (zif_persist_apm=>c_tabname) FROM ls_abappm.
       IF sy-subrc <> 0.
-        ZCX_ABAPPM_ERROR=>RAISE( |Error saving { iv_key }| ).
+        zcx_abappm_error=>raise( |Error saving { iv_key }| ).
       ENDIF.
     ENDIF.
 

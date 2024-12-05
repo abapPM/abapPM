@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_PACKAGE_JSON_TYPES PUBLIC.
+INTERFACE zif_abappm_package_json_types PUBLIC.
 
 ************************************************************************
 * Package JSON - Types

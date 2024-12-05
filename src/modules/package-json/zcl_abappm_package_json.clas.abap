@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
+CLASS zcl_abappm_package_json DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,7 +11,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_PACKAGE_JSON.
+    INTERFACES zif_abappm_package_json.
 
     CLASS-METHODS class_constructor.
 
@@ -22,14 +22,14 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
         !iv_version   TYPE string OPTIONAL
         !iv_private   TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+        VALUE(result) TYPE REF TO zif_abappm_package_json
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
         !iv_package TYPE devclass
-        !ii_mock    TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON.
+        !ii_mock    TYPE REF TO zif_abappm_package_json.
 
     METHODS constructor
       IMPORTING
@@ -38,24 +38,24 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
         !iv_version TYPE string OPTIONAL
         !iv_private TYPE abap_bool DEFAULT abap_false
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS list
       IMPORTING
         !iv_filter      TYPE string OPTIONAL
         !iv_instanciate TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result)   TYPE ZIF_ABAPPM_PACKAGE_JSON=>TY_PACKAGES.
+        VALUE(result)   TYPE zif_abappm_package_json=>ty_packages.
 
     CLASS-METHODS get_package_key
       IMPORTING
         !iv_package   TYPE devclass
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY.
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_key.
 
     CLASS-METHODS get_package_from_key
       IMPORTING
-        !iv_key       TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY
+        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
       RETURNING
         VALUE(result) TYPE devclass.
 
@@ -63,19 +63,19 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
       IMPORTING
         !iv_json      TYPE string
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST
+        VALUE(result) TYPE zif_abappm_package_json_types=>ty_manifest
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS convert_manifest_to_json
       IMPORTING
-        !is_manifest     TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST
+        !is_manifest     TYPE zif_abappm_package_json_types=>ty_manifest
         !iv_package_json TYPE abap_bool DEFAULT abap_false
         !iv_complete     TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)    TYPE string
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -83,60 +83,60 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON DEFINITION
     TYPES:
       BEGIN OF ty_instance,
         package  TYPE devclass,
-        instance TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON,
+        instance TYPE REF TO zif_abappm_package_json,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
 
     CLASS-DATA:
-      gi_persist   TYPE REF TO ZIF_ABAPPM_PERSIST_APM,
+      gi_persist   TYPE REF TO zif_abappm_persist_apm,
       gt_instances TYPE ty_instances.
 
     DATA:
-      mv_key      TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
+      mv_key      TYPE zif_abappm_persist_apm=>ty_key,
       mv_package  TYPE devclass,
-      ms_manifest TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST.
+      ms_manifest TYPE zif_abappm_package_json_types=>ty_manifest.
 
     CLASS-METHODS check_manifest
       IMPORTING
-        !is_manifest TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST
+        !is_manifest TYPE zif_abappm_package_json_types=>ty_manifest
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS sort_manifest
       IMPORTING
-        !is_manifest  TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST
+        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST.
+        VALUE(result) TYPE zif_abappm_package_json_types=>ty_manifest.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
+CLASS zcl_abappm_package_json IMPLEMENTATION.
 
 
   METHOD check_manifest.
 
     DATA lt_issues TYPE string_table.
 
-    lt_issues = ZCL_ABAPPM_PACKAGE_JSON_VALID=>CHECK( is_manifest ).
+    lt_issues = zcl_abappm_package_json_valid=>check( is_manifest ).
 
     IF lt_issues IS NOT INITIAL.
-      ZCX_ABAPPM_ERROR=>RAISE( |Invalid package json:\n{ concat_lines_of( table = lt_issues sep = |\n| ) }| ).
+      zcx_abappm_error=>raise( |Invalid package json:\n{ concat_lines_of( table = lt_issues sep = |\n| ) }| ).
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD class_constructor.
-    gi_persist = ZCL_ABAPPM_PERSIST_APM=>GET_INSTANCE( ).
+    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
   ENDMETHOD.
 
 
   METHOD constructor.
 
-    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_SAP_PACKAGE( iv_package ) = abap_false.
-      ZCX_ABAPPM_ERROR=>RAISE( |Invalid package: { iv_package }| ).
+    IF zcl_abappm_package_json_valid=>is_valid_sap_package( iv_package ) = abap_false.
+      zcx_abappm_error=>raise( |Invalid package: { iv_package }| ).
     ENDIF.
 
     mv_package          = iv_package.
@@ -147,8 +147,8 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
     mv_key = get_package_key( mv_package ).
 
     TRY.
-        ZIF_ABAPPM_PACKAGE_JSON~LOAD( ).
-      CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
+        zif_abappm_package_json~load( ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -168,24 +168,24 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
         keywords            TYPE string_table,
         homepage            TYPE string,
         BEGIN OF bugs,
-          url   TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_URI,
-          email TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_EMAIL,
+          url   TYPE zif_abappm_package_json_types=>ty_uri,
+          email TYPE zif_abappm_package_json_types=>ty_email,
         END OF bugs,
         license             TYPE string,
-        author              TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PERSON,
-        contributors        TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PERSON WITH KEY name,
-        maintainers         TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PERSON WITH KEY name,
+        author              TYPE zif_abappm_package_json_types=>ty_person,
+        contributors        TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
+        maintainers         TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
         main                TYPE string,
         man                 TYPE string_table,
         type                TYPE string,
         BEGIN OF repository,
           type      TYPE string,
-          url       TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_URI,
+          url       TYPE zif_abappm_package_json_types=>ty_uri,
           directory TYPE string,
         END OF repository,
         BEGIN OF funding,
           type TYPE string,
-          url  TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_URI,
+          url  TYPE zif_abappm_package_json_types=>ty_uri,
         END OF funding,
         bundle_dependencies TYPE string_table,
         os                  TYPE string_table,
@@ -197,7 +197,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
           file_count    TYPE i,
           integrity     TYPE string,
           shasum        TYPE string,
-          signatures    TYPE STANDARD TABLE OF ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_SIGNATURE WITH DEFAULT KEY,
+          signatures    TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_signature WITH DEFAULT KEY,
           tarball       TYPE string,
           unpacked_size TYPE i,
         END OF dist,
@@ -205,16 +205,16 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
       END OF ty_package_json_partial.
 
     DATA:
-      li_json         TYPE REF TO ZIF_ABAPPM_AJSON,
+      li_json         TYPE REF TO zif_abappm_ajson,
       ls_json_partial TYPE ty_package_json_partial,
-      ls_dependency   TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_DEPENDENCY,
-      ls_json         TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_MANIFEST,
-      ls_package_json TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_PACKAGE_JSON,
+      ls_dependency   TYPE zif_abappm_package_json_types=>ty_dependency,
+      ls_json         TYPE zif_abappm_package_json_types=>ty_manifest,
+      ls_package_json TYPE zif_abappm_package_json_types=>ty_package_json,
       lt_issues       TYPE string_table,
-      lx_error        TYPE REF TO ZCX_ABAPPM_AJSON_ERROR.
+      lx_error        TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        li_json = ZCL_ABAPPM_AJSON=>PARSE( iv_json ).
+        li_json = zcl_abappm_ajson=>parse( iv_json ).
         li_json->to_abap(
           EXPORTING
             iv_corresponding = abap_true
@@ -245,8 +245,8 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
         result = sort_manifest( ls_json ).
 
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO lx_error.
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( lx_error ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -255,16 +255,16 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
   METHOD convert_manifest_to_json.
 
     DATA:
-      li_json       TYPE REF TO ZIF_ABAPPM_AJSON,
-      ls_dependency TYPE ZIF_ABAPPM_PACKAGE_JSON_TYPES=>TY_DEPENDENCY,
-      lx_error      TYPE REF TO ZCX_ABAPPM_AJSON_ERROR.
+      li_json       TYPE REF TO zif_abappm_ajson,
+      ls_dependency TYPE zif_abappm_package_json_types=>ty_dependency,
+      lx_error      TYPE REF TO zcx_abappm_ajson_error.
 
     TRY.
-        li_json = ZCL_ABAPPM_AJSON=>NEW( )->keep_item_order( )->set(
+        li_json = zcl_abappm_ajson=>new( )->keep_item_order( )->set(
           iv_path = '/'
           iv_val  = is_manifest ).
 
-        li_json = li_json->map( ZCL_ABAPPM_AJSON_MAPPING=>CREATE_TO_CAMEL_CASE( ) ).
+        li_json = li_json->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
 
         " Transpose dependencies
         li_json->setx( '/dependencies:{ }' ).
@@ -298,19 +298,19 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
         IF iv_complete = abap_false.
           li_json = li_json->filter( lcl_ajson_filters=>create_empty_filter( ) ).
           IF is_manifest-private = abap_false.
-            li_json = li_json->filter( ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER( iv_skip_paths = '/private' ) ).
+            li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/private' ) ).
           ENDIF.
         ENDIF.
 
         IF iv_package_json = abap_true.
           " Remove the manifest fields that are not in package.json
-          li_json = li_json->filter( ZCL_ABAPPM_AJSON_FILTER_LIB=>CREATE_PATH_FILTER(
+          li_json = li_json->filter( zcl_abappm_ajson_filter_lib=>create_path_filter(
             iv_skip_paths = '/dist,/deprecated,/_id,/_abapVersion,/_apmVersion' ) ).
         ENDIF.
 
         result = li_json->stringify( 2 ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO lx_error.
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( lx_error ).
+      CATCH zcx_abappm_ajson_error INTO lx_error.
+        zcx_abappm_error=>raise_with_text( lx_error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -326,7 +326,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <ls_instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE ZCL_ABAPPM_PACKAGE_JSON
+      CREATE OBJECT result TYPE zcl_abappm_package_json
         EXPORTING
           iv_package = iv_package
           iv_name    = iv_name
@@ -354,7 +354,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
 
 
   METHOD get_package_key.
-    result = |{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKAGE }:{ iv_package }:{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_EXTRA-PACKAGE_JSON }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ zif_abappm_persist_apm=>c_key_extra-package_json }|.
   ENDMETHOD.
 
 
@@ -379,13 +379,13 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
   METHOD list.
 
     DATA:
-      lt_list   TYPE ZIF_ABAPPM_PERSIST_APM=>TY_LIST,
+      lt_list   TYPE zif_abappm_persist_apm=>ty_list,
       ls_result LIKE LINE OF result.
 
     FIELD-SYMBOLS <ls_list> LIKE LINE OF lt_list.
 
-    lt_list = gi_persist->list( ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKAGE && |:{ iv_filter }%:|
-      && ZIF_ABAPPM_PERSIST_APM=>C_KEY_EXTRA-PACKAGE_JSON ).
+    lt_list = gi_persist->list( zif_abappm_persist_apm=>c_key_type-package && |:{ iv_filter }%:|
+      && zif_abappm_persist_apm=>c_key_extra-package_json ).
 
     LOOP AT lt_list ASSIGNING <ls_list>.
       CLEAR ls_result.
@@ -403,7 +403,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
             ls_result-description = ls_result-instance->get( )-description.
             ls_result-type        = ls_result-instance->get( )-type.
             ls_result-private     = ls_result-instance->get( )-private.
-          CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
+          CATCH zcx_abappm_error ##NO_HANDLER.
         ENDTRY.
       ENDIF.
 
@@ -422,27 +422,27 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~DELETE.
+  METHOD zif_abappm_package_json~delete.
     gi_persist->delete( mv_key ).
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~EXISTS.
+  METHOD zif_abappm_package_json~exists.
     TRY.
         gi_persist->load( mv_key ).
         result = abap_true.
-      CATCH ZCX_ABAPPM_ERROR.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~GET.
+  METHOD zif_abappm_package_json~get.
     MOVE-CORRESPONDING ms_manifest TO result.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~GET_JSON.
+  METHOD zif_abappm_package_json~get_json.
     result = convert_manifest_to_json(
       is_manifest     = ms_manifest
       iv_package_json = abap_true
@@ -450,30 +450,30 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~IS_VALID.
+  METHOD zif_abappm_package_json~is_valid.
     TRY.
-        result = boolc( ZCL_ABAPPM_PACKAGE_JSON_VALID=>CHECK( ms_manifest ) IS INITIAL ).
-      CATCH ZCX_ABAPPM_ERROR.
+        result = boolc( zcl_abappm_package_json_valid=>check( ms_manifest ) IS INITIAL ).
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~LOAD.
-    ZIF_ABAPPM_PACKAGE_JSON~SET_JSON( gi_persist->load( mv_key )-value ).
+  METHOD zif_abappm_package_json~load.
+    zif_abappm_package_json~set_json( gi_persist->load( mv_key )-value ).
     result = me.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~SAVE.
+  METHOD zif_abappm_package_json~save.
     check_manifest( ms_manifest ).
     gi_persist->save(
       iv_key   = mv_key
-      iv_value = ZIF_ABAPPM_PACKAGE_JSON~GET_JSON( ) ).
+      iv_value = zif_abappm_package_json~get_json( ) ).
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~SET.
+  METHOD zif_abappm_package_json~set.
     MOVE-CORRESPONDING is_json TO ms_manifest.
     check_manifest( ms_manifest ).
     ms_manifest = sort_manifest( ms_manifest ).
@@ -481,7 +481,7 @@ CLASS ZCL_ABAPPM_PACKAGE_JSON IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACKAGE_JSON~SET_JSON.
+  METHOD zif_abappm_package_json~set_json.
     ms_manifest = convert_json_to_manifest( iv_json ).
     result = me.
   ENDMETHOD.

@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_HTTP_AGENT DEFINITION
+CLASS zcl_abappm_http_agent DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,31 +11,31 @@ CLASS ZCL_ABAPPM_HTTP_AGENT DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_HTTP_AGENT.
+    INTERFACES zif_abappm_http_agent.
 
     CLASS-METHODS create
       RETURNING
-        VALUE(ri_instance) TYPE REF TO ZIF_ABAPPM_HTTP_AGENT.
+        VALUE(ri_instance) TYPE REF TO zif_abappm_http_agent.
 
     METHODS constructor.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA mo_global_headers TYPE REF TO zcl_abap_string_map.
+    DATA mo_global_headers TYPE REF TO zcl_abappm_string_map.
 
     CLASS-METHODS attach_payload
       IMPORTING
         ii_request TYPE REF TO if_http_request
         iv_payload TYPE any
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_HTTP_AGENT IMPLEMENTATION.
+CLASS zcl_abappm_http_agent IMPLEMENTATION.
 
 
   METHOD attach_payload.
@@ -49,7 +49,7 @@ CLASS ZCL_ABAPPM_HTTP_AGENT IMPLEMENTATION.
     ELSEIF lo_type->type_kind = cl_abap_typedescr=>typekind_string.
       ii_request->set_cdata( iv_payload ).
     ELSE.
-      ZCX_ABAPPM_ERROR=>RAISE( |Unexpected payload type { lo_type->absolute_name }| ).
+      zcx_abappm_error=>raise( |Unexpected payload type { lo_type->absolute_name }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -61,16 +61,16 @@ CLASS ZCL_ABAPPM_HTTP_AGENT IMPLEMENTATION.
 
 
   METHOD create.
-    CREATE OBJECT ri_instance TYPE ZCL_ABAPPM_HTTP_AGENT.
+    CREATE OBJECT ri_instance TYPE zcl_abappm_http_agent.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_HTTP_AGENT~GLOBAL_HEADERS.
+  METHOD zif_abappm_http_agent~global_headers.
     ro_global_headers = mo_global_headers.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_HTTP_AGENT~REQUEST.
+  METHOD zif_abappm_http_agent~request.
 
     DATA:
       li_client  TYPE REF TO if_http_client,
@@ -112,9 +112,9 @@ CLASS ZCL_ABAPPM_HTTP_AGENT IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
-    IF iv_method = ZIF_ABAPPM_HTTP_AGENT=>C_METHODS-POST
-      OR iv_method = ZIF_ABAPPM_HTTP_AGENT=>C_METHODS-PUT
-      OR iv_method = ZIF_ABAPPM_HTTP_AGENT=>C_METHODS-PATCH.
+    IF iv_method = zif_abappm_http_agent=>c_methods-post
+      OR iv_method = zif_abappm_http_agent=>c_methods-put
+      OR iv_method = zif_abappm_http_agent=>c_methods-patch.
       attach_payload(
         ii_request = li_client->request
         iv_payload = iv_payload ).
@@ -141,7 +141,7 @@ CLASS ZCL_ABAPPM_HTTP_AGENT IMPLEMENTATION.
         IMPORTING
           code    = lv_code
           message = lv_message ).
-      ZCX_ABAPPM_ERROR=>RAISE( |HTTP error: [{ lv_code }] { lv_message }| ).
+      zcx_abappm_error=>raise( |HTTP error: [{ lv_code }] { lv_message }| ).
     ENDIF.
 
     ri_response = lcl_http_response=>create( li_client ).
