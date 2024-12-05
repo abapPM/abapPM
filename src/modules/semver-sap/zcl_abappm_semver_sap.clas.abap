@@ -22,6 +22,14 @@ CLASS ZCL_ABAPPM_SEMVER_SAP DEFINITION
       RAISING
         cx_abap_invalid_value.
 
+    METHODS sap_component_to_semver
+      IMPORTING
+        component     TYPE cvers-component
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        cx_abap_invalid_value.
+
     METHODS semver_to_sap_release
       IMPORTING
         version       TYPE string
@@ -47,6 +55,22 @@ ENDCLASS.
 
 
 CLASS ZCL_ABAPPM_SEMVER_SAP IMPLEMENTATION.
+
+
+  METHOD sap_component_to_semver.
+
+    DATA cvers TYPE cvers.
+
+    SELECT SINGLE * FROM cvers INTO cvers WHERE component = component.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE cx_abap_invalid_value
+        EXPORTING
+          value = |{ component }|.
+    ENDIF.
+
+    result = sap_release_to_semver( release = cvers-release support_pack = cvers-extrelease ).
+
+  ENDMETHOD.
 
 
   METHOD sap_release_to_semver.

@@ -17,6 +17,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
     CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
     TYPES:
+      ty_typeflag TYPE c LENGTH 1,
       BEGIN OF ty_file,
         name     TYPE string,
         date     TYPE d,
@@ -24,10 +25,22 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
         mode     TYPE i,
         unixtime TYPE i,
         size     TYPE i,
-        typeflag TYPE c LENGTH 1,
+        typeflag TYPE ty_typeflag,
         content  TYPE xstring,
       END OF ty_file,
       ty_files TYPE STANDARD TABLE OF ty_file WITH KEY name.
+
+    CONSTANTS:
+      BEGIN OF c_typeflag,
+        file              TYPE ty_typeflag VALUE '0',
+        hard_link         TYPE ty_typeflag VALUE '1',
+        symbolic_link     TYPE ty_typeflag VALUE '2',
+        character_special TYPE ty_typeflag VALUE '3',
+        block_special     TYPE ty_typeflag VALUE '4',
+        directory         TYPE ty_typeflag VALUE '5',
+        fifo              TYPE ty_typeflag VALUE '6',
+        contiguous_file   TYPE ty_typeflag VALUE '7',
+      END OF c_typeflag.
 
     CLASS-METHODS class_constructor.
 
@@ -147,19 +160,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       ty_tar_data TYPE HASHED TABLE OF ty_data WITH UNIQUE KEY name.
 
     CONSTANTS:
-      c_blocksize TYPE i VALUE 512,
-
-      BEGIN OF c_typeflag,
-        file              TYPE ty_header-typeflag VALUE '0',
-        hard_link         TYPE ty_header-typeflag VALUE '1',
-        symbolic_link     TYPE ty_header-typeflag VALUE '2',
-        character_special TYPE ty_header-typeflag VALUE '3',
-        block_special     TYPE ty_header-typeflag VALUE '4',
-        directory         TYPE ty_header-typeflag VALUE '5',
-        fifo              TYPE ty_header-typeflag VALUE '6',
-        contiguous_file   TYPE ty_header-typeflag VALUE '7',
-      END OF c_typeflag,
-
+      c_blocksize     TYPE i VALUE 512,
       c_ustar_magic   TYPE c LENGTH 5 VALUE 'ustar',
       c_ustar_version TYPE c LENGTH 2 VALUE '00',
       c_mode_default  TYPE i VALUE 436, " octal 664 rw-rw-r--
