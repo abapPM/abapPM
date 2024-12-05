@@ -1,4 +1,4 @@
-CLASS zcl_abappm_markdown DEFINITION
+CLASS ZCL_ABAPPM_MARKDOWN DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -36,25 +36,25 @@ CLASS zcl_abappm_markdown DEFINITION
       IMPORTING
         VALUE(breaks_enabled) TYPE clike
       RETURNING
-        VALUE(this)           TYPE REF TO zcl_abappm_markdown.
+        VALUE(this)           TYPE REF TO ZCL_ABAPPM_MARKDOWN.
 
     METHODS set_markup_escaped
       IMPORTING
         VALUE(markup_escaped) TYPE clike
       RETURNING
-        VALUE(this)           TYPE REF TO zcl_abappm_markdown.
+        VALUE(this)           TYPE REF TO ZCL_ABAPPM_MARKDOWN.
 
     METHODS set_urls_linked
       IMPORTING
         VALUE(urls_linked) TYPE clike
       RETURNING
-        VALUE(this)        TYPE REF TO zcl_abappm_markdown.
+        VALUE(this)        TYPE REF TO ZCL_ABAPPM_MARKDOWN.
 
     METHODS set_safe_mode
       IMPORTING
         !iv_safe_mode TYPE clike
       RETURNING
-        VALUE(this)   TYPE REF TO zcl_abappm_markdown.
+        VALUE(this)   TYPE REF TO ZCL_ABAPPM_MARKDOWN.
 
     METHODS constructor
       IMPORTING
@@ -195,7 +195,7 @@ CLASS zcl_abappm_markdown DEFINITION
         root_img  TYPE string,
         sapevent  TYPE abap_bool,
         path      TYPE string,
-        path_util TYPE REF TO zcl_abappm_markdown_path,
+        path_util TYPE REF TO ZCL_ABAPPM_MARKDOWN_PATH,
       END OF config.
     "<<< apm
 
@@ -582,7 +582,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_markdown IMPLEMENTATION.
+CLASS ZCL_ABAPPM_MARKDOWN IMPLEMENTATION.
 
 
   METHOD block_code.
@@ -2487,7 +2487,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF sy-subrc = 0 AND <attribute>-value CP 'language-*'.
       lv_language = <attribute>-value+9(*).
 
-      markup = zcl_abappm_markdown_syn=>process(
+      markup = ZCL_ABAPPM_MARKDOWN_SYN=>PROCESS(
         iv_source   = ls_element-text-text
         iv_language = lv_language ).
     ELSE.

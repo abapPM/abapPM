@@ -329,7 +329,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD explain_key_formatted.
 
-    DATA ls_explained TYPE zcl_abappm_persist_apm=>ty_explained.
+    DATA ls_explained TYPE zif_abappm_persist_apm=>ty_explained.
 
     ls_explained = zcl_abappm_persist_apm=>explain_key( iv_key ).
 

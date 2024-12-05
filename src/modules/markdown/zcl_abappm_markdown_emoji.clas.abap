@@ -1,4 +1,4 @@
-CLASS zcl_abappm_markdown_emoji DEFINITION
+CLASS ZCL_ABAPPM_MARKDOWN_EMOJI DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -29,7 +29,7 @@ CLASS zcl_abappm_markdown_emoji DEFINITION
 
     CLASS-METHODS create
       RETURNING
-        VALUE(ro_result) TYPE REF TO zcl_abappm_markdown_emoji.
+        VALUE(ro_result) TYPE REF TO ZCL_ABAPPM_MARKDOWN_EMOJI.
 
     METHODS get_emoji_css
       RETURNING
@@ -83,7 +83,7 @@ CLASS zcl_abappm_markdown_emoji DEFINITION
         img  TYPE string,
       END OF ty_emoji.
 
-    CLASS-DATA go_emoji TYPE REF TO zcl_abappm_markdown_emoji.
+    CLASS-DATA go_emoji TYPE REF TO ZCL_ABAPPM_MARKDOWN_EMOJI.
 
     DATA mt_emoji TYPE HASHED TABLE OF ty_emoji WITH UNIQUE KEY name.
 
@@ -109,7 +109,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_markdown_emoji IMPLEMENTATION.
+CLASS ZCL_ABAPPM_MARKDOWN_EMOJI IMPLEMENTATION.
 
 
   METHOD create.

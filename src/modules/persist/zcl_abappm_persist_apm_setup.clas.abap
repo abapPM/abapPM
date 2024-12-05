@@ -1,4 +1,4 @@
-CLASS zcl_abappm_persist_apm_setup DEFINITION
+CLASS ZCL_ABAPPM_PERSIST_APM_SETUP DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
@@ -13,22 +13,22 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
 
     CLASS-METHODS install
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS uninstall
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CLASS-METHODS logo_create
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS logo_delete
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS logo_exists
       RETURNING
@@ -36,11 +36,11 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
 
     CLASS-METHODS table_create
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS table_delete
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS table_exists
       RETURNING
@@ -48,11 +48,11 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
 
     CLASS-METHODS lock_create
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS lock_delete
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS lock_exists
       RETURNING
@@ -65,13 +65,13 @@ CLASS zcl_abappm_persist_apm_setup DEFINITION
         !iv_no_ask               TYPE abap_bool DEFAULT abap_true
         !iv_no_ask_delete_append TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
+CLASS ZCL_ABAPPM_PERSIST_APM_SETUP IMPLEMENTATION.
 
 
   METHOD delete_ddic.
@@ -124,9 +124,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ENDTRY.
 
     IF sy-subrc = 5.
-      zcx_abappm_error=>raise( |{ iv_objtype } { iv_objname } has dependencies and must be deleted manually| ).
+      ZCX_ABAPPM_ERROR=>RAISE( |{ iv_objtype } { iv_objname } has dependencies and must be deleted manually| ).
     ELSEIF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error deleting { iv_objtype } { iv_objname }| ).
+      ZCX_ABAPPM_ERROR=>RAISE( |Error deleting { iv_objtype } { iv_objname }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -161,30 +161,30 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       <ls_dd26e> LIKE LINE OF lt_dd26e,
       <ls_dd27p> LIKE LINE OF lt_dd27p.
 
-    ls_dd25v-viewname   = zif_abappm_persist_apm=>c_lock.
+    ls_dd25v-viewname   = ZIF_ABAPPM_PERSIST_APM=>C_LOCK.
     ls_dd25v-aggtype    = 'E'.
-    ls_dd25v-roottab    = zif_abappm_persist_apm=>c_tabname.
-    ls_dd25v-ddlanguage = zif_abappm_persist_apm=>c_english.
+    ls_dd25v-roottab    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
+    ls_dd25v-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     ls_dd25v-ddtext     = 'apm - Persistence'.
 
     APPEND INITIAL LINE TO lt_dd26e ASSIGNING <ls_dd26e>.
-    <ls_dd26e>-viewname   = zif_abappm_persist_apm=>c_lock.
-    <ls_dd26e>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd26e>-viewname   = ZIF_ABAPPM_PERSIST_APM=>C_LOCK.
+    <ls_dd26e>-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd26e>-tabpos     = '0001'.
-    <ls_dd26e>-fortabname = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd26e>-fortabname = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd26e>-enqmode    = 'E'.
 
     APPEND INITIAL LINE TO lt_dd27p ASSIGNING <ls_dd27p>.
-    <ls_dd27p>-viewname  = zif_abappm_persist_apm=>c_lock.
+    <ls_dd27p>-viewname  = ZIF_ABAPPM_PERSIST_APM=>C_LOCK.
     <ls_dd27p>-objpos    = '0001'.
     <ls_dd27p>-viewfield = 'KEYS'.
-    <ls_dd27p>-tabname   = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd27p>-tabname   = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd27p>-fieldname = 'KEYS'.
     <ls_dd27p>-keyflag   = abap_true.
 
     CALL FUNCTION 'DDIF_ENQU_PUT'
       EXPORTING
-        name              = zif_abappm_persist_apm=>c_lock
+        name              = ZIF_ABAPPM_PERSIST_APM=>C_LOCK
         dd25v_wa          = ls_dd25v
       TABLES
         dd26e_tab         = lt_dd26e
@@ -197,10 +197,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      ZCX_ABAPPM_ERROR=>RAISE_T100( ).
     ENDIF.
 
-    lv_obj_name = zif_abappm_persist_apm=>c_lock.
+    lv_obj_name = ZIF_ABAPPM_PERSIST_APM=>C_LOCK.
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -209,22 +209,22 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         wi_tadir_obj_name = lv_obj_name
         wi_set_genflag    = abap_true
         wi_test_modus     = abap_false
-        wi_tadir_devclass = zif_abappm_persist_apm=>c_devclass
+        wi_tadir_devclass = ZIF_ABAPPM_PERSIST_APM=>C_DEVCLASS
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      ZCX_ABAPPM_ERROR=>RAISE_T100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_ENQU_ACTIVATE'
       EXPORTING
-        name        = zif_abappm_persist_apm=>c_lock
+        name        = ZIF_ABAPPM_PERSIST_APM=>C_LOCK
       EXCEPTIONS
         not_found   = 1
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_lock }| ).
+      ZCX_ABAPPM_ERROR=>RAISE( |Error activating { ZIF_ABAPPM_PERSIST_APM=>C_LOCK }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -233,7 +233,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD lock_delete.
     delete_ddic(
       iv_objtype = 'L'
-      iv_objname = zif_abappm_persist_apm=>c_lock ).
+      iv_objname = ZIF_ABAPPM_PERSIST_APM=>C_LOCK ).
   ENDMETHOD.
 
 
@@ -241,7 +241,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     DATA lv_viewname TYPE dd25l-viewname.
 
-    SELECT SINGLE viewname FROM dd25l INTO lv_viewname WHERE viewname = zif_abappm_persist_apm=>c_lock.
+    SELECT SINGLE viewname FROM dd25l INTO lv_viewname WHERE viewname = ZIF_ABAPPM_PERSIST_APM=>C_LOCK.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
@@ -255,7 +255,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       ls_objs  TYPE objs,
       ls_objsl TYPE objsl.
 
-    ls_objh-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objh-objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM.
     ls_objh-objecttype = 'L'.
     ls_objh-objcateg   = 'APPL'.
     ls_objh-checkid    = 'L'.
@@ -265,23 +265,23 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ls_objh-ldate      = sy-datum.
     ls_objh-objcharset = '1'.
 
-    ls_objt-language   = zif_abappm_persist_apm=>c_english.
-    ls_objt-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objt-language   = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
+    ls_objt-objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM.
     ls_objt-objecttype = 'L'.
     ls_objt-ddtext     = 'apm'.
 
-    ls_objs-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objs-objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM.
     ls_objs-objecttype = 'L'.
-    ls_objs-tabname    = zif_abappm_persist_apm=>c_tabname.
+    ls_objs-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     ls_objs-ddic       = abap_true.
     ls_objs-prim_table = abap_true.
 
-    ls_objsl-objectname = zif_abappm_persist_apm=>c_zapm.
+    ls_objsl-objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM.
     ls_objsl-objecttype = 'L'.
     ls_objsl-trwcount   = '01'.
     ls_objsl-tpgmid     = 'R3TR'.
     ls_objsl-tobject    = 'TABU'.
-    ls_objsl-tobj_name  = zif_abappm_persist_apm=>c_tabname.
+    ls_objsl-tobj_name  = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     ls_objsl-tobjkey    = '/&/*'.
     ls_objsl-masknlen   = 7.
     ls_objsl-maskklen   = 2.
@@ -297,10 +297,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_delete.
 
-    DELETE FROM objh WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objt WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objs WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objsl WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    DELETE FROM objh WHERE objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM AND objecttype = 'L'.
+    DELETE FROM objt WHERE objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM AND objecttype = 'L'.
+    DELETE FROM objs WHERE objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM AND objecttype = 'L'.
+    DELETE FROM objsl WHERE objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM AND objecttype = 'L'.
 
   ENDMETHOD.
 
@@ -310,7 +310,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     DATA lv_logo TYPE objh-objectname.
 
     SELECT SINGLE objectname FROM objh INTO lv_logo
-      WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+      WHERE objectname = ZIF_ABAPPM_PERSIST_APM=>C_ZAPM AND objecttype = 'L'.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.
@@ -328,14 +328,14 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     FIELD-SYMBOLS:
       <ls_dd03p> LIKE LINE OF lt_dd03p.
 
-    ls_dd02v-tabname    = zif_abappm_persist_apm=>c_tabname.
-    ls_dd02v-ddlanguage = zif_abappm_persist_apm=>c_english.
+    ls_dd02v-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
+    ls_dd02v-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     ls_dd02v-tabclass   = 'TRANSP'.
     ls_dd02v-ddtext     = 'apm - Persistence'.
     ls_dd02v-contflag   = 'A'.
     ls_dd02v-exclass    = '1'.
 
-    ls_dd09l-tabname   = zif_abappm_persist_apm=>c_tabname.
+    ls_dd09l-tabname   = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     ls_dd09l-as4local  = 'A'.
     ls_dd09l-tabkat    = '1'.
     ls_dd09l-tabart    = 'APPL0'.
@@ -343,48 +343,48 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ls_dd09l-pufferung = 'P'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd03p>-fieldname  = 'KEYS'. "KEY is not allowed
     <ls_dd03p>-position   = '0001'.
     <ls_dd03p>-keyflag    = 'X'.
     <ls_dd03p>-notnull    = 'X'.
     <ls_dd03p>-datatype   = 'CHAR'.
     <ls_dd03p>-leng       = '000120'.
-    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     <ls_dd03p>-ddtext     = 'Key'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd03p>-fieldname  = 'VALUE'.
     <ls_dd03p>-position   = '0002'.
     <ls_dd03p>-datatype   = 'STRG'.
-    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     <ls_dd03p>-ddtext     = 'Value'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd03p>-fieldname  = 'LUSER'.
     <ls_dd03p>-position   = '0003'.
     <ls_dd03p>-rollname   = 'AS4USER'.
     <ls_dd03p>-datatype   = 'CHAR'.
     <ls_dd03p>-leng       = '000012'.
-    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     <ls_dd03p>-ddtext     = 'Last Changed By'.
 
     APPEND INITIAL LINE TO lt_dd03p ASSIGNING <ls_dd03p>.
-    <ls_dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
+    <ls_dd03p>-tabname    = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     <ls_dd03p>-fieldname  = 'TIMESTAMP'.
     <ls_dd03p>-position   = '0004'.
     <ls_dd03p>-rollname   = 'TIMESTAMPL'.
     <ls_dd03p>-datatype   = 'DEC'.
     <ls_dd03p>-leng       = '000021'.
     <ls_dd03p>-decimals   = '00007'.
-    <ls_dd03p>-ddlanguage = zif_abappm_persist_apm=>c_english.
+    <ls_dd03p>-ddlanguage = ZIF_ABAPPM_PERSIST_APM=>C_ENGLISH.
     <ls_dd03p>-ddtext     = 'Last Changed At'.
 
     CALL FUNCTION 'DDIF_TABL_PUT'
       EXPORTING
-        name              = zif_abappm_persist_apm=>c_tabname
+        name              = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME
         dd02v_wa          = ls_dd02v
         dd09l_wa          = ls_dd09l
       TABLES
@@ -397,10 +397,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      ZCX_ABAPPM_ERROR=>RAISE_T100( ).
     ENDIF.
 
-    lv_obj_name = zif_abappm_persist_apm=>c_tabname.
+    lv_obj_name = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -409,16 +409,16 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         wi_tadir_obj_name = lv_obj_name
         wi_set_genflag    = abap_true
         wi_test_modus     = abap_false
-        wi_tadir_devclass = zif_abappm_persist_apm=>c_devclass
+        wi_tadir_devclass = ZIF_ABAPPM_PERSIST_APM=>C_DEVCLASS
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      ZCX_ABAPPM_ERROR=>RAISE_T100( ).
     ENDIF.
 
     CALL FUNCTION 'DDIF_TABL_ACTIVATE'
       EXPORTING
-        name        = zif_abappm_persist_apm=>c_tabname
+        name        = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME
         auth_chk    = abap_false
       IMPORTING
         rc          = lv_subrc
@@ -427,7 +427,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0 OR lv_subrc <> 0.
-      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_tabname }| ).
+      ZCX_ABAPPM_ERROR=>RAISE( |Error activating { ZIF_ABAPPM_PERSIST_APM=>C_TABNAME }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -448,9 +448,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     SELECT SINGLE tabname tabclass sqltab FROM dd02l
       INTO CORRESPONDING FIELDS OF ls_dd02l
-      WHERE tabname = zif_abappm_persist_apm=>c_tabname AND as4local = 'A' AND as4vers = '0000'.
+      WHERE tabname = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME AND as4local = 'A' AND as4vers = '0000'.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Table { zif_abappm_persist_apm=>c_tabname } not found| ).
+      ZCX_ABAPPM_ERROR=>RAISE( |Table { ZIF_ABAPPM_PERSIST_APM=>C_TABNAME } not found| ).
     ENDIF.
 
     CALL FUNCTION 'DD_EXISTS_DATA'
@@ -473,7 +473,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     delete_ddic(
       iv_objtype = 'T'
-      iv_objname = zif_abappm_persist_apm=>c_tabname
+      iv_objname = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME
       iv_no_ask  = lv_no_ask ).
 
   ENDMETHOD.
@@ -483,7 +483,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     DATA lv_tabname TYPE dd02l-tabname.
 
-    SELECT SINGLE tabname FROM dd02l INTO lv_tabname WHERE tabname = zif_abappm_persist_apm=>c_tabname.
+    SELECT SINGLE tabname FROM dd02l INTO lv_tabname WHERE tabname = ZIF_ABAPPM_PERSIST_APM=>C_TABNAME.
     result = boolc( sy-subrc = 0 ).
 
   ENDMETHOD.

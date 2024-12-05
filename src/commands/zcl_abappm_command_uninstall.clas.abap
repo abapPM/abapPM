@@ -106,17 +106,9 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
   METHOD uninstall_package.
 
-    DATA lx_error TYPE REF TO zcx_abapinst_exception.
-
-    " TODO: The installer needs to be moved to the ZCL_ABAPPM_ namespace
-    " TODO: Currently hardcoded to $-packages and prefix folder logic
-    TRY.
-        zcl_abapinst_installer=>uninstall(
-          iv_apm  = abap_true
-          iv_pack = iv_package ).
-      CATCH zcx_abapinst_exception INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    zcl_abappm_installer=>uninstall(
+      iv_apm  = abap_true
+      iv_pack = iv_package ).
 
   ENDMETHOD.
 ENDCLASS.

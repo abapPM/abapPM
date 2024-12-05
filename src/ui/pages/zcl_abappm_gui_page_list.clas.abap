@@ -541,10 +541,18 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_registry.
 
+    DATA lv_class TYPE string.
+
+    IF ms_settings-registry CS 'registry.abappm.com'.
+      lv_class = 'transport-box'. " green
+    ELSE.
+      lv_class = 'user-box'. " blue
+    ENDIF.
+
     ri_html = zcl_abapgit_html=>create( ).
 
     ri_html->add( '<span style="float:right">' ).
-    ri_html->add( '<span class="transport-box">' ).
+    ri_html->add( |<span class="{ lv_class }">| ).
     ri_html->add_a(
       iv_title = 'Registry'
       iv_txt   = ms_settings-registry
@@ -770,7 +778,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
       WHEN c_action-select.
 
-          ms_settings-last_package = lv_package.
+        ms_settings-last_package = lv_package.
         save_settings( ).
 
         rs_handled-page  = zcl_abappm_gui_page_package=>create( lv_package ).

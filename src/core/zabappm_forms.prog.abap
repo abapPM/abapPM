@@ -34,7 +34,7 @@ FORM open_gui RAISING zcx_abapgit_exception.
   IF sy-batch = abap_true.
     " FUTURE: One day we will add this
     " zcl_abappm_background=>run( )
-    MESSAGE s000(oo) WITH 'apm does not support background processing (yet)'.
+    MESSAGE s000(oo) WITH 'apm does not support background processing'.
   ELSE.
 
     " https://docs.abapgit.org/user-guide/reference/database-util.html#emergency-mode

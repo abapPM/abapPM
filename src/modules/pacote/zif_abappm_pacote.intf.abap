@@ -16,41 +16,52 @@ INTERFACE zif_abappm_pacote PUBLIC.
     END OF ty_version.
 
   TYPES:
+    BEGIN OF ty_attachment,
+      key TYPE string,
+      BEGIN OF tarball,
+        content_type TYPE string,
+        data         TYPE string,
+        length       TYPE i,
+      END OF tarball,
+    END OF ty_attachment.
+
+  TYPES:
     " Full packument (as fetched from registry)
     " Some fields are hoisted from latest version to root
-    " TODO: Check if this needs to happen in client or if its provided by registry already
-    " TODO: Does not work with generics since ajson expects structure for example "time": { ... }
     BEGIN OF ty_packument,
-      _id         TYPE string,
-      _rev        TYPE string,
-      name        TYPE string,
-      description TYPE string,
-*      dist_tags   TYPE STANDARD TABLE OF zif_package_json_types=>ty_generic WITH KEY key,
-*      time        TYPE STANDARD TABLE OF zif_package_json_types=>ty_generic WITH KEY key,
-      versions    TYPE STANDARD TABLE OF ty_version WITH KEY key,
-      maintainers TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
-      readme      TYPE string,
-*      users       TYPE STANDARD TABLE OF zif_package_json_types=>ty_user WITH KEY name,
-      homepage    TYPE string,
+      name          TYPE string,
+      description   TYPE string,
+      dist_tags     TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_generic WITH KEY key,
+      time          TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_time WITH KEY key,
+      versions      TYPE STANDARD TABLE OF ty_version WITH KEY key,
+      maintainers   TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_person WITH KEY name,
+      readme        TYPE string,
+      users         TYPE STANDARD TABLE OF zif_abappm_package_json_types=>ty_user WITH KEY name,
+      homepage      TYPE string,
       BEGIN OF bugs,
         url   TYPE zif_abappm_package_json_types=>ty_uri,
         email TYPE zif_abappm_package_json_types=>ty_email,
       END OF bugs,
-      license     TYPE string,
-      keywords    TYPE string_table,
-      author      TYPE zif_abappm_package_json_types=>ty_person,
+      license       TYPE string,
+      keywords      TYPE string_table,
+      author        TYPE zif_abappm_package_json_types=>ty_person,
       BEGIN OF repository,
         type      TYPE string,
         url       TYPE zif_abappm_package_json_types=>ty_uri,
         directory TYPE string,
       END OF repository,
+      __id          TYPE string,
+      __rev         TYPE string,
+      __attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key,
+      access        TYPE string,
     END OF ty_packument.
 
   TYPES:
     BEGIN OF ty_pacote,
       key       TYPE zif_abappm_persist_apm=>ty_key,
       name      TYPE string,
-      packument TYPE string,
+      json      TYPE string,
+      packument TYPE ty_packument,
       instance  TYPE REF TO zif_abappm_pacote,
     END OF ty_pacote.
   TYPES:
@@ -58,11 +69,23 @@ INTERFACE zif_abappm_pacote PUBLIC.
 
   METHODS get
     RETURNING
+      VALUE(result) TYPE ty_packument.
+
+  METHODS get_json
+    RETURNING
       VALUE(result) TYPE string.
 
   METHODS set
     IMPORTING
-      !iv_packument TYPE string
+      !is_packument TYPE ty_packument
+    RETURNING
+      VALUE(result) TYPE REF TO zif_abappm_pacote
+    RAISING
+      zcx_abappm_error.
+
+  METHODS set_json
+    IMPORTING
+      !iv_json      TYPE string
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING

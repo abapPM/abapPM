@@ -28,6 +28,23 @@ CLASS zcl_abappm_command_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS init_package
+      IMPORTING
+        !is_packument    TYPE zif_abappm_pacote=>ty_packument
+        !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
+      RETURNING
+        VALUE(result)    TYPE zif_abappm_pacote=>ty_packument
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS attach_package
+      IMPORTING
+        iv_tarball TYPE xstring
+      CHANGING
+        cs_publish TYPE zif_abappm_pacote=>ty_packument
+      RAISING
+        zcx_abappm_error.
+
     CLASS-METHODS get_agent
       IMPORTING
         !iv_url       TYPE string
@@ -77,6 +94,17 @@ ENDCLASS.
 CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
 
+  METHOD attach_package.
+
+    DATA ls_attachment TYPE LINE OF zif_abappm_pacote=>ty_packument-__attachments.
+
+    ls_attachment-tarball-content_type = 'application/octet-stream'.
+    ls_attachment-tarball-length       = xstrlen( iv_tarball ).
+    INSERT ls_attachment INTO TABLE cs_publish-__attachments.
+
+  ENDMETHOD.
+
+
   METHOD check_package.
 
     DATA:
@@ -94,11 +122,11 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD check_packument.
 
-*    READ TABLE is_packument-versions TRANSPORTING NO FIELDS
-*      WITH KEY x = is_package_json-version.
-*    IF sy-subrc = 0.
-*      zcx_abappm_error=>raise( |Version { is_package_json-version } already published| ).
-*    ENDIF.
+    READ TABLE is_packument-versions TRANSPORTING NO FIELDS
+      WITH KEY key = is_package_json-version.
+    IF sy-subrc = 0.
+      zcx_abappm_error=>raise( |Version { is_package_json-version } already published| ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -143,6 +171,8 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA:
       lx_ajson_error TYPE REF TO zcx_abappm_ajson_error,
+      li_json        TYPE REF TO zif_abappm_ajson,
+      ls_dependency  TYPE zif_abappm_package_json_types=>ty_dependency,
       lv_packument   TYPE string.
 
     " The abbreviated manifest would be sufficient for installer
@@ -152,7 +182,8 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       iv_name     = is_package_json-name )->packument( ).
 
     TRY.
-        zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
+        " zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
+
       CATCH zcx_abappm_ajson_error INTO lx_ajson_error.
         zcx_abappm_error=>raise_with_text( lx_ajson_error ).
     ENDTRY.
@@ -162,6 +193,31 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD get_readme.
     result = zcl_abappm_readme=>factory( iv_package )->load( )->get( ).
+  ENDMETHOD.
+
+
+  METHOD init_package.
+
+    DATA:
+      ls_dist_tag TYPE LINE OF zif_abappm_pacote=>ty_packument-dist_tags,
+      ls_version  TYPE LINE OF zif_abappm_pacote=>ty_packument-versions.
+
+    result-__id        = is_package_json-name.
+    result-name        = is_package_json-name.
+    result-description = is_package_json-description.
+
+    " TODO: Publish with other tag
+    ls_dist_tag-key   = 'latest'.
+    ls_dist_tag-value = is_package_json-version.
+    INSERT ls_dist_tag INTO TABLE result-dist_tags.
+
+    ls_version-key     = is_package_json-version.
+    MOVE-CORRESPONDING is_package_json TO ls_version-version.
+    ls_version-version-__id           = |{ is_package_json-name }@{ is_package_json-version }|.
+    ls_version-version-__abap_version = sy-saprl.
+    ls_version-version-__apm_version  = zif_abappm_version=>c_version.
+    INSERT ls_version INTO TABLE result-versions.
+
   ENDMETHOD.
 
 
@@ -189,6 +245,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     DATA:
       ls_package_json TYPE zif_abappm_package_json_types=>ty_package_json,
       ls_packument    TYPE zif_abappm_pacote=>ty_packument,
+      ls_publish      TYPE zif_abappm_pacote=>ty_packument,
       lv_success      TYPE abap_bool,
       lv_tarball      TYPE xstring.
 
@@ -199,20 +256,38 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ls_package_json = get_package_json( iv_package ).
 
     " 3. Get packument from registry
-    " TODO: This should include request parameter for writing to the registry
-    ls_packument = get_packument_from_registry(
-      iv_registry     = iv_registry
-      is_package_json = ls_package_json ).
+    " TODO: This should include request parameter for writing to the registry (only if not anonymous?)
+    TRY.
+        ls_packument = get_packument_from_registry(
+          iv_registry     = iv_registry
+          is_package_json = ls_package_json ).
+      CATCH zcx_abappm_error ##NO_HANDLER.
+    ENDTRY.
 
     " 4. Check if version already exist in registry
     check_packument(
-      is_package_json = ls_package_json
-      is_packument    = ls_packument ).
+      is_packument    = ls_packument
+      is_package_json = ls_package_json ).
 
-    " 5. Publish package to registry
+    " 5. Initialize packument for publishing
+    ls_publish = init_package(
+      is_packument    = ls_packument
+      is_package_json = ls_package_json ).
+
+    " 6. Get tarball
+
+
+    " 7. Attach tarball to packument
+    attach_package(
+      EXPORTING
+        iv_tarball = lv_tarball
+      CHANGING
+        cs_publish = ls_publish ).
+
+    " 8. Publish package to registry
     lv_success = publish_package(
       iv_registry  = iv_registry
-      is_packument = ls_packument ).
+      is_packument = ls_publish ).
 
     MESSAGE 'Package successfully published' TYPE 'S'.
 

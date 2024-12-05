@@ -33,15 +33,6 @@ CLASS zcl_abappm_command_install DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS get_packument_from_registry
-      IMPORTING
-        !iv_registry     TYPE string
-        !is_package_json TYPE zif_abappm_package_json_types=>ty_package_json
-      RETURNING
-        VALUE(result)    TYPE zif_abappm_pacote=>ty_packument
-      RAISING
-        zcx_abappm_error.
-
     CLASS-METHODS get_tarball_from_registry
       IMPORTING
         !iv_registry  TYPE string
@@ -112,27 +103,6 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_packument_from_registry.
-
-    DATA:
-      lx_ajson_error TYPE REF TO zcx_abappm_ajson_error,
-      lv_packument   TYPE string.
-
-    " The abbreviated manifest would be sufficient for installer
-    " however we also want to get the description and readme
-    lv_packument = zcl_abappm_pacote=>factory(
-      iv_registry = iv_registry
-      iv_name     = is_package_json-name )->packument( ).
-
-    TRY.
-        zcl_abappm_ajson=>parse( lv_packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
-      CATCH zcx_abappm_ajson_error INTO lx_ajson_error.
-        zcx_abappm_error=>raise_with_text( lx_ajson_error ).
-    ENDTRY.
-
-  ENDMETHOD.
-
-
   METHOD get_tarball_from_registry.
     result = zcl_abappm_pacote=>factory(
       iv_registry = iv_registry
@@ -159,24 +129,17 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
   METHOD install_package.
 
-    DATA lx_error TYPE REF TO zcx_abapinst_exception.
-
-    " TODO: The installer needs to be moved to the ZCL_ABAPPM_ namespace
     " TODO: Currently hardcoded to $-packages and prefix folder logic
-    TRY.
-        zcl_abapinst_installer=>install(
-          iv_apm_name          = is_package_json-name
-          iv_apm_version       = is_package_json-version
-          iv_enum_zip          = zcl_abapinst_installer=>c_enum_zip-registry
-          iv_name              = |{ is_package_json-name }|
-          iv_data              = iv_tarball
-          iv_enum_package      = zcl_abapinst_installer=>c_enum_package-local
-          iv_package           = iv_package
-          iv_enum_transport    = zcl_abapinst_installer=>c_enum_transport-prompt
-          iv_enum_folder_logic = zcl_abapinst_installer=>c_enum_folder_logic-prefix ).
-      CATCH zcx_abapinst_exception INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
-    ENDTRY.
+    zcl_abappm_installer=>install(
+      iv_apm_name          = is_package_json-name
+      iv_apm_version       = is_package_json-version
+      iv_enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
+      iv_name              = |{ is_package_json-name }|
+      iv_data              = iv_tarball
+      iv_enum_package      = zcl_abappm_installer=>c_enum_package-local
+      iv_package           = iv_package
+      iv_enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
+      iv_enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix ).
 
   ENDMETHOD.
 
@@ -199,13 +162,6 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       ls_manifest = get_manifest_from_registry(
         iv_registry     = iv_registry
         is_package_json = is_package_json ).
-
-      " FUTURE: The following should become obsolete when registry keeps readme for all versions
-      " 2b. Registry currently returns readme only on packument level (not in manifest)
-      ls_packument = get_packument_from_registry(
-        iv_registry     = iv_registry
-        is_package_json = is_package_json ).
-      ls_manifest-readme = ls_packument-readme.
 
       " 3. Get tarball
       lv_tarball = get_tarball_from_registry(

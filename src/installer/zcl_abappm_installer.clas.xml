@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_ABAPPM_INSTALLER</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>apm - Installer</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+    <RSTAT>K</RSTAT>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CMPNAME>C_ERROR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Error</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_SUCCESS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Success</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_WARNING</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Warning</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GI_LOG</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Log</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GO_DB</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>abapInst - Persistence</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GO_DOT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>.abapgit.xml</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GS_INST</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Installation metadata</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GS_PACKAGING</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Package metadata</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GT_CLMCUS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Modification assistant settings</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GT_REMOTE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Repository files</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GT_REQUIREMENTS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Requirements</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_NAME</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Name of Installer (singluar)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_NAMES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Name of Installer (plural)</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+   <DESCRIPTIONS_SUB>
+    <SEOSUBCOTX>
+     <CMPNAME>INIT</CMPNAME>
+     <SCONAME>IV_LOCK</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Name of SAP table view</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>INIT</CMPNAME>
+     <SCONAME>IV_TABNAME</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Table Name</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_DESERIALIZE_DATA</CMPNAME>
+     <SCONAME>ZCX_ABAPGIT_EXCEPTION</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>abapinst - Exception</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_DESERIALIZE_OBJECTS</CMPNAME>
+     <SCONAME>ZCX_ABAPGIT_EXCEPTION</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>abapinst - Exception</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_FIND_REMOTE_DATA_CONFIG</CMPNAME>
+     <SCONAME>RI_CONFIG</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>abapGit - Data Config</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_FIND_REMOTE_DATA_CONFIG</CMPNAME>
+     <SCONAME>ZCX_ABAPGIT_EXCEPTION</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exception</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_TRANSPORT_GET</CMPNAME>
+     <SCONAME>RV_TRKORR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Request/Task</DESCRIPT>
+    </SEOSUBCOTX>
+   </DESCRIPTIONS_SUB>
+  </asx:values>
+ </asx:abap>
+</abapGit>

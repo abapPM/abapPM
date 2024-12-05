@@ -1,4 +1,4 @@
-CLASS zcl_abappm_readme DEFINITION
+CLASS ZCL_ABAPPM_README DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,7 +11,7 @@ CLASS zcl_abappm_readme DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES zif_abappm_readme.
+    INTERFACES ZIF_ABAPPM_README.
 
     CLASS-METHODS class_constructor.
 
@@ -20,31 +20,31 @@ CLASS zcl_abappm_readme DEFINITION
         !iv_package   TYPE devclass
         !iv_markdown  TYPE string OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zif_abappm_readme
+        VALUE(result) TYPE REF TO ZIF_ABAPPM_README
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS injector
       IMPORTING
         !iv_package TYPE devclass
-        !ii_mock    TYPE REF TO zif_abappm_readme.
+        !ii_mock    TYPE REF TO ZIF_ABAPPM_README.
 
     METHODS constructor
       IMPORTING
         !iv_package  TYPE devclass
         !iv_markdown TYPE string OPTIONAL
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     CLASS-METHODS get_package_key
       IMPORTING
         !iv_package   TYPE devclass
       RETURNING
-        VALUE(result) TYPE zif_abappm_persist_apm=>ty_key.
+        VALUE(result) TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY.
 
     CLASS-METHODS get_package_from_key
       IMPORTING
-        !iv_key       TYPE zif_abappm_persist_apm=>ty_key
+        !iv_key       TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY
       RETURNING
         VALUE(result) TYPE devclass.
 
@@ -54,27 +54,27 @@ CLASS zcl_abappm_readme DEFINITION
     TYPES:
       BEGIN OF ty_instance,
         package  TYPE devclass,
-        instance TYPE REF TO zif_abappm_readme,
+        instance TYPE REF TO ZIF_ABAPPM_README,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
 
     CLASS-DATA:
-      gi_persist   TYPE REF TO zif_abappm_persist_apm,
+      gi_persist   TYPE REF TO ZIF_ABAPPM_PERSIST_APM,
       gt_instances TYPE ty_instances.
 
     DATA:
       mv_package TYPE devclass,
-      ms_readme  TYPE zif_abappm_readme=>ty_readme.
+      ms_readme  TYPE ZIF_ABAPPM_README=>TY_README.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_readme IMPLEMENTATION.
+CLASS ZCL_ABAPPM_README IMPLEMENTATION.
 
 
   METHOD class_constructor.
-    gi_persist = zcl_abappm_persist_apm=>get_instance( ).
+    gi_persist = ZCL_ABAPPM_PERSIST_APM=>GET_INSTANCE( ).
   ENDMETHOD.
 
 
@@ -89,8 +89,8 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
     ms_readme-markdown = iv_markdown.
 
     TRY.
-        zif_abappm_readme~load( ).
-      CATCH zcx_abappm_error ##NO_HANDLER.
+        ZIF_ABAPPM_README~LOAD( ).
+      CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -106,7 +106,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <ls_instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE zcl_abappm_readme
+      CREATE OBJECT result TYPE ZCL_ABAPPM_README
         EXPORTING
           iv_package  = iv_package
           iv_markdown = iv_markdown.
@@ -132,7 +132,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
 
   METHOD get_package_key.
-    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ iv_package }:{ zif_abappm_persist_apm=>c_key_extra-package_readme }|.
+    result = |{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKAGE }:{ iv_package }:{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_EXTRA-PACKAGE_README }|.
   ENDMETHOD.
 
 
@@ -154,40 +154,40 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~delete.
+  METHOD ZIF_ABAPPM_README~DELETE.
     gi_persist->delete( ms_readme-key ).
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~exists.
+  METHOD ZIF_ABAPPM_README~EXISTS.
     TRY.
         gi_persist->load( ms_readme-key ).
         result = abap_true.
-      CATCH zcx_abappm_error.
+      CATCH ZCX_ABAPPM_ERROR.
         result = abap_false.
     ENDTRY.
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~get.
+  METHOD ZIF_ABAPPM_README~GET.
     result = ms_readme-markdown.
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~load.
+  METHOD ZIF_ABAPPM_README~LOAD.
     ms_readme-markdown = gi_persist->load( ms_readme-key )-value.
     result = me.
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~save.
+  METHOD ZIF_ABAPPM_README~SAVE.
     gi_persist->save(
       iv_key   = ms_readme-key
-      iv_value = zif_abappm_readme~get( ) ).
+      iv_value = ZIF_ABAPPM_README~GET( ) ).
   ENDMETHOD.
 
 
-  METHOD zif_abappm_readme~set.
+  METHOD ZIF_ABAPPM_README~SET.
     ms_readme-markdown = iv_markdown.
     result = me.
   ENDMETHOD.

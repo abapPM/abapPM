@@ -1,4 +1,4 @@
-INTERFACE zif_abappm_package_json_types PUBLIC.
+INTERFACE ZIF_ABAPPM_PACKAGE_JSON_TYPES PUBLIC.
 
 ************************************************************************
 * Package JSON - Types
@@ -32,6 +32,10 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
       key   TYPE string,
       value TYPE string,
     END OF ty_generic,
+    BEGIN OF ty_time,
+      key       TYPE string,
+      timestamp TYPE timestamp,
+    END OF ty_time,
     BEGIN OF ty_signature,
       keyid TYPE string,
       sig   TYPE string,
@@ -97,8 +101,11 @@ INTERFACE zif_abappm_package_json_types PUBLIC.
     BEGIN OF ty_manifest.
       INCLUDE TYPE ty_package_json.
   TYPES:
-      dist       TYPE ty_dist,
-      deprecated TYPE abap_bool,
+      dist           TYPE ty_dist,
+      deprecated     TYPE abap_bool,
+      __id           TYPE string,
+      __abap_version TYPE string, " _nodeVersion
+      __apm_version  TYPE string, " _npmVersion
     END OF ty_manifest.
 
   TYPES:

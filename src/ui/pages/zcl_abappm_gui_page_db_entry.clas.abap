@@ -174,7 +174,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
     " Validation might raise expection but we want to keep the edited (inconsistent) value
     ms_data-value = is_content-value.
 
-    IF mv_content_type = zcl_abappm_persist_apm=>c_content_type-json.
+    IF mv_content_type = zif_abappm_persist_apm=>c_content_type-json.
       ms_data-value = validate_and_pretty_json( is_content-value ).
     ENDIF.
 
@@ -245,7 +245,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
       val    = ms_data-value
       format = cl_abap_format=>e_html_text ).
 
-    IF mv_content_type = zcl_abappm_persist_apm=>c_content_type-json.
+    IF mv_content_type = zif_abappm_persist_apm=>c_content_type-json.
       ri_html->add( |<textarea rows="40" cols="200" name="value" id="editor">{ lv_value }</textarea>| ).
       " TODO: Replace with
       " ii_html->add( |<json-editor value="{ lv_value }" indent="2"></json-editor>| ).

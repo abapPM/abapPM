@@ -1,116 +1,116 @@
-CLASS lcl_mapping_fields DEFINITION.
+class lcl_mapping_fields definition.
 
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
 
-    METHODS constructor
-      IMPORTING
-        it_mapping_fields TYPE zif_abappm_ajson_mapping~ty_mapping_fields OPTIONAL.
+    methods constructor
+      importing
+        it_mapping_fields type ZIF_ABAPPM_AJSON_MAPPING~TY_MAPPING_FIELDS optional.
 
-  PROTECTED SECTION.
+  protected section.
 
-  PRIVATE SECTION.
-    DATA mt_mapping_fields TYPE zif_abappm_ajson_mapping~ty_mapping_fields.
+  private section.
+    data mt_mapping_fields type ZIF_ABAPPM_AJSON_MAPPING~TY_MAPPING_FIELDS.
 
-ENDCLASS.
+endclass.
 
-CLASS lcl_rename DEFINITION.
+class lcl_rename definition.
 
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
 
-    METHODS constructor
-      IMPORTING
-        it_rename_map TYPE zif_abappm_ajson_mapping~tty_rename_map
-        iv_rename_by  TYPE i.
+    methods constructor
+      importing
+        it_rename_map type ZIF_ABAPPM_AJSON_MAPPING~TTY_RENAME_MAP
+        iv_rename_by type i.
 
-  PROTECTED SECTION.
+  protected section.
 
-  PRIVATE SECTION.
-    DATA mt_rename_map TYPE zif_abappm_ajson_mapping~tty_rename_map.
-    DATA mv_rename_by TYPE i.
+  private section.
+    data mt_rename_map type ZIF_ABAPPM_AJSON_MAPPING~TTY_RENAME_MAP.
+    data mv_rename_by type i.
 
-ENDCLASS.
+endclass.
 
-CLASS lcl_mapping_to_upper DEFINITION.
+class lcl_mapping_to_upper definition.
 
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
 
-    METHODS constructor
-      IMPORTING
-        it_mapping_fields TYPE zif_abappm_ajson_mapping~ty_mapping_fields OPTIONAL.
+    methods constructor
+      importing
+        it_mapping_fields type ZIF_ABAPPM_AJSON_MAPPING~TY_MAPPING_FIELDS optional.
 
-  PROTECTED SECTION.
+  protected section.
 
-  PRIVATE SECTION.
-    DATA mi_mapping_fields TYPE REF TO zif_abappm_ajson_mapping.
+  private section.
+    data mi_mapping_fields type ref to ZIF_ABAPPM_AJSON_MAPPING.
 
-ENDCLASS.
-
-
-CLASS lcl_mapping_to_lower DEFINITION.
-
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
-
-    METHODS constructor
-      IMPORTING
-        it_mapping_fields TYPE zif_abappm_ajson_mapping~ty_mapping_fields OPTIONAL.
-
-  PROTECTED SECTION.
-
-  PRIVATE SECTION.
-    DATA mi_mapping_fields TYPE REF TO zif_abappm_ajson_mapping.
-
-ENDCLASS.
+endclass.
 
 
-CLASS lcl_mapping_camel DEFINITION.
+class lcl_mapping_to_lower definition.
 
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
 
-    METHODS constructor
-      IMPORTING
-        it_mapping_fields   TYPE zif_abappm_ajson_mapping~ty_mapping_fields OPTIONAL
-        iv_first_json_upper TYPE abap_bool DEFAULT abap_true.
+    methods constructor
+      importing
+        it_mapping_fields type ZIF_ABAPPM_AJSON_MAPPING~TY_MAPPING_FIELDS optional.
 
-  PROTECTED SECTION.
+  protected section.
 
-  PRIVATE SECTION.
-    DATA mv_first_json_upper TYPE abap_bool.
-    DATA mi_mapping_fields TYPE REF TO zif_abappm_ajson_mapping.
+  private section.
+    data mi_mapping_fields type ref to ZIF_ABAPPM_AJSON_MAPPING.
 
-ENDCLASS.
+endclass.
 
-CLASS lcl_compound_mapper DEFINITION.
 
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
+class lcl_mapping_camel definition.
 
-    METHODS constructor
-      IMPORTING
-        it_queue TYPE zif_abappm_ajson_mapping=>ty_table_of.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
 
-  PROTECTED SECTION.
+    methods constructor
+      importing
+        it_mapping_fields   type ZIF_ABAPPM_AJSON_MAPPING~TY_MAPPING_FIELDS optional
+        iv_first_json_upper type abap_bool default abap_true.
 
-  PRIVATE SECTION.
-    DATA mt_queue TYPE zif_abappm_ajson_mapping=>ty_table_of.
+  protected section.
 
-ENDCLASS.
+  private section.
+    data mv_first_json_upper type abap_bool.
+    data mi_mapping_fields type ref to ZIF_ABAPPM_AJSON_MAPPING.
 
-CLASS lcl_to_snake DEFINITION.
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
-ENDCLASS.
+endclass.
 
-CLASS lcl_to_camel DEFINITION.
-  PUBLIC SECTION.
-    INTERFACES zif_abappm_ajson_mapping.
-    METHODS constructor
-      IMPORTING
-        iv_first_json_upper TYPE abap_bool.
-  PRIVATE SECTION.
-    DATA mv_first_json_upper TYPE abap_bool.
-ENDCLASS.
+class lcl_compound_mapper definition.
+
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
+
+    methods constructor
+      importing
+        it_queue type ZIF_ABAPPM_AJSON_MAPPING=>TY_TABLE_OF.
+
+  protected section.
+
+  private section.
+    data mt_queue type ZIF_ABAPPM_AJSON_MAPPING=>TY_TABLE_OF.
+
+endclass.
+
+class lcl_to_snake definition.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
+endclass.
+
+class lcl_to_camel definition.
+  public section.
+    interfaces ZIF_ABAPPM_AJSON_MAPPING.
+    methods constructor
+      importing
+        iv_first_json_upper type abap_bool.
+  private section.
+    data mv_first_json_upper type abap_bool.
+endclass.

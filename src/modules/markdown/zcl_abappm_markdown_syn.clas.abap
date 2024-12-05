@@ -1,4 +1,4 @@
-CLASS zcl_abappm_markdown_syn DEFINITION
+CLASS ZCL_ABAPPM_MARKDOWN_SYN DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -29,26 +29,26 @@ CLASS zcl_abappm_markdown_syn DEFINITION
 
     CLASS-DATA:
       gv_language    TYPE string,
-      go_highlighter TYPE REF TO zcl_abappm_highlighter.
+      go_highlighter TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER.
 
     CLASS-METHODS create
       IMPORTING
         !iv_language       TYPE string
       RETURNING
-        VALUE(ro_instance) TYPE REF TO zcl_abappm_highlighter.
+        VALUE(ro_instance) TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_markdown_syn IMPLEMENTATION.
+CLASS ZCL_ABAPPM_MARKDOWN_SYN IMPLEMENTATION.
 
 
   METHOD create.
-    ro_instance = zcl_abappm_highlighter_factory=>create( |.{ iv_language }| ).
+    ro_instance = ZCL_ABAPPM_HIGHLIGHTER_FACTORY=>CREATE( |.{ iv_language }| ).
 
     IF ro_instance IS INITIAL.
-      ro_instance = zcl_abappm_highlighter_factory=>create( |.txt| ).
+      ro_instance = ZCL_ABAPPM_HIGHLIGHTER_FACTORY=>CREATE( |.txt| ).
     ENDIF.
   ENDMETHOD.
 

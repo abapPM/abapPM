@@ -243,10 +243,9 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
           mo_form_data->to_abap( CHANGING cs_container = ls_params ).
 
           TRY.
-              MESSAGE 'Not implemented yet' TYPE 'I'.
-*              zcl_abappm_command_publish=>run(
-*                iv_registry     = mv_registry
-*                iv_package      = ls_params-package ).
+              zcl_abappm_command_publish=>run(
+                iv_registry     = mv_registry
+                iv_package      = ls_params-package ).
 
               rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back.
             CATCH zcx_abappm_error INTO lx_error.
