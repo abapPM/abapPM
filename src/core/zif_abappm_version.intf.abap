@@ -7,6 +7,6 @@ INTERFACE zif_abappm_version PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0-beta'.
+  CONSTANTS c_version TYPE string VALUE '1.0.0-beta-1'.
 
 ENDINTERFACE.

@@ -294,6 +294,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         li_json = li_json->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
 
         " Transpose dist-tags, times, users, versions...
+        li_json->delete( '/distTags' ). " created incorrectly due to underscope
         li_json->setx( '/dist-tags:{ }' ).
         LOOP AT is_packument-dist_tags INTO ls_generic.
           li_json->set(
@@ -346,6 +347,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
         li_json->setx( '/versions:{ }' ).
         LOOP AT is_packument-versions INTO ls_version.
+          ls_version-version-version = ''.
           lv_version = zcl_abappm_package_json=>convert_manifest_to_json( is_manifest = ls_version-version ).
 
           li_version = zcl_abappm_ajson=>parse( lv_version )->keep_item_order( ).

@@ -6,25 +6,25 @@
 ************************************************************************
 
 SELECTION-SCREEN BEGIN OF SCREEN 1002 TITLE sc_title.
-SELECTION-SCREEN SKIP.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(18) sc_url FOR FIELD p_url.
-PARAMETERS: p_url TYPE string LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN SKIP.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(18) sc_user FOR FIELD p_user.
-PARAMETERS: p_user TYPE string LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(18) sc_pass FOR FIELD p_pass.
-PARAMETERS: p_pass TYPE c LENGTH 255 LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
-SELECTION-SCREEN END OF LINE.
-SELECTION-SCREEN SKIP.
-SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(18) sc_cmnt FOR FIELD p_cmnt.
-PARAMETERS: p_cmnt TYPE c LENGTH 255 LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
-SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN SKIP.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(18) sc_url FOR FIELD p_url.
+    PARAMETERS: p_url TYPE string LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN SKIP.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(18) sc_user FOR FIELD p_user.
+    PARAMETERS: p_user TYPE string LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(18) sc_pass FOR FIELD p_pass.
+    PARAMETERS: p_pass TYPE c LENGTH 255 LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
+  SELECTION-SCREEN END OF LINE.
+  SELECTION-SCREEN SKIP.
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN COMMENT 1(18) sc_cmnt FOR FIELD p_cmnt.
+    PARAMETERS: p_cmnt TYPE c LENGTH 255 LOWER CASE VISIBLE LENGTH 60 ##SEL_WRONG.
+  SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF SCREEN 1002.
 
 *-----------------------------------------------------------------------
@@ -42,24 +42,24 @@ CLASS lcl_password_dialog DEFINITION FINAL.
 
     CLASS-METHODS popup
       IMPORTING
-        iv_repo_url TYPE string
+        url      TYPE string
       CHANGING
-        cv_user     TYPE string
-        cv_pass     TYPE string.
+        username TYPE string
+        password TYPE string.
 
     CLASS-METHODS on_screen_init.
     CLASS-METHODS on_screen_output.
     CLASS-METHODS on_screen_event
       IMPORTING
-        iv_ucomm TYPE sy-ucomm.
+        command TYPE sy-ucomm.
 
   PRIVATE SECTION.
 
-    CLASS-DATA gv_confirm TYPE abap_bool.
+    CLASS-DATA is_confirmed TYPE abap_bool.
 
     CLASS-METHODS enrich_title_by_hostname
       IMPORTING
-        iv_repo_url TYPE string.
+        url TYPE string.
 
 ENDCLASS.
 
@@ -67,30 +67,28 @@ CLASS lcl_password_dialog IMPLEMENTATION.
 
   METHOD popup.
 
-    DATA ls_position TYPE zif_abapgit_popups=>ty_popup_position.
-
     CLEAR p_pass.
-    p_url      = iv_repo_url.
-    p_user     = cv_user.
-    gv_confirm = abap_false.
+    p_url      = url.
+    p_user     = username.
+    is_confirmed = abap_false.
 
     p_cmnt = 'Press F1 for Help'.
 
-    enrich_title_by_hostname( iv_repo_url ).
+    enrich_title_by_hostname( url ).
 
-    ls_position = zcl_abapgit_popups=>center(
+    DATA(position) = zcl_abapgit_popups=>center(
       iv_width  = 65
       iv_height = 7 ).
 
     CALL SELECTION-SCREEN c_dynnr
-      STARTING AT ls_position-start_column ls_position-start_row
-      ENDING AT ls_position-end_column ls_position-end_row.
+      STARTING AT position-start_column position-start_row
+      ENDING AT position-end_column position-end_row.
 
-    IF gv_confirm = abap_true.
-      cv_user = p_user.
-      cv_pass = p_pass.
+    IF is_confirmed = abap_true.
+      username = p_user.
+      password = p_pass.
     ELSE.
-      CLEAR: cv_user, cv_pass.
+      CLEAR: username, password.
     ENDIF.
 
     CLEAR: p_url, p_user, p_pass.
@@ -107,7 +105,7 @@ CLASS lcl_password_dialog IMPLEMENTATION.
 
   METHOD on_screen_output.
 
-    DATA lt_ucomm TYPE TABLE OF sy-ucomm.
+    DATA excluded_commands TYPE TABLE OF sy-ucomm.
 
     ASSERT sy-dynnr = c_dynnr.
 
@@ -129,14 +127,14 @@ CLASS lcl_password_dialog IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    APPEND 'PICK' TO lt_ucomm.
+    APPEND 'PICK' TO excluded_commands.
 
     CALL FUNCTION 'RS_SET_SELSCREEN_STATUS'
       EXPORTING
         p_status  = 'DETL'
         p_program = 'RSPFPAR'
       TABLES
-        p_exclude = lt_ucomm.
+        p_exclude = excluded_commands.
 
     IF p_user IS NOT INITIAL.
       SET CURSOR FIELD 'P_PASS'.
@@ -148,9 +146,9 @@ CLASS lcl_password_dialog IMPLEMENTATION.
 
     ASSERT sy-dynnr = c_dynnr.
 
-    CASE iv_ucomm.
+    CASE command.
       WHEN 'OK'. " Enter
-        gv_confirm = abap_true.
+        is_confirmed = abap_true.
         LEAVE TO SCREEN 0.
       WHEN 'HELP'. " F1
         TRY.
@@ -159,7 +157,7 @@ CLASS lcl_password_dialog IMPLEMENTATION.
           CATCH zcx_abapgit_exception ##NO_HANDLER.
         ENDTRY.
       WHEN OTHERS. " Escape
-        gv_confirm = abap_false.
+        is_confirmed = abap_false.
         LEAVE TO SCREEN 0.
     ENDCASE.
 
@@ -168,12 +166,10 @@ CLASS lcl_password_dialog IMPLEMENTATION.
 
   METHOD enrich_title_by_hostname.
 
-    DATA lv_host TYPE string.
-
-    FIND REGEX 'https?://([^/^:]*)' IN iv_repo_url SUBMATCHES lv_host.
-    IF lv_host IS NOT INITIAL AND lv_host <> space.
+    FIND REGEX 'https?://([^/^:]*)' IN url SUBMATCHES DATA(host).
+    IF host IS NOT INITIAL AND host <> space.
       CLEAR sc_title.
-      CONCATENATE 'Login:' lv_host INTO sc_title IN CHARACTER MODE SEPARATED BY space.
+      CONCATENATE 'Login:' host INTO sc_title IN CHARACTER MODE SEPARATED BY space.
     ENDIF.
 
   ENDMETHOD.
@@ -183,16 +179,16 @@ ENDCLASS.
 
 FORM password_popup
   USING
-    pv_repo_url TYPE string
+    url      TYPE string
   CHANGING
-    cv_user     TYPE string
-    cv_pass     TYPE string.
+    username TYPE string
+    password TYPE string.
 
   lcl_password_dialog=>popup(
     EXPORTING
-      iv_repo_url     = pv_repo_url
+      url      = url
     CHANGING
-      cv_user         = cv_user
-      cv_pass         = cv_pass ).
+      username = username
+      password = password ).
 
 ENDFORM.

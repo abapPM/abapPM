@@ -7,8 +7,6 @@
 
 FORM run.
 
-  DATA lx_error TYPE REF TO cx_root.
-
   TRY.
       " TODO: Authorization check
 
@@ -18,8 +16,8 @@ FORM run.
 
       PERFORM open_gui.
 
-    CATCH cx_root INTO lx_error.
-      MESSAGE lx_error TYPE 'E'.
+    CATCH cx_root INTO DATA(error).
+      MESSAGE error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
 
 ENDFORM.
@@ -27,9 +25,9 @@ ENDFORM.
 FORM open_gui RAISING zcx_abapgit_exception.
 
   DATA:
-    lv_action TYPE string,
-    lv_mode   TYPE tabname,
-    li_router TYPE REF TO zif_abapgit_gui_event_handler.
+    action TYPE string,
+    mode   TYPE tabname,
+    router TYPE REF TO zif_abapgit_gui_event_handler.
 
   IF sy-batch = abap_true.
     " FUTURE: One day we will add this
@@ -38,17 +36,17 @@ FORM open_gui RAISING zcx_abapgit_exception.
   ELSE.
 
     " https://docs.abapgit.org/user-guide/reference/database-util.html#emergency-mode
-    GET PARAMETER ID 'DBT' FIELD lv_mode.
-    CASE lv_mode.
+    GET PARAMETER ID 'DBT' FIELD mode.
+    CASE mode.
       WHEN 'ZABAPPM'.
-        lv_action = zif_abapgit_definitions=>c_action-go_db.
+        action = zif_abapgit_definitions=>c_action-go_db.
       WHEN OTHERS.
-        lv_action = zif_abapgit_definitions=>c_action-go_home.
+        action = zif_abapgit_definitions=>c_action-go_home.
     ENDCASE.
 
     " TODO: zcl_abapgit_services_abapgit=>prepare_gui_startup( ).
 
-    zcl_abappm_gui_factory=>get_gui( )->go_home( lv_action ).
+    zcl_abappm_gui_factory=>get_gui( )->go_home( action ).
 
     CALL SELECTION-SCREEN 1001. " trigger screen
 
@@ -58,32 +56,28 @@ ENDFORM.
 
 FORM output.
 
-  DATA:
-    lx_error TYPE REF TO zcx_abapgit_exception,
-    lt_ucomm TYPE TABLE OF sy-ucomm.
+  DATA excluded_commands TYPE TABLE OF sy-ucomm.
 
   PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
 
-  APPEND 'CRET' TO lt_ucomm.  "Button Execute
-  APPEND 'SPOS' TO lt_ucomm.  "Button Save
+  APPEND 'CRET' TO excluded_commands.  "Button Execute
+  APPEND 'SPOS' TO excluded_commands.  "Button Save
 
   CALL FUNCTION 'RS_SET_SELSCREEN_STATUS'
     EXPORTING
       p_status  = sy-pfkey
     TABLES
-      p_exclude = lt_ucomm.
+      p_exclude = excluded_commands.
 
   TRY.
       zcl_abappm_gui_factory=>get_gui( )->set_focus( ).
-    CATCH zcx_abapgit_exception INTO lx_error.
-      MESSAGE lx_error TYPE 'S' DISPLAY LIKE 'E'.
+    CATCH cx_root INTO DATA(error).
+      MESSAGE error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
 
 ENDFORM.
 
 FORM exit.
-
-  DATA lx_error TYPE REF TO zcx_abapgit_exception.
 
   " The exit logic should only be applied for our 'main' selection screen 1001.
   " All other selection-screens are called as popups and shouldn't influence
@@ -101,8 +95,8 @@ FORM exit.
             LEAVE TO SCREEN 1001.
           ENDIF.
       ENDCASE.
-    CATCH zcx_abapgit_exception INTO lx_error.
-      MESSAGE lx_error TYPE 'S' DISPLAY LIKE 'E'.
+    CATCH cx_root INTO DATA(error).
+      MESSAGE error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
 
 ENDFORM.

@@ -44,6 +44,7 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
       BEGIN OF c_action,
         choose_package  TYPE string VALUE 'choose-package',
         publish_package TYPE string VALUE 'publish-package',
+        refresh         TYPE string VALUE 'refresh',
       END OF c_action.
 
     DATA:
@@ -73,7 +74,6 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
     METHODS get_form_schema
       RETURNING
         VALUE(ro_form) TYPE REF TO zcl_abappm_html_form.
-
 ENDCLASS.
 
 
@@ -148,6 +148,9 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
       iv_label       = 'Publish Package'
       iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
       iv_action      = c_action-publish_package
+    )->command(
+      iv_label       = 'Refresh'
+      iv_action      = c_action-refresh
     )->command(
       iv_label       = 'Back'
       iv_action      = zif_abapgit_definitions=>c_action-go_back ).
@@ -233,6 +236,11 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
         ELSE.
           mo_form_data = read_package( |{ mo_form_data->get( c_id-package ) }| ).
         ENDIF.
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+
+      WHEN c_action-refresh.
+
+        mo_form_data = read_package( |{ mo_form_data->get( c_id-package ) }| ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN c_action-publish_package.

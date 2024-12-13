@@ -23,15 +23,15 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_LOG</KEY>
-     <ENTRY>Show Log</ENTRY>
-     <LENGTH>16</LENGTH>
+     <KEY>P_DRYRUN</KEY>
+     <ENTRY>Dry Run</ENTRY>
+     <LENGTH>15</LENGTH>
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_NOTEST</KEY>
-     <ENTRY>Skip Test Classes</ENTRY>
-     <LENGTH>25</LENGTH>
+     <KEY>P_LOG</KEY>
+     <ENTRY>Show Log</ENTRY>
+     <LENGTH>16</LENGTH>
     </item>
     <item>
      <ID>S</ID>
@@ -47,9 +47,9 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_TEST</KEY>
-     <ENTRY>Test Run</ENTRY>
-     <LENGTH>17</LENGTH>
+     <KEY>P_PROD</KEY>
+     <ENTRY>Production (no test classes)</ENTRY>
+     <LENGTH>36</LENGTH>
     </item>
     <item>
      <ID>S</ID>
