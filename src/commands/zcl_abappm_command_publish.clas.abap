@@ -104,12 +104,12 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD attach_package.
 
-    DATA attachment TYPE LINE OF zif_abappm_pacote=>ty_packument-__attachments.
+    DATA(attachment) = VALUE zif_abappm_pacote=>ty_attachment(
+      key                  = |{ cs_publish-name }-{ version }.tgz|
+      tarball-content_type = 'application/octet-stream'
+      tarball-data         = cl_http_utility=>encode_x_base64( tarball )
+      tarball-length       = xstrlen( tarball ) ).
 
-    attachment-key                  = |{ cs_publish-name }-{ version }.tgz|.
-    attachment-tarball-content_type = 'application/octet-stream'.
-    attachment-tarball-data         = cl_http_utility=>encode_x_base64( tarball ).
-    attachment-tarball-length       = xstrlen( tarball ).
     INSERT attachment INTO TABLE cs_publish-__attachments.
 
   ENDMETHOD.
@@ -185,19 +185,18 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
 
   METHOD get_package_json.
+
     result = zcl_abappm_package_json=>factory( package )->load( )->get( ).
     result-readme = zcl_abappm_readme=>factory( package )->load( )->get( ).
+
   ENDMETHOD.
 
 
   METHOD get_packument_from_registry.
 
-    DATA:
-      packument   TYPE string.
-
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    packument = zcl_abappm_pacote=>factory(
+    DATA(packument) = zcl_abappm_pacote=>factory(
       iv_registry = registry
       iv_name     = package_json-name )->packument( ).
 
@@ -205,8 +204,8 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         " TODO: ...
         " zcl_abappm_ajson=>parse( packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
 
-      CATCH zcx_abappm_ajson_error INTO DATA(ajson_error).
-        zcx_abappm_error=>raise_with_text( ajson_error ).
+      CATCH zcx_abappm_ajson_error INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -217,36 +216,24 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     " TODO: Move this and all called methods to local part of class
     CONSTANTS lc_null TYPE xstring VALUE ''.
 
-    DATA:
-      local_settings TYPE zif_abapgit_persistence=>ty_local_settings,
-      dot_abapgit    TYPE REF TO zcl_abapgit_dot_abapgit,
-      files          TYPE zif_abapgit_definitions=>ty_files_item_tt,
-      serializer     TYPE REF TO zcl_abapgit_serialize,
-      tar            TYPE REF TO zcl_abappm_tar,
-      manifest       TYPE zif_abappm_package_json_types=>ty_manifest,
-      json           TYPE string,
-      name           TYPE string,
-      tarball        TYPE xstring,
-      logger         TYPE REF TO zif_abapgit_log.
-
     " 1. Serialize local objects
     TRY.
-        CREATE OBJECT logger TYPE zcl_abapgit_log.
+        DATA(logger) = NEW zcl_abapgit_log( ).
 
-        local_settings-ignore_subpackages = abap_false.
-        local_settings-only_local_objects = abap_false.
+        DATA(local_settings) = VALUE zif_abapgit_persistence=>ty_local_settings(
+          ignore_subpackages = abap_false
+          only_local_objects = abap_false ).
 
         " TODO: Hardcoded to prefix
-        dot_abapgit = zcl_abapgit_dot_abapgit=>build_default( ).
+        DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
         dot_abapgit->set_folder_logic( zif_abapgit_dot_abapgit=>c_folder_logic-prefix ).
         dot_abapgit->set_starting_folder( 'src' ).
 
-        CREATE OBJECT serializer
-          EXPORTING
-            io_dot_abapgit    = dot_abapgit
-            is_local_settings = local_settings.
+        DATA(serializer) = NEW zcl_abapgit_serialize(
+          io_dot_abapgit    = dot_abapgit
+          is_local_settings = local_settings ).
 
-        files = serializer->files_local(
+        DATA(files) = serializer->files_local(
           iv_package = package
           ii_log     = logger ).
 
@@ -256,7 +243,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ENDTRY.
 
     " 2. Tar and gzip files
-    tar = zcl_abappm_tar=>new( ).
+    DATA(tar) = zcl_abappm_tar=>new( ).
 
     LOOP AT files ASSIGNING FIELD-SYMBOL(<file>).
       AT NEW file-path.
@@ -268,7 +255,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         ENDIF.
       ENDAT.
       IF <file>-file-path = '/'.
-        name = <file>-file-filename.
+        DATA(name) = <file>-file-filename.
       ELSE.
         name = |{ <file>-file-path }/{ <file>-file-filename }|.
       ENDIF.
@@ -278,8 +265,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ENDLOOP.
 
     " 3. Add package.json and readme
-    MOVE-CORRESPONDING package_json TO manifest.
-    json = zcl_abappm_package_json=>convert_manifest_to_json(
+    DATA(manifest) = CORRESPONDING zif_abappm_package_json_types=>ty_manifest( package_json ).
+
+    DATA(json) = zcl_abappm_package_json=>convert_manifest_to_json(
       is_manifest     = manifest
       iv_package_json = abap_true ).
 
@@ -295,31 +283,30 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
-    tarball = tar->save( ).
-    result = tar->gzip( tarball ).
+    result = tar->gzip( tar->save( ) ).
 
   ENDMETHOD.
 
 
   METHOD init_package.
 
-    DATA:
-      dist_tag TYPE LINE OF zif_abappm_pacote=>ty_packument-dist_tags,
-      version  TYPE LINE OF zif_abappm_pacote=>ty_packument-versions.
-
     MOVE-CORRESPONDING package_json TO result.
     result-__id = package_json-name.
 
     " TODO: Allow publishing with other tag
-    dist_tag-key   = 'latest'.
-    dist_tag-value = package_json-version.
+    DATA(dist_tag) = VALUE zif_abappm_package_json_types=>ty_generic(
+      key   = 'latest'
+      value = package_json-version ).
+
     INSERT dist_tag INTO TABLE result-dist_tags.
 
-    version-key     = package_json-version.
+    DATA(version) = VALUE zif_abappm_pacote=>ty_version( key = package_json-version ).
+
     MOVE-CORRESPONDING package_json TO version-version.
     version-version-__id           = |{ package_json-name }@{ package_json-version }|.
     version-version-__abap_version = get_abap_version( ).
     version-version-__apm_version  = zif_abappm_version=>c_version.
+
     INSERT version INTO TABLE result-versions.
 
   ENDMETHOD.
@@ -343,18 +330,11 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD run.
 
-    DATA:
-      package_json      TYPE zif_abappm_package_json_types=>ty_package_json,
-      packument         TYPE zif_abappm_pacote=>ty_packument,
-      packument_publish TYPE zif_abappm_pacote=>ty_packument,
-      message           TYPE string,
-      tarball           TYPE xstring.
-
     " 1. Check if package exists and is initialized
     check_package( package ).
 
     " 2. Get package.abap.json and readme
-    package_json = get_package_json( package ).
+    DATA(package_json) = get_package_json( package ).
 
     IF package_json-private = abap_true.
       zcx_abappm_error=>raise( 'This is a private package and can not be published' ).
@@ -363,7 +343,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     " 3. Get packument from registry
     " TODO: This should include request parameter for writing to the registry (only if not anonymous?)
     TRY.
-        packument = get_packument_from_registry(
+        DATA(packument) = get_packument_from_registry(
           registry     = registry
           package_json = package_json ).
       CATCH zcx_abappm_error ##NO_HANDLER.
@@ -376,12 +356,12 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       package_json = package_json ).
 
     " 5. Initialize packument for publishing
-    packument_publish = init_package(
+    DATA(packument_publish) = init_package(
       packument    = packument
       package_json = package_json ).
 
     " 6. Get tarball
-    tarball = get_tarball(
+    DATA(tarball) = get_tarball(
       package      = package
       package_json = package_json ).
 
@@ -394,7 +374,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         cs_publish = packument_publish ).
 
     " 8. Publish package to registry
-    message = publish_package(
+    DATA(message) = publish_package(
       registry  = registry
       packument = packument_publish ).
 

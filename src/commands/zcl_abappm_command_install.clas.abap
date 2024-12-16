@@ -104,7 +104,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
   METHOD install_dependencies.
 
-    " TODO: pass production flag
+    " TODO: pass production flag from ui to here
     zcl_abappm_importer=>run(
        package       = package
        is_logging    = abap_false
@@ -134,11 +134,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
   METHOD run.
 
-    DATA:
-      manifest          TYPE zif_abappm_package_json_types=>ty_manifest,
-      package_json_init TYPE zif_abappm_package_json_types=>ty_package_json,
-      packument         TYPE zif_abappm_pacote=>ty_packument,
-      tarball           TYPE xstring.
+    DATA package_json_init TYPE zif_abappm_package_json_types=>ty_package_json.
 
     IF only_dependencies = abap_false.
       " 1. Check if something else is already installed
@@ -147,12 +143,12 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
         name    = package_json-name ).
 
       " 2. Get manifest
-      manifest = get_manifest_from_registry(
+      DATA(manifest) = get_manifest_from_registry(
         registry     = registry
         package_json = package_json ).
 
       " 3. Get tarball
-      tarball = get_tarball_from_registry(
+      DATA(tarball) = get_tarball_from_registry(
         registry = registry
         manifest = manifest ).
 

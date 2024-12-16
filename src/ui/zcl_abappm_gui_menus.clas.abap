@@ -13,23 +13,23 @@ CLASS zcl_abappm_gui_menus DEFINITION
 
     CLASS-METHODS advanced
       RETURNING
-        VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
+        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar.
 
     CLASS-METHODS help
       RETURNING
-        VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
+        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar.
 
     CLASS-METHODS back
       RETURNING
-        VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
+        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar.
 
     CLASS-METHODS settings
       RETURNING
-        VALUE(ro_menu) TYPE REF TO zcl_abapgit_html_toolbar.
+        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar.
 
     CLASS-METHODS experimental
       IMPORTING
-        !io_menu TYPE REF TO zcl_abapgit_html_toolbar.
+        !menu TYPE REF TO zcl_abapgit_html_toolbar.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -41,10 +41,9 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
 
 
   METHOD advanced.
+    result = zcl_abapgit_html_toolbar=>create( 'toolbar-advanced' ).
 
-    CREATE OBJECT ro_menu EXPORTING iv_id = 'toolbar-advanced'.
-
-    ro_menu->add(
+    result->add(
       iv_txt = 'Database Utility'
       iv_act = zif_abapgit_definitions=>c_action-go_db
     )->add(
@@ -52,44 +51,38 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
       iv_act = zif_abapgit_definitions=>c_action-go_debuginfo ).
 
     IF zcl_abapgit_ui_factory=>get_frontend_services( )->is_sapgui_for_windows( ) = abap_true.
-      ro_menu->add(
+      result->add(
         iv_txt = 'Open IE DevTools'
         iv_act = zif_abapgit_definitions=>c_action-ie_devtools ).
     ENDIF.
-
   ENDMETHOD.
 
 
   METHOD back.
+    result = zcl_abapgit_html_toolbar=>create( 'toolbar-back' ).
 
-    CREATE OBJECT ro_menu EXPORTING iv_id = 'toolbar-back'.
-
-    ro_menu->add(
+    result->add(
       iv_txt = 'Back'
       iv_act = zif_abapgit_definitions=>c_action-go_back ).
-
   ENDMETHOD.
 
 
   METHOD experimental.
-
     TRY.
         IF zcl_abappm_settings=>factory( )->get( )-experimental_features IS NOT INITIAL. "apm
-          io_menu->add(
+          menu->add(
             iv_txt = zcl_abappm_gui_buttons=>experimental( )
             iv_act = zif_abappm_gui_router=>c_action-go_settings ).
         ENDIF.
       CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
-
   ENDMETHOD.
 
 
   METHOD help.
+    result = zcl_abapgit_html_toolbar=>create( 'toolbar-help' ).
 
-    CREATE OBJECT ro_menu EXPORTING iv_id = 'toolbar-help'.
-
-    ro_menu->add(
+    result->add(
       iv_txt = 'Registry'
       iv_act = zif_abappm_gui_router=>c_action-registry
 * FUTURE
@@ -105,20 +98,17 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     )->add(
       iv_txt = 'Hotkeys'
       iv_act = zif_abappm_gui_router=>c_action-show_hotkeys ).
-
   ENDMETHOD.
 
 
   METHOD settings.
+    result = zcl_abapgit_html_toolbar=>create( 'toolbar-settings' ).
 
-    CREATE OBJECT ro_menu EXPORTING iv_id = 'toolbar-settings'.
-
-    ro_menu->add(
+    result->add(
       iv_txt = 'Global'
       iv_act = zif_abappm_gui_router=>c_action-go_settings
     )->add(
       iv_txt = 'Personal'
       iv_act = zif_abappm_gui_router=>c_action-go_settings_personal ).
-
   ENDMETHOD.
 ENDCLASS.

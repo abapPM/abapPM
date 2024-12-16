@@ -20,8 +20,8 @@ CLASS zcl_abappm_html_form_utils DEFINITION
 
     CLASS-METHODS is_dirty
       IMPORTING
-        !io_form_data    TYPE REF TO zcl_abapgit_string_map
-        !io_compare_with TYPE REF TO zcl_abapgit_string_map
+        !io_form_data    TYPE REF TO zcl_abappm_string_map
+        !io_compare_with TYPE REF TO zcl_abappm_string_map
       RETURNING
         VALUE(rv_dirty)  TYPE abap_bool.
 
@@ -31,23 +31,31 @@ CLASS zcl_abappm_html_form_utils DEFINITION
 
     METHODS normalize
       IMPORTING
-        !io_form_data       TYPE REF TO zcl_abapgit_string_map
+        !io_form_data       TYPE REF TO zcl_abappm_string_map OPTIONAL
       RETURNING
-        VALUE(ro_form_data) TYPE REF TO zcl_abapgit_string_map
+        VALUE(ro_form_data) TYPE REF TO zcl_abappm_string_map
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS normalize_abapgit
+      IMPORTING
+        !io_form_data       TYPE REF TO zcl_abapgit_string_map OPTIONAL
+      RETURNING
+        VALUE(ro_form_data) TYPE REF TO zcl_abappm_string_map
       RAISING
         zcx_abapgit_exception.
 
     METHODS validate
       IMPORTING
-        !io_form_data            TYPE REF TO zcl_abapgit_string_map
+        !io_form_data            TYPE REF TO zcl_abappm_string_map
       RETURNING
-        VALUE(ro_validation_log) TYPE REF TO zcl_abapgit_string_map
+        VALUE(ro_validation_log) TYPE REF TO zcl_abappm_string_map
       RAISING
         zcx_abapgit_exception.
 
     METHODS is_empty
       IMPORTING
-        !io_form_data   TYPE REF TO zcl_abapgit_string_map
+        !io_form_data   TYPE REF TO zcl_abappm_string_map
       RETURNING
         VALUE(rv_empty) TYPE abap_bool
       RAISING
@@ -55,12 +63,12 @@ CLASS zcl_abappm_html_form_utils DEFINITION
 
     METHODS set_data
       IMPORTING
-        !io_form_data TYPE REF TO zcl_abapgit_string_map.
+        !io_form_data TYPE REF TO zcl_abappm_string_map.
 
     METHODS exit
       IMPORTING
-        !io_form_data    TYPE REF TO zcl_abapgit_string_map
-        !io_compare_with TYPE REF TO zcl_abapgit_string_map
+        !io_form_data    TYPE REF TO zcl_abappm_string_map
+        !io_compare_with TYPE REF TO zcl_abappm_string_map
       RETURNING
         VALUE(rv_state)  TYPE i
       RAISING
@@ -70,7 +78,7 @@ CLASS zcl_abappm_html_form_utils DEFINITION
   PRIVATE SECTION.
 
     DATA mo_form      TYPE REF TO zcl_abappm_html_form.
-    DATA mo_form_data TYPE REF TO zcl_abapgit_string_map.
+    DATA mo_form_data TYPE REF TO zcl_abappm_string_map.
 
 ENDCLASS.
 
@@ -79,19 +87,19 @@ ENDCLASS.
 CLASS zcl_abappm_html_form_utils IMPLEMENTATION.
 
 
-  METHOD CONSTRUCTOR.
+  METHOD constructor.
     mo_form = io_form.
   ENDMETHOD.
 
 
-  METHOD CREATE.
+  METHOD create.
     CREATE OBJECT ro_form_util
       EXPORTING
         io_form = io_form.
   ENDMETHOD.
 
 
-  METHOD EXIT.
+  METHOD exit.
 
     DATA lv_answer TYPE c LENGTH 1.
 
@@ -116,12 +124,12 @@ CLASS zcl_abappm_html_form_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD IS_DIRTY.
+  METHOD is_dirty.
     rv_dirty = boolc( io_form_data->mt_entries <> io_compare_with->mt_entries ).
   ENDMETHOD.
 
 
-  METHOD IS_EMPTY.
+  METHOD is_empty.
 
     DATA:
       lt_fields TYPE zif_abapgit_html_form=>ty_fields,
@@ -168,7 +176,7 @@ CLASS zcl_abappm_html_form_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD NORMALIZE.
+  METHOD normalize.
 
     DATA:
       lt_fields TYPE zif_abapgit_html_form=>ty_fields,
@@ -250,12 +258,95 @@ CLASS zcl_abappm_html_form_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD SET_DATA.
+  METHOD normalize_abapgit.
+
+    " TODO: replace with normalize
+    DATA:
+      lt_fields TYPE zif_abapgit_html_form=>ty_fields,
+      lv_value  TYPE string,
+      lv_rows   TYPE i,
+      lv_row    TYPE i,
+      lv_len    TYPE i.
+
+    FIELD-SYMBOLS <ls_field> LIKE LINE OF lt_fields.
+
+    CREATE OBJECT ro_form_data.
+
+    IF io_form_data->is_empty( ) = abap_true.
+      RETURN.
+    ENDIF.
+
+    lt_fields = mo_form->get_fields( ).
+    LOOP AT lt_fields ASSIGNING <ls_field> WHERE type <> zif_abapgit_html_form=>c_field_type-field_group
+      AND type <> zif_abapgit_html_form=>c_field_type-hidden.
+
+      CLEAR lv_value.
+      lv_value = io_form_data->get( <ls_field>-name ).
+      IF <ls_field>-condense = abap_true.
+        lv_value = condense( val = lv_value
+                             del = ` ` ).
+      ENDIF.
+
+      IF <ls_field>-type = zif_abapgit_html_form=>c_field_type-checkbox.
+        ro_form_data->set(
+          iv_key = <ls_field>-name
+          iv_val = boolc( lv_value = 'on' ) ) ##TYPE.
+      ELSEIF ( <ls_field>-type = zif_abapgit_html_form=>c_field_type-text
+          OR <ls_field>-type = zif_abapgit_html_form=>c_field_type-textarea )
+          AND <ls_field>-upper_case = abap_true.
+        ro_form_data->set(
+          iv_key = <ls_field>-name
+          iv_val = to_upper( lv_value ) ).
+      ELSEIF <ls_field>-type = zif_abapgit_html_form=>c_field_type-number.
+        " Numeric value is checked in validation
+        ro_form_data->set(
+          iv_key = <ls_field>-name
+          iv_val = condense( val = lv_value del = ` ` ) ).
+      ELSEIF <ls_field>-type = zif_abapgit_html_form=>c_field_type-table.
+        lv_rows = io_form_data->get( |{ <ls_field>-name }-{ zif_abapgit_html_form=>c_rows }| ).
+        DO lv_rows TIMES.
+          lv_row = sy-index.
+          DO lines( <ls_field>-subitems ) TIMES.
+            lv_value = io_form_data->get( |{ <ls_field>-name }-{ lv_row }-{ sy-index }| ).
+            ro_form_data->set(
+              iv_key = |{ <ls_field>-name }-{ lv_row }-{ sy-index }|
+              iv_val = lv_value ).
+          ENDDO.
+        ENDDO.
+        ro_form_data->set(
+          iv_key = |{ <ls_field>-name }-{ zif_abapgit_html_form=>c_rows }|
+          iv_val = |{ lv_rows }| ).
+      ELSEIF <ls_field>-type = zif_abapgit_html_form=>c_field_type-textarea.
+        REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf IN lv_value
+          WITH cl_abap_char_utilities=>newline.
+
+        " Remove last line if empty (ie 2x newline)
+        lv_len = strlen( lv_value ) - 2.
+        IF lv_len >= 0 AND lv_value+lv_len(1) = cl_abap_char_utilities=>newline.
+          lv_len = lv_len + 1.
+          lv_value = lv_value(lv_len).
+        ENDIF.
+
+        ro_form_data->set(
+          iv_key = <ls_field>-name
+          iv_val = lv_value ).
+      ELSE.
+        ro_form_data->set(
+          iv_key = <ls_field>-name
+          iv_val = lv_value ).
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD set_data.
     mo_form_data = io_form_data.
   ENDMETHOD.
 
 
-  METHOD VALIDATE.
+  METHOD validate.
 
     DATA:
       lt_fields TYPE zif_abapgit_html_form=>ty_fields,

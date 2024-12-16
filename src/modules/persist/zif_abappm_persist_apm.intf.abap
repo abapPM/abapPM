@@ -6,6 +6,9 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+
+  CONSTANTS c_max_key_len TYPE i VALUE 120.
+
   TYPES:
     ty_key TYPE c LENGTH 120,
     BEGIN OF ty_zabappm,

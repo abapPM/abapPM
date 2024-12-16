@@ -26,8 +26,8 @@ CLASS zcl_abappm_html_form DEFINITION
     METHODS render
       IMPORTING
         !iv_form_class     TYPE csequence DEFAULT 'dialog-form'
-        !io_values         TYPE REF TO zcl_abapgit_string_map
-        !io_validation_log TYPE REF TO zcl_abapgit_string_map OPTIONAL
+        !io_values         TYPE REF TO zcl_abappm_string_map
+        !io_validation_log TYPE REF TO zcl_abappm_string_map OPTIONAL
       RETURNING
         VALUE(ri_html)     TYPE REF TO zif_abapgit_html
       RAISING
@@ -169,8 +169,8 @@ CLASS zcl_abappm_html_form DEFINITION
     METHODS render_field
       IMPORTING
         !ii_html           TYPE REF TO zif_abapgit_html
-        !io_values         TYPE REF TO zcl_abapgit_string_map
-        !io_validation_log TYPE REF TO zcl_abapgit_string_map
+        !io_values         TYPE REF TO zcl_abappm_string_map
+        !io_validation_log TYPE REF TO zcl_abappm_string_map
         !is_field          TYPE zif_abapgit_html_form=>ty_field
         !iv_autofocus      TYPE abap_bool.
 
@@ -203,7 +203,7 @@ CLASS zcl_abappm_html_form DEFINITION
         !ii_html   TYPE REF TO zif_abapgit_html
         !is_field  TYPE zif_abapgit_html_form=>ty_field
         !is_attr   TYPE ty_attr
-        !io_values TYPE REF TO zcl_abapgit_string_map.
+        !io_values TYPE REF TO zcl_abappm_string_map.
 
     METHODS render_command
       IMPORTING

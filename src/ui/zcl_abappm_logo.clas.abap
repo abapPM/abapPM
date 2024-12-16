@@ -13,31 +13,31 @@ CLASS zcl_abappm_logo DEFINITION
 
     CLASS-METHODS xml
       IMPORTING
-        iv_svg        TYPE string
+        svg           TYPE string
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS svg_logo
       IMPORTING
-        iv_height     TYPE i DEFAULT 25
+        height        TYPE i DEFAULT 25
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS svg_logo_with_text
       IMPORTING
-        iv_height     TYPE i DEFAULT 25
+        height        TYPE i DEFAULT 25
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS svg_cube
       IMPORTING
-        iv_height     TYPE i DEFAULT 25
+        height        TYPE i DEFAULT 25
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS svg_text
       IMPORTING
-        iv_height     TYPE i DEFAULT 25
+        height        TYPE i DEFAULT 25
       RETURNING
         VALUE(result) TYPE string.
 
@@ -46,9 +46,9 @@ CLASS zcl_abappm_logo DEFINITION
 
     CLASS-METHODS replace_width_height
       IMPORTING
-        iv_svg        TYPE string
-        iv_ratio      TYPE p
-        iv_height     TYPE i
+        svg           TYPE string
+        ratio         TYPE p
+        height        TYPE i
       RETURNING
         VALUE(result) TYPE string.
 
@@ -61,18 +61,16 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
 
   METHOD replace_width_height.
 
-    DATA lv_width TYPE i.
-
-    lv_width = iv_height * iv_ratio.
+    DATA(width) = height * ratio.
 
     result = replace(
-      val  = iv_svg
+      val  = svg
       sub  = '$'
-      with = |{ lv_width }| ).
+      with = |{ width }| ).
     result = replace(
       val  = result
       sub  = '$'
-      with = |{ iv_height }| ).
+      with = |{ height }| ).
 
   ENDMETHOD.
 
@@ -91,9 +89,9 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
       && |</svg>|.
 
     result = replace_width_height(
-      iv_svg    = result
-      iv_ratio  = '0.92'
-      iv_height = iv_height ).
+      svg    = result
+      ratio  = '0.92'
+      height = height ).
 
   ENDMETHOD.
 
@@ -124,16 +122,16 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
       && |</svg>|.
 
     result = replace_width_height(
-      iv_svg    = result
-      iv_ratio  = '1.0'
-      iv_height = iv_height ).
+      svg    = result
+      ratio  = '1.0'
+      height = height ).
 
   ENDMETHOD.
 
 
   METHOD svg_logo_with_text.
     " TODO: Replace gap with styles to avoid underline on hover
-    result = svg_logo( iv_height ) && |<span>&nbsp;</span>| && svg_text( iv_height - 5 ).
+    result = svg_logo( height ) && |<span>&nbsp;</span>| && svg_text( height - 5 ).
   ENDMETHOD.
 
 
@@ -169,14 +167,14 @@ CLASS zcl_abappm_logo IMPLEMENTATION.
       && |</svg>|.
 
     result = replace_width_height(
-      iv_svg    = result
-      iv_ratio  = '2.43'
-      iv_height = iv_height ).
+      svg    = result
+      ratio  = '2.43'
+      height = height ).
 
   ENDMETHOD.
 
 
   METHOD xml.
-    result = |<?xml version="1.0" encoding="utf-8"?>\n{ iv_svg }\n|.
+    result = |<?xml version="1.0" encoding="utf-8"?>\n{ svg }\n|.
   ENDMETHOD.
 ENDCLASS.

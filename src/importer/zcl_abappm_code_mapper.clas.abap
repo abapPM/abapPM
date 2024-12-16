@@ -58,12 +58,6 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
 
   METHOD get.
 
-    DATA:
-      import_all TYPE abap_bool,
-      rules      TYPE ty_rules,
-      map        TYPE zif_abappm_code_importer=>ty_map_item,
-      tadir      TYPE zif_abapgit_definitions=>ty_tadir_tt.
-
     " TODO: replace with logger
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -75,18 +69,18 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
     ENDIF.
 
     " Get list of rules for importing objects
-    rules = get_import_rules(
+    DATA(rules) = get_import_rules(
       program    = program
       is_logging = is_logging ).
 
     READ TABLE rules ASSIGNING FIELD-SYMBOL(<rule>) WITH KEY old_object = '*'.
     IF sy-subrc = 0.
-      import_all = abap_true.
+      DATA(import_all) = abap_true.
       <rule>-old_object = default_rule.
     ENDIF.
 
     " Get list of original objects
-    tadir = get_tadir_objects(
+    DATA(tadir) = get_tadir_objects(
       source_package = program-source_package
       object_types   = object_types
       object_names   = object_names
@@ -94,11 +88,11 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
 
     " Process all objects and apply rules
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>).
-      CLEAR map.
-      map-source_package = program-source_package.
-      map-target_package = program-package.
-      map-object_type    = <tadir>-object.
-      map-old_object     = <tadir>-obj_name.
+      DATA(map) = VALUE zif_abappm_code_importer=>ty_map_item(
+        source_package = program-source_package
+        target_package = program-package
+        object_type    = <tadir>-object
+        old_object     = <tadir>-obj_name ).
 
       " Collect first matching rule
       DATA(found) = abap_false.

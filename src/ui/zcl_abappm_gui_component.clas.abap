@@ -28,7 +28,7 @@ CLASS zcl_abappm_gui_component DEFINITION
 
     METHODS gui_services
       RETURNING
-        VALUE(ri_gui_services) TYPE REF TO zif_abapgit_gui_services
+        VALUE(result) TYPE REF TO zif_abapgit_gui_services
       RAISING
         zcx_abapgit_exception.
 
@@ -38,7 +38,7 @@ CLASS zcl_abappm_gui_component DEFINITION
 
   PRIVATE SECTION.
 
-    DATA mi_gui_services TYPE REF TO zif_abapgit_gui_services.
+    DATA gui_service TYPE REF TO zif_abapgit_gui_services.
 
     METHODS register_event_handler
       IMPORTING
@@ -60,10 +60,10 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
 
   METHOD gui_services.
-    IF mi_gui_services IS NOT BOUND.
-      mi_gui_services = zcl_abappm_gui_factory=>get_gui_services( ). " apm
+    IF gui_service IS NOT BOUND.
+      gui_service = zcl_abappm_gui_factory=>get_gui_services( ). " apm
     ENDIF.
-    ri_gui_services = mi_gui_services.
+    result = gui_service.
   ENDMETHOD.
 
 

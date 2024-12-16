@@ -6,6 +6,7 @@ INTERFACE zif_abappm_object PUBLIC.
       obj_name TYPE tadir-obj_name,
     END OF ty_item.
 
+  " TODO: Switch from importing global package to importing files
   METHODS import
     IMPORTING
       !new_package   TYPE devclass

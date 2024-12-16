@@ -28,6 +28,6 @@ CLASS zcl_abappm_roadmap IMPLEMENTATION.
 
 
   METHOD planned.
-    zcx_abappm_error=>raise( 'The feature has not been implemented yet but on the roadmap' ).
+    zcx_abappm_error=>raise( 'The feature has not been implemented but is on the roadmap' ).
   ENDMETHOD.
 ENDCLASS.

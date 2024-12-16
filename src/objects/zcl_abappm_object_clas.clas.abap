@@ -28,8 +28,10 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
 
 
   METHOD constructor.
+
     super->constructor( ).
     class_name = item-obj_name.
+
   ENDMETHOD.
 
 
@@ -96,9 +98,9 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         class_code = source( ).
 
         class_code = zcl_abappm_code_importer=>import(
-          iv_program = cl_oo_classname_service=>get_classpool_name( class_name )
-          it_source  = class_code
-          it_map     = map ).
+          program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
+          program_source = class_code
+          map            = map ).
 
         IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(
@@ -109,21 +111,21 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         ENDIF.
 
         local_definitions = zcl_abappm_code_importer=>import(
-          iv_program = cl_oo_classname_service=>get_ccdef_name( class_name )
-          it_map     = map ).
+          program_name = cl_oo_classname_service=>get_ccdef_name( class_name )
+          map          = map ).
 
         local_implementations = zcl_abappm_code_importer=>import(
-          iv_program = cl_oo_classname_service=>get_ccimp_name( class_name )
-          it_map     = map ).
+          program_name = cl_oo_classname_service=>get_ccimp_name( class_name )
+          map          = map ).
 
         local_macros = zcl_abappm_code_importer=>import(
-          iv_program = cl_oo_classname_service=>get_ccmac_name( class_name )
-          it_map     = map ).
+          program_name = cl_oo_classname_service=>get_ccmac_name( class_name )
+          map          = map ).
 
         IF is_production IS INITIAL.
           test_classes = zcl_abappm_code_importer=>import(
-            iv_program = cl_oo_classname_service=>get_ccau_name( class_name )
-            it_map     = map ).
+            program_name = cl_oo_classname_service=>get_ccau_name( class_name )
+            map          = map ).
         ENDIF.
 
         IF is_dryrun IS INITIAL.

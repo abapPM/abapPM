@@ -38,7 +38,7 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS get_apm_metadata
+    CLASS-METHODS get_metadata
       IMPORTING
         !name         TYPE string
       RETURNING
@@ -51,24 +51,6 @@ ENDCLASS.
 CLASS zcl_abappm_importer IMPLEMENTATION.
 
 
-  METHOD get_apm_metadata.
-
-    " For now, check if package is installed with apm
-    DATA(apm_key)  = 'PACKAGE:%:PACKAGE_JSON'.
-    DATA(apm_name) = |"name":*"{ name }"|.
-
-    SELECT * FROM zabappm INTO result WHERE keys LIKE apm_key.
-      IF result-value CP apm_name.
-        RETURN.
-      ENDIF.
-    ENDSELECT.
-
-    " not found
-    CLEAR result.
-
-  ENDMETHOD.
-
-
   METHOD get_map.
 
     LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
@@ -79,6 +61,23 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
       APPEND LINES OF map TO result.
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD get_metadata.
+
+    " For now, check if package is installed with apm
+    DATA(key)  = 'PACKAGE:%:PACKAGE_JSON'.
+
+    SELECT * FROM zabappm INTO result WHERE keys LIKE key.
+      IF result-value CP |"name":*"{ name }"|.
+        RETURN.
+      ENDIF.
+    ENDSELECT.
+
+    " not found
+    CLEAR result.
 
   ENDMETHOD.
 
@@ -121,10 +120,10 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           " TODO: Big change... instead of looking for the package in the global namespace
           " and copying it from there, the package (tarball) needs to be read from the
           " registry (using pacote)
-          DATA(apm_metadata) = get_apm_metadata( name ).
+          DATA(metadata) = get_metadata( name ).
 
-          IF apm_metadata IS NOT INITIAL.
-            SPLIT apm_metadata-keys AT ':' INTO DATA(rest1) DATA(source_package) DATA(rest2).
+          IF metadata IS NOT INITIAL.
+            SPLIT metadata-keys AT ':' INTO DATA(rest1) DATA(source_package) DATA(rest2).
             ASSERT sy-subrc = 0.
 
             IF is_logging = abap_true.

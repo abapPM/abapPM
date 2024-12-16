@@ -22,8 +22,10 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
 
 
   METHOD constructor.
+
     super->constructor( ).
     interface_name = item-obj_name.
+
   ENDMETHOD.
 
 
@@ -56,8 +58,8 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
 
         " Import code and apply mapping of old to new names
         interface_code = zcl_abappm_code_importer=>import(
-          iv_program = cl_oo_classname_service=>get_intfsec_name( interface_name )
-          it_map     = map ).
+          program_name = cl_oo_classname_service=>get_intfsec_name( interface_name )
+          map          = map ).
 
         IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(

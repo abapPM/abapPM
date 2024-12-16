@@ -25,12 +25,10 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
 
     DATA:
       markdown               TYPE string,
-      package_json_no_readme TYPE zif_abappm_package_json_types=>ty_package_json,
-      package_json_service   TYPE REF TO zif_abappm_package_json,
-      readme_service         TYPE REF TO zif_abappm_readme.
+      package_json_wo_readme TYPE zif_abappm_package_json_types=>ty_package_json.
 
     " Package JSON
-    package_json_service = zcl_abappm_package_json=>factory(
+    DATA(package_json_service) = zcl_abappm_package_json=>factory(
       iv_package = package
       iv_name    = package_json-name
       iv_version = package_json-version ).
@@ -40,10 +38,10 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
     ENDIF.
 
     " Remove readme which is stored separately
-    package_json_no_readme = package_json.
-    CLEAR package_json_no_readme-readme.
+    package_json_wo_readme = package_json.
+    CLEAR package_json_wo_readme-readme.
 
-    package_json_service->set( package_json_no_readme )->save( ).
+    package_json_service->set( package_json_wo_readme )->save( ).
 
     " Readme
     IF package_json-readme IS INITIAL.
@@ -57,7 +55,7 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
         occ   = 0 ).
     ENDIF.
 
-    readme_service = zcl_abappm_readme=>factory(
+    DATA(readme_service) = zcl_abappm_readme=>factory(
       iv_package  = package
       iv_markdown = markdown ).
 

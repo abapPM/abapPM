@@ -6,28 +6,29 @@ CLASS zcl_abappm_gui_factory DEFINITION
 ************************************************************************
 * apm GUI Factory
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* adapted: router, hotkey_controller
   PUBLIC SECTION.
 
     CLASS-METHODS get_gui
       RETURNING
-        VALUE(ro_gui) TYPE REF TO zcl_abapgit_gui
+        VALUE(result) TYPE REF TO zcl_abapgit_gui
       RAISING
         zcx_abapgit_exception.
 
     CLASS-METHODS get_gui_services
       RETURNING
-        VALUE(ri_gui_services) TYPE REF TO zif_abapgit_gui_services
+        VALUE(result) TYPE REF TO zif_abapgit_gui_services
       RAISING
         zcx_abapgit_exception.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CLASS-DATA go_gui TYPE REF TO zcl_abapgit_gui.
-    CLASS-DATA gi_gui_services TYPE REF TO zif_abapgit_gui_services.
+    CLASS-DATA gui TYPE REF TO zcl_abapgit_gui.
+    CLASS-DATA gui_service TYPE REF TO zif_abapgit_gui_services.
 
 ENDCLASS.
 
@@ -37,40 +38,33 @@ CLASS zcl_abappm_gui_factory IMPLEMENTATION.
 
 
   METHOD get_gui.
+    IF gui IS INITIAL.
+      DATA(asset_mananager) = zcl_abapgit_ui_factory=>get_asset_manager( ).
 
-    DATA:
-      li_hotkey_ctl TYPE REF TO zif_abapgit_gui_hotkey_ctl,
-      li_router     TYPE REF TO zif_abapgit_gui_event_handler,
-      li_asset_man  TYPE REF TO zif_abapgit_gui_asset_manager.
+      DATA(html_preprocessor) = NEW zcl_abapgit_gui_html_processor( ii_asset_man = asset_mananager ).
 
-    DATA lo_html_preprocessor TYPE REF TO zcl_abapgit_gui_html_processor.
+      html_preprocessor->preserve_css( 'css/ag-icons.css' ).
+      html_preprocessor->preserve_css( 'css/common.css' ).
 
-    IF go_gui IS INITIAL.
-      li_asset_man = zcl_abapgit_ui_factory=>get_asset_manager( ).
+      DATA(router)            = NEW zcl_abappm_gui_router( ). " apm: routing
+      DATA(hotkey_controller) = NEW zcl_abappm_gui_hotkey_ctl( ). " apm: settings
 
-      CREATE OBJECT lo_html_preprocessor EXPORTING ii_asset_man = li_asset_man.
-      lo_html_preprocessor->preserve_css( 'css/ag-icons.css' ).
-      lo_html_preprocessor->preserve_css( 'css/common.css' ).
-
-      CREATE OBJECT li_router TYPE zcl_abappm_gui_router. " apm: routing
-      CREATE OBJECT li_hotkey_ctl TYPE zcl_abappm_gui_hotkey_ctl. " apm: settings
-
-      CREATE OBJECT go_gui
+      CREATE OBJECT gui
         EXPORTING
-          io_component      = li_router
-          ii_hotkey_ctl     = li_hotkey_ctl
-          ii_html_processor = lo_html_preprocessor
-          ii_asset_man      = li_asset_man.
+          io_component      = router
+          ii_hotkey_ctl     = hotkey_controller
+          ii_html_processor = html_preprocessor
+          ii_asset_man      = asset_mananager.
     ENDIF.
-    ro_gui = go_gui.
 
+    result = gui.
   ENDMETHOD.
 
 
   METHOD get_gui_services.
-    IF gi_gui_services IS NOT BOUND.
-      gi_gui_services ?= get_gui( ).
+    IF gui_service IS NOT BOUND.
+      gui_service ?= get_gui( ).
     ENDIF.
-    ri_gui_services = gi_gui_services.
+    result = gui_service.
   ENDMETHOD.
 ENDCLASS.
