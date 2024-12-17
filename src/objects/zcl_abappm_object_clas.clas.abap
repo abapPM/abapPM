@@ -56,8 +56,8 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         CALL METHOD source_handler->get_source
           IMPORTING
             source = result.
-      CATCH cx_root INTO DATA(lx_error).
-        zcx_abappm_error=>raise( lx_error->get_text( ) ).
+      CATCH cx_root INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -95,7 +95,11 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
             cg_properties = class_metadata ).
 
         " Import code and apply mapping of old to new names
-        class_code = source( ).
+        IF files IS INITIAL.
+          class_code = source( ).
+        ELSE.
+          class_code = files->get_abap( ).
+        ENDIF.
 
         class_code = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
@@ -110,22 +114,36 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
             it_source  = class_code ).
         ENDIF.
 
+        IF files IS NOT INITIAL.
+          local_definitions     = files->get_abap( 'local_def' ).
+          local_implementations = files->get_abap( 'local_imp' ).
+          local_macros          = files->get_abap( 'macros' ).
+          test_classes          = files->get_abap( 'testclasses' ).
+        ENDIF.
+
         local_definitions = zcl_abappm_code_importer=>import(
-          program_name = cl_oo_classname_service=>get_ccdef_name( class_name )
-          map          = map ).
+          program_name   = cl_oo_classname_service=>get_ccdef_name( class_name )
+          program_source = local_definitions
+          map            = map ).
+
+        IF files IS NOT INITIAL.
+        ENDIF.
 
         local_implementations = zcl_abappm_code_importer=>import(
-          program_name = cl_oo_classname_service=>get_ccimp_name( class_name )
-          map          = map ).
+          program_name   = cl_oo_classname_service=>get_ccimp_name( class_name )
+          program_source = local_implementations
+          map            = map ).
 
         local_macros = zcl_abappm_code_importer=>import(
-          program_name = cl_oo_classname_service=>get_ccmac_name( class_name )
-          map          = map ).
+          program_name   = cl_oo_classname_service=>get_ccmac_name( class_name )
+          program_source = local_macros
+          map            = map ).
 
         IF is_production IS INITIAL.
           test_classes = zcl_abappm_code_importer=>import(
-            program_name = cl_oo_classname_service=>get_ccau_name( class_name )
-            map          = map ).
+            program_name   = cl_oo_classname_service=>get_ccau_name( class_name )
+            program_source = test_classes
+            map            = map ).
         ENDIF.
 
         IF is_dryrun IS INITIAL.

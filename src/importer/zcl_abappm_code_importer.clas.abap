@@ -5,7 +5,7 @@ CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
     CLASS-METHODS scan
       IMPORTING
         !program_name   TYPE progname
-        !program_source TYPE seop_source_string OPTIONAL
+        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
       RETURNING
         VALUE(result)   TYPE stokesx_tab
       RAISING
@@ -16,18 +16,18 @@ CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !program_name   TYPE progname
         !map            TYPE zif_abappm_code_importer=>ty_map
         !is_pretty      TYPE abap_bool DEFAULT abap_false
-        !program_source TYPE seop_source_string OPTIONAL
+        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
       RETURNING
-        VALUE(result)   TYPE seop_source_string
+        VALUE(result)   TYPE zif_abappm_code_importer=>ty_code
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS read
       IMPORTING
         !program_name   TYPE progname
-        !program_source TYPE seop_source_string OPTIONAL
+        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
       RETURNING
-        VALUE(result)   TYPE seop_source_string
+        VALUE(result)   TYPE zif_abappm_code_importer=>ty_code
       RAISING
         zcx_abappm_error.
 
@@ -93,10 +93,10 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
   METHOD import.
 
-    CONSTANTS lc_token_types TYPE string VALUE 'HIlm34C'.
+    CONSTANTS c_token_types TYPE string VALUE 'HIlm34C'.
 
     DATA:
-      tokens    TYPE stokesx_tab,
+      tokens         TYPE stokesx_tab,
       tokens_checked TYPE stokesx_tab.
 
     result = read(
@@ -112,7 +112,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
     ENDIF.
 
     " Collect all tokens that have a mapping
-    LOOP AT tokens ASSIGNING FIELD-SYMBOL(<token>) WHERE type CA lc_token_types.
+    LOOP AT tokens ASSIGNING FIELD-SYMBOL(<token>) WHERE type CA c_token_types.
 
       " FIXME: this does not work if there are objects with different type but same name
       IF <token>-type = 'C'.
@@ -207,7 +207,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
     DATA statements TYPE TABLE OF sstmnt.
 
     DATA(source_code) = read(
-      program_name = program_name
+      program_name    = program_name
       program_source  = program_source ).
 
     IF source_code IS INITIAL.

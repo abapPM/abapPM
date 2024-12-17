@@ -122,24 +122,24 @@ CLASS zcl_abappm_installer_popups IMPLEMENTATION.
   METHOD center.
 
     CONSTANTS:
-      lc_min_size TYPE i VALUE 10,
-      lc_min_pos  TYPE i VALUE 5.
+      c_min_size TYPE i VALUE 10,
+      c_min_pos  TYPE i VALUE 5.
 
     " Magic math to approximate starting position of popup
-    IF sy-scols > lc_min_size AND iv_width > 0 AND sy-scols > iv_width.
+    IF sy-scols > c_min_size AND iv_width > 0 AND sy-scols > iv_width.
       rs_position-start_column = nmax(
         val1 = ( sy-scols - iv_width ) / 2
-        val2 = lc_min_pos ).
+        val2 = c_min_pos ).
     ELSE.
-      rs_position-start_column = lc_min_pos.
+      rs_position-start_column = c_min_pos.
     ENDIF.
 
-    IF sy-srows > lc_min_size AND iv_height > 0 AND sy-srows > iv_height.
+    IF sy-srows > c_min_size AND iv_height > 0 AND sy-srows > iv_height.
       rs_position-start_row = nmax(
         val1 = ( sy-srows - iv_height ) / 2 - 1
-        val2 = lc_min_pos ).
+        val2 = c_min_pos ).
     ELSE.
-      rs_position-start_row = lc_min_pos.
+      rs_position-start_row = c_min_pos.
     ENDIF.
 
     rs_position-end_column = rs_position-start_column + iv_width.
@@ -187,55 +187,48 @@ CLASS zcl_abappm_installer_popups IMPLEMENTATION.
       END OF ty_free_sel_field,
       ty_free_sel_field_tab TYPE STANDARD TABLE OF ty_free_sel_field WITH DEFAULT KEY.
 
-    DATA:
-      lt_fields TYPE ty_free_sel_field_tab,
-      lo_dialog TYPE REF TO lcl_abapgit_free_sel_dialog,
-      lx_error  TYPE REF TO zcx_abapgit_exception.
+    DATA fields TYPE ty_free_sel_field_tab.
 
-    FIELD-SYMBOLS:
-      <ls_field> TYPE ty_free_sel_field.
+    APPEND INITIAL LINE TO fields ASSIGNING FIELD-SYMBOL(<field>).
+    <field>-name             = 'NAME'.
+    <field>-text             = 'Name'.
+    <field>-only_parameter   = abap_true.
+    <field>-ddic_tabname     = 'E071'.
+    <field>-ddic_fieldname   = 'OBJ_NAME'.
+    <field>-param_obligatory = abap_true.
+    <field>-value            = iv_name.
 
-    APPEND INITIAL LINE TO lt_fields ASSIGNING <ls_field>.
-    <ls_field>-name             = 'NAME'.
-    <ls_field>-text             = 'Name'.
-    <ls_field>-only_parameter   = abap_true.
-    <ls_field>-ddic_tabname     = 'E071'.
-    <ls_field>-ddic_fieldname   = 'OBJ_NAME'.
-    <ls_field>-param_obligatory = abap_true.
-    <ls_field>-value            = iv_name.
-
-    APPEND INITIAL LINE TO lt_fields ASSIGNING <ls_field>.
-    <ls_field>-name             = 'VERSION'.
-    <ls_field>-text             = 'Version'.
-    <ls_field>-only_parameter   = abap_true.
-    <ls_field>-ddic_tabname     = 'TTREV'.
-    <ls_field>-ddic_fieldname   = 'VERSION'.
-    <ls_field>-param_obligatory = abap_true.
-    <ls_field>-value            = iv_version.
+    APPEND INITIAL LINE TO fields ASSIGNING <field>.
+    <field>-name             = 'VERSION'.
+    <field>-text             = 'Version'.
+    <field>-only_parameter   = abap_true.
+    <field>-ddic_tabname     = 'TTREV'.
+    <field>-ddic_fieldname   = 'VERSION'.
+    <field>-param_obligatory = abap_true.
+    <field>-value            = iv_version.
 
     TRY.
-        CREATE OBJECT lo_dialog
-          EXPORTING
-            iv_title      = |apm|
-            iv_frame_text = |Packaging Details|.
+        data(dialog) = new lcl_abapgit_free_sel_dialog(
+          title      = |apm|
+          frame_text = |Packaging Details| ).
 
-        lo_dialog->set_fields( CHANGING ct_fields = lt_fields ).
-        lo_dialog->show( ).
+        dialog->set_fields( CHANGING field_table = fields ).
+        dialog->show( ).
 
-        LOOP AT lt_fields ASSIGNING <ls_field>.
-          CASE <ls_field>-name.
+        LOOP AT fields ASSIGNING <field>.
+          CASE <field>-name.
             WHEN 'NAME'.
-              rs_packaging-name = <ls_field>-value.
+              rs_packaging-name = <field>-value.
             WHEN 'VERSION'.
-              rs_packaging-version = <ls_field>-value.
+              rs_packaging-version     = <field>-value.
               rs_packaging-sem_version = zcl_abapgit_version=>conv_str_to_version( rs_packaging-version ).
           ENDCASE.
         ENDLOOP.
 
       CATCH zcx_abapgit_cancel.
         RETURN.
-      CATCH zcx_abapgit_exception INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
+      CATCH zcx_abapgit_exception INTO data(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.

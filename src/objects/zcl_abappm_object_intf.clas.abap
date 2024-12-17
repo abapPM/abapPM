@@ -56,10 +56,15 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
           CHANGING
             cg_properties = interface_metadata ).
 
+        IF files IS NOT INITIAL.
+          interface_code = files->get_abap( ).
+        ENDIF.
+
         " Import code and apply mapping of old to new names
         interface_code = zcl_abappm_code_importer=>import(
-          program_name = cl_oo_classname_service=>get_intfsec_name( interface_name )
-          map          = map ).
+          program_name   = cl_oo_classname_service=>get_intfsec_name( interface_name )
+          program_source = interface_code
+          map            = map ).
 
         IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(

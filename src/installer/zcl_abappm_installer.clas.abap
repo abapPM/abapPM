@@ -823,19 +823,19 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Temporarily suppress certain messages that are not relevant for installation
 
-    CONSTANTS lc_toolflag_set TYPE funcname VALUE 'SCWG_TOOLFLAG_SET'.
+    CONSTANTS c_toolflag_set TYPE funcname VALUE 'SCWG_TOOLFLAG_SET'.
 
     DATA ls_clmcus TYPE clmcus.
 
     " Set tool flag to avoid messages
     CALL FUNCTION 'FUNCTION_EXISTS'
       EXPORTING
-        funcname           = lc_toolflag_set
+        funcname           = c_toolflag_set
       EXCEPTIONS
         function_not_exist = 1
         OTHERS             = 2.
     IF sy-subrc = 0.
-      CALL FUNCTION lc_toolflag_set.
+      CALL FUNCTION c_toolflag_set.
     ENDIF.
 
     " Confirm message about modification mode (DT, CLM_INFORMATION)

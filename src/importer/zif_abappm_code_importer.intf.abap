@@ -25,6 +25,7 @@ INTERFACE zif_abappm_code_importer PUBLIC.
 
   TYPES:
     ty_object_types TYPE RANGE OF tadir-object,
-    ty_object_names TYPE RANGE OF tadir-obj_name.
+    ty_object_names TYPE RANGE OF tadir-obj_name,
+    ty_code         TYPE rswsourcet.
 
 ENDINTERFACE.

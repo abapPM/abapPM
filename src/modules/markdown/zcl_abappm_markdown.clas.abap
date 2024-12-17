@@ -1873,7 +1873,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
 
   METHOD inline_link.
-    CONSTANTS lc_regex_template TYPE string VALUE '\[((?:[^\]\[]|(?R))*)\]'.
+    CONSTANTS c_regex_template TYPE string VALUE '\[((?:[^\]\[]|(?R))*)\]'.
 
     DATA:
       lv_len        TYPE i,
@@ -1895,9 +1895,9 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     lv_remainder = excerpt-text.
 
-    lv_regex = |({ lc_regex_template })|.
+    lv_regex = |({ c_regex_template })|.
     DO 5 TIMES. "// regex recursion
-      REPLACE '(?R)' IN lv_regex WITH lc_regex_template.
+      REPLACE '(?R)' IN lv_regex WITH c_regex_template.
     ENDDO.
     REPLACE '(?R)' IN lv_regex WITH '$'.
 

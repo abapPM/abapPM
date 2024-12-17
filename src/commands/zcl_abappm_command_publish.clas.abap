@@ -214,7 +214,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
   METHOD get_tarball.
 
     " TODO: Move this and all called methods to local part of class
-    CONSTANTS lc_null TYPE xstring VALUE ''.
+    CONSTANTS c_null TYPE xstring VALUE ''.
 
     " 1. Serialize local objects
     TRY.
@@ -250,7 +250,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         IF <file>-file-path <> '/'.
           tar->append(
             iv_name     = <file>-file-path
-            iv_content  = lc_null
+            iv_content  = c_null
             iv_typeflag = zcl_abappm_tar=>c_typeflag-directory ).
         ENDIF.
       ENDAT.
