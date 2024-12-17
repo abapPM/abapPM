@@ -6,7 +6,7 @@
   <p>&nbsp;</p>
 </div>
 
-![Version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/abapPM/abapPM/src/zif_abappm_const.intf.abap/c_version&label=Version&color=blue)
+![Version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/abapPM/abapPM/src/zif_abappm_version.intf.abap/c_version&label=Version&color=blue)
 [![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://github.com/abapPM/abapPM/build/zabappm_standalone.abap)
 
 [![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=green)](LICENSE)
@@ -44,7 +44,9 @@ Start apm using transaction `ZAPM`.
 
 All contributions are welcome! Read our [Contribution Guidelines](https://github.com/abapPM/abapPM/CONTRIBUTING.md), fork this repo, and create a pull request.
 
-Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) either by creating a new online repository for https://github.com/abapPM/abapPM.
+Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) by creating a new online repository for https://github.com/abapPM/abapPM.
+
+Recommended SAP Package: `$ABAPPM`
 
 *Note:*
 
@@ -56,4 +58,4 @@ Made with :heart: in Canada
 
 Copyright 2024 apm.to Inc. <https://apm.to>
 
-Follow [@marcfbe](https://x.com/marcfbe) on X/Twitter
+Follow [@marcf.be](https://bsky.app/profile/marcf.be) on Bluesky
