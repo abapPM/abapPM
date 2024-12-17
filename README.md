@@ -1,7 +1,8 @@
 <div align="center">
   <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/abapPM/abapPM/blob/main/img/apm_banner.svg?raw=true&ver=1.0.0">
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/abapPM/abapPM/blob/main/img/apm_banner_dark.svg?raw=true&ver=1.0.0">
-    <img height="80" alt="apm logo banner" src="https://github.com/abapPM/abapPM/blob/main/img/apm_banner.svg?raw=true&ver=1.0.0">
+    <img height="80" alt="apm logo banner" src="https://github.com/abapPM/abapPM/blob/main/img/apm_banner_dark.svg?raw=true&ver=1.0.0">
   </picture>
   <p>&nbsp;</p>
 </div>
