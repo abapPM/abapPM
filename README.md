@@ -6,7 +6,7 @@
   <p>&nbsp;</p>
 </div>
 
-![Version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/abapPM/abapPM/src/zif_abappm_version.intf.abap/c_version&label=Version&color=blue)
+![Version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/abapPM/abapPM/src/core/zif_abappm_version.intf.abap/c_version&label=Version&color=blue)
 [![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://github.com/abapPM/abapPM/build/zabappm_standalone.abap)
 
 [![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=green)](LICENSE)
@@ -54,7 +54,7 @@ Different from other projects, a build process is required to create the standal
 
 ## About
 
-Made with :heart: in Canada
+Made with ❤️ in Canada
 
 Copyright 2024 apm.to Inc. <https://apm.to>
 
