@@ -122,7 +122,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
     METHODS get_package_boxed
       IMPORTING
         !name         TYPE string
-        !value        TYPE string
+        !value        TYPE string OPTIONAL
       RETURNING
         VALUE(result) TYPE string.
 
@@ -309,7 +309,11 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD get_package_boxed.
 
-    result = |<span class="transport-box">{ name }: { value }</span>|.
+    IF value IS INITIAL.
+      result = |<span class="transport-box">{ name }</span>|.
+    ELSE.
+      result = |<span class="transport-box">{ name }: { value }</span>|.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -406,16 +410,69 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     html->add( '<div class="html">' ).
 
+    DATA(none) = abap_true.
+
     IF package_json-dependencies IS NOT INITIAL.
       html->add( |<h2>Dependencies ({ lines( package_json-dependencies ) })</h2>| ).
 
       LOOP AT package_json-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
+        none = abap_false.
         html->add( get_package_boxed(
           name  = <dependency>-name
           value = <dependency>-range ) ).
         " TODO: Display status of dependency
         " Is it installed and if yes in which version?
       ENDLOOP.
+    ENDIF.
+
+    IF package_json-dev_dependencies IS NOT INITIAL.
+      html->add( |<h2>Dev Dependencies ({ lines( package_json-dev_dependencies ) })</h2>| ).
+
+      LOOP AT package_json-dev_dependencies ASSIGNING <dependency>.
+        none = abap_false.
+        html->add( get_package_boxed(
+          name  = <dependency>-name
+          value = <dependency>-range ) ).
+      ENDLOOP.
+    ENDIF.
+
+    IF package_json-peer_dependencies IS NOT INITIAL.
+      html->add( |<h2>Peer Dependencies ({ lines( package_json-peer_dependencies ) })</h2>| ).
+
+      LOOP AT package_json-peer_dependencies ASSIGNING <dependency>.
+        none = abap_false.
+        html->add( get_package_boxed(
+          name  = <dependency>-name
+          value = <dependency>-range ) ).
+        " TODO: Display status of dependency
+        " Is it installed and if yes in which version?
+      ENDLOOP.
+    ENDIF.
+
+    IF package_json-optional_dependencies IS NOT INITIAL.
+      html->add( |<h2>Optional Dependencies ({ lines( package_json-optional_dependencies ) })</h2>| ).
+
+      LOOP AT package_json-optional_dependencies ASSIGNING <dependency>.
+        none = abap_false.
+        html->add( get_package_boxed(
+          name  = <dependency>-name
+          value = <dependency>-range ) ).
+        " TODO: Display status of dependency
+        " Is it installed and if yes in which version?
+      ENDLOOP.
+    ENDIF.
+
+    IF package_json-bundle_dependencies IS NOT INITIAL.
+      html->add( |<h2>Bundle Dependencies ({ lines( package_json-bundle_dependencies ) })</h2>| ).
+
+      LOOP AT package_json-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
+        none = abap_false.
+        html->add( get_package_boxed( <bundle> ) ).
+      ENDLOOP.
+    ENDIF.
+
+    IF none = abap_true.
+      html->add( '<h3>This package has no dependencies</h3>' ).
     ENDIF.
 
     html->add( '</div>' ).
@@ -650,7 +707,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     html->add( '.markdown pre' ).
     html->add( '{ background-color: #eee; border-radius: 6px; display: block;' ).
     html->add( '  margin-bottom: 16px; margin-top: 0; overflow: auto; overflow-wrap: normal;' ).
-    html->add( '  padding: 16px; word-break: normal; box-sizing: border-box;' ).
+    html->add( '  padding: 16px; word-break: normal; box-sizing: border-box; white-space: pre;' ).
     html->add( '  font-family: Consolas, Courier, monospace; font-size: 14px; }' ).
     html->add( '.markdown p code' ).
     html->add( '{ background-color: #eee; border-radius: 6px; margin: 0; padding: .2em .4em;' ).

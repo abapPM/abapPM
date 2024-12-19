@@ -175,6 +175,8 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     html->add( '</tr></table>' ).
     html->add( '</div>' ).
+
+    result = html.
   ENDMETHOD.
 
 
@@ -266,6 +268,8 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     html->add( '</head>' ).
 
+    ri_html = html.
+
   ENDMETHOD.
 
 
@@ -350,7 +354,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     " You should remember that the we have to instantiate ro_html even
     " it's overwritten further down. Because ADD checks whether it's
     " bound.
-    DATA(html) = zcl_abapgit_html=>create( ).
+    result = zcl_abapgit_html=>create( ).
 
     " You should remember that we render the message panel only
     " if we have an error.
@@ -358,7 +362,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    html = zcl_abapgit_gui_chunk_lib=>render_error_message_box( error ).
+    result = zcl_abapgit_gui_chunk_lib=>render_error_message_box( error ).
 
     " You should remember that the exception viewer dispatches the events of
     " error message panel
@@ -369,8 +373,6 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     " You should remember that we render the message panel just once
     " for each exception/error text.
     CLEAR error.
-
-    result = html.
   ENDMETHOD.
 
 
