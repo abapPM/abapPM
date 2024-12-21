@@ -3,6 +3,7 @@ CLASS zcl_abappm_command_uninstall DEFINITION
   FINAL
   CREATE PUBLIC.
 
+  " Note: This is a stateless class. Do not add any attributes!
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -71,7 +72,6 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
         IF answer = '2'.
           MESSAGE 'Uninstall cancelled' TYPE 'S'.
-          result = abap_false.
           RETURN.
         ENDIF.
 
@@ -88,7 +88,9 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
     check_package( package ).
 
-    confirm_popup( package ).
+    IF confirm_popup( package ) = abap_false.
+      RETURN.
+    ENDIF.
 
     uninstall_package( package ).
 

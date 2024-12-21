@@ -3,6 +3,7 @@ CLASS zcl_abappm_command_publish DEFINITION
   FINAL
   CREATE PUBLIC.
 
+  " Note: This is a stateless class. Do not add any attributes!
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -18,6 +19,14 @@ CLASS zcl_abappm_command_publish DEFINITION
     CLASS-METHODS check_package
       IMPORTING
         !package TYPE devclass
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS confirm_popup
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE abap_bool
       RAISING
         zcx_abappm_error.
 
@@ -133,6 +142,37 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     IF sy-subrc = 0.
       zcx_abappm_error=>raise( |Version { package_json-version } already published| ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD confirm_popup.
+
+    TRY.
+        DATA(question) = |This will PUBLISH all objects in package { package } | &&
+                         |including subpackages to the registry|.
+
+        DATA(answer) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
+          iv_titlebar              = 'Publish'
+          iv_text_question         = question
+          iv_text_button_1         = 'Publish'
+          iv_icon_button_1         = 'ICON_EXPORT'
+          iv_text_button_2         = 'Cancel'
+          iv_icon_button_2         = 'ICON_CANCEL'
+          iv_default_button        = '2'
+          iv_popup_type            = 'ICON_MESSAGE_WARNING'
+          iv_display_cancel_button = abap_false ).
+
+        IF answer = '2'.
+          MESSAGE 'Publish cancelled' TYPE 'S'.
+          RETURN.
+        ENDIF.
+
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
+
+    result = abap_true.
 
   ENDMETHOD.
 
@@ -337,7 +377,11 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     DATA(package_json) = get_package_json( package ).
 
     IF package_json-private = abap_true.
-      zcx_abappm_error=>raise( 'This is a private package and can not be published' ).
+      zcx_abappm_error=>raise( 'Private packages can not be published' ).
+    ENDIF.
+
+    IF confirm_popup( package ) = abap_false.
+      RETURN.
     ENDIF.
 
     " 3. Get packument from registry

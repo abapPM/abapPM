@@ -109,6 +109,7 @@ CLASS zcl_abappm_highlighter_md IMPLEMENTATION.
       lv_match      TYPE string,
       lv_line_len   TYPE i,
       lv_cmmt_end   TYPE i,
+      lv_new_len    TYPE i,
       lv_index      TYPE sy-tabix,
       lv_prev_token TYPE c,
       lv_state      TYPE c VALUE 'O'. " O - for open tag; C - for closed tag;
@@ -156,7 +157,13 @@ CLASS zcl_abappm_highlighter_md IMPLEMENTATION.
           ELSEIF <ls_match>-text_tag = '>' AND lv_prev_token <> c_token-xml_tag.
             lv_state = 'C'.
             IF <ls_prev> IS ASSIGNED.
-              <ls_match>-length = <ls_match>-offset - <ls_prev>-offset - <ls_prev>-length + <ls_match>-length.
+              lv_new_len = <ls_match>-offset - <ls_prev>-offset - <ls_prev>-length + <ls_match>-length.
+              IF lv_new_len < 0.
+                " Something went wrong. Ignore the match
+                DELETE ct_matches INDEX lv_index.
+                CONTINUE.
+              ENDIF.
+              <ls_match>-length = lv_new_len.
               <ls_match>-offset = <ls_prev>-offset + <ls_prev>-length.
             ENDIF.
           ELSE.

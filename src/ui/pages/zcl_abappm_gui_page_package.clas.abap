@@ -23,7 +23,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       BEGIN OF c_default,
         path     TYPE string VALUE '/',
         filename TYPE string VALUE 'README.md',
-        view     TYPE string VALUE 'view_readme_rendered',
+        view     TYPE string VALUE 'view_readme',
       END OF c_default.
 
     CLASS-METHODS create
@@ -45,14 +45,16 @@ CLASS zcl_abappm_gui_page_package DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        view_readme_rendered TYPE string VALUE 'view_readme_rendered',
-        view_readme_source   TYPE string VALUE 'view_readme_source',
-        view_readme_raw      TYPE string VALUE 'view_readme_raw',
-        edit_readme          TYPE string VALUE 'edit_readme',
-        view_json            TYPE string VALUE 'view_json',
-        edit_json            TYPE string VALUE 'edit_json',
-        view_dependencies    TYPE string VALUE 'view_dependencies',
-        edit_dependencies    TYPE string VALUE 'edit_dependencies',
+        view_readme         TYPE string VALUE 'view_readme',
+        view_readme_code    TYPE string VALUE 'view_readme_code',
+        view_readme_raw     TYPE string VALUE 'view_readme_raw',
+        edit_readme         TYPE string VALUE 'edit_readme',
+        view_json           TYPE string VALUE 'view_json',
+        edit_json           TYPE string VALUE 'edit_json',
+        view_dependencies   TYPE string VALUE 'view_dependencies',
+        add_dependency      TYPE string VALUE 'add_dependency',
+        remove_dependency   TYPE string VALUE 'remove_dependency',
+        update_dependencies TYPE string VALUE 'update_dependencies',
       END OF c_action.
 
     CONSTANTS:
@@ -361,19 +363,50 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD get_toolbar.
 
     CASE view.
-      WHEN c_action-view_readme_rendered OR c_action-view_readme_source OR c_action-view_readme_raw.
-        DATA(action) = c_action-edit_readme.
+      WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
+
+        DATA(readme_menu) = zcl_abapgit_html_toolbar=>create( 'readme' )->add(
+          iv_txt = 'Rendered'
+          iv_chk = boolc( view = c_action-view_readme OR view IS INITIAL )
+          iv_act = c_action-view_readme
+         )->add(
+          iv_txt = 'Markdown'
+          iv_chk = boolc( view = c_action-view_readme_code )
+          iv_act = c_action-view_readme_code
+         )->add(
+          iv_txt = 'Raw'
+          iv_chk = boolc( view = c_action-view_readme_raw )
+          iv_act = c_action-view_readme_raw ).
+
+        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+          iv_txt = 'View'
+          io_sub = readme_menu
+        )->add(
+          iv_txt = 'Edit'
+          iv_act = |{ c_action-edit_readme }?key={ package }| ).
+
       WHEN c_action-view_dependencies.
-        action = c_action-edit_dependencies.
+
+        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+          iv_txt = 'Add'
+          iv_act = |{ c_action-add_dependency }?key={ package }|
+        )->add(
+          iv_txt = 'Remove'
+          iv_act = |{ c_action-remove_dependency }?key={ package }|
+        )->add(
+          iv_txt = 'Update'
+          iv_act = |{ c_action-update_dependencies }?key={ package }| ).
+
       WHEN c_action-view_json.
-        action = c_action-edit_json.
+
+        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+          iv_txt = 'Edit'
+          iv_act = |{ c_action-edit_json }?key={ package }| ).
+
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
 
-    result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
-      iv_txt = 'Edit'
-      iv_act = |{ action }?key={ package }| ).
 
   ENDMETHOD.
 
@@ -383,20 +416,30 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     html->add( '<div class="content syntax-hl">' ).
 
     CASE view.
-      WHEN c_action-view_readme_rendered.
+      WHEN c_action-view_readme.
+
         render_markdown( html ).
-      WHEN c_action-view_readme_source.
+
+      WHEN c_action-view_readme_code.
+
         render_markdown_source(
           html = html
           raw  = abap_false ).
+
       WHEN c_action-view_readme_raw.
+
         render_markdown_source(
           html = html
           raw  = abap_true ).
+
       WHEN c_action-view_dependencies.
+
         render_dependencies( html ).
+
       WHEN c_action-view_json.
+
         render_json( html ).
+
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -491,8 +534,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD render_header.
 
     CASE view.
-      WHEN c_action-view_readme_rendered
-        OR c_action-view_readme_source
+      WHEN c_action-view_readme
+        OR c_action-view_readme_code
         OR c_action-view_readme_raw.
 
         IF markdown-data IS INITIAL.
@@ -502,16 +545,23 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         ELSE.
           render_header_content(
             html   = html
-            image = |<img src="{ c_markdown-logo }" title="{ markdown-filename }" class="logo">  |
+            image = zcl_abapgit_html=>icon( 'markdown' )
             text  = |{ markdown-path+1 }{ markdown-filename }| ).
         ENDIF.
 
-      WHEN c_action-view_dependencies
-        OR c_action-view_json.
+      WHEN c_action-view_dependencies.
+
+        " TODO: Replace with "chain-link" icon
+        render_header_content(
+          html   = html
+          image = zcl_abapgit_html=>icon( 'file-alt' )
+          text  = 'Dependencies' ).
+
+      WHEN c_action-view_json.
 
         render_header_content(
           html   = html
-          image = zcl_abapgit_html=>icon( 'file' )
+          image = zcl_abapgit_html=>icon( 'code-solid' )
           text  = 'package.abap.json' ).
 
       WHEN OTHERS.
@@ -747,20 +797,29 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD zif_abapgit_gui_event_handler~on_event.
 
     CASE ii_event->mv_action.
-      WHEN c_action-view_readme_rendered OR c_action-view_readme_source OR c_action-view_readme_raw
-        OR c_action-view_dependencies OR c_action-view_json.
+      WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
+
+        markdown-data = get_markdown( ).
 
         view = ii_event->mv_action.
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
+      WHEN c_action-view_dependencies OR c_action-view_json.
+
+        package_json = get_package_json( ).
+
+        view = ii_event->mv_action.
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN c_action-edit_readme.
+
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
           key       = zcl_abappm_readme=>get_package_key( package )
           edit_mode = abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN c_action-edit_json.
+
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
           key       = zcl_abappm_package_json=>get_package_key( package )
           edit_mode = abap_true ).
@@ -773,22 +832,9 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    DATA(readme_menu) = zcl_abapgit_html_toolbar=>create( 'readme' )->add(
-      iv_txt = 'Rendered'
-      iv_chk = boolc( view = c_action-view_readme_rendered OR view IS INITIAL )
-      iv_act = c_action-view_readme_rendered
-     )->add(
-      iv_txt = 'Markdown'
-      iv_chk = boolc( view = c_action-view_readme_source )
-      iv_act = c_action-view_readme_source
-     )->add(
-      iv_txt = 'Raw'
-      iv_chk = boolc( view = c_action-view_readme_raw )
-      iv_act = c_action-view_readme_raw ).
-
     ro_toolbar = zcl_abapgit_html_toolbar=>create( 'main' )->add(
       iv_txt = 'Readme'
-      io_sub = readme_menu
+      iv_act = c_action-view_readme
     )->add(
       iv_txt = 'Dependencies'
       iv_act = c_action-view_dependencies

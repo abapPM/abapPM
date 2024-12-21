@@ -10,12 +10,16 @@ CLASS zcl_abappm_gui_dlg_uninstall DEFINITION
     INTERFACES zif_abapgit_gui_renderable.
 
     CLASS-METHODS create
+      IMPORTING
+        !package      TYPE devclass OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
         zcx_abapgit_exception.
 
     METHODS constructor
+      IMPORTING
+        !package TYPE devclass
       RAISING
         zcx_abapgit_exception.
 
@@ -32,20 +36,24 @@ CLASS zcl_abappm_gui_dlg_uninstall DEFINITION
     CONSTANTS:
       BEGIN OF c_id,
         package TYPE string VALUE 'package',
+        name    TYPE string VALUE 'name',
+        version TYPE string VALUE 'version',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
         choose_package    TYPE string VALUE 'choose-package',
         uninstall_package TYPE string VALUE 'uninstall-package',
-      END OF c_action .
+        refresh           TYPE string VALUE 'refresh',
+      END OF c_action.
 
     DATA:
-      registry       TYPE string,
-      form           TYPE REF TO zcl_abappm_html_form,
-      form_data      TYPE REF TO zcl_abappm_string_map,
-      form_util      TYPE REF TO zcl_abappm_html_form_utils,
-      validation_log TYPE REF TO zcl_abappm_string_map.
+      registry         TYPE string,
+      unpubish_package TYPE devclass,
+      form             TYPE REF TO zcl_abappm_html_form,
+      form_data        TYPE REF TO zcl_abappm_string_map,
+      form_util        TYPE REF TO zcl_abappm_html_form_utils,
+      validation_log   TYPE REF TO zcl_abappm_string_map.
 
     METHODS get_form_schema
       RETURNING
@@ -60,6 +68,14 @@ CLASS zcl_abappm_gui_dlg_uninstall DEFINITION
     METHODS validate_form
       IMPORTING
         !io_form_data TYPE REF TO zcl_abappm_string_map
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_abappm_string_map
+      RAISING
+        zcx_abapgit_exception.
+
+    METHODS read_package
+      IMPORTING
+        !package      TYPE devclass
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_string_map
       RAISING
@@ -81,6 +97,11 @@ CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
     form = get_form_schema( ).
     form_util = zcl_abappm_html_form_utils=>create( form ).
 
+    unpubish_package = package.
+    IF unpubish_package IS NOT INITIAL.
+      form_data = read_package( unpubish_package ).
+    ENDIF.
+
     TRY.
         registry = zcl_abappm_settings=>factory( )->get( )-registry.
       CATCH zcx_abappm_error INTO DATA(error).
@@ -92,7 +113,7 @@ CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
 
   METHOD create.
 
-    DATA(component) = NEW zcl_abappm_gui_dlg_uninstall( ).
+    DATA(component) = NEW zcl_abappm_gui_dlg_uninstall( package ).
 
     result = zcl_abappm_gui_page_hoc=>create(
       page_title      = 'Uninstall Package'
@@ -115,12 +136,23 @@ CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
       iv_label       = 'Package'
       iv_hint        = 'SAP package'
       iv_placeholder = 'Z... / $...'
-      iv_max         = 30 ).
+      iv_max         = 30
+    )->text(
+      iv_name        = c_id-name
+      iv_label       = 'Name'
+      iv_readonly    = abap_true
+    )->text(
+      iv_name        = c_id-version
+      iv_label       = 'Version'
+      iv_readonly    = abap_true ).
 
     result->command(
       iv_label       = 'Uninstall Package'
       iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
       iv_action      = c_action-uninstall_package
+    )->command(
+      iv_label       = 'Refresh'
+      iv_action      = c_action-refresh
     )->command(
       iv_label       = 'Back'
       iv_action      = zif_abapgit_definitions=>c_action-go_back ).
@@ -131,6 +163,29 @@ CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
   METHOD get_parameters.
 
     form_data->to_struc( CHANGING cs_container = result ).
+
+  ENDMETHOD.
+
+
+  METHOD read_package.
+
+    TRY.
+        DATA(package_json) = zcl_abappm_package_json=>factory( package )->get( ).
+      CATCH zcx_abappm_error INTO DATA(error).
+        zcx_abapgit_exception=>raise_with_text( error ).
+    ENDTRY.
+
+    CREATE OBJECT result.
+
+    result->set(
+      iv_key = c_id-package
+      iv_val = package
+    )->set(
+      iv_key = c_id-name
+      iv_val = package_json-name
+    )->set(
+      iv_key = c_id-version
+      iv_val = package_json-version ).
 
   ENDMETHOD.
 
@@ -173,10 +228,15 @@ CLASS zcl_abappm_gui_dlg_uninstall IMPLEMENTATION.
           iv_val = zcl_abapgit_ui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+          form_data = read_package( |{ form_data->get( c_id-package ) }| ).
         ENDIF.
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+
+      WHEN c_action-refresh.
+
+        form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN c_action-uninstall_package.
 

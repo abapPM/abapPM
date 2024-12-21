@@ -115,10 +115,10 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         ENDIF.
 
         IF files IS NOT INITIAL.
-          local_definitions     = files->get_abap( 'local_def' ).
-          local_implementations = files->get_abap( 'local_imp' ).
-          local_macros          = files->get_abap( 'macros' ).
-          test_classes          = files->get_abap( 'testclasses' ).
+          local_definitions     = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_def ).
+          local_implementations = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_imp ).
+          local_macros          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-macros ).
+          test_classes          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-testclasses ).
         ENDIF.
 
         local_definitions = zcl_abappm_code_importer=>import(

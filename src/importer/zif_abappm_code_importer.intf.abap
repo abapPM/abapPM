@@ -5,9 +5,8 @@ INTERFACE zif_abappm_code_importer PUBLIC.
 
   TYPES:
     BEGIN OF ty_program,
-      program        TYPE progname,
-      package        TYPE devclass,
-      source_package TYPE devclass,
+      program TYPE progname,
+      package TYPE devclass,
     END OF ty_program,
     ty_programs TYPE STANDARD TABLE OF ty_program WITH KEY program.
 

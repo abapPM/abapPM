@@ -403,14 +403,10 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD prepare_packages.
 
-    FIELD-SYMBOLS:
-      <package>  LIKE LINE OF result,
-      <settings> LIKE LINE OF settings-package_settings.
-
     result = packages.
 
-    LOOP AT result ASSIGNING <package>.
-      READ TABLE settings-package_settings ASSIGNING <settings>
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<package>).
+      READ TABLE settings-package_settings ASSIGNING FIELD-SYMBOL(<settings>)
         WITH TABLE KEY package = <package>-package.
       IF sy-subrc = 0.
         <package>-favorite        = <settings>-favorite.
@@ -550,7 +546,9 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     html->add( '<tbody>' ).
 
-    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+    DATA(list) = prepare_packages( ).
+
+    LOOP AT list ASSIGNING FIELD-SYMBOL(<package>).
       render_table_item(
         html    = html
         package = <package> ).
@@ -601,15 +599,17 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     " Start of row
     IF package_settings-favorite = abap_true.
       DATA(css_class) = ' class="favorite"'.
+      data(css_color) = 'blue'.
     ELSE.
       css_class = ''.
+      css_color = 'grey'.
     ENDIF.
 
     html->add( |<tr{ css_class } data-key="{ package-package }">| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
-      iv_name  = 'star/grey' " blue is added in css, based on TR style
+      iv_name  = |star/{ css_color }|
       iv_class = 'pad-sides'
       iv_hint  = 'Click to toggle favorite' ).
 
@@ -847,6 +847,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
+    CONSTANTS lc_dummy_key TYPE string VALUE `?key=#`.
+
     DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'toolbar-main' ).
 
     toolbar->add(
@@ -854,13 +856,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_act = zif_abappm_gui_router=>c_action-apm_init
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'download-solid' ) && ' Install'
-      iv_act = zif_abappm_gui_router=>c_action-apm_install
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_install }{ lc_dummy_key }|
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'upload-solid' ) && ' Publish'
-      iv_act = zif_abappm_gui_router=>c_action-apm_publish
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_publish }{ lc_dummy_key }|
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'times-solid' ) && ' Uninstall'
-      iv_act = zif_abappm_gui_router=>c_action-apm_uninstall
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ lc_dummy_key }|
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>settings( )
       io_sub = zcl_abappm_gui_menus=>settings( )

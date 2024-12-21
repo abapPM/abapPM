@@ -52,6 +52,7 @@ START-OF-SELECTION.
         package       = p_pack
         object_types  = so_type[]
         object_names  = so_name[]
+        default_rule  = p_defrul
         is_logging    = p_log
         is_dryrun     = p_dryrun
         is_production = p_prod ).

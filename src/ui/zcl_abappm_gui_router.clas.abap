@@ -156,6 +156,9 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD command_dialogs.
 
+    DATA(key) = event->query( )->get( 'KEY' ).
+
+    " TODO: Pass selected package, for example, from Package List
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-apm_init.
         result-page  = zcl_abappm_gui_dlg_init=>create( ).
