@@ -34,9 +34,9 @@ SAP Basis 7.40 SP 8 or higher
 ## Installation
 
 1. Download the standalone version of apm from [zabappm_standalone](https://github.com/abapPM/abapPM/build/zabappm_standalone.abap)
-1. Create a new SAP package in your system. Recommended: `$APM`
-1. Create the program `ZABAPPM_STANDALONE` in the package, upload the code, and activate
-1. Create transaction `ZAPM` for the program `ZABAPPM_STANDALONE`
+1. Create SAP package `$ZAPM` in your system
+1. Create the program `ZABAPPM_STANDALONE` in package `$ZAPM`, upload the code, and activate
+1. Create transaction `ZAPM` in package `$ZAPM` for program `ZABAPPM_STANDALONE`
 
 ## Usage
 
