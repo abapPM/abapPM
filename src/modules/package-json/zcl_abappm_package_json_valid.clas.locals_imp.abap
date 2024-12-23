@@ -229,11 +229,11 @@ CLASS lcl_validate IMPLEMENTATION.
     LOOP AT manifest-bundle_dependencies INTO value.
       COLLECT value INTO values.
       IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( value ) = abap_false.
-        INSERT |Invalid bundle dependency: { dependency-name }| INTO TABLE result.
+        INSERT |Invalid bundle dependency: { value }| INTO TABLE result.
       ENDIF.
       READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = value.
       IF sy-subrc <> 0.
-        INSERT |Bundle dependency { dependency-name } not included in dependencies| INTO TABLE result.
+        INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-bundle_dependencies ) <> lines( values ).
