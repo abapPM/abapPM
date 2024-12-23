@@ -103,15 +103,15 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
     " TODO: Currently hardcoded to local packages (no transport)
     " FUTURE: Allow other folder logic than prefix
     zcl_abappm_installer=>install(
-      iv_apm_name          = name
-      iv_apm_version       = version
-      iv_enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
-      iv_name              = |{ name }|
-      iv_data              = tarball
-      iv_enum_package      = zcl_abappm_installer=>c_enum_package-local
-      iv_package           = package
-      iv_enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
-      iv_enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix ).
+      apm_name          = name
+      apm_version       = version
+      enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
+      name              = |{ name }|
+      data              = tarball
+      enum_package      = zcl_abappm_installer=>c_enum_package-local
+      package           = package
+      enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
+      enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix ).
 
   ENDMETHOD.
 
@@ -119,8 +119,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
   METHOD uninstall_package.
 
     zcl_abappm_installer=>uninstall(
-      iv_apm  = abap_true
-      iv_pack = package ).
+      apm  = abap_true
+      pack = package ).
 
   ENDMETHOD.
 ENDCLASS.

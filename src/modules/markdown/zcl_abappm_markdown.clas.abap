@@ -26,6 +26,10 @@ CLASS zcl_abappm_markdown DEFINITION
 
     CONSTANTS version TYPE string VALUE '1.3.0' ##NEEDED.
 
+    CLASS-METHODS styles
+      RETURNING
+        VALUE(result) TYPE string.
+
     METHODS text
       IMPORTING
         VALUE(text)   TYPE clike
@@ -994,6 +998,25 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     FIND REGEX '^>[ ]?(.*)' IN line-text SUBMATCHES lv_m1.
     IF sy-subrc = 0.
+      " >>> apm
+      IF line-text CS '[!NOTE]'.
+        DATA(color) = `blue`.
+      ELSEIF line-text CS '[!TIP]'.
+        color = `green`.
+      ELSEIF line-text CS '[!IMPORTANT]'.
+        color = `purple`.
+      ELSEIF line-text CS '[!WARNING]'.
+        color = `yellow`.
+      ELSEIF line-text CS '[!CAUTION]'.
+        color = `red`.
+      ENDIF.
+
+      IF color IS NOT INITIAL.
+        APPEND INITIAL LINE TO r_block-element-attributes ASSIGNING FIELD-SYMBOL(<attribute>).
+        <attribute>-name  = 'class'.
+        <attribute>-value = 'border-' && color.
+      ENDIF.
+      " <<< apm
       SHIFT lv_m1 LEFT DELETING LEADING space.
       r_block-element-name = 'blockquote'.
       r_block-element-handler = '_lines'.
@@ -2468,6 +2491,93 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD styles.
+
+    result = |.markdown\n|
+      && |\{ background-color: #f2f2f2; padding: 15px; \}\n|
+      && |.markdown .logo\n|
+      && |\{ width: 36px; height: 22px; margin-top: -4px; \}\n|
+      && |.markdown .header,\n|
+      && |.markdown .content\n|
+      && |\{ background-color: #ffffff; border: 1px solid #d8dee4; display: block; \}\n|
+      && |.markdown .header\n|
+      && |\{ font-size: larger; margin-bottom: 15px; padding: 15px; \}\n|
+      && |.markdown .content\n|
+      && |\{ padding: 25px; \}\n|
+      && |.markdown .html\n|
+      && |\{ max-width: 1024px; margin: 0 auto; padding: 25px; \}\n|
+      " Markdown View
+      && |.markdown .source\n|
+      && |\{ font-family: Consolas,Courier,monospace; font-size: 12pt; padding: 25px;\n|
+      && |  max-width: 1024px; margin: 0 auto; \}\n|
+      && |.markdown .source table\n|
+      && |\{ border: 1px solid #d8dee4; \}\n|
+      && |.markdown .source td\n|
+      && |\{ border-top: 0px; border-bottom: 0px; padding-top: 0; padding-bottom: 0;\n|
+      && |  line-height: 20px; vertical-align: top; \}\n|
+      " Syntax Highlight
+      && |.markdown .syntax-hl .heading\n|
+      && |\{ color: blue; \}\n|
+      && |.markdown .syntax-hl .link\n|
+      && |\{ color: purple; \}\n|
+      && |.markdown .syntax-hl .url\n|
+      && |\{ color: green; \}\n|
+      && |.markdown .syntax-hl .html\n|
+      && |\{ padding: 0; \}\n|
+      && |.markdown .syntax-hl .bold\n|
+      && |\{ font-weight: bold; \}\n|
+      " HTML Tags
+      && |.markdown h1,\n|
+      && |.markdown h2\n|
+      && |\{ border-bottom: 1px solid #d8dee4; box-sizing: border-box; \}\n|
+      && |.markdown img\n|
+      && |\{ border: 0; box-sizing: border-box; max-width: 100%; vertical-align: middle; \}\n|
+      && |.markdown table\n|
+      && |\{ border: 1px solid #ddd; border-radius: 3px; \}\n|
+      && |.markdown th,\n|
+      && |\{ color: #4078c0; background-color: #edf2f9; border-bottom-color: #ddd; \}\n|
+      && |.markdown th,\n|
+      && |.markdown td\n|
+      && |\{ border: 1px solid #ddd; padding: 6px 13px; \}\n|
+      && |.markdown tr:first-child td\n|
+      && |\{ border-top: 0; \}\n|
+      && |.markdown hr\n|
+      && |\{ background-color: #eee; margin: 24px 0; overflow: hidden; padding: 0; \}\n|
+      && |.markdown mark\n|
+      && |\{ background-color: #fff8e0; border-radius: 6px; margin: 0; padding: .2em .4em; \}\n|
+      && |.markdown blockquote\n|
+      && |\{ background-color: #eee; border-left: 3px solid #303d36; border-radius: 6px;\n|
+      && |  margin: 0 0 16px; padding: 1px 1em; \}\n|
+      " GitHub Alerts
+      && |.markdown blockquote.border-blue\n|
+      && |\{ border-left: 3px solid #4493f8; \}\n|
+      && |.markdown blockquote.border-green\n|
+      && |\{ border-left: 3px solid #3fb950; \}\n|
+      && |.markdown blockquote.border-purple\n|
+      && |\{ border-left: 3px solid #ab7df8; \}\n|
+      && |.markdown blockquote.border-yellow\n|
+      && |\{ border-left: 3px solid #d29922; \}\n|
+      && |.markdown blockquote.border-red\n|
+      && |\{ border-left: 3px solid #f85149; \}\n|
+      " Code blocks
+      && |.markdown pre\n|
+      && |\{ background-color: #eee; border-radius: 6px; display: block;\n|
+      && |  margin-bottom: 16px; margin-top: 0; overflow: auto; overflow-wrap: normal;\n|
+      && |  padding: 16px; word-break: normal; box-sizing: border-box;\n|
+      && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|
+      && |.markdown p code\n|
+      && |\{ background-color: #eee; border-radius: 6px; margin: 0; padding: .2em .4em;\n|
+      && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|
+      && |.markdown pre code\n|
+      && |\{ background-color: transparent; border-style: initial;\n|
+      && |  border-width: 0; box-sizing: border-box; display: inline; margin: 0;\n|
+      && |  overflow: visible; word-break: normal; overflow-wrap: normal;\n|
+      && |  padding: 0; white-space: pre;\n|
+      && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|.
+
+  ENDMETHOD.
+
+
   METHOD syntax_highlighter.
     ">>> apm
     DATA:
@@ -2532,6 +2642,44 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     markup = trim(
       str  = markup
       mask = '\n' ).
+
+    ">>> apm
+    DO 5 TIMES.
+      CASE sy-index.
+        WHEN 1.
+          DATA(sub)   = `[!NOTE]`.
+          DATA(color) = `#4493F8`.
+          DATA(icon)  = lcl_icons=>note( ).
+          DATA(descr) = `Note`.
+        WHEN 2.
+          sub   = `[!TIP]`.
+          color = `#3FB950`.
+          icon  = lcl_icons=>tip( ).
+          descr = `Tip`.
+        WHEN 3.
+          sub   = `[!IMPORTANT]`.
+          color = `#AB7DF8`.
+          icon  = lcl_icons=>important( ).
+          descr = `Important`.
+        WHEN 4.
+          sub   = `[!WARNING]`.
+          color = `#D29922`.
+          icon  = lcl_icons=>warning( ).
+          descr = `Warning`.
+        WHEN 5.
+          sub   = `[!CAUTION]`.
+          color = `#F85149`.
+          icon  = lcl_icons=>caution( ).
+          descr = `Caution`.
+      ENDCASE.
+
+      markup = replace(
+        val  = markup
+        sub  = sub
+        with = |<p style="color:{ color };display:flex;align-items:center;">{ icon }&nbsp;&nbsp;<strong>{ descr }</strong></p>|
+        occ  = 0 ).
+    ENDDO.
+    "<<< apm
   ENDMETHOD.                    "text
 
 

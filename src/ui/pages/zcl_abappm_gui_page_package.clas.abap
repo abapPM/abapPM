@@ -688,86 +688,17 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD render_styles.
 
     " Emoji Styles
-    DATA(css) = concat_lines_of(
+    DATA(emoji_styles) = concat_lines_of(
       table = zcl_abappm_markdown_emoji=>create( )->get_emoji_css( )
       sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).
-    html->add( css ).
+    html->add( emoji_styles ).
     html->add( '</style>' ).
 
     " Markdown Styles
     html->add( '<style>' ).
-    html->add( '.markdown' ).
-    html->add( '{ background-color: #f2f2f2; padding: 15px; }' ).
-    html->add( '.markdown .logo' ).
-    html->add( '{ width: 36px; height: 22px; margin-top: -4px; }' ).
-    html->add( '.markdown .header,' ).
-    html->add( '.markdown .content' ).
-    html->add( '{ background-color: #ffffff; border: 1px solid #d8dee4; display: block; }' ).
-    html->add( '.markdown .header' ).
-    html->add( '{ font-size: larger; margin-bottom: 15px; padding: 15px; }' ).
-    html->add( '.markdown .content' ).
-    html->add( '{ padding: 25px; }' ).
-    html->add( '.markdown .html' ).
-    html->add( '{ max-width: 1024px; margin: 0 auto; padding: 25px; }' ).
-    " Markdown View
-    html->add( '.markdown .source' ).
-    html->add( '{ font-family: Consolas,Courier,monospace; font-size: 12pt; padding: 25px;' ).
-    html->add( '  max-width: 1024px; margin: 0 auto; }' ).
-    html->add( '.markdown .source table' ).
-    html->add( '{ border: 1px solid #d8dee4; }' ).
-    html->add( '.markdown .source td' ).
-    html->add( '{ border-top: 0px; border-bottom: 0px; padding-top: 0; padding-bottom: 0;' ).
-    html->add( '  line-height: 20px; vertical-align: top; }' ).
-    " Syntax Highlight
-    html->add( '.markdown .syntax-hl .heading' ).
-    html->add( '{ color: blue; }' ).
-    html->add( '.markdown .syntax-hl .link' ).
-    html->add( '{ color: purple; }' ).
-    html->add( '.markdown .syntax-hl .url' ).
-    html->add( '{ color: green; }' ).
-    html->add( '.markdown .syntax-hl .html' ).
-    html->add( '{ padding: 0; }' ).
-    html->add( '.markdown .syntax-hl .bold' ).
-    html->add( '{ font-weight: bold; }' ).
-    " HTML Tags
-    html->add( '.markdown h1,' ).
-    html->add( '.markdown h2' ).
-    html->add( '{ border-bottom: 1px solid #d8dee4; box-sizing: border-box; }' ).
-    html->add( '.markdown img' ).
-    html->add( '{ border: 0; box-sizing: border-box; max-width: 100%; vertical-align: middle; }' ).
-    html->add( '.markdown table' ).
-    html->add( '{ border: 1px solid #ddd; border-radius: 3px; }' ).
-    html->add( '.markdown th,' ).
-    html->add( '{ color: #4078c0; background-color: #edf2f9; border-bottom-color: #ddd; }' ).
-    html->add( '.markdown th,' ).
-    html->add( '.markdown td' ).
-    html->add( '{ border: 1px solid #ddd; padding: 6px 13px; }' ).
-    html->add( '.markdown tr:first-child td' ).
-    html->add( '{ border-top: 0; }' ).
-    html->add( '.markdown hr' ).
-    html->add( '{ background-color: #eee; margin: 24px 0; overflow: hidden; padding: 0; }' ).
-    html->add( '.markdown mark' ).
-    html->add( '{ background-color: #fff8e0; border-radius: 6px; margin: 0; padding: .2em .4em; }' ).
-    html->add( '.markdown blockquote' ).
-    html->add( '{ background-color: #eee; border-left: 3px solid #303d36; border-radius: 6px;' ).
-    html->add( '  margin: 0 0 16px; padding: 1px 1em; }' ).
-    " Code blocks
-    html->add( '.markdown pre' ).
-    html->add( '{ background-color: #eee; border-radius: 6px; display: block;' ).
-    html->add( '  margin-bottom: 16px; margin-top: 0; overflow: auto; overflow-wrap: normal;' ).
-    html->add( '  padding: 16px; word-break: normal; box-sizing: border-box; white-space: pre;' ).
-    html->add( '  font-family: Consolas, Courier, monospace; font-size: 14px; }' ).
-    html->add( '.markdown p code' ).
-    html->add( '{ background-color: #eee; border-radius: 6px; margin: 0; padding: .2em .4em;' ).
-    html->add( '  font-family: Consolas, Courier, monospace; font-size: 14px; }' ).
-    html->add( '.markdown pre code' ).
-    html->add( '{ background-color: transparent; border-style: initial;' ).
-    html->add( '  border-width: 0; box-sizing: border-box; display: inline; margin: 0;' ).
-    html->add( '  overflow: visible; word-break: normal; overflow-wrap: normal;' ).
-    html->add( '  padding: 0; white-space: pre;' ).
-    html->add( '  font-family: Consolas, Courier, monospace; font-size: 14px; }' ).
+    html->add( zcl_abappm_markdown=>styles( ) ).
     html->add( '</style>' ).
 
   ENDMETHOD.

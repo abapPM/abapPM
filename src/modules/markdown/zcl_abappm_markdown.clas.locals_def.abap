@@ -6,7 +6,7 @@
 "!
 INTERFACE lif_value_type.
   METHODS: copy IMPORTING source TYPE REF TO lif_value_type.
-ENDINTERFACE.                    "lif_value_type
+ENDINTERFACE.
 
 "!
 "! String class for use in template objects
@@ -16,7 +16,7 @@ CLASS lcl_string DEFINITION FINAL.
     INTERFACES lif_value_type.
     DATA: data TYPE string.
     ALIASES: copy FOR lif_value_type~copy.
-ENDCLASS.                    "lcl_string DEFINITION
+ENDCLASS.
 
 "!
 "! String array class for use in template objects
@@ -33,7 +33,7 @@ CLASS lcl_string_array DEFINITION FINAL.
       find_val IMPORTING value TYPE clike RETURNING VALUE(index) TYPE i.
 
     ALIASES: copy FOR lif_value_type~copy.
-ENDCLASS.                    "lcl_array DEFINITION
+ENDCLASS.
 
 "!
 "! Hashmap template class
@@ -90,4 +90,27 @@ CLASS lcl_hashmap DEFINITION FINAL.
   PRIVATE SECTION.
     DATA: value_type                    TYPE string,
           subsequent_hashmap_value_type TYPE string.
-ENDCLASS.                    "lcl_hashmap DEFINITION
+ENDCLASS.
+
+
+"!
+"! GitHub Icons
+"!
+CLASS lcl_icons DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-METHODS note
+      RETURNING
+        VALUE(result) TYPE string.
+    CLASS-METHODS tip
+      RETURNING
+        VALUE(result) TYPE string.
+    CLASS-METHODS important
+      RETURNING
+        VALUE(result) TYPE string.
+    CLASS-METHODS warning
+      RETURNING
+        VALUE(result) TYPE string.
+    CLASS-METHODS caution
+      RETURNING
+        VALUE(result) TYPE string.
+ENDCLASS.
