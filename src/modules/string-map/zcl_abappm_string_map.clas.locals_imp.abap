@@ -1,30 +1,30 @@
-CLASS lcx_error DEFINITION FINAL INHERITING FROM cx_no_check.
-  PUBLIC SECTION.
+class lcx_error definition final inheriting from cx_no_check.
+  public section.
 
-    INTERFACES if_t100_message.
-    CONSTANTS:
-      BEGIN OF c_error_signature,
-        msgid TYPE symsgid VALUE 'SY',
-        msgno TYPE symsgno VALUE '002', " &
-        attr1 TYPE scx_attrname VALUE 'MSG',
-        attr2 TYPE scx_attrname VALUE '',
-        attr3 TYPE scx_attrname VALUE '',
-        attr4 TYPE scx_attrname VALUE '',
-      END OF c_error_signature.
-    DATA msg TYPE string READ-ONLY.
+    interfaces if_t100_message.
+    constants:
+      begin of c_error_signature,
+        msgid type symsgid value 'SY',
+        msgno type symsgno value '002', " &
+        attr1 type scx_attrname value 'MSG',
+        attr2 type scx_attrname value '',
+        attr3 type scx_attrname value '',
+        attr4 type scx_attrname value '',
+      end of c_error_signature.
+    data msg type string read-only.
 
-    CLASS-METHODS raise
-      IMPORTING
-        iv_msg TYPE string.
-  PRIVATE SECTION.
-ENDCLASS.
+    class-methods raise
+      importing
+        iv_msg type string.
+  private section.
+endclass.
 
-CLASS lcx_error IMPLEMENTATION.
-  METHOD raise.
-    DATA lx_e TYPE REF TO lcx_error.
-    CREATE OBJECT lx_e.
+class lcx_error implementation.
+  method raise.
+    data lx_e type ref to lcx_error.
+    create object lx_e.
     lx_e->msg = iv_msg.
     lx_e->if_t100_message~t100key = c_error_signature.
-    RAISE EXCEPTION lx_e.
-  ENDMETHOD.
-ENDCLASS.
+    raise exception lx_e.
+  endmethod.
+endclass.

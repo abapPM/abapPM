@@ -4,25 +4,25 @@ CLASS lcl_validate DEFINITION.
 
     CLASS-METHODS validate_single_values
       IMPORTING
-        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest     TYPE ZIF_ABAPPM_TYPES=>TY_MANIFEST
       RETURNING
         VALUE(result) TYPE string_table.
 
     CLASS-METHODS validate_persons
       IMPORTING
-        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest     TYPE ZIF_ABAPPM_TYPES=>TY_MANIFEST
       RETURNING
         VALUE(result) TYPE string_table.
 
     CLASS-METHODS validate_arrays
       IMPORTING
-        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest     TYPE ZIF_ABAPPM_TYPES=>TY_MANIFEST
       RETURNING
         VALUE(result) TYPE string_table.
 
     CLASS-METHODS validate_dependencies
       IMPORTING
-        !is_manifest  TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest     TYPE ZIF_ABAPPM_TYPES=>TY_MANIFEST
       RETURNING
         VALUE(result) TYPE string_table.
 
@@ -32,36 +32,36 @@ CLASS lcl_validate IMPLEMENTATION.
 
   METHOD validate_single_values.
 
-    IF zcl_abappm_package_json_valid=>is_valid_name( is_manifest-name ) = abap_false.
-      INSERT |Invalid name: { is_manifest-name }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( manifest-name ) = abap_false.
+      INSERT |Invalid name: { manifest-name }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_version( is_manifest-version ) = abap_false.
-      INSERT |Invalid version: { is_manifest-version }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_VERSION( manifest-version ) = abap_false.
+      INSERT |Invalid version: { manifest-version }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_package_type( is_manifest-type ) = abap_false.
-      INSERT |Invalid package type: { is_manifest-type }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_PACKAGE_TYPE( manifest-type ) = abap_false.
+      INSERT |Invalid package type: { manifest-type }| INTO TABLE result.
     ENDIF.
 
-    IF is_manifest-private <> abap_false AND is_manifest-private <> abap_true.
-      INSERT |Invalid private flag: { is_manifest-private }| INTO TABLE result.
+    IF manifest-private <> abap_false AND manifest-private <> abap_true.
+      INSERT |Invalid private flag: { manifest-private }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_url( is_manifest-homepage ) = abap_false.
-      INSERT |Invalid homepage URL: { is_manifest-homepage }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( manifest-homepage ) = abap_false.
+      INSERT |Invalid homepage URL: { manifest-homepage }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_email( is_manifest-bugs-email ) = abap_false.
-      INSERT |Invalid bugs email: { is_manifest-bugs-email }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_EMAIL( manifest-bugs-email ) = abap_false.
+      INSERT |Invalid bugs email: { manifest-bugs-email }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_url( is_manifest-bugs-url ) = abap_false.
-      INSERT |Invalid bugs URL: { is_manifest-bugs-url }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( manifest-bugs-url ) = abap_false.
+      INSERT |Invalid bugs URL: { manifest-bugs-url }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_url( is_manifest-repository-url ) = abap_false.
-      INSERT |Invalid repository URL: { is_manifest-repository-url }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( manifest-repository-url ) = abap_false.
+      INSERT |Invalid repository URL: { manifest-repository-url }| INTO TABLE result.
     ENDIF.
 
   ENDMETHOD.
@@ -69,43 +69,42 @@ CLASS lcl_validate IMPLEMENTATION.
   METHOD validate_persons.
 
     DATA:
-      ls_person TYPE zif_abappm_package_json_types=>ty_person,
-      lv_value  TYPE string,
-      lt_values TYPE string_table.
+      value  TYPE string,
+      values TYPE string_table.
 
-    IF zcl_abappm_package_json_valid=>is_valid_email( is_manifest-author-email ) = abap_false.
-      INSERT |Invalid author email: { is_manifest-author-email }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_EMAIL( manifest-author-email ) = abap_false.
+      INSERT |Invalid author email: { manifest-author-email }| INTO TABLE result.
     ENDIF.
 
-    IF zcl_abappm_package_json_valid=>is_valid_url( is_manifest-author-url ) = abap_false.
-      INSERT |Invalid author URL: { is_manifest-author-url }| INTO TABLE result.
+    IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( manifest-author-url ) = abap_false.
+      INSERT |Invalid author URL: { manifest-author-url }| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-contributors INTO ls_person.
-      COLLECT ls_person-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_email( ls_person-email ) = abap_false.
-        INSERT |Invalid contributor email: { ls_person-name } { ls_person-email }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-contributors INTO DATA(person).
+      COLLECT person-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_EMAIL( person-email ) = abap_false.
+        INSERT |Invalid contributor email: { person-name } { person-email }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_url( ls_person-url ) = abap_false.
-        INSERT |Invalid contributor URL: { ls_person-name } { ls_person-url }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( person-url ) = abap_false.
+        INSERT |Invalid contributor URL: { person-name } { person-url }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-contributors ) <> lines( lt_values ).
+    IF lines( manifest-contributors ) <> lines( values ).
       INSERT |Duplicate contributors| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-maintainers INTO ls_person.
-      COLLECT ls_person-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_email( ls_person-email ) = abap_false.
-        INSERT |Invalid maintainer email: { ls_person-name } { ls_person-email }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-maintainers INTO person.
+      COLLECT person-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_EMAIL( person-email ) = abap_false.
+        INSERT |Invalid maintainer email: { person-name } { person-email }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_url( ls_person-url ) = abap_false.
-        INSERT |Invalid maintainer URL: { ls_person-name } { ls_person-url }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_URL( person-url ) = abap_false.
+        INSERT |Invalid maintainer URL: { person-name } { person-url }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-maintainers ) <> lines( lt_values ).
+    IF lines( manifest-maintainers ) <> lines( values ).
       INSERT |Duplicate maintainers| INTO TABLE result.
     ENDIF.
 
@@ -114,39 +113,39 @@ CLASS lcl_validate IMPLEMENTATION.
   METHOD validate_arrays.
 
     DATA:
-      lv_value  TYPE string,
-      lt_values TYPE string_table.
+      value  TYPE string,
+      values TYPE string_table.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-cpu INTO lv_value.
-      COLLECT lv_value INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_cpu( lv_value ) = abap_false.
-        INSERT |Invalid CPU: { lv_value }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-cpu INTO value.
+      COLLECT value INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_CPU( value ) = abap_false.
+        INSERT |Invalid CPU: { value }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-cpu ) <> lines( lt_values ).
+    IF lines( manifest-cpu ) <> lines( values ).
       INSERT |Duplicate CPU values| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-db INTO lv_value.
-      COLLECT lv_value INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_db( lv_value ) = abap_false.
-        INSERT |Invalid database: { lv_value }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-db INTO value.
+      COLLECT value INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_DB( value ) = abap_false.
+        INSERT |Invalid database: { value }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-db ) <> lines( lt_values ).
+    IF lines( manifest-db ) <> lines( values ).
       INSERT |Duplicate database values| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-os INTO lv_value.
-      COLLECT lv_value INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_os( lv_value ) = abap_false.
-        INSERT |Invalid operating system: { lv_value }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-os INTO value.
+      COLLECT value INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_OS( value ) = abap_false.
+        INSERT |Invalid operating system: { value }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-os ) <> lines( lt_values ).
+    IF lines( manifest-os ) <> lines( values ).
       INSERT |Duplicate operating system values| INTO TABLE result.
     ENDIF.
 
@@ -155,90 +154,89 @@ CLASS lcl_validate IMPLEMENTATION.
   METHOD validate_dependencies.
 
     DATA:
-      ls_dependency TYPE zif_abappm_package_json_types=>ty_dependency,
-      lv_value      TYPE string,
-      lt_values     TYPE string_table.
+      value  TYPE string,
+      values TYPE string_table.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-engines INTO ls_dependency.
-      COLLECT ls_dependency-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_engine( ls_dependency-name ) = abap_false.
-        INSERT |Invalid engine: { ls_dependency-name }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-engines INTO DATA(dependency).
+      COLLECT dependency-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_ENGINE( dependency-name ) = abap_false.
+        INSERT |Invalid engine: { dependency-name }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_version_range( ls_dependency-range ) = abap_false.
-        INSERT |Invalid engine version: { ls_dependency-name } { ls_dependency-range }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_VERSION_RANGE( dependency-range ) = abap_false.
+        INSERT |Invalid engine version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-engines ) <> lines( lt_values ).
+    IF lines( manifest-engines ) <> lines( values ).
       INSERT |Duplicate engines| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-dependencies INTO ls_dependency.
-      COLLECT ls_dependency-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( ls_dependency-name ) = abap_false.
-        INSERT |Invalid dependency: { ls_dependency-name }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-dependencies INTO dependency.
+      COLLECT dependency-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( dependency-name ) = abap_false.
+        INSERT |Invalid dependency: { dependency-name }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_version_range( ls_dependency-range ) = abap_false.
-        INSERT |Invalid dependency version: { ls_dependency-name } { ls_dependency-range }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_VERSION_RANGE( dependency-range ) = abap_false.
+        INSERT |Invalid dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-dependencies ) <> lines( lt_values ).
+    IF lines( manifest-dependencies ) <> lines( values ).
       INSERT |Duplicate dependencies| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-dev_dependencies INTO ls_dependency.
-      COLLECT ls_dependency-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( ls_dependency-name ) = abap_false.
-        INSERT |Invalid dev dependency: { ls_dependency-name }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-dev_dependencies INTO dependency.
+      COLLECT dependency-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( dependency-name ) = abap_false.
+        INSERT |Invalid dev dependency: { dependency-name }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_version_range( ls_dependency-range ) = abap_false.
-        INSERT |Invalid dev dependency version: { ls_dependency-name } { ls_dependency-range }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_VERSION_RANGE( dependency-range ) = abap_false.
+        INSERT |Invalid dev dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
-      READ TABLE is_manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = ls_dependency-name.
+      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
       IF sy-subrc = 0.
-        INSERT |Dev dependency { ls_dependency-name } already included in dependencies| INTO TABLE result.
+        INSERT |Dev dependency { dependency-name } already included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-dev_dependencies ) <> lines( lt_values ).
+    IF lines( manifest-dev_dependencies ) <> lines( values ).
       INSERT |Duplicate dev dependencies| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-optional_dependencies INTO ls_dependency.
-      COLLECT ls_dependency-name INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( ls_dependency-name ) = abap_false.
-        INSERT |Invalid optional dependency: { ls_dependency-name }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-optional_dependencies INTO dependency.
+      COLLECT dependency-name INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( dependency-name ) = abap_false.
+        INSERT |Invalid optional dependency: { dependency-name }| INTO TABLE result.
       ENDIF.
-      IF zcl_abappm_package_json_valid=>is_valid_version_range( ls_dependency-range ) = abap_false.
-        INSERT |Invalid optional dependency version: { ls_dependency-name } { ls_dependency-range }| INTO TABLE result.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_VERSION_RANGE( dependency-range ) = abap_false.
+        INSERT |Invalid optional dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
-      READ TABLE is_manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = ls_dependency-name.
+      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
       IF sy-subrc = 0.
-        INSERT |Optional dependency { ls_dependency-name } already included in dependencies| INTO TABLE result.
+        INSERT |Optional dependency { dependency-name } already included in dependencies| INTO TABLE result.
       ENDIF.
-      READ TABLE is_manifest-dev_dependencies TRANSPORTING NO FIELDS WITH KEY name = ls_dependency-name.
+      READ TABLE manifest-dev_dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
       IF sy-subrc = 0.
-        INSERT |Optional dependency { ls_dependency-name } already included in dev dependencies| INTO TABLE result.
+        INSERT |Optional dependency { dependency-name } already included in dev dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-optional_dependencies ) <> lines( lt_values ).
+    IF lines( manifest-optional_dependencies ) <> lines( values ).
       INSERT |Duplicate optional dependencies| INTO TABLE result.
     ENDIF.
 
-    CLEAR lt_values.
-    LOOP AT is_manifest-bundle_dependencies INTO lv_value.
-      COLLECT lv_value INTO lt_values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( lv_value ) = abap_false.
-        INSERT |Invalid bundle dependency: { ls_dependency-name }| INTO TABLE result.
+    CLEAR values.
+    LOOP AT manifest-bundle_dependencies INTO value.
+      COLLECT value INTO values.
+      IF ZCL_ABAPPM_PACKAGE_JSON_VALID=>IS_VALID_NAME( value ) = abap_false.
+        INSERT |Invalid bundle dependency: { dependency-name }| INTO TABLE result.
       ENDIF.
-      READ TABLE is_manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = ls_dependency-name.
+      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = value.
       IF sy-subrc <> 0.
-        INSERT |Bundle dependency { ls_dependency-name } not included in dependencies| INTO TABLE result.
+        INSERT |Bundle dependency { dependency-name } not included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
-    IF lines( is_manifest-bundle_dependencies ) <> lines( lt_values ).
+    IF lines( manifest-bundle_dependencies ) <> lines( values ).
       INSERT |Duplicate bundle dependencies| INTO TABLE result.
     ENDIF.
 

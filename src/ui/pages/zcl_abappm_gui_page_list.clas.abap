@@ -389,7 +389,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
 
   METHOD load_package_list.
-    packages = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+    packages = zcl_abappm_package_json=>list( instanciate = abap_true ).
   ENDMETHOD.
 
 

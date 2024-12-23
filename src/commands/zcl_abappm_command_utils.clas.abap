@@ -11,7 +11,7 @@ CLASS zcl_abappm_command_utils DEFINITION
         !registry     TYPE string
         !name         TYPE string
       RETURNING
-        VALUE(result) TYPE zif_abappm_pacote=>ty_packument
+        VALUE(result) TYPE zif_abappm_types=>ty_packument
       RAISING
         zcx_abappm_error.
 
@@ -65,8 +65,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
     DATA(manifest) = zcl_abappm_pacote=>factory(
-      iv_registry = registry
-      iv_name     = name )->manifest( version ).
+      registry = registry
+      name     = name )->manifest( version ).
 
     result = zcl_abappm_package_json=>convert_json_to_manifest( manifest ).
 
@@ -78,8 +78,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
     DATA(packument) = zcl_abappm_pacote=>factory(
-      iv_registry = registry
-      iv_name     = name )->get( ).
+      registry = registry
+      name     = name )->get( ).
 
   ENDMETHOD.
 
@@ -87,8 +87,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
   METHOD get_tarball_from_registry.
 
     result = zcl_abappm_pacote=>factory(
-      iv_registry = registry
-      iv_name     = name )->tarball( tarball ).
+      registry = registry
+      name     = name )->tarball( tarball ).
 
   ENDMETHOD.
 

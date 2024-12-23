@@ -1,4 +1,4 @@
-CLASS zcl_abappm_semver_range DEFINITION
+CLASS ZCL_ABAPPM_SEMVER_RANGE DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -12,12 +12,10 @@ CLASS zcl_abappm_semver_range DEFINITION
   PUBLIC SECTION.
 
     TYPES:
-      ty_comparators TYPE STANDARD TABLE OF REF TO zcl_abappm_semver_comparator WITH DEFAULT KEY,
+      ty_comparators TYPE STANDARD TABLE OF REF TO ZCL_ABAPPM_SEMVER_COMPARATOR WITH DEFAULT KEY,
       ty_set         TYPE STANDARD TABLE OF ty_comparators WITH DEFAULT KEY.
 
-    DATA:
-      range TYPE string READ-ONLY,
-      set   TYPE ty_set READ-ONLY.
+    DATA set TYPE ty_set READ-ONLY.
 
     METHODS constructor
       IMPORTING
@@ -25,7 +23,7 @@ CLASS zcl_abappm_semver_range DEFINITION
         !loose  TYPE abap_bool DEFAULT abap_false
         !incpre TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS create
       IMPORTING
@@ -33,9 +31,13 @@ CLASS zcl_abappm_semver_range DEFINITION
         !loose        TYPE abap_bool DEFAULT abap_false
         !incpre       TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_semver_range
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_SEMVER_RANGE
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
+
+    METHODS range
+      RETURNING
+        VALUE(result) TYPE string.
 
     METHODS format
       RETURNING
@@ -51,7 +53,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE ty_comparators
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS test
       IMPORTING
@@ -59,17 +61,17 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS intersects
       IMPORTING
-        !range        TYPE REF TO zcl_abappm_semver_range
+        !range        TYPE REF TO ZCL_ABAPPM_SEMVER_RANGE
         !loose        TYPE abap_bool DEFAULT abap_false
         !incpre       TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -83,20 +85,22 @@ CLASS zcl_abappm_semver_range DEFINITION
       END OF ty_cache_entry,
       ty_cache TYPE HASHED TABLE OF ty_cache_entry WITH UNIQUE KEY key.
 
+    CLASS-DATA cache TYPE ty_cache.
+
     DATA:
-      raw     TYPE string,
-      cache   TYPE ty_cache,
-      options TYPE zif_abappm_semver_options=>ty_options.
+      raw       TYPE string,
+      formatted TYPE string,
+      options   TYPE ZIF_ABAPPM_SEMVER_OPTIONS=>TY_OPTIONS.
 
     CLASS-METHODS is_any
       IMPORTING
-        !comp         TYPE REF TO zcl_abappm_semver_comparator
+        !comp         TYPE REF TO ZCL_ABAPPM_SEMVER_COMPARATOR
       RETURNING
         VALUE(result) TYPE abap_bool.
 
     CLASS-METHODS is_null_set
       IMPORTING
-        !comp         TYPE REF TO zcl_abappm_semver_comparator
+        !comp         TYPE REF TO ZCL_ABAPPM_SEMVER_COMPARATOR
       RETURNING
         VALUE(result) TYPE abap_bool.
 
@@ -114,7 +118,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS parse_comparator
       IMPORTING
@@ -124,7 +128,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_tildes
       IMPORTING
@@ -134,7 +138,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_tilde
       IMPORTING
@@ -144,7 +148,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_carets
       IMPORTING
@@ -154,7 +158,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_caret
       IMPORTING
@@ -164,7 +168,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_xranges
       IMPORTING
@@ -174,7 +178,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_xrange
       IMPORTING
@@ -184,7 +188,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS replace_stars
       IMPORTING
@@ -210,7 +214,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS test_set
       IMPORTING
@@ -221,7 +225,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS str
       IMPORTING
@@ -233,7 +237,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_semver_range IMPLEMENTATION.
+CLASS ZCL_ABAPPM_SEMVER_RANGE IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -244,7 +248,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
     " First reduce all whitespace as much as possible so we do not have to rely
     " on potentially slow regexes like \s*. This is then stored and used for
     " future error messages as well.
-    raw = zcl_abappm_semver_utils=>trim( range ).
+    raw = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( range ).
 
     " First, split on ||
     IF raw IS NOT INITIAL.
@@ -255,7 +259,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     " map the range to a 2d array of comparators
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range>).
-      INSERT parse_range( zcl_abappm_semver_utils=>trim( <range> ) ) INTO TABLE set.
+      INSERT parse_range( ZCL_ABAPPM_SEMVER_UTILS=>TRIM( <range> ) ) INTO TABLE set.
     ENDLOOP.
 
     " throw out any comparator lists that are empty
@@ -264,7 +268,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
     DELETE set WHERE table_line IS INITIAL.
 
     IF set IS INITIAL.
-      zcx_abappm_semver_error=>raise( |Invalid SemVer Range: { raw }| ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid SemVer Range: { raw }| ).
     ENDIF.
 
     " if we have any that are not the null set, throw out null sets.
@@ -296,18 +300,16 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     ENDIF.
 
-    format( ).
-
   ENDMETHOD.
 
 
   METHOD create.
 
-    DATA comp TYPE REF TO zcl_abappm_semver_comparator.
+    DATA comp TYPE REF TO ZCL_ABAPPM_SEMVER_COMPARATOR.
 
     DATA(kind) = cl_abap_typedescr=>describe_by_data( range )->type_kind.
 
-    IF kind = cl_abap_typedescr=>typekind_oref AND range IS INSTANCE OF zcl_abappm_semver_range.
+    IF kind = cl_abap_typedescr=>typekind_oref AND range IS INSTANCE OF ZCL_ABAPPM_SEMVER_RANGE.
 
       result ?= range.
 
@@ -315,45 +317,27 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      result = NEW zcl_abappm_semver_range( range = |{ result->raw }| loose = loose incpre = incpre ).
+      result = NEW ZCL_ABAPPM_SEMVER_RANGE( range = |{ result->raw }| loose = loose incpre = incpre ).
 
-    ELSEIF kind = cl_abap_typedescr=>typekind_oref AND range IS INSTANCE OF zcl_abappm_semver_comparator.
+    ELSEIF kind = cl_abap_typedescr=>typekind_oref AND range IS INSTANCE OF ZCL_ABAPPM_SEMVER_COMPARATOR.
 
       comp ?= range.
 
-      result = NEW zcl_abappm_semver_range( range = |{ comp->value }| loose = loose incpre = incpre ).
+      result = NEW ZCL_ABAPPM_SEMVER_RANGE( range = |{ comp->value }| loose = loose incpre = incpre ).
 
     ELSEIF kind = cl_abap_typedescr=>typekind_char OR kind = cl_abap_typedescr=>typekind_string.
 
-      result = NEW zcl_abappm_semver_range( range = |{ range }| loose = loose incpre = incpre ).
+      result = NEW ZCL_ABAPPM_SEMVER_RANGE( range = |{ range }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_semver_error=>raise( 'Invalid parameter type' ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Invalid parameter type' ).
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD format.
-
-    DATA comps TYPE string_table.
-    DATA comp TYPE string.
-
-    LOOP AT set ASSIGNING FIELD-SYMBOL(<set>).
-      LOOP AT <set> ASSIGNING FIELD-SYMBOL(<comp>).
-        IF sy-tabix = 1.
-          comp = zcl_abappm_semver_utils=>trim( <comp>->value ).
-        ELSE.
-          comp = comp && ` ` && zcl_abappm_semver_utils=>trim( <comp>->value ).
-        ENDIF.
-      ENDLOOP.
-      INSERT comp INTO TABLE comps.
-    ENDLOOP.
-
-    range = zcl_abappm_semver_utils=>trim( concat_lines_of( table = comps sep = `||` ) ).
-
-    result = range.
-
+    result = range( ).
   ENDMETHOD.
 
 
@@ -418,7 +402,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
       DATA(test_comparator) = remaining_comparators[ i ].
 
       LOOP AT remaining_comparators ASSIGNING FIELD-SYMBOL(<other_comparator>).
-        DATA(semcomp) = zcl_abappm_semver_comparator=>create( test_comparator ).
+        DATA(semcomp) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( test_comparator ).
 
         IF semcomp IS BOUND.
           result = semcomp->intersects( comp = <other_comparator> loose = loose incpre = incpre ).
@@ -477,23 +461,23 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
     " `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
     range = replace(
       val   = range
-      regex = zcl_abappm_semver_re=>token-comparatortrim-safe_src
-      with  = zcl_abappm_semver_re=>comparator_trim_replace
-      occ   = zcl_abappm_semver_re=>token-comparatortrim-occ ).
+      regex = ZCL_ABAPPM_SEMVER_RE=>TOKEN-COMPARATORTRIM-SAFE_SRC
+      with  = ZCL_ABAPPM_SEMVER_RE=>COMPARATOR_TRIM_REPLACE
+      occ   = ZCL_ABAPPM_SEMVER_RE=>TOKEN-COMPARATORTRIM-OCC ).
 
     " `~ 1.2.3` => `~1.2.3`
     range = replace(
       val   = range
-      regex = zcl_abappm_semver_re=>token-tildetrim-safe_src
-      with  = zcl_abappm_semver_re=>tilde_trim_replace
-      occ   = zcl_abappm_semver_re=>token-tildetrim-occ ).
+      regex = ZCL_ABAPPM_SEMVER_RE=>TOKEN-TILDETRIM-SAFE_SRC
+      with  = ZCL_ABAPPM_SEMVER_RE=>TILDE_TRIM_REPLACE
+      occ   = ZCL_ABAPPM_SEMVER_RE=>TOKEN-TILDETRIM-OCC ).
 
     " `^ 1.2.3` => `^1.2.3`
     range = replace(
       val   = range
-      regex = zcl_abappm_semver_re=>token-carettrim-safe_src
-      with  = zcl_abappm_semver_re=>caret_trim_replace
-      occ   = zcl_abappm_semver_re=>token-carettrim-occ ).
+      regex = ZCL_ABAPPM_SEMVER_RE=>TOKEN-CARETTRIM-SAFE_SRC
+      with  = ZCL_ABAPPM_SEMVER_RE=>CARET_TRIM_REPLACE
+      occ   = ZCL_ABAPPM_SEMVER_RE=>TOKEN-CARETTRIM-OCC ).
 
     " At this point, the range is completely trimmed and
     " ready to be split into comparators.
@@ -518,7 +502,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     IF options-loose = abap_true.
       " in loose mode, throw out any that are not valid comparators
-      DATA(r) = zcl_abappm_semver_re=>token-comparatorloose-safe_regex.
+      DATA(r) = ZCL_ABAPPM_SEMVER_RE=>TOKEN-COMPARATORLOOSE-SAFE_REGEX.
       LOOP AT comps ASSIGNING <comp>.
         DATA(m) = r->create_matcher( text = <comp> ).
         IF NOT m->match( ).
@@ -532,7 +516,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
     " also, don't include the same comparator more than once
 
     LOOP AT comps ASSIGNING <comp>.
-      DATA(semcomp) = zcl_abappm_semver_comparator=>create( comp = <comp> loose = options-loose incpre = options-incpre ).
+      DATA(semcomp) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( comp = <comp> loose = options-loose incpre = options-incpre ).
       INSERT semcomp INTO TABLE comparators.
     ENDLOOP.
 
@@ -554,6 +538,31 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD range.
+
+    DATA comps TYPE string_table.
+    DATA comp TYPE string.
+
+    IF formatted IS INITIAL.
+      LOOP AT set ASSIGNING FIELD-SYMBOL(<set>).
+        LOOP AT <set> ASSIGNING FIELD-SYMBOL(<comp>).
+          IF sy-tabix = 1.
+            comp = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( <comp>->value ).
+          ELSE.
+            comp = comp && ` ` && ZCL_ABAPPM_SEMVER_UTILS=>TRIM( <comp>->value ).
+          ENDIF.
+        ENDLOOP.
+        INSERT comp INTO TABLE comps.
+      ENDLOOP.
+
+      formatted = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( concat_lines_of( table = comps sep = `||` ) ).
+    ENDIF.
+
+    result = formatted.
+
+  ENDMETHOD.
+
+
   METHOD replace_caret.
     " ^ --> * (any, kinda silly)
     " ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0-0
@@ -567,8 +576,8 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     DATA(r) = COND #(
       WHEN loose = abap_true
-      THEN zcl_abappm_semver_re=>token-caretloose-safe_regex
-      ELSE zcl_abappm_semver_re=>token-caret-safe_regex ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-CARETLOOSE-SAFE_REGEX
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-CARET-SAFE_REGEX ).
 
     TRY.
         DATA(m) = r->create_matcher( text = result ).
@@ -623,7 +632,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_semver_error=>raise( 'Overflow' ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Overflow' ).
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
         BREAK-POINT.
         " zcx_semver_error=>raise_with_text( error )
@@ -634,7 +643,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
   METHOD replace_carets.
 
-    SPLIT zcl_abappm_semver_utils=>trim( comp ) AT ` ` INTO TABLE DATA(comps).
+    SPLIT ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp ) AT ` ` INTO TABLE DATA(comps).
 
     LOOP AT comps ASSIGNING FIELD-SYMBOL(<comp>).
       <comp> = replace_caret( comp = <comp> loose = loose incpre = incpre ).
@@ -649,11 +658,11 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     DATA(regex) = COND #(
       WHEN incpre = abap_true
-      THEN zcl_abappm_semver_re=>token-gte0pre-safe_src
-      ELSE zcl_abappm_semver_re=>token-gte0-safe_src ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-GTE0PRE-SAFE_SRC
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-GTE0-SAFE_SRC ).
 
     result = replace(
-      val   = zcl_abappm_semver_utils=>trim( comp )
+      val   = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp )
       regex = regex
       with  = '' ).
 
@@ -668,8 +677,8 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     DATA(r) = COND #(
       WHEN loose = abap_true
-      THEN zcl_abappm_semver_re=>token-hyphenrangeloose-safe_regex
-      ELSE zcl_abappm_semver_re=>token-hyphenrange-safe_regex ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-HYPHENRANGELOOSE-SAFE_REGEX
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-HYPHENRANGE-SAFE_REGEX ).
 
     TRY.
         DATA(m) = r->create_matcher( text = result ).
@@ -718,14 +727,14 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
             to = |<={ to }|.
           ENDIF.
 
-          DATA(with) = zcl_abappm_semver_utils=>trim( |{ from } { to }| ).
+          DATA(with) = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( |{ from } { to }| ).
 
           m->replace_found( with ).
 
           result = m->text.
         ENDIF.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_semver_error=>raise( 'Overflow' ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Overflow' ).
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
         BREAK-POINT.
         " zcx_semver_error=>raise_with_text( error )
@@ -740,8 +749,8 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     " Looseness is ignored here.  star is always as loose as it gets!
     result = replace(
-      val   = zcl_abappm_semver_utils=>trim( comp )
-      regex = zcl_abappm_semver_re=>token-star-safe_src
+      val   = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp )
+      regex = ZCL_ABAPPM_SEMVER_RE=>TOKEN-STAR-SAFE_SRC
       with  = '' ).
 
   ENDMETHOD.
@@ -759,8 +768,8 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
     DATA(r) = COND #(
       WHEN loose = abap_true
-      THEN zcl_abappm_semver_re=>token-tildeloose-safe_regex
-      ELSE zcl_abappm_semver_re=>token-tilde-safe_regex ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-TILDELOOSE-SAFE_REGEX
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-TILDE-SAFE_REGEX ).
 
     TRY.
         DATA(m) = r->create_matcher( text = result ).
@@ -795,7 +804,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_semver_error=>raise( 'Overflow' ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Overflow' ).
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
         BREAK-POINT.
         " zcx_semver_error=>raise_with_text( error )
@@ -806,7 +815,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
   METHOD replace_tildes.
 
-    SPLIT zcl_abappm_semver_utils=>trim( comp ) AT ` ` INTO TABLE DATA(comps).
+    SPLIT ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp ) AT ` ` INTO TABLE DATA(comps).
 
     LOOP AT comps ASSIGNING FIELD-SYMBOL(<comp>).
       <comp> = replace_tilde( comp = <comp> loose = loose incpre = incpre ).
@@ -819,12 +828,12 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
   METHOD replace_xrange.
 
-    result = zcl_abappm_semver_utils=>trim( comp ).
+    result = ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp ).
 
     DATA(r) = COND #(
       WHEN loose = abap_true
-      THEN zcl_abappm_semver_re=>token-xrangeloose-safe_regex
-      ELSE zcl_abappm_semver_re=>token-xrange-safe_regex ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-XRANGELOOSE-SAFE_REGEX
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-XRANGE-SAFE_REGEX ).
 
     TRY.
         DATA(m) = r->create_matcher( text = result ).
@@ -909,7 +918,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_semver_error=>raise( 'Overflow' ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Overflow' ).
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
         BREAK-POINT.
         " zcx_semver_error=>raise_with_text( error )
@@ -920,7 +929,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
   METHOD replace_xranges.
 
-    SPLIT zcl_abappm_semver_utils=>trim( comp ) AT ` ` INTO TABLE DATA(comps).
+    SPLIT ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp ) AT ` ` INTO TABLE DATA(comps).
 
     LOOP AT comps ASSIGNING FIELD-SYMBOL(<comp>).
       <comp> = replace_xrange( comp = <comp> loose = loose incpre = incpre ).
@@ -940,8 +949,8 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
   METHOD test.
 
     TRY.
-        DATA(semver) = zcl_abappm_semver=>create( version = version loose = options-loose incpre = options-incpre ).
-      CATCH zcx_abappm_semver_error.
+        DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = options-loose incpre = options-incpre ).
+      CATCH ZCX_ABAPPM_SEMVER_ERROR.
         result = abap_false.
         RETURN.
     ENDTRY.
@@ -962,7 +971,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
   METHOD test_set.
 
-    DATA(semver) = zcl_abappm_semver=>create( version = version loose = loose incpre = incpre ).
+    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = loose incpre = incpre ).
 
     CHECK semver IS BOUND.
 
@@ -980,7 +989,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
       " However, `1.2.4-alpha.notready` should NOT be allowed,
       " even though it's within the range set by the comparators.
       LOOP AT comparators ASSIGNING <comparator>.
-        IF <comparator>->semver = zcl_abappm_semver_comparator=>any_semver.
+        IF <comparator>->semver = ZCL_ABAPPM_SEMVER_COMPARATOR=>ANY_SEMVER.
           CONTINUE.
         ENDIF.
 
@@ -1004,6 +1013,6 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
 
   METHOD to_string.
-    result = range.
+    result = range( ).
   ENDMETHOD.
 ENDCLASS.

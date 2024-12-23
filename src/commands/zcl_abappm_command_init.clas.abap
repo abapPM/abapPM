@@ -30,9 +30,9 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
 
     " Package JSON
     DATA(package_json_service) = zcl_abappm_package_json=>factory(
-      iv_package = package
-      iv_name    = package_json-name
-      iv_version = package_json-version ).
+      package = package
+      name    = package_json-name
+      version = package_json-version ).
 
     IF package_json_service->exists( ) = abap_true.
       zcx_abappm_error=>raise( |Package { package } is already initialized| ).
@@ -57,8 +57,8 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
     ENDIF.
 
     DATA(readme_service) = zcl_abappm_readme=>factory(
-      iv_package  = package
-      iv_markdown = markdown ).
+      package  = package
+      markdown = markdown ).
 
     readme_service->save( ).
 

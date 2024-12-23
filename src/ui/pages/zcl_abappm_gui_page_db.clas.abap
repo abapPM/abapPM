@@ -288,8 +288,8 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
         LOOP AT db_entries INTO db_entry.
           db_persist->save(
-            iv_key   = db_entry-keys
-            iv_value = db_entry-value ).
+            key   = db_entry-keys
+            value = db_entry-value ).
         ENDLOOP.
 
         COMMIT WORK.

@@ -1,4 +1,4 @@
-CLASS zcl_abappm_highlighter DEFINITION
+CLASS ZCL_ABAPPM_HIGHLIGHTER DEFINITION
   PUBLIC
   ABSTRACT
   CREATE PUBLIC.
@@ -101,7 +101,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_highlighter IMPLEMENTATION.
+CLASS ZCL_ABAPPM_HIGHLIGHTER IMPLEMENTATION.
 
 
   METHOD add_rule.
@@ -276,10 +276,6 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
     IF iv_line IS INITIAL OR is_whitespace( iv_line ) = abap_true.
       rv_line = show_hidden_chars( iv_line ).
       RETURN.
-    ENDIF.
-
-    IF iv_line CP '#### Example*=>*'.
-      BREAK-POINT.
     ENDIF.
 
     lt_matches = parse_line( iv_line ).

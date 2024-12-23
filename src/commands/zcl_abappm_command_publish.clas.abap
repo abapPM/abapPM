@@ -32,7 +32,7 @@ CLASS zcl_abappm_command_publish DEFINITION
 
     CLASS-METHODS check_packument
       IMPORTING
-        !packument    TYPE zif_abappm_pacote=>ty_packument
+        !packument    TYPE zif_abappm_types=>ty_packument
         !package_json TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abappm_error.
@@ -64,10 +64,10 @@ CLASS zcl_abappm_command_publish DEFINITION
 
     CLASS-METHODS init_package
       IMPORTING
-        !packument    TYPE zif_abappm_pacote=>ty_packument
+        !packument    TYPE zif_abappm_types=>ty_packument
         !package_json TYPE zif_abappm_types=>ty_package_json
       RETURNING
-        VALUE(result) TYPE zif_abappm_pacote=>ty_packument
+        VALUE(result) TYPE zif_abappm_types=>ty_packument
       RAISING
         zcx_abappm_error.
 
@@ -76,14 +76,14 @@ CLASS zcl_abappm_command_publish DEFINITION
         !version    TYPE string
         !tarball    TYPE xstring
       CHANGING
-        !cs_publish TYPE zif_abappm_pacote=>ty_packument
+        !cs_publish TYPE zif_abappm_types=>ty_packument
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS publish_package
       IMPORTING
         !registry     TYPE string
-        !packument    TYPE zif_abappm_pacote=>ty_packument
+        !packument    TYPE zif_abappm_types=>ty_packument
       RETURNING
         VALUE(result) TYPE string
       RAISING
@@ -104,7 +104,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD attach_package.
 
-    DATA(attachment) = VALUE zif_abappm_pacote=>ty_attachment(
+    DATA(attachment) = VALUE zif_abappm_types=>ty_attachment(
       key                  = |{ cs_publish-name }-{ version }.tgz|
       tarball-content_type = 'application/octet-stream'
       tarball-data         = cl_http_utility=>encode_x_base64( tarball )
@@ -261,9 +261,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       AT NEW file-path.
         IF <file>-file-path <> '/'.
           tar->append(
-            iv_name     = <file>-file-path
-            iv_content  = c_null
-            iv_typeflag = zcl_abappm_tar=>c_typeflag-directory ).
+            name     = <file>-file-path
+            content  = c_null
+            typeflag = zcl_abappm_tar=>c_typeflag-directory ).
         ENDIF.
       ENDAT.
       IF <file>-file-path = '/'.
@@ -272,25 +272,25 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         name = |{ <file>-file-path }/{ <file>-file-filename }|.
       ENDIF.
       tar->append(
-        iv_name    = name
-        iv_content = <file>-file-data ).
+        name    = name
+        content = <file>-file-data ).
     ENDLOOP.
 
     " 3. Add package.json and readme
     DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( package_json ).
 
     DATA(json) = zcl_abappm_package_json=>convert_manifest_to_json(
-      is_manifest     = manifest
-      iv_package_json = abap_true ).
+      manifest        = manifest
+      is_package_json = abap_true ).
 
     TRY.
         tar->append(
-          iv_name    = 'package.json'
-          iv_content = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
+          name    = 'package.json'
+          content = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
 
         tar->append(
-          iv_name    = 'README.md'
-          iv_content = zcl_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
+          name    = 'README.md'
+          content = zcl_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
       CATCH zcx_abapgit_exception INTO error.
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
@@ -312,7 +312,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     INSERT dist_tag INTO TABLE result-dist_tags.
 
-    DATA(version) = VALUE zif_abappm_pacote=>ty_version( key = package_json-version ).
+    DATA(version) = VALUE zif_abappm_types=>ty_version( key = package_json-version ).
 
     MOVE-CORRESPONDING package_json TO version-version.
     version-version-__id           = |{ package_json-name }@{ package_json-version }|.
@@ -329,9 +329,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     DATA(json) = zcl_abappm_pacote=>convert_packument_to_json( packument ).
 
     DATA(response) = get_agent( registry )->request(
-      iv_url     = |{ registry }/{ packument-name }|
-      iv_method  = 'PUT'
-      iv_payload = json ).
+      url     = |{ registry }/{ packument-name }|
+      method  = 'PUT'
+      payload = json ).
 
     IF response->is_ok( ) = abap_false.
       result = |Error { response->code( ) } when publishing package|.

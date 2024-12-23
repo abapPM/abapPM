@@ -127,7 +127,8 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    DATA(list) = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+" FIXME!
+    DATA(list) = zcl_package_json=>list( instanciate = abap_true ).
 
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -294,7 +295,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
         obj_name = mapping-old_object ).
 
       DATA(new_package) = mapping-target_package.
-      DATA(new_object)   = map[ old_object = mapping-old_object ]-new_object.
+      DATA(new_object)  = map[ old_object = mapping-old_object ]-new_object.
 
       ASSERT new_object IS NOT INITIAL AND new_object <> mapping-old_object.
 

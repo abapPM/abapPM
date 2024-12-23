@@ -162,8 +162,8 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     TRY.
         db_persist->save(
-          iv_key   = db_entry-keys
-          iv_value = db_entry-value ).
+          key   = db_entry-keys
+          value = db_entry-value ).
       CATCH zcx_abappm_error INTO DATA(error).
         zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.

@@ -1,4 +1,4 @@
-CLASS zcl_abappm_semver_utils DEFINITION
+CLASS ZCL_ABAPPM_SEMVER_UTILS DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -35,7 +35,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_abappm_semver_utils IMPLEMENTATION.
+CLASS ZCL_ABAPPM_SEMVER_UTILS IMPLEMENTATION.
 
 
   METHOD is_numeric.
@@ -67,8 +67,8 @@ CLASS zcl_abappm_semver_utils IMPLEMENTATION.
     " POSIX: Remove whitespace after "v" or "=" to avoid issue with greedy regex
     result = replace(
       val   = trim( data )
-      regex = zcl_abappm_semver_re=>token-vtrim-src
-      with  = zcl_abappm_semver_re=>version_trim_replace
-      occ   = zcl_abappm_semver_re=>token-vtrim-occ ).
+      regex = ZCL_ABAPPM_SEMVER_RE=>TOKEN-VTRIM-SRC
+      with  = ZCL_ABAPPM_SEMVER_RE=>VERSION_TRIM_REPLACE
+      occ   = ZCL_ABAPPM_SEMVER_RE=>TOKEN-VTRIM-OCC ).
   ENDMETHOD.
 ENDCLASS.

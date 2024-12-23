@@ -73,7 +73,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
   METHOD get_bundle_dependencies.
 
     " Get all installed packages
-    DATA(list) = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+    DATA(list) = zcl_abappm_package_json=>list( instanciate = abap_true ).
 
     " Get all sub packages where a dependency could be installed
     DATA(sub_packages) = zcl_abapgit_factory=>get_sap_package( package )->list_subpackages( ).
@@ -247,7 +247,6 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
     " 6. Import dependencies
     zcl_abappm_importer=>run(
       package       = package
-      is_logging    = abap_false
       is_dryrun     = is_dryrun
       is_production = is_production ).
 

@@ -1,4 +1,4 @@
-CLASS zcl_abappm_semver DEFINITION
+CLASS ZCL_ABAPPM_SEMVER DEFINITION
   PUBLIC
   CREATE PRIVATE.
 
@@ -25,7 +25,7 @@ CLASS zcl_abappm_semver DEFINITION
         loose   TYPE abap_bool DEFAULT abap_false
         incpre  TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     CLASS-METHODS create
       IMPORTING
@@ -33,9 +33,9 @@ CLASS zcl_abappm_semver DEFINITION
         loose         TYPE abap_bool DEFAULT abap_false
         incpre        TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_semver
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_SEMVER
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS format
       RETURNING
@@ -51,7 +51,7 @@ CLASS zcl_abappm_semver DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS compare_main
       IMPORTING
@@ -59,7 +59,7 @@ CLASS zcl_abappm_semver DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS compare_pre
       IMPORTING
@@ -67,7 +67,7 @@ CLASS zcl_abappm_semver DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS compare_build
       IMPORTING
@@ -75,7 +75,7 @@ CLASS zcl_abappm_semver DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
     METHODS inc
       IMPORTING
@@ -83,27 +83,27 @@ CLASS zcl_abappm_semver DEFINITION
         identifier      TYPE string OPTIONAL
         identifier_base TYPE string OPTIONAL
       RETURNING
-        VALUE(result)   TYPE REF TO zcl_abappm_semver
+        VALUE(result)   TYPE REF TO ZCL_ABAPPM_SEMVER
       RAISING
-        zcx_abappm_semver_error.
+        ZCX_ABAPPM_SEMVER_ERROR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     DATA:
       raw     TYPE string,
-      options TYPE zif_abappm_semver_options=>ty_options.
+      options TYPE ZIF_ABAPPM_SEMVER_OPTIONS=>TY_OPTIONS.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_semver IMPLEMENTATION.
+CLASS ZCL_ABAPPM_SEMVER IMPLEMENTATION.
 
 
   METHOD compare.
 
-    DATA(semver) = zcl_abappm_semver=>create( version = other loose = options-loose incpre = options-incpre ).
+    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = other loose = options-loose incpre = options-incpre ).
 
     CHECK semver IS BOUND.
 
@@ -121,7 +121,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD compare_build.
 
-    DATA(semver) = zcl_abappm_semver=>create( version = other loose = options-loose incpre = options-incpre ).
+    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = other loose = options-loose incpre = options-incpre ).
 
     DATA(i) = 1.
     DO.
@@ -137,7 +137,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         result = -1.
         RETURN.
       ELSEIF a <> b.
-        result = zcl_abappm_semver_identifiers=>compare_identifiers( a = a b = b ).
+        result = ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = a b = b ).
         RETURN.
       ENDIF.
       i += 1.
@@ -148,15 +148,15 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD compare_main.
 
-    DATA(semver) = zcl_abappm_semver=>create( version = other loose = options-loose incpre = options-incpre ).
+    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = other loose = options-loose incpre = options-incpre ).
 
     CHECK semver IS BOUND.
 
-    result = zcl_abappm_semver_identifiers=>compare_identifiers( a = major b = semver->major ).
+    result = ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = major b = semver->major ).
     IF result = 0.
-      result = zcl_abappm_semver_identifiers=>compare_identifiers( a = minor b = semver->minor ).
+      result = ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = minor b = semver->minor ).
       IF result = 0.
-        result = zcl_abappm_semver_identifiers=>compare_identifiers( a = patch b = semver->patch ).
+        result = ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = patch b = semver->patch ).
       ENDIF.
     ENDIF.
 
@@ -165,7 +165,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD compare_pre.
 
-    DATA(semver) = zcl_abappm_semver=>create( version = other loose = options-loose incpre = options-incpre ).
+    DATA(semver) = ZCL_ABAPPM_SEMVER=>CREATE( version = other loose = options-loose incpre = options-incpre ).
 
     CHECK semver IS BOUND.
 
@@ -191,7 +191,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
           result = -1.
           RETURN.
         ELSEIF a <> b.
-          result = zcl_abappm_semver_identifiers=>compare_identifiers( a = a b = b ).
+          result = ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = a b = b ).
           RETURN.
         ENDIF.
         i += 1.
@@ -203,8 +203,8 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF strlen( version ) > zif_abappm_semver_constants=>max_length.
-      zcx_abappm_semver_error=>raise( |Version is longer than { zif_abappm_semver_constants=>max_length } characters| ).
+    IF strlen( version ) > ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_LENGTH.
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Version is longer than { ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_LENGTH } characters| ).
     ENDIF.
 
     options-loose  = loose.
@@ -212,14 +212,14 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
     DATA(r) = COND #(
       WHEN loose = abap_true
-      THEN zcl_abappm_semver_re=>token-loose-safe_regex
-      ELSE zcl_abappm_semver_re=>token-full-safe_regex ).
+      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-LOOSE-SAFE_REGEX
+      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-FULL-SAFE_REGEX ).
 
     TRY.
-        DATA(m) = r->create_matcher( text = zcl_abappm_semver_utils=>version_trim( version ) ).
+        DATA(m) = r->create_matcher( text = ZCL_ABAPPM_SEMVER_UTILS=>VERSION_TRIM( version ) ).
 
         IF NOT m->match( ).
-          zcx_abappm_semver_error=>raise( |Invalid version: { version }| ).
+          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid version: { version }| ).
         ENDIF.
 
         raw = version.
@@ -229,22 +229,22 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         DATA(minor_num) = CONV decfloat34( m->get_submatch( 2 ) ).
         DATA(patch_num) = CONV decfloat34( m->get_submatch( 3 ) ).
 
-        IF major_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
+        IF major_num BETWEEN 0 AND ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER.
           major = major_num.
         ELSE.
-          zcx_abappm_semver_error=>raise( |Invalid major version: { major_num }| ).
+          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid major version: { major_num }| ).
         ENDIF.
 
-        IF minor_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
+        IF minor_num BETWEEN 0 AND ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER.
           minor = minor_num.
         ELSE.
-          zcx_abappm_semver_error=>raise( |Invalid minor version: { minor_num }| ).
+          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid minor version: { minor_num }| ).
         ENDIF.
 
-        IF patch_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
+        IF patch_num BETWEEN 0 AND ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER.
           patch = patch_num.
         ELSE.
-          zcx_abappm_semver_error=>raise( |Invalid patch version: { patch_num }| ).
+          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid patch version: { patch_num }| ).
         ENDIF.
 
         DATA(m4) = m->get_submatch( 4 ).
@@ -252,7 +252,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
           SPLIT m4 AT '.' INTO TABLE prerelease.
 
           LOOP AT prerelease ASSIGNING FIELD-SYMBOL(<pre>).
-            IF zcl_abappm_semver_utils=>is_numeric( <pre> ).
+            IF ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( <pre> ).
               DATA(pre_num) = CONV decfloat34( <pre> ).
               <pre> = pre_num.
             ENDIF.
@@ -265,7 +265,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         ENDIF.
 
       CATCH cx_sy_matcher.
-        zcx_abappm_semver_error=>raise( |Error evaluating regex for { version }| ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Error evaluating regex for { version }| ).
     ENDTRY.
 
     format( ).
@@ -278,7 +278,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
     DATA(descr) = cl_abap_typedescr=>describe_by_data( version ).
     DATA(kind) = descr->type_kind.
 
-    IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF zcl_abappm_semver.
+    IF kind = cl_abap_typedescr=>typekind_oref AND version IS INSTANCE OF ZCL_ABAPPM_SEMVER.
 
       result ?= version.
 
@@ -286,14 +286,14 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      result = NEW zcl_abappm_semver( version = |{ result->version }| loose = loose incpre = incpre ).
+      result = NEW ZCL_ABAPPM_SEMVER( version = |{ result->version }| loose = loose incpre = incpre ).
 
     ELSEIF kind = cl_abap_typedescr=>typekind_char OR kind = cl_abap_typedescr=>typekind_string.
 
-      result = NEW zcl_abappm_semver( version = |{ version }| loose = loose incpre = incpre ).
+      result = NEW ZCL_ABAPPM_SEMVER( version = |{ version }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_semver_error=>raise( |Invalid version. Must be a string or a semver. Got { descr->absolute_name }| ).
+      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid version. Must be a string or a semver. Got { descr->absolute_name }| ).
     ENDIF.
 
   ENDMETHOD.
@@ -382,11 +382,11 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         IF identifier_base IS INITIAL OR identifier_base = `0`.
           DATA(base) = `0`.
         ELSE.
-          base = COND #( WHEN zcl_abappm_semver_utils=>is_numeric( identifier_base ) THEN `1` ELSE `0` ).
+          base = COND #( WHEN ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( identifier_base ) THEN `1` ELSE `0` ).
         ENDIF.
 
         IF identifier IS INITIAL AND identifier_base = false.
-          zcx_abappm_semver_error=>raise( 'Invalid increment argument: identifier is empty' ).
+          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Invalid increment argument: identifier is empty' ).
         ENDIF.
 
         IF prerelease IS INITIAL.
@@ -394,7 +394,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         ELSE.
           DATA(i) = lines( prerelease ).
           WHILE i > 0.
-            IF zcl_abappm_semver_utils=>is_numeric( prerelease[ i ] ).
+            IF ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( prerelease[ i ] ).
               prerelease[ i ] += 1.
               prerelease[ i ] = condense( prerelease[ i ] ).
               i = -2.
@@ -405,7 +405,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
             " didn't increment anything
             DATA(prerelease_string) = concat_lines_of( table = prerelease sep = '.' ).
             IF identifier = prerelease_string AND identifier_base = false.
-              zcx_abappm_semver_error=>raise( 'Invalid increment argument: identifier already exists' ).
+              ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Invalid increment argument: identifier already exists' ).
             ENDIF.
 
             INSERT base INTO TABLE prerelease.
@@ -419,8 +419,8 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
             prerelease_tab =  VALUE #( ( identifier ) ).
           ENDIF.
 
-          IF zcl_abappm_semver_identifiers=>compare_identifiers( a = prerelease[ 1 ] b = identifier ) = 0.
-            IF NOT zcl_abappm_semver_utils=>is_numeric( VALUE #( prerelease[ 2 ] DEFAULT `-` ) ).
+          IF ZCL_ABAPPM_SEMVER_IDENTIFIERS=>COMPARE_IDENTIFIERS( a = prerelease[ 1 ] b = identifier ) = 0.
+            IF NOT ZCL_ABAPPM_SEMVER_UTILS=>IS_NUMERIC( VALUE #( prerelease[ 2 ] DEFAULT `-` ) ).
               prerelease = prerelease_tab.
             ENDIF.
           ELSE.
@@ -431,7 +431,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         " Used by zcl_semver_ranges->min_version
         INSERT identifier_base INTO TABLE prerelease.
       WHEN OTHERS.
-        zcx_abappm_semver_error=>raise( |Invalid increment argument { release }| ).
+        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid increment argument { release }| ).
     ENDCASE.
 
     format( ).

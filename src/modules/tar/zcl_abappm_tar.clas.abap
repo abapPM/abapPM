@@ -1,4 +1,4 @@
-CLASS zcl_abappm_tar DEFINITION
+CLASS ZCL_ABAPPM_TAR DEFINITION
   PUBLIC
   CREATE PRIVATE.
 
@@ -47,86 +47,86 @@ CLASS zcl_abappm_tar DEFINITION
     "! Create archive
     CLASS-METHODS new
       IMPORTING
-        !iv_force_ustar TYPE abap_bool DEFAULT abap_false
+        !force_ustar  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result)   TYPE REF TO zcl_abappm_tar.
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR.
 
     METHODS constructor
       IMPORTING
-        !iv_force_ustar TYPE abap_bool.
+        !force_ustar TYPE abap_bool.
 
     "! Load archive
     METHODS load
       IMPORTING
-        !iv_tar       TYPE xstring
+        !tar          TYPE xstring
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tar
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Create archive
     METHODS save
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Read file from archive
     METHODS get
       IMPORTING
-        !iv_name      TYPE string
+        !name         TYPE string
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! List the table of contents of an archive (no data)
     METHODS list
       RETURNING
         VALUE(result) TYPE ty_files
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Append file to archive
     METHODS append
       IMPORTING
-        !iv_name      TYPE string
-        !iv_content   TYPE xsequence
-        !iv_date      TYPE d OPTIONAL
-        !iv_time      TYPE t OPTIONAL
-        !iv_mode      TYPE i OPTIONAL
-        !iv_typeflag  TYPE c OPTIONAL
+        !name         TYPE string
+        !content      TYPE xsequence
+        !date         TYPE d OPTIONAL
+        !time         TYPE t OPTIONAL
+        !mode         TYPE i OPTIONAL
+        !typeflag     TYPE c OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tar
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Delete file from archive
     METHODS delete
       IMPORTING
-        !iv_name      TYPE string
+        !name         TYPE string
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tar
+        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Gzip archive
     METHODS gzip
       IMPORTING
-        !iv_tar       TYPE xstring
+        !tar          TYPE xstring
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     "! Gunzip archive
     METHODS gunzip
       IMPORTING
-        !iv_gzip      TYPE xstring
+        !gzip         TYPE xstring
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -153,11 +153,11 @@ CLASS zcl_abappm_tar DEFINITION
       END OF ty_header.
 
     TYPES:
-      BEGIN OF ty_data,
+      BEGIN OF ty_tar_item,
         name    TYPE string,
         content TYPE xstring,
-      END OF ty_data,
-      ty_tar_data TYPE HASHED TABLE OF ty_data WITH UNIQUE KEY name.
+      END OF ty_tar_item,
+      ty_tar_list TYPE HASHED TABLE OF ty_tar_item WITH UNIQUE KEY name.
 
     CONSTANTS:
       c_blocksize     TYPE i VALUE 512,
@@ -168,155 +168,155 @@ CLASS zcl_abappm_tar DEFINITION
       c_epoch         TYPE timestamp VALUE '19700101000000'.
 
     CLASS-DATA:
-      gv_null        TYPE c LENGTH 256,
-      go_convert_in  TYPE REF TO cl_abap_conv_in_ce,
-      go_convert_out TYPE REF TO cl_abap_conv_out_ce.
+      null        TYPE c LENGTH 256,
+      convert_in  TYPE REF TO cl_abap_conv_in_ce,
+      convert_out TYPE REF TO cl_abap_conv_out_ce.
 
     DATA:
-      mv_force_ustar TYPE abap_bool,
-      mt_files       TYPE ty_files,
-      mt_data        TYPE ty_tar_data.
+      force_ustar TYPE abap_bool,
+      tar_files   TYPE ty_files,
+      tar_list    TYPE ty_tar_list.
 
     METHODS _append_nulls
       CHANGING
-        !cg_data TYPE simple.
+        !data TYPE simple.
 
     METHODS _remove_nulls
       CHANGING
-        !cg_data TYPE simple.
+        !data TYPE simple.
 
     METHODS _pad
       IMPORTING
-        !iv_number       TYPE numeric
-        !iv_length       TYPE i
+        !number       TYPE numeric
+        !length       TYPE i
       RETURNING
-        VALUE(rv_result) TYPE string.
+        VALUE(result) TYPE string.
 
     METHODS _unpad
       IMPORTING
-        !iv_data         TYPE csequence
+        !data         TYPE csequence
       RETURNING
-        VALUE(rv_result) TYPE i.
+        VALUE(result) TYPE i.
 
     METHODS _from_octal
       IMPORTING
-        !iv_octal        TYPE string
+        !octal        TYPE string
       RETURNING
-        VALUE(rv_result) TYPE i.
+        VALUE(result) TYPE i.
 
     METHODS _to_octal
       IMPORTING
-        !iv_number       TYPE numeric
+        !number       TYPE numeric
       RETURNING
-        VALUE(rv_result) TYPE string.
+        VALUE(result) TYPE string.
 
     METHODS _from_xstring
       IMPORTING
-        !iv_data         TYPE xstring
+        !data         TYPE xstring
       RETURNING
-        VALUE(rv_result) TYPE string
+        VALUE(result) TYPE string
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     METHODS _to_xstring
       IMPORTING
-        !ig_data         TYPE simple
+        !data         TYPE simple
       RETURNING
-        VALUE(rv_result) TYPE xstring
+        VALUE(result) TYPE xstring
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     METHODS _from_filename
       IMPORTING
-        !iv_filename TYPE string
+        !filename TYPE string
       EXPORTING
-        !ev_prefix   TYPE ty_header-prefix
-        !ev_name     TYPE ty_header-name
+        !prefix   TYPE ty_header-prefix
+        !name     TYPE ty_header-name
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     METHODS _to_filename
       IMPORTING
-        !iv_prefix       TYPE ty_header-prefix
-        !iv_name         TYPE ty_header-name
+        !prefix       TYPE ty_header-prefix
+        !name         TYPE ty_header-name
       RETURNING
-        VALUE(rv_result) TYPE string.
+        VALUE(result) TYPE string.
 
     METHODS _from_unixtime
       IMPORTING
-        !iv_unixtime TYPE i
+        !unixtime TYPE i
       EXPORTING
-        !ev_date     TYPE d
-        !ev_time     TYPE t
+        !date     TYPE d
+        !time     TYPE t
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     METHODS _to_unixtime
       IMPORTING
-        !iv_date         TYPE d
-        !iv_time         TYPE t
+        !date         TYPE d
+        !time         TYPE t
       RETURNING
-        VALUE(rv_result) TYPE i
+        VALUE(result) TYPE i
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
     METHODS _checksum
       IMPORTING
-        VALUE(ig_data)   TYPE any
+        VALUE(data)   TYPE any
       RETURNING
-        VALUE(rv_result) TYPE i
+        VALUE(result) TYPE i
       RAISING
-        zcx_abappm_error.
+        ZCX_ABAPPM_ERROR.
 
 ENDCLASS.
 
 
 
-CLASS zcl_abappm_tar IMPLEMENTATION.
+CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
 
   METHOD append.
 
     DATA:
-      ls_file TYPE ty_file,
-      ls_data TYPE ty_data.
+      file TYPE ty_file,
+      item TYPE ty_tar_item.
 
     " List
-    ls_file-name    = iv_name.
-    ls_file-size    = xstrlen( iv_content ).
-    IF iv_date IS INITIAL.
-      ls_file-date = sy-datum.
+    file-name    = name.
+    file-size    = xstrlen( content ).
+    IF date IS INITIAL.
+      file-date = sy-datum.
     ELSE.
-      ls_file-date = iv_date.
+      file-date = date.
     ENDIF.
-    IF iv_time IS INITIAL.
-      ls_file-time = sy-uzeit.
+    IF time IS INITIAL.
+      file-time = sy-uzeit.
     ELSE.
-      ls_file-time = iv_time.
+      file-time = time.
     ENDIF.
-    IF iv_mode IS INITIAL.
-      ls_file-mode = c_mode_default.
+    IF mode IS INITIAL.
+      file-mode = c_mode_default.
     ELSE.
-      ls_file-mode = iv_mode.
+      file-mode = mode.
     ENDIF.
-    IF iv_typeflag IS INITIAL.
-      ls_file-typeflag = c_typeflag-file.
+    IF typeflag IS INITIAL.
+      file-typeflag = c_typeflag-file.
     ELSE.
-      ls_file-typeflag = iv_typeflag.
+      file-typeflag = typeflag.
     ENDIF.
-    ls_file-unixtime = _to_unixtime( iv_date = ls_file-date iv_time = ls_file-time ).
+    file-unixtime = _to_unixtime( date = file-date time = file-time ).
 
-    INSERT ls_file INTO TABLE mt_files.
+    INSERT file INTO TABLE tar_files.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error adding file (list)' ).
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error adding file (list)' ).
     ENDIF.
 
     " Data
-    ls_data-name    = iv_name.
-    ls_data-content = iv_content.
-    INSERT ls_data INTO TABLE mt_data.
+    item-name    = name.
+    item-content = content.
+    INSERT item INTO TABLE tar_list.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error adding file (data)' ).
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error adding file (data)' ).
     ENDIF.
 
     result = me.
@@ -327,40 +327,41 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD class_constructor.
 
     " Generate a char 256 null
-    DATA lv_x TYPE x LENGTH 4 VALUE '00000000'.
+    DATA x TYPE x LENGTH 4 VALUE '00000000'.
 
-    FIELD-SYMBOLS <lv_y> TYPE c.
+    FIELD-SYMBOLS <c> TYPE c.
 
-    ASSIGN lv_x TO <lv_y> CASTING ##SUBRC_OK.
+    ASSIGN x TO <c> CASTING ##SUBRC_OK.
 
-    gv_null = <lv_y>.
-
+    null = <c>.
     DO 8 TIMES.
-      gv_null = gv_null && gv_null.
+      null = null && null.
     ENDDO.
 
     " Initialize converters
-    go_convert_in  = cl_abap_conv_in_ce=>create( encoding = 'UTF-8' ).
-    go_convert_out = cl_abap_conv_out_ce=>create( encoding = 'UTF-8' ).
+    convert_in  = cl_abap_conv_in_ce=>create( encoding = 'UTF-8' ).
+    convert_out = cl_abap_conv_out_ce=>create( encoding = 'UTF-8' ).
 
   ENDMETHOD.
 
 
   METHOD constructor.
-    mv_force_ustar = iv_force_ustar.
+
+    me->force_ustar = force_ustar.
+
   ENDMETHOD.
 
 
   METHOD delete.
 
-    DELETE mt_files WHERE name = iv_name.
+    DELETE tar_files WHERE name = name.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error deleting file (list)' ).
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error deleting file (list)' ).
     ENDIF.
 
-    DELETE mt_data WHERE name = iv_name.
+    DELETE tar_list WHERE name = name.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error deleting file (data)' ).
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error deleting file (data)' ).
     ENDIF.
 
     result = me.
@@ -370,126 +371,129 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD get.
 
-    FIELD-SYMBOLS <ls_data> TYPE ty_data.
-
-    READ TABLE mt_data ASSIGNING <ls_data> WITH TABLE KEY name = iv_name.
+    READ TABLE tar_list ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = name.
     IF sy-subrc = 0.
-      result = <ls_data>-content.
+      result = <item>-content.
     ELSE.
-      zcx_abappm_error=>raise( 'Error getting file' ).
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error getting file' ).
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD gunzip.
+
     cl_abap_gzip=>decompress_binary_with_header(
       EXPORTING
-        gzip_in = iv_gzip
+        gzip_in = gzip
       IMPORTING
         raw_out = result ).
+
   ENDMETHOD.
 
 
   METHOD gzip.
+
     cl_abap_gzip=>compress_binary_with_header(
       EXPORTING
-        raw_in   = iv_tar
+        raw_in   = tar
       IMPORTING
         gzip_out = result ).
+
   ENDMETHOD.
 
 
   METHOD list.
-    result = mt_files.
+
+    result = tar_files.
+
   ENDMETHOD.
 
 
   METHOD load.
 
     DATA:
-      lv_size   TYPE i,
-      ls_header TYPE ty_header,
-      ls_file   TYPE ty_file,
-      ls_data   TYPE ty_data,
-      lv_block  TYPE xstring,
-      lv_count  TYPE i,
-      lv_length TYPE i,
-      lv_offset TYPE i.
+      header TYPE ty_header,
+      file   TYPE ty_file,
+      item   TYPE ty_tar_item,
+      block  TYPE xstring,
+      count  TYPE i,
+      length TYPE i,
+      offset TYPE i.
 
-    lv_size = xstrlen( iv_tar ).
+    DATA(size) = xstrlen( tar ).
 
-    IF lv_size = 0 OR lv_size MOD c_blocksize <> 0.
-      zcx_abappm_error=>raise( 'Error loading file (blocksize)' ).
+    IF size = 0 OR size MOD c_blocksize <> 0.
+      ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (blocksize)' ).
     ENDIF.
 
-    CLEAR mt_files.
+    CLEAR tar_files.
 
     DO.
-      IF lv_offset + c_blocksize > lv_size.
+      IF offset + c_blocksize > size.
         EXIT.
       ENDIF.
 
       " Header block
-      lv_block = iv_tar+lv_offset(c_blocksize).
-      lv_offset = lv_offset + c_blocksize.
+      block = tar+offset(c_blocksize).
+      offset = offset + c_blocksize.
 
-      ls_header = _from_xstring( lv_block ).
+      header = _from_xstring( block ).
 
-      _remove_nulls( CHANGING cg_data = ls_header ).
+      _remove_nulls( CHANGING data = header ).
 
-      IF ls_header IS INITIAL.
+      IF header IS INITIAL.
         CONTINUE.
       ENDIF.
 
-      IF mv_force_ustar = abap_true.
-        IF ls_header-magic <> c_ustar_magic.
-          zcx_abappm_error=>raise( 'Error loading file (ustar)' ).
-        ELSEIF ls_header-version <> c_ustar_version AND ls_header-version <> ` `.
-          zcx_abappm_error=>raise( 'Error loading file (version)' ).
+      IF force_ustar = abap_true.
+        IF header-magic <> c_ustar_magic.
+          ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (ustar)' ).
+        ELSEIF header-version <> c_ustar_version AND header-version <> ` `.
+          ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (version)' ).
         ENDIF.
       ENDIF.
 
-      CLEAR ls_file.
-      ls_file-name     = _to_filename( iv_prefix = ls_header-prefix iv_name = ls_header-name ).
-      ls_file-size     = _unpad( ls_header-size ).
-      ls_file-mode     = _unpad( ls_header-mode ).
-      ls_file-unixtime = _unpad( ls_header-mtime ).
+      CLEAR file.
+      file-name     = _to_filename( prefix = header-prefix name = header-name ).
+      file-size     = _unpad( header-size ).
+      file-mode     = _unpad( header-mode ).
+      file-unixtime = _unpad( header-mtime ).
 
       _from_unixtime(
         EXPORTING
-          iv_unixtime = ls_file-unixtime
+          unixtime = file-unixtime
         IMPORTING
-          ev_date     = ls_file-date
-          ev_time     = ls_file-time ).
+          date     = file-date
+          time     = file-time ).
 
-      IF ls_header-typeflag IS INITIAL.
-        ls_file-typeflag = c_typeflag-file.
+      IF header-typeflag IS INITIAL.
+        file-typeflag = c_typeflag-file.
       ELSE.
-        ls_file-typeflag = ls_header-typeflag.
+        file-typeflag = header-typeflag.
       ENDIF.
 
-      INSERT ls_file INTO TABLE mt_files.
+      INSERT file INTO TABLE tar_files.
 
       " Data blocks
-      CLEAR ls_data.
-      ls_data-name = ls_file-name.
+      CLEAR item.
+      item-name = file-name.
 
-      lv_length = ls_file-size.
-      lv_count  = ( ls_file-size - 1 ) DIV c_blocksize + 1.
+      length = file-size.
+      count  = ( file-size - 1 ) DIV c_blocksize + 1.
 
-      DO lv_count TIMES.
-        IF lv_length > c_blocksize.
-          lv_block = iv_tar+lv_offset(c_blocksize).
+      DO count TIMES.
+        IF length > c_blocksize.
+          block = tar+offset(c_blocksize).
         ELSE.
-          lv_block = iv_tar+lv_offset(lv_length).
+          block = tar+offset(length).
         ENDIF.
-        ls_data-content = ls_data-content && lv_block.
-        lv_offset = lv_offset + c_blocksize.
-        lv_length = lv_length - c_blocksize.
+        item-content = item-content && block.
+        offset = offset + c_blocksize.
+        length = length - c_blocksize.
       ENDDO.
 
-      INSERT ls_data INTO TABLE mt_data.
+      INSERT item INTO TABLE tar_list.
     ENDDO.
 
     result = me.
@@ -501,7 +505,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     CREATE OBJECT result
       EXPORTING
-        iv_force_ustar = iv_force_ustar.
+        force_ustar = force_ustar.
 
   ENDMETHOD.
 
@@ -509,78 +513,74 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD save.
 
     DATA:
-      ls_header TYPE ty_header,
-      lv_block  TYPE x LENGTH c_blocksize,
-      lv_count  TYPE i,
-      lv_length TYPE i,
-      lv_offset TYPE i.
-
-    FIELD-SYMBOLS:
-      <ls_file> TYPE ty_file,
-      <ls_data> TYPE ty_data.
+      header TYPE ty_header,
+      block  TYPE x LENGTH c_blocksize,
+      count  TYPE i,
+      length TYPE i,
+      offset TYPE i.
 
     " TODO: Support other types
-    LOOP AT mt_files ASSIGNING <ls_file>
+    LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>)
       WHERE typeflag = c_typeflag-file OR typeflag = c_typeflag-directory.
 
-      IF strlen( <ls_file>-name ) > 255.
-        zcx_abappm_error=>raise( 'Error saving file (name)' ).
-      ELSEIF <ls_file>-name CA '\'.
-        zcx_abappm_error=>raise( 'Error saving file (path)' ).
+      IF strlen( <file>-name ) > 255.
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (name)' ).
+      ELSEIF <file>-name CA '\'.
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (path)' ).
       ENDIF.
 
       " Header block
-      CLEAR ls_header.
+      CLEAR header.
 
       _from_filename(
         EXPORTING
-          iv_filename = <ls_file>-name
+          filename = <file>-name
         IMPORTING
-          ev_prefix   = ls_header-prefix
-          ev_name     = ls_header-name ).
+          prefix   = header-prefix
+          name     = header-name ).
 
-      ls_header-mode     = _pad( iv_number = <ls_file>-mode iv_length = 7 ).
-      ls_header-uid      = ''.
-      ls_header-gid      = ''.
-      ls_header-size     = _pad( iv_number = <ls_file>-size iv_length = 11 ).
-      ls_header-mtime    = _pad( iv_number = <ls_file>-unixtime iv_length = 11 ).
-      ls_header-typeflag = <ls_file>-typeflag.
-      ls_header-magic    = c_ustar_magic.
-      ls_header-version  = c_ustar_version.
-      ls_header-uname    = to_lower( cl_abap_syst=>get_user_name( ) ).
-      ls_header-gname    = ''.
-      ls_header-linkname = ''.
-      ls_header-devminor = ''.
-      ls_header-devmajor = ''.
-      ls_header-padding  = ''.
+      header-mode     = _pad( number = <file>-mode length = 7 ).
+      header-uid      = ''.
+      header-gid      = ''.
+      header-size     = _pad( number = <file>-size length = 11 ).
+      header-mtime    = _pad( number = <file>-unixtime length = 11 ).
+      header-typeflag = <file>-typeflag.
+      header-magic    = c_ustar_magic.
+      header-version  = c_ustar_version.
+      header-uname    = to_lower( cl_abap_syst=>get_user_name( ) ).
+      header-gname    = ''.
+      header-linkname = ''.
+      header-devminor = ''.
+      header-devmajor = ''.
+      header-padding  = ''.
 
-      _append_nulls( CHANGING cg_data = ls_header ).
+      _append_nulls( CHANGING data = header ).
 
-      ls_header-chksum = `        `. " 8 spaces
-      ls_header-chksum = _pad( iv_number = _checksum( ls_header ) iv_length = 7 ) && gv_null.
+      header-chksum = `        `. " 8 spaces
+      header-chksum = _pad( number = _checksum( header ) length = 7 ) && null.
 
-      lv_block = _to_xstring( ls_header ).
-      result   = result && lv_block.
+      block = _to_xstring( header ).
+      result   = result && block.
 
       " Data blocks
-      READ TABLE mt_data ASSIGNING <ls_data> WITH TABLE KEY name = <ls_file>-name.
+      READ TABLE tar_list ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
       IF sy-subrc <> 0.
-        zcx_abappm_error=>raise( 'Error saving file (data)' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (data)' ).
       ENDIF.
 
-      lv_offset = 0.
-      lv_length = <ls_file>-size.
-      lv_count  = ( lv_length - 1 ) DIV c_blocksize + 1.
+      offset = 0.
+      length = <file>-size.
+      count  = ( length - 1 ) DIV c_blocksize + 1.
 
-      DO lv_count TIMES.
-        IF lv_length > c_blocksize.
-          lv_block = <ls_data>-content+lv_offset(c_blocksize).
+      DO count TIMES.
+        IF length > c_blocksize.
+          block = <item>-content+offset(c_blocksize).
         ELSE.
-          lv_block = <ls_data>-content+lv_offset(lv_length).
+          block = <item>-content+offset(length).
         ENDIF.
-        result    = result && lv_block.
-        lv_offset = lv_offset + c_blocksize.
-        lv_length = lv_length - c_blocksize.
+        result    = result && block.
+        offset = offset + c_blocksize.
+        length = length - c_blocksize.
       ENDDO.
 
     ENDLOOP.
@@ -590,17 +590,14 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _append_nulls.
 
-    DATA lv_count TYPE i.
-
-    FIELD-SYMBOLS <lv_field> TYPE any.
-
+    DATA(count) = 0.
     DO.
-      lv_count = lv_count + 1.
-      ASSIGN COMPONENT lv_count OF STRUCTURE cg_data TO <lv_field>.
+      count = count + 1.
+      ASSIGN COMPONENT count OF STRUCTURE data TO FIELD-SYMBOL(<field>).
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.
-      <lv_field> = <lv_field> && gv_null.
+      <field> = <field> && null.
     ENDDO.
 
   ENDMETHOD.
@@ -608,17 +605,13 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _checksum.
 
-    DATA:
-      lv_data TYPE xstring,
-      lv_i    TYPE i,
-      lv_x    TYPE x LENGTH 1.
+    DATA(xstring) = _to_xstring( data ).
+    DATA(i) = 0.
 
-    lv_data = _to_xstring( ig_data ).
-
-    DO xstrlen( lv_data ) TIMES.
-      lv_x = lv_data+lv_i(1).
-      rv_result = rv_result + lv_x.
-      lv_i = lv_i + 1.
+    DO xstrlen( xstring ) TIMES.
+      DATA(x) = xstring+i(1).
+      result = result + x.
+      i += 1.
     ENDDO.
 
   ENDMETHOD.
@@ -627,26 +620,26 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD _from_filename.
 
     DATA:
-      lv_name   TYPE string,
-      lv_prefix TYPE string.
+      temp_name   TYPE string,
+      temp_prefix TYPE string.
 
-    lv_name = iv_filename.
+    temp_name = filename.
     DO.
-      IF strlen( lv_name ) <= 100.
-        ev_name = lv_name.
+      IF strlen( temp_name ) <= 100.
+        name = temp_name.
         EXIT.
       ENDIF.
 
       " Shorten name by moving part of path to prefix
-      SPLIT lv_name AT c_path_sep INTO lv_prefix lv_name.
+      SPLIT temp_name AT c_path_sep INTO temp_prefix temp_name.
       IF sy-subrc <> 0.
-        zcx_abappm_error=>raise( 'Error file name too long' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error file name too long' ).
       ENDIF.
 
-      IF ev_prefix IS INITIAL.
-        ev_prefix = lv_prefix.
+      IF prefix IS INITIAL.
+        prefix = temp_prefix.
       ELSE.
-        ev_prefix = ev_prefix && c_path_sep && lv_prefix.
+        prefix = prefix && c_path_sep && temp_prefix.
       ENDIF.
     ENDDO.
 
@@ -655,11 +648,11 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _from_octal.
 
-    DATA lv_offset TYPE i.
+    DATA(offset) = 0.
 
-    DO strlen( iv_octal ) TIMES.
-      rv_result = rv_result * 8 + iv_octal+lv_offset(1).
-      lv_offset = lv_offset + 1.
+    DO strlen( octal ) TIMES.
+      result = result * 8 + octal+offset(1).
+      offset += 1.
     ENDDO.
 
   ENDMETHOD.
@@ -667,19 +660,17 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _from_unixtime.
 
-    DATA lv_timestamp TYPE timestampl.
-
     TRY.
-        lv_timestamp = cl_abap_tstmp=>add(
+        DATA(timestamp) = cl_abap_tstmp=>add(
           tstmp = c_epoch
-          secs  = iv_unixtime ).
+          secs  = unixtime ).
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting from UNIX time' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting from UNIX time' ).
     ENDTRY.
 
-    CONVERT TIME STAMP lv_timestamp TIME ZONE 'UTC' INTO DATE ev_date TIME ev_time.
+    CONVERT TIME STAMP timestamp TIME ZONE 'UTC' INTO DATE date TIME time.
 
   ENDMETHOD.
 
@@ -687,17 +678,17 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD _from_xstring.
 
     TRY.
-        go_convert_in->convert(
+        convert_in->convert(
           EXPORTING
-            input = iv_data
-            n     = xstrlen( iv_data )
+            input = data
+            n     = xstrlen( data )
           IMPORTING
-            data  = rv_result ).
+            data  = result ).
 
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting from xstring' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting from xstring' ).
     ENDTRY.
 
   ENDMETHOD.
@@ -705,24 +696,22 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _pad.
 
-    rv_result = |{ _to_octal( iv_number ) ALIGN = RIGHT PAD = '0' WIDTH = iv_length }|.
+    result = |{ _to_octal( number ) ALIGN = RIGHT PAD = '0' WIDTH = length }|.
 
   ENDMETHOD.
 
 
   METHOD _remove_nulls.
 
-    DATA lv_count TYPE i.
-
-    FIELD-SYMBOLS <lv_field> TYPE any.
+    DATA(count) = 0.
 
     DO.
-      lv_count = lv_count + 1.
-      ASSIGN COMPONENT lv_count OF STRUCTURE cg_data TO <lv_field>.
+      count = count + 1.
+      ASSIGN COMPONENT count OF STRUCTURE data TO FIELD-SYMBOL(<field>).
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.
-      REPLACE ALL OCCURRENCES OF gv_null(1) IN <lv_field> WITH ''.
+      REPLACE ALL OCCURRENCES OF null(1) IN <field> WITH ''.
     ENDDO.
 
   ENDMETHOD.
@@ -730,10 +719,10 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _to_filename.
 
-    IF iv_prefix IS INITIAL.
-      rv_result = iv_name.
+    IF prefix IS INITIAL.
+      result = name.
     ELSE.
-      rv_result = iv_prefix && c_path_sep && iv_name.
+      result = prefix && c_path_sep && name.
     ENDIF.
 
   ENDMETHOD.
@@ -741,17 +730,15 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _to_octal.
 
-    DATA lv_number TYPE i.
+    DATA(temp_number) = CONV i( number ).
 
-    lv_number = iv_number.
-
-    WHILE lv_number > 0.
-      rv_result = |{ lv_number MOD 8 }{ rv_result }|.
-      lv_number = lv_number DIV 8.
+    WHILE temp_number > 0.
+      result = |{ temp_number MOD 8 }{ result }|.
+      temp_number = temp_number DIV 8.
     ENDWHILE.
 
-    IF rv_result IS INITIAL.
-      rv_result = '0'.
+    IF result IS INITIAL.
+      result = '0'.
     ENDIF.
 
   ENDMETHOD.
@@ -759,18 +746,18 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _to_unixtime.
 
-    DATA lv_timestamp TYPE timestamp.
+    DATA timestamp TYPE timestamp.
 
-    CONVERT DATE iv_date TIME iv_time INTO TIME STAMP lv_timestamp TIME ZONE 'UTC'.
+    CONVERT DATE date TIME time INTO TIME STAMP timestamp TIME ZONE 'UTC'.
 
     TRY.
-        rv_result = cl_abap_tstmp=>subtract(
-          tstmp1 = lv_timestamp
+        result = cl_abap_tstmp=>subtract(
+          tstmp1 = timestamp
           tstmp2 = c_epoch ).
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting to UNIX time' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting to UNIX time' ).
     ENDTRY.
 
   ENDMETHOD.
@@ -778,21 +765,19 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _to_xstring.
 
-    DATA lv_data TYPE string.
-
-    lv_data = ig_data.
+    DATA(string_data) = CONV string( data ).
 
     TRY.
-        go_convert_out->convert(
+        convert_out->convert(
           EXPORTING
-            data   = lv_data
+            data   = string_data
           IMPORTING
-            buffer = rv_result ).
+            buffer = result ).
 
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting to xstring' ).
+        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting to xstring' ).
     ENDTRY.
 
   ENDMETHOD.
@@ -800,12 +785,15 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD _unpad.
 
-    DATA lv_data TYPE string.
+    DATA(temp_data) = CONV string( data ).
 
-    lv_data = iv_data.
-    REPLACE ALL OCCURRENCES OF ` ` IN lv_data WITH ''.
+    temp_data = replace(
+      val  = temp_data
+      sub  = ` `
+      with = ''
+      occ  = 0 ).
 
-    rv_result = _from_octal( condense( lv_data ) ).
+    result = _from_octal( condense( data ) ).
 
   ENDMETHOD.
 ENDCLASS.

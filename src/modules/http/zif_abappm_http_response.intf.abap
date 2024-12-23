@@ -1,4 +1,4 @@
-INTERFACE zif_abappm_http_response PUBLIC.
+INTERFACE ZIF_ABAPPM_HTTP_RESPONSE PUBLIC.
 
 ************************************************************************
 * HTTP Response
@@ -6,37 +6,38 @@ INTERFACE zif_abappm_http_response PUBLIC.
 * Copyright (c) 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+
   METHODS data
     RETURNING
-      VALUE(rv_data) TYPE xstring.
+      VALUE(result) TYPE xstring.
 
   METHODS cdata
     RETURNING
-      VALUE(rv_data) TYPE string.
+      VALUE(result) TYPE string.
 
   METHODS json
     RETURNING
-      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+      VALUE(result) TYPE REF TO ZIF_ABAPPM_AJSON
     RAISING
-      zcx_abappm_error.
+      ZCX_ABAPPM_ERROR.
 
   METHODS is_ok
     RETURNING
-      VALUE(rv_yes) TYPE abap_bool.
+      VALUE(result) TYPE abap_bool.
 
   METHODS code
     RETURNING
-      VALUE(rv_code) TYPE i.
+      VALUE(result) TYPE i.
 
   METHODS error
     RETURNING
-      VALUE(rv_message) TYPE string.
+      VALUE(result) TYPE string.
 
   METHODS headers
     RETURNING
-      VALUE(ro_headers) TYPE REF TO zcl_abappm_string_map
+      VALUE(result) TYPE REF TO ZCL_ABAPPM_STRING_MAP
     RAISING
-      zcx_abappm_error.
+      ZCX_ABAPPM_ERROR.
 
   METHODS close.
 
