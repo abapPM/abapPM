@@ -7,63 +7,65 @@ CLASS zcl_abappm_installer_files DEFINITION
 
     CLASS-METHODS load_internet
       IMPORTING
-        !iv_url            TYPE string
-        !iv_user           TYPE string
-        !iv_password       TYPE string
-        !iv_proxy_host     TYPE string
-        !iv_proxy_port     TYPE string
-        !iv_proxy_user     TYPE string
-        !iv_proxy_password TYPE string
+        !url            TYPE string
+        !user           TYPE string OPTIONAL
+        !password       TYPE string OPTIONAL
+        !proxy_host     TYPE string OPTIONAL
+        !proxy_port     TYPE string OPTIONAL
+        !proxy_user     TYPE string OPTIONAL
+        !proxy_password TYPE string OPTIONAL
       RETURNING
-        VALUE(rv_file)     TYPE xstring
+        VALUE(result)   TYPE xstring
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS load_local
       IMPORTING
-        !iv_filename   TYPE csequence
+        !filename     TYPE csequence
       RETURNING
-        VALUE(rv_file) TYPE xstring
+        VALUE(result) TYPE xstring
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS load_server
       IMPORTING
-        !iv_filename   TYPE csequence
+        !filename     TYPE csequence
       RETURNING
-        VALUE(rv_file) TYPE xstring
+        VALUE(result) TYPE xstring
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS virus_scan
       IMPORTING
-        !iv_data TYPE xstring
+        !data TYPE xstring
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS unzip
       IMPORTING
-        !iv_xstr        TYPE xstring
+        !xstr         TYPE xstring
       RETURNING
-        VALUE(rt_files) TYPE zif_abapgit_git_definitions=>ty_files_tt
+        VALUE(result) TYPE zif_abapgit_git_definitions=>ty_files_tt
       RAISING
         zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    TYPES ty_hex TYPE x LENGTH 1024.
+
     CLASS-METHODS _filename
       IMPORTING
-        !iv_str      TYPE string
+        !str      TYPE string
       EXPORTING
-        !ev_path     TYPE string
-        !ev_filename TYPE string
+        !path     TYPE string
+        !filename TYPE string
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS _normalize_path
       CHANGING
-        !ct_files TYPE zif_abapgit_git_definitions=>ty_files_tt
+        !files TYPE zif_abapgit_git_definitions=>ty_files_tt
       RAISING
         zcx_abappm_error.
 
@@ -77,28 +79,26 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
   METHOD load_internet.
 
     DATA:
-      li_client  TYPE REF TO if_http_client,
-      lx_error   TYPE REF TO zcx_abapgit_exception,
-      lv_url     TYPE string,
-      lv_code    TYPE i,
-      lv_message TYPE string,
-      lv_reason  TYPE string.
+      client  TYPE REF TO if_http_client,
+      code    TYPE i,
+      message TYPE string,
+      reason  TYPE string.
 
     TRY.
-        lv_url = zcl_abapgit_url=>host( iv_url ).
-      CATCH zcx_abapgit_exception INTO lx_error.
-        zcx_abappm_error=>raise_with_text( lx_error ).
+        DATA(host) = zcl_abapgit_url=>host( url ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
-    IF iv_proxy_host IS NOT INITIAL AND iv_proxy_port IS NOT INITIAL.
+    IF proxy_host IS NOT INITIAL AND proxy_port IS NOT INITIAL.
       cl_http_client=>create_by_url(
         EXPORTING
-          url                = lv_url
+          url                = host
           ssl_id             = 'ANONYM'
-          proxy_host         = iv_proxy_host
-          proxy_service      = iv_proxy_port
+          proxy_host         = proxy_host
+          proxy_service      = proxy_port
         IMPORTING
-          client             = li_client
+          client             = client
         EXCEPTIONS
           argument_not_found = 1
           plugin_not_active  = 2
@@ -107,10 +107,10 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
     ELSE.
       cl_http_client=>create_by_url(
         EXPORTING
-          url                = lv_url
+          url                = host
           ssl_id             = 'ANONYM'
         IMPORTING
-          client             = li_client
+          client             = client
         EXCEPTIONS
           argument_not_found = 1
           plugin_not_active  = 2
@@ -121,30 +121,30 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       zcx_abappm_error=>raise( |Error creating HTTP client (check certificates in STRUST)| ).
     ENDIF.
 
-    IF iv_proxy_user IS NOT INITIAL AND iv_proxy_password IS NOT INITIAL.
-      li_client->authenticate(
+    IF proxy_user IS NOT INITIAL AND proxy_password IS NOT INITIAL.
+      client->authenticate(
         proxy_authentication = abap_true
-        username             = iv_proxy_user
-        password             = iv_proxy_password ).
+        username             = proxy_user
+        password             = proxy_password ).
     ENDIF.
 
-    IF iv_user IS NOT INITIAL AND iv_password IS NOT INITIAL.
-      li_client->authenticate(
-        username = iv_user
-        password = iv_password ).
+    IF user IS NOT INITIAL AND password IS NOT INITIAL.
+      client->authenticate(
+        username = user
+        password = password ).
     ENDIF.
 
     cl_http_utility=>set_request_uri(
-      request = li_client->request
-      uri     = iv_url ).
+      request = client->request
+      uri     = url ).
 
-    li_client->request->set_method( 'GET' ).
-    li_client->request->set_compression( ).
-    li_client->request->set_header_field(
+    client->request->set_method( 'GET' ).
+    client->request->set_compression( ).
+    client->request->set_header_field(
       name  = 'content-type'
       value = 'application/zip' ).
 
-    li_client->send(
+    client->send(
       EXPORTING
         timeout                    = '6000'
       EXCEPTIONS
@@ -154,7 +154,7 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
         http_invalid_timeout       = 4
         OTHERS                     = 5 ).
     IF sy-subrc  = 0.
-      li_client->receive(
+      client->receive(
         EXCEPTIONS
           http_communication_failure = 1
           http_invalid_state         = 2
@@ -163,50 +163,47 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
     ENDIF.
 
     IF sy-subrc <> 0.
-      li_client->get_last_error(
+      client->get_last_error(
         IMPORTING
-          code    = lv_code
-          message = lv_message ).
+          code    = code
+          message = message ).
 
-      zcx_abappm_error=>raise( |{ lv_code } { lv_message }| ).
+      zcx_abappm_error=>raise( |{ code } { message }| ).
     ENDIF.
 
-    li_client->response->get_status(
+    client->response->get_status(
       IMPORTING
-        code   = lv_code
-        reason = lv_reason ).
-    IF lv_code <> 200.
-      zcx_abappm_error=>raise( |{ lv_code } { lv_reason }| ).
+        code   = code
+        reason = reason ).
+    IF code <> 200.
+      zcx_abappm_error=>raise( |{ code } { reason }| ).
     ENDIF.
 
-    rv_file = li_client->response->get_data( ).
+    result = client->response->get_data( ).
 
-    IF rv_file IS INITIAL.
+    IF result IS INITIAL.
       zcx_abappm_error=>raise( 'Error downloading file. No data returned.' ).
     ENDIF.
 
-    li_client->close( ).
+    client->close( ).
 
   ENDMETHOD.
 
 
   METHOD load_local.
 
-    TYPES:
-      ty_hex TYPE x LENGTH 255.
-
     DATA:
-      lt_data   TYPE TABLE OF ty_hex WITH DEFAULT KEY,
-      lv_length TYPE i.
+      file_size  TYPE i,
+      data_table TYPE TABLE OF ty_hex WITH DEFAULT KEY.
 
     cl_gui_frontend_services=>gui_upload(
       EXPORTING
-        filename                = |{ iv_filename }|
+        filename                = |{ filename }|
         filetype                = 'BIN'
       IMPORTING
-        filelength              = lv_length
+        filelength              = file_size
       CHANGING
-        data_tab                = lt_data
+        data_tab                = data_table
       EXCEPTIONS
         file_open_error         = 1
         file_read_error         = 2
@@ -231,8 +228,8 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
-    CONCATENATE LINES OF lt_data INTO rv_file IN BYTE MODE.
-    rv_file = rv_file(lv_length).
+    CONCATENATE LINES OF data_table INTO result IN BYTE MODE.
+    result = result(file_size).
 
   ENDMETHOD.
 
@@ -240,17 +237,16 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
   METHOD load_server.
 
     DATA:
-      lv_eps_inbox TYPE eps2path,
-      lv_filename  TYPE file_name,
-      lv_filesize  TYPE i,
-      lv_data      TYPE x LENGTH 1024,
-      lt_data      LIKE TABLE OF lv_data.
+      eps_inbox  TYPE eps2path,
+      file_name  TYPE file_name,
+      file_size  TYPE i,
+      data_table TYPE TABLE OF ty_hex WITH DEFAULT KEY.
 
     CALL FUNCTION 'EPS_GET_DIRECTORY_PATH'
       EXPORTING
         eps_subdir             = 'in'
       IMPORTING
-        ev_long_dir_name       = lv_eps_inbox
+        long_dir_name          = eps_inbox
       EXCEPTIONS
         invalid_eps_subdir     = 1
         sapgparam_failed       = 2
@@ -260,49 +256,43 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       zcx_abappm_error=>raise( |Error getting EPS directory from server| ).
     ENDIF.
 
-    IF lv_eps_inbox CA '\'.
-      lv_filename = lv_eps_inbox && '\' && iv_filename.
+    IF eps_inbox CA '\'.
+      file_name = eps_inbox && '\' && filename.
     ELSE.
-      lv_filename = lv_eps_inbox && '/' && iv_filename.
+      file_name = eps_inbox && '/' && filename.
     ENDIF.
 
     CALL FUNCTION 'SCMS_UPLOAD'
       EXPORTING
-        filename = lv_filename
+        filename = file_name
         binary   = abap_true
         frontend = abap_false
       IMPORTING
-        filesize = lv_filesize
+        filesize = file_size
       TABLES
-        data     = lt_data
+        data     = data_table
       EXCEPTIONS
         error    = 1
         OTHERS   = 2.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error loading file from server: { lv_filename }| ).
+      zcx_abappm_error=>raise( |Error loading file from server: { file_name }| ).
     ENDIF.
 
-    CONCATENATE LINES OF lt_data INTO rv_file IN BYTE MODE.
-    rv_file = rv_file(lv_filesize).
+    CONCATENATE LINES OF data_table INTO result IN BYTE MODE.
+    result = result(file_size).
 
   ENDMETHOD.
 
 
   METHOD unzip.
 
-    DATA:
-      lo_zip  TYPE REF TO cl_abap_zip,
-      lv_data TYPE xstring.
+    DATA file_data TYPE xstring.
 
-    FIELD-SYMBOLS:
-      <ls_zipfile> LIKE LINE OF lo_zip->files,
-      <ls_file>    LIKE LINE OF rt_files.
+    DATA(zip) = NEW cl_abap_zip( ).
 
-    CREATE OBJECT lo_zip.
-
-    lo_zip->load(
+    zip->load(
       EXPORTING
-        zip             = iv_xstr
+        zip             = xstr
       EXCEPTIONS
         zip_parse_error = 1
         OTHERS          = 2 ).
@@ -310,13 +300,13 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       zcx_abappm_error=>raise( 'Error loading ZIP' ).
     ENDIF.
 
-    LOOP AT lo_zip->files ASSIGNING <ls_zipfile>.
+    LOOP AT zip->files ASSIGNING FIELD-SYMBOL(<zipfile>).
 
-      lo_zip->get(
+      zip->get(
         EXPORTING
-          name                    = <ls_zipfile>-name
+          name                    = <zipfile>-name
         IMPORTING
-          content                 = lv_data
+          content                 = file_data
         EXCEPTIONS
           zip_index_error         = 1
           zip_decompression_error = 2
@@ -325,29 +315,30 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
         zcx_abappm_error=>raise( 'Error getting file from ZIP' ).
       ENDIF.
 
-      APPEND INITIAL LINE TO rt_files ASSIGNING <ls_file>.
+      APPEND INITIAL LINE TO result ASSIGNING FIELD-SYMBOL(<file>).
 
       _filename(
         EXPORTING
-          iv_str      = <ls_zipfile>-name
+          str      = <zipfile>-name
         IMPORTING
-          ev_path     = <ls_file>-path
-          ev_filename = <ls_file>-filename ).
+          path     = <file>-path
+          filename = <file>-filename ).
 
-      <ls_file>-data = lv_data.
+      <file>-data = file_data.
 
       TRY.
-          <ls_file>-sha1 = zcl_abapgit_hash=>sha1( iv_type = zif_abapgit_git_definitions=>c_type-blob
-                                                   iv_data = <ls_file>-data ).
+          <file>-sha1 = zcl_abapgit_hash=>sha1(
+            iv_type = zif_abapgit_git_definitions=>c_type-blob
+            iv_data = <file>-data ).
         CATCH zcx_abapgit_exception.
           zcx_abappm_error=>raise( 'Error during hashing' ).
       ENDTRY.
 
     ENDLOOP.
 
-    DELETE rt_files WHERE filename IS INITIAL.
+    DELETE result WHERE filename IS INITIAL.
 
-    _normalize_path( CHANGING ct_files = rt_files ).
+    _normalize_path( CHANGING files = result ).
 
   ENDMETHOD.
 
@@ -355,11 +346,10 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
   METHOD virus_scan.
 
     DATA:
-      lo_scanner  TYPE REF TO cl_vsi,
-      lv_scanrc   TYPE vscan_scanrc,
-      lv_msg      TYPE string ##NEEDED,
-      ls_message  TYPE bapiret2,
-      lt_bapiret2 TYPE vscan_bapiret2_t.
+      scanner   TYPE REF TO cl_vsi,
+      scanrc    TYPE vscan_scanrc,
+      bapi_msg  TYPE bapiret2,
+      bapi_msgs TYPE vscan_bapiret2_t.
 
     " Data was download from Internet and uploaded here
     " so we will use the HTTP_UPLOAD profile
@@ -367,19 +357,19 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       EXPORTING
         if_profile         = '/SIHTTP/HTTP_UPLOAD'
       IMPORTING
-        eo_instance        = lo_scanner
+        eo_instance        = scanner
       EXCEPTIONS
         profile_not_active = 1
         OTHERS             = 2 ).
     CASE sy-subrc.
       WHEN 0.
         " Perform virus scan
-        lo_scanner->if_vscan_instance~scan_bytes(
+        scanner->if_vscan_instance~scan_bytes(
           EXPORTING
-            if_data             = iv_data
+            if_data             = data
           IMPORTING
-            ef_scanrc           = lv_scanrc
-            et_bapiret          = lt_bapiret2
+            ef_scanrc           = scanrc
+            et_bapiret          = bapi_msgs
           EXCEPTIONS
             not_available       = 1
             configuration_error = 2
@@ -393,11 +383,11 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
 
         " Result of virus scan
         " Any scan error or virus infection will be reported there
-        IF lv_scanrc <> 0.
-          LOOP AT lt_bapiret2 INTO ls_message WHERE type = 'E'.
-            MESSAGE ID ls_message-id TYPE 'E' NUMBER ls_message-number
-              WITH ls_message-message_v1 ls_message-message_v2 ls_message-message_v3 ls_message-message_v4
-              INTO lv_msg.
+        IF scanrc <> 0.
+          LOOP AT bapi_msgs INTO bapi_msg WHERE type = 'E'.
+            MESSAGE ID bapi_msg-id TYPE 'E' NUMBER bapi_msg-number
+              WITH bapi_msg-message_v1 bapi_msg-message_v2 bapi_msg-message_v3 bapi_msg-message_v4
+              INTO zcx_abappm_error=>null.
             zcx_abappm_error=>raise_t100( ).
           ENDLOOP.
         ENDIF.
@@ -414,64 +404,56 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
 
   METHOD _filename.
 
-    IF iv_str CA '/'.
-      FIND REGEX '(.*/)(.*)' IN iv_str
-        SUBMATCHES ev_path ev_filename.
+    IF str CA '/'.
+      FIND REGEX '(.*/)(.*)' IN str
+        SUBMATCHES path filename.
       IF sy-subrc <> 0.
         zcx_abappm_error=>raise( 'Malformed path' ).
       ENDIF.
-      IF ev_path <> '/'.
-        CONCATENATE '/' ev_path INTO ev_path.
+      IF path <> '/'.
+        CONCATENATE '/' path INTO path.
       ENDIF.
     ELSE.
-      ev_path = '/'.
-      ev_filename = iv_str.
+      path = '/'.
+      filename = str.
     ENDIF.
-    TRANSLATE ev_filename TO LOWER CASE.
+    TRANSLATE filename TO LOWER CASE.
 
   ENDMETHOD.
 
 
   METHOD _normalize_path.
-* removes first folder from path if needed
 
-    DATA:
-      lt_split  TYPE TABLE OF string,
-      lv_needed TYPE abap_bool,
-      lv_length TYPE i,
-      lv_split  LIKE LINE OF lt_split.
+    " removes first folder from path if needed
 
-    FIELD-SYMBOLS:
-      <ls_file> LIKE LINE OF ct_files.
-
-    READ TABLE ct_files INDEX 1 ASSIGNING <ls_file>.
+    READ TABLE files INDEX 1 ASSIGNING FIELD-SYMBOL(<file>).
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
 
-    SPLIT <ls_file>-path AT '/' INTO TABLE lt_split.
+    SPLIT <file>-path AT '/' INTO TABLE DATA(parts).
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
-    READ TABLE lt_split INDEX 2 INTO lv_split.
-    IF sy-subrc <> 0 OR strlen( lv_split ) = 0.
+    READ TABLE parts INDEX 2 INTO DATA(part).
+    IF sy-subrc <> 0 OR strlen( part ) = 0.
       RETURN.
     ENDIF.
 
-    CONCATENATE '/' lv_split '/*' INTO lv_split.
+    CONCATENATE '/' part '/*' INTO part.
 
-    lv_needed = abap_true.
-    LOOP AT ct_files ASSIGNING <ls_file>.
-      IF <ls_file>-path NP lv_split.
-        lv_needed = abap_false.
+    DATA(needed) = abap_true.
+    LOOP AT files ASSIGNING <file>.
+      IF <file>-path NP part.
+        needed = abap_false.
         EXIT. " current loop
       ENDIF.
     ENDLOOP.
 
-    IF lv_needed = abap_true.
-      lv_length = strlen( lv_split ) - 2.
-      LOOP AT ct_files ASSIGNING <ls_file>.
-        <ls_file>-path = <ls_file>-path+lv_length.
+    IF needed = abap_true.
+      DATA(length) = strlen( part ) - 2.
+      LOOP AT files ASSIGNING <file>.
+        <file>-path = <file>-path+length.
       ENDLOOP.
     ENDIF.
 
