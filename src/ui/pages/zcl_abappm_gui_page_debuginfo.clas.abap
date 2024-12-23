@@ -115,8 +115,8 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
         iv_typ = zif_abapgit_html=>c_action_type-url ) }).</div>| ).
     ELSE.
       DATA(package) = zcl_abapgit_factory=>get_tadir( )->get_object_package(
-        iv_object   = 'CLAS'
-        iv_obj_name = 'ZCX_ABAPPM_ERROR' ).
+        iv_object   = 'PROG'
+        iv_obj_name = 'ZABAPPM' ).
       html->add( '<h2>apm - Developer Version</h2>' ).
       html->add( |<div>apm is installed in package { package }</div>| ).
     ENDIF.
@@ -140,6 +140,8 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
     html->add( |<tr><td>SY release:     </td><td>{ release-release } SP { release-sp }</td></tr>| ).
     html->add( |</table>| ).
     html->add( |<br>| ).
+
+    " TODO: List support objects for bundling and IMPORT (see package $ABAPPM_OBJECTS)
 
   ENDMETHOD.
 
@@ -188,8 +190,15 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
     render_debug_info( html ).
     html->add( '</div>' ).
 
-    html_for_download = '<!DOCTYPE html><html lang="en"><title>apm - Debug Info</title></head>'.
-    html_for_download = |<body>{ html->render( ) }</body></html>|.
+    html_for_download =
+      |<!DOCTYPE html>\n| &&
+      |<html lang="en">\n| &&
+      |  <title>apm - Debug Info</title>\n| &&
+      |</head>\n| &&
+      |<body>\n| &&
+      |  { html->render( ) }\n| &&
+      |</body>\n| &&
+      |</html>|.
 
     register_deferred_script( get_scripts( ) ).
 

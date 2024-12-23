@@ -28,8 +28,7 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
         package      TYPE devclass,
         name         TYPE string,
         version      TYPE string,
-        only_deps    TYPE abap_bool,
-        package_json TYPE zif_package_json_types=>ty_package_json,
+        package_json TYPE zif_abappm_types=>ty_package_json,
       END OF ty_params.
 
     CONSTANTS:
@@ -37,7 +36,6 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
         package   TYPE string VALUE 'package',
         name      TYPE string VALUE 'name',
         version   TYPE string VALUE 'version',
-        only_deps TYPE string VALUE 'only_deps',
       END OF c_id.
 
     CONSTANTS:
@@ -98,11 +96,13 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
 
   METHOD create.
+
     DATA(component) = NEW zcl_abappm_gui_dlg_install( ).
 
     result = zcl_abappm_gui_page_hoc=>create(
       page_title      = 'Install Package'
       child_component = component ).
+
   ENDMETHOD.
 
 
@@ -120,6 +120,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       iv_label       = 'Package'
       iv_hint        = 'SAP package (should be a dedicated one)'
       iv_placeholder = 'Z... / $...'
+      iv_min         = 2
       iv_max         = 30
     )->text(
       iv_name        = c_id-name
@@ -132,10 +133,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       iv_name        = c_id-version
       iv_required    = abap_true
       iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)'
-    )->checkbox(
-      iv_name        = c_id-only_deps
-      iv_label       = 'Install Only Dependencies' ).
+      iv_hint        = 'Semantic version (x.y.z)' ).
 
     result->command(
       iv_label       = 'Install Package'
@@ -237,10 +235,9 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
           TRY.
               zcl_abappm_command_install=>run(
-                registry          = registry
-                package           = params-package
-                package_json      = params-package_json
-                only_dependencies = params-only_deps ).
+                registry     = registry
+                package      = params-package
+                package_json = params-package_json ).
 
               rs_handled-page  = zcl_abappm_gui_page_package=>create( params-package ).
               rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.

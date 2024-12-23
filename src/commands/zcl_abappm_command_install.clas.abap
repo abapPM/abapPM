@@ -8,9 +8,10 @@ CLASS zcl_abappm_command_install DEFINITION
 
     CLASS-METHODS run
       IMPORTING
-        !registry     TYPE string
-        !package      TYPE devclass
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !registry      TYPE string
+        !package       TYPE devclass
+        !package_json  TYPE zif_abappm_types=>ty_package_json
+        !is_production TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
@@ -26,20 +27,21 @@ CLASS zcl_abappm_command_install DEFINITION
 
     CLASS-METHODS check_prerequisites
       IMPORTING
-        !manifest TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest TYPE zif_abappm_types=>ty_manifest
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS check_dependencies
       IMPORTING
-        !manifest TYPE zif_abappm_package_json_types=>ty_manifest
+        !manifest      TYPE zif_abappm_types=>ty_manifest
+        !is_production TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS check_dependency
       IMPORTING
         !list        TYPE zif_abappm_package_json=>ty_packages
-        !dependency  TYPE zif_abappm_package_json_types=>ty_dependency
+        !dependency  TYPE zif_abappm_types=>ty_dependency
         !category    TYPE string
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
@@ -52,14 +54,6 @@ CLASS zcl_abappm_command_install DEFINITION
         !range       TYPE string
         !category    TYPE string
         !is_optional TYPE abap_bool DEFAULT abap_false
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS install_package
-      IMPORTING
-        !package      TYPE devclass
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
-        !tarball      TYPE xstring
       RAISING
         zcx_abappm_error.
 
@@ -86,17 +80,14 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
-      " Bundled devDependency doesn't make much sense but why not allow it?
-      READ TABLE manifest-bundle_dependencies TRANSPORTING NO FIELDS
-        WITH TABLE KEY table_line = <dependency>-name.
-      IF sy-subrc <> 0.
+    IF is_production = abap_false.
+      LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
         check_dependency(
           list       = list
           dependency = <dependency>
           category   = 'devDependency' ).
-      ENDIF.
-    ENDLOOP.
+      ENDLOOP.
+    ENDIF.
 
     LOOP AT manifest-optional_dependencies ASSIGNING <dependency>.
       check_dependency(
@@ -120,7 +111,8 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   METHOD check_dependency.
 
     " TODO: Log the issues instead of failing
-    READ TABLE list ASSIGNING FIELD-SYMBOL(<package>) WITH KEY name = dependency-name.
+    READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
+      WITH KEY name COMPONENTS name = dependency-name.
     IF sy-subrc = 0.
       TRY.
           DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
@@ -206,13 +198,9 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
   METHOD check_semver.
 
-    TRY.
-        DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
-          version = version
-          range   = range ).
-      CATCH zcx_abappm_semver_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
+    DATA(satisfies) = zcl_abappm_command_semver=>satisfies(
+      version = version
+      range   = range ).
 
     IF satisfies = abap_false.
       IF is_optional = abap_true.
@@ -227,27 +215,9 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD install_package.
-
-    " TODO: Currently hardcoded to local packages (no transport)
-    " FUTURE: Allow other folder logic than prefix
-    zcl_abappm_installer=>install(
-      iv_apm_name          = package_json-name
-      iv_apm_version       = package_json-version
-      iv_enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
-      iv_name              = |{ package_json-name }|
-      iv_data              = tarball
-      iv_enum_package      = zcl_abappm_installer=>c_enum_package-local
-      iv_package           = package
-      iv_enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
-      iv_enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix ).
-
-  ENDMETHOD.
-
-
   METHOD run.
 
-    DATA package_json_init TYPE zif_abappm_package_json_types=>ty_package_json.
+    DATA package_json_init TYPE zif_abappm_types=>ty_package_json.
 
     " 1. Check if something else is already installed
     check_package(
@@ -256,8 +226,9 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " 2. Get manifest
     DATA(manifest) = zcl_abappm_command_utils=>get_manifest_from_registry(
-      registry     = registry
-      package_json = package_json ).
+      registry = registry
+      name     = package_json-name
+      version  = package_json-version ).
 
     " 3. Check prerequisites (os, cpu, engines)
     check_prerequisites( manifest ).
@@ -269,16 +240,13 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     " 4. Check dependencies
     check_dependencies( manifest ).
 
-    " 5. Get tarball
-    DATA(tarball) = zcl_abappm_command_utils=>get_tarball_from_registry(
-      registry = registry
-      manifest = manifest ).
-
-    " 6. Pass tarball to installer
-    install_package(
+    " 6. Get tarball from registry and install it into package
+    zcl_abappm_command_utils=>install_package(
+      registry     = registry
+      manifest     = manifest
       package      = package
-      package_json = package_json
-      tarball      = tarball ).
+      name         = package_json-name
+      version      = package_json-version ).
 
     " 7. Save package.abap.json and readme
     package_json_init = package_json.

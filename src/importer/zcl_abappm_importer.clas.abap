@@ -2,13 +2,15 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
   PUBLIC SECTION.
 
+    " TODO: replace logging with ABAP Logger (wait for v2 of it)
+
     CLASS-METHODS run
       IMPORTING
         !package       TYPE devclass
-        !object_types  TYPE zif_abappm_code_importer=>ty_object_types OPTIONAL
-        !object_names  TYPE zif_abappm_code_importer=>ty_object_names OPTIONAL
-        !default_rule  TYPE string DEFAULT zif_abappm_code_importer=>c_default_import_rule
-        !is_logging    TYPE abap_bool DEFAULT abap_true
+        !dependencies  TYPE zif_abappm_importer=>ty_dependencies OPTIONAL
+        !object_types  TYPE zif_abappm_importer=>ty_object_types OPTIONAL
+        !object_names  TYPE zif_abappm_importer=>ty_object_names OPTIONAL
+        !default_rule  TYPE string DEFAULT zif_abappm_importer=>c_default_import_rule
         !is_dryrun     TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
         !from_registry TYPE abap_bool DEFAULT abap_true
@@ -18,35 +20,44 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    " TODO: replace with logger
     CONSTANTS c_width TYPE i VALUE 150.
+
+    CLASS-DATA is_logging TYPE abap_bool VALUE 'X'.
 
     CLASS-METHODS get_programs
       IMPORTING
         !package      TYPE devclass
-        !is_logging   TYPE abap_bool
       RETURNING
-        VALUE(result) TYPE zif_abappm_code_importer=>ty_programs
+        VALUE(result) TYPE zif_abappm_importer=>ty_programs
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS get_rules
       IMPORTING
-        !programs     TYPE zif_abappm_code_importer=>ty_programs
+        !programs     TYPE zif_abappm_importer=>ty_programs
         !default_rule TYPE string
-        !is_logging   TYPE abap_bool
       RETURNING
-        VALUE(result) TYPE zcl_abappm_code_import_rules=>ty_rules
+        VALUE(result) TYPE zif_abappm_importer=>ty_rules
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS get_packages
+      IMPORTING
+        !rules        TYPE zif_abappm_importer=>ty_rules
+        !dependencies TYPE zif_abappm_importer=>ty_dependencies
+      RETURNING
+        VALUE(result) TYPE zif_abappm_importer=>ty_packages
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS get_map
       IMPORTING
-        !rules        TYPE zcl_abappm_code_import_rules=>ty_rules
-        !object_types TYPE zif_abappm_code_importer=>ty_object_types
-        !object_names TYPE zif_abappm_code_importer=>ty_object_names
+        !rules        TYPE zif_abappm_importer=>ty_rules
+        !packages     TYPE zif_abappm_importer=>ty_packages
+        !object_types TYPE zif_abappm_importer=>ty_object_types
+        !object_names TYPE zif_abappm_importer=>ty_object_names
       RETURNING
-        VALUE(result) TYPE zif_abappm_code_importer=>ty_map
+        VALUE(result) TYPE zif_abappm_importer=>ty_map
       RAISING
         zcx_abappm_error.
 
@@ -58,8 +69,7 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CLASS-METHODS import_objects
       IMPORTING
-        !map           TYPE zif_abappm_code_importer=>ty_map
-        !is_logging    TYPE abap_bool
+        !map           TYPE zif_abappm_importer=>ty_map
         !is_dryrun     TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
       RAISING
@@ -73,6 +83,25 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
 
   METHOD get_map.
+
+    IF is_logging = abap_true.
+      FORMAT COLOR COL_HEADING.
+      WRITE: / 'Object Mapping:', AT c_width space.
+      SKIP.
+      FORMAT COLOR OFF.
+    ENDIF.
+
+    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+      DATA(map) = zcl_abappm_code_mapper=>get(
+        source_package = <package>-source_package
+        target_package = <package>-target_package
+        rules          = rules
+        object_types   = object_types
+        object_names   = object_names
+        is_logging     = is_logging ).
+
+      INSERT LINES OF map INTO TABLE result.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -96,17 +125,89 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_packages.
+
+    DATA(list) = zcl_abappm_package_json=>list( iv_instanciate = abap_true ).
+
+    IF is_logging = abap_true.
+      FORMAT COLOR COL_HEADING.
+      WRITE: / 'Packages:', AT c_width space.
+      SKIP.
+      FORMAT COLOR OFF.
+    ENDIF.
+
+    LOOP AT rules ASSIGNING FIELD-SYMBOL(<rule>).
+      IF dependencies IS NOT INITIAL.
+        READ TABLE dependencies ASSIGNING FIELD-SYMBOL(<dependency>)
+          WITH KEY name = <rule>-name.
+        IF sy-subrc <> 0.
+          zcx_abappm_error=>raise( |Package { <rule>-name } used in IMPORT statement but not a dependency| ).
+        ENDIF.
+      ENDIF.
+
+      " TODO!: Instead of using the globally installed package as a source,
+      " this needs to be retrieved from the registry
+      READ TABLE list ASSIGNING FIELD-SYMBOL(<package_json>)
+        WITH KEY name COMPONENTS name = <rule>-name.
+      IF sy-subrc = 0.
+        DATA(package) = VALUE zif_abappm_importer=>ty_package(
+          name           = <rule>-name
+          version        = <rule>-version
+          source_package = <package_json>-package
+          target_package = <rule>-target_package ).
+
+        IF <rule>-version = 'latest'.
+          IF dependencies IS NOT INITIAL.
+            package-version = <dependency>-version.
+          ELSE.
+            package-version = <package_json>-version.
+          ENDIF.
+        ELSEIF <rule>-version = <package_json>-version.
+          " TODO: better error
+          zcx_abappm_error=>raise( 'Version mismatch' ).
+        ENDIF.
+
+        INSERT package INTO TABLE result.
+
+        IF is_logging = abap_true.
+          FORMAT COLOR COL_POSITIVE.
+          WRITE: AT /5 package-name, AT 30 package-version,
+            AT 40 package-source_package, AT 72 package-target_package, AT c_width space.
+        ENDIF.
+
+      ELSE.
+        IF is_logging = abap_true.
+          FORMAT COLOR COL_NEGATIVE.
+          WRITE: AT /5 <rule>-name , 'not found in global namespace', AT c_width space.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+
+    IF is_logging = abap_true.
+      FORMAT COLOR OFF.
+      SKIP.
+    ENDIF.
+
+    SORT result.
+    DELETE ADJACENT DUPLICATES FROM result.
+
+  ENDMETHOD.
+
+
   METHOD get_programs.
 
-    DATA programs TYPE zif_abappm_code_importer=>ty_programs.
+    DATA programs TYPE zif_abappm_importer=>ty_programs.
 
     DATA(packages) = zcl_abapgit_factory=>get_sap_package( package )->list_subpackages( ).
 
-    LOOP AT packages INTO DATA(sub_package) WHERE table_line <> package.
+    IF is_logging = abap_true.
+      FORMAT COLOR COL_HEADING.
+      WRITE: / 'Searching for IMPORTs:', AT c_width space.
+      SKIP.
+      FORMAT COLOR OFF.
+    ENDIF.
 
-      IF is_logging = abap_true.
-        WRITE: / 'PACKAGE', sub_package.
-      ENDIF.
+    LOOP AT packages INTO DATA(sub_package) WHERE table_line <> package.
 
       " Find INCLUDEs containing IMPORT statements
       " FUTURE: includes are not available in BTP so this could be the source of an interface
@@ -118,9 +219,13 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
         ON a~obj_name = b~name
         WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = sub_package AND b~subc = 'I'.
 
+      IF is_logging = abap_true AND programs IS NOT INITIAL.
+        WRITE: / 'PACKAGE', sub_package, AT c_width space.
+      ENDIF.
+
       LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
         IF is_logging = abap_true.
-          WRITE: AT /5 'INCLUDE', <program>-program.
+          WRITE: AT /5 'INCLUDE', <program>-program, AT c_width space.
         ENDIF.
 
         DATA(source_code) = zcl_abappm_code_importer=>read( <program>-program ).
@@ -131,7 +236,9 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           FIND REGEX 'IMPORT\s+.*\s+TO\s+.*\s+FROM\s+''.*''\s*\.' IN <code> IGNORING CASE.
           IF sy-subrc = 0.
             IF is_logging = abap_true.
-              WRITE: AT /10 <code> COLOR COL_POSITIVE.
+              FORMAT COLOR COL_POSITIVE.
+              WRITE: AT /10 <code>, AT c_width space.
+              FORMAT COLOR OFF.
             ENDIF.
             found = abap_true.
           ENDIF.
@@ -182,43 +289,41 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           'IN PACKAGE', mapping-target_package.
       ENDIF.
 
-***      item-obj_type = mapping-object_type.
-***      item-obj_name = mapping-old_object.
-***      new_package   = mapping-target_package.
-***      new_object    = map[ old_object = mapping-old_object ]-new_object.
-*
-*      ASSERT new_object IS NOT INITIAL AND new_object <> mapping-old_object.
+      DATA(item) = VALUE zif_abappm_object=>ty_item(
+        obj_type = mapping-object_type
+        obj_name = mapping-old_object ).
+
+      DATA(new_package) = mapping-target_package.
+      DATA(new_object)   = map[ old_object = mapping-old_object ]-new_object.
+
+      ASSERT new_object IS NOT INITIAL AND new_object <> mapping-old_object.
 
       " TODO: make this dynamic like in abapGit
       " TODO: pass FILES
-***      CASE mapping-object_type.
-***        WHEN 'CLAS'.
-***          CREATE OBJECT class_handler
-***            EXPORTING
-***              item = item.
-***
-***          class_handler->zif_abappm_object~import(
-***            new_package   = new_package
-***            new_object    = new_object
-***            map           = map
-***            is_dryrun     = is_dryrun
-***            is_production = is_production ).
-***
-***        WHEN 'INTF'.
-***          CREATE OBJECT interface_handler
-***            EXPORTING
-***              item = item.
-***
-***          interface_handler->zif_abappm_object~import(
-***            new_package   = new_package
-***            new_object    = new_object
-***            map           = map
-***            is_dryrun     = is_dryrun
-***            is_production = is_production ).
-***
-***        WHEN OTHERS.
-***          zcx_abappm_error=>raise( |Unknow type { mapping-object_type }| ).
-***      ENDCASE.
+      CASE mapping-object_type.
+        WHEN 'CLAS'.
+          DATA(class_handler) = NEW zcl_abappm_object_clas( item ).
+
+          class_handler->zif_abappm_object~import(
+            new_package   = new_package
+            new_object    = new_object
+            map           = map
+            is_dryrun     = is_dryrun
+            is_production = is_production ).
+
+        WHEN 'INTF'.
+          DATA(interface_handler) = NEW zcl_abappm_object_intf( item ).
+
+          interface_handler->zif_abappm_object~import(
+            new_package   = new_package
+            new_object    = new_object
+            map           = map
+            is_dryrun     = is_dryrun
+            is_production = is_production ).
+
+        WHEN OTHERS.
+          zcx_abappm_error=>raise( |Unsupported object type { mapping-object_type }| ).
+      ENDCASE.
 
     ENDLOOP.
 
@@ -234,32 +339,33 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       class_handler     TYPE REF TO zcl_abappm_object_clas,
       interface_handler TYPE REF TO zcl_abappm_object_intf.
 
-    " TODO: replace with logger
-    IF is_logging = abap_true.
-      FORMAT COLOR COL_HEADING.
-      WRITE: / 'Searching for IMPORTs:', AT c_width space.
-      SKIP.
-      FORMAT COLOR OFF.
-    ENDIF.
-
     " 1. Get all programs that contain IMPORT statements
-    DATA(programs) = get_programs(
-      package    = package
-      is_logging = is_logging ).
+    DATA(programs) = get_programs( package ).
 
     " 2. Get the import rules from the programs
     DATA(rules) = get_rules(
       programs     = programs
-      default_rule = default_rule
-      is_logging   = is_logging ).
+      default_rule = default_rule ).
 
-    " 3. Get name/version to be installed from the rules
+    " 3. Get name/version from the rules
+    DATA(packages) = get_packages(
+      rules        = rules
+      dependencies = dependencies ).
 
-    " 4. Download the tarballs for name/version
+    " TODO: 4. Download the tarballs for all packages
 
-    " 5. Get the mapping for the objects in  the tarballs
+    " 5. Get the object mapping
+    DATA(map) = get_map(
+      rules        = rules
+      packages     = packages
+      object_types = object_types
+      object_names = object_names ).
 
     " 6. Import the tarballs using the mapping
+    import_objects(
+      map           = map
+      is_dryrun     = is_dryrun
+      is_production = is_production ).
 
   ENDMETHOD.
 ENDCLASS.

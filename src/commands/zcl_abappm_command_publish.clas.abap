@@ -33,7 +33,7 @@ CLASS zcl_abappm_command_publish DEFINITION
     CLASS-METHODS check_packument
       IMPORTING
         !packument    TYPE zif_abappm_pacote=>ty_packument
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !package_json TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abappm_error.
 
@@ -49,23 +49,14 @@ CLASS zcl_abappm_command_publish DEFINITION
       IMPORTING
         !package      TYPE devclass
       RETURNING
-        VALUE(result) TYPE zif_abappm_package_json_types=>ty_package_json
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS get_packument_from_registry
-      IMPORTING
-        !registry     TYPE string
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
-      RETURNING
-        VALUE(result) TYPE zif_abappm_pacote=>ty_packument
+        VALUE(result) TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS get_tarball
       IMPORTING
         !package      TYPE devclass
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !package_json TYPE zif_abappm_types=>ty_package_json
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
@@ -74,7 +65,7 @@ CLASS zcl_abappm_command_publish DEFINITION
     CLASS-METHODS init_package
       IMPORTING
         !packument    TYPE zif_abappm_pacote=>ty_packument
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !package_json TYPE zif_abappm_types=>ty_package_json
       RETURNING
         VALUE(result) TYPE zif_abappm_pacote=>ty_packument
       RAISING
@@ -232,25 +223,6 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_packument_from_registry.
-
-    " The abbreviated manifest would be sufficient for installer
-    " however we also want to get the description and readme
-    DATA(packument) = zcl_abappm_pacote=>factory(
-      iv_registry = registry
-      iv_name     = package_json-name )->packument( ).
-
-    TRY.
-        " TODO: ...
-        " zcl_abappm_ajson=>parse( packument )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = result ).
-
-      CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
-
-  ENDMETHOD.
-
-
   METHOD get_tarball.
 
     " TODO: Move this and all called methods to local part of class
@@ -305,7 +277,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ENDLOOP.
 
     " 3. Add package.json and readme
-    DATA(manifest) = CORRESPONDING zif_abappm_package_json_types=>ty_manifest( package_json ).
+    DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( package_json ).
 
     DATA(json) = zcl_abappm_package_json=>convert_manifest_to_json(
       is_manifest     = manifest
@@ -334,7 +306,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     result-__id = package_json-name.
 
     " TODO: Allow publishing with other tag
-    DATA(dist_tag) = VALUE zif_abappm_package_json_types=>ty_generic(
+    DATA(dist_tag) = VALUE zif_abappm_types=>ty_generic(
       key   = 'latest'
       value = package_json-version ).
 
@@ -387,9 +359,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     " 3. Get packument from registry
     " TODO: This should include request parameter for writing to the registry (only if not anonymous?)
     TRY.
-        DATA(packument) = get_packument_from_registry(
-          registry     = registry
-          package_json = package_json ).
+        DATA(packument) = zcl_abappm_command_utils=>get_packument_from_registry(
+          registry = registry
+          name     = package_json-name ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " ignore if not found
     ENDTRY.

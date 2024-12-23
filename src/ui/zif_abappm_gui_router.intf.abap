@@ -13,6 +13,7 @@ INTERFACE zif_abappm_gui_router PUBLIC.
       apm_install          TYPE string VALUE 'apm_install',
       apm_publish          TYPE string VALUE 'apm_publish',
       apm_uninstall        TYPE string VALUE 'apm_uninstall',
+      apm_update           TYPE string VALUE 'apm_update',
       changelog            TYPE string VALUE 'changelog',
       clipboard            TYPE string VALUE 'clipboard',
       documentation        TYPE string VALUE 'documentation',

@@ -40,7 +40,7 @@ SELECTION-SCREEN END OF BLOCK b3.
 CONSTANTS c_width TYPE i VALUE 150.
 
 INITIALIZATION.
-  p_defrul = zif_abappm_code_importer=>c_default_import_rule.
+  p_defrul = zif_abappm_importer=>c_default_import_rule.
 
 START-OF-SELECTION.
 
@@ -53,15 +53,14 @@ START-OF-SELECTION.
         object_types  = so_type[]
         object_names  = so_name[]
         default_rule  = p_defrul
-        is_logging    = p_log
         is_dryrun     = p_dryrun
         is_production = p_prod ).
 
-    CATCH zcx_abappm_error INTO DATA(gx_error).
-      MESSAGE gx_error TYPE 'S' DISPLAY LIKE 'E'.
+    CATCH zcx_abappm_error INTO DATA(error).
+      MESSAGE error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
 
   IF p_log = abap_true.
     SKIP.
-    WRITE: / timer->end( abap_true ).
+    WRITE: / timer->end( ).
   ENDIF.

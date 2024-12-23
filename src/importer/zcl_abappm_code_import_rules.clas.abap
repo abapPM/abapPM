@@ -2,38 +2,29 @@ CLASS zcl_abappm_code_import_rules DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
   PUBLIC SECTION.
 
-    TYPES:
-      BEGIN OF ty_rule,
-        old_object  TYPE string,
-        new_object  TYPE string,
-        new_package TYPE string,
-        name        TYPE string,
-        version     TYPE string,
-      END OF ty_rule,
-      ty_rules TYPE STANDARD TABLE OF ty_rule WITH DEFAULT KEY.
+    " TODO: replace logging with ABAP Logger (wait for v2 of it)
 
     CLASS-METHODS get
       IMPORTING
-        !programs     TYPE zif_abappm_code_importer=>ty_programs
+        !programs     TYPE zif_abappm_importer=>ty_programs
         !is_logging   TYPE abap_bool
         !default_rule TYPE string
       RETURNING
-        VALUE(result) TYPE ty_rules
+        VALUE(result) TYPE zif_abappm_importer=>ty_rules
       RAISING
         zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    " TODO: replace with logger
     CONSTANTS c_width TYPE i VALUE 150.
 
     CLASS-METHODS get_import_rules
       IMPORTING
-        !program      TYPE zif_abappm_code_importer=>ty_program
+        !program      TYPE zif_abappm_importer=>ty_program
         !is_logging   TYPE abap_bool
       RETURNING
-        VALUE(result) TYPE ty_rules
+        VALUE(result) TYPE zif_abappm_importer=>ty_rules
       RAISING
         zcx_abappm_error.
 
@@ -47,13 +38,12 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
   METHOD get.
 
     LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
-      " TODO: replace with logger
       IF is_logging = abap_true.
         FORMAT COLOR COL_HEADING.
         WRITE: / 'Include:', AT c_width space.
         SKIP.
         FORMAT COLOR OFF.
-        WRITE: / <program>-program.
+        WRITE: / <program>-program, AT c_width space.
         SKIP.
       ENDIF.
 
@@ -77,7 +67,7 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
       tabix  TYPE sy-tabix,
       pos    TYPE string,
       tokens TYPE TABLE OF stokesx,
-      rule   TYPE ty_rule.
+      rule   TYPE zif_abappm_importer=>ty_rule.
 
     tokens = zcl_abappm_code_importer=>scan( program-program ).
 
@@ -143,15 +133,15 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
                   with = ''
                   occ  = 0 ) ).
                 IF rule-new_object CS '/'.
-                  SPLIT rule-new_object AT '/' INTO rule-new_package rule-new_object.
+                  SPLIT rule-new_object AT '/' INTO rule-target_package rule-new_object.
                   " Install into a sub package of where the IMPORT was found
                   " Note: new_package is the folder name, which is mapped to
                   " an ABAP package based on prefix folder rules
-                  rule-new_package = |{ program-package }_{ rule-new_package }|.
+                  rule-target_package = |{ program-package }_{ rule-target_package }|.
                   " FUTURE: support full and mixed folder modes
                 ELSE.
                   " Install into the same package where the IMPORT was found
-                  rule-new_package = program-package.
+                  rule-target_package = program-package.
                 ENDIF.
               WHEN OTHERS.
                 zcx_abappm_error=>raise( |Unknown identifier { <token>-str }. { pos }| ).
@@ -188,18 +178,18 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
       INSERT rule INTO TABLE result.
     ENDLOOP.
 
-    " TODO: replace with logger
     IF is_logging = abap_true.
       FORMAT COLOR COL_NORMAL.
       WRITE: / 'Rules:', AT c_width space.
       SKIP.
-      FORMAT COLOR OFF.
       LOOP AT result ASSIGNING FIELD-SYMBOL(<rule>).
-        WRITE: / <rule>-old_object,
-          AT 32 <rule>-new_package, <rule>-new_object,
-          AT 94 <rule>-name, <rule>-version.
+        FORMAT COLOR COL_POSITIVE.
+        WRITE: /5 <rule>-old_object,
+          AT 37 <rule>-target_package, AT 69 <rule>-new_object,
+          AT 94 <rule>-name, AT 120 <rule>-version, AT c_width space.
       ENDLOOP.
       SKIP.
+      FORMAT COLOR OFF.
     ENDIF.
 
   ENDMETHOD.

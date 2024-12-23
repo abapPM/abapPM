@@ -5,7 +5,7 @@ CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
     CLASS-METHODS scan
       IMPORTING
         !program_name   TYPE progname
-        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
+        !program_source TYPE zif_abappm_importer=>ty_code OPTIONAL
       RETURNING
         VALUE(result)   TYPE stokesx_tab
       RAISING
@@ -14,20 +14,20 @@ CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
     CLASS-METHODS import
       IMPORTING
         !program_name   TYPE progname
-        !map            TYPE zif_abappm_code_importer=>ty_map
+        !map            TYPE zif_abappm_importer=>ty_map
         !is_pretty      TYPE abap_bool DEFAULT abap_false
-        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
+        !program_source TYPE zif_abappm_importer=>ty_code OPTIONAL
       RETURNING
-        VALUE(result)   TYPE zif_abappm_code_importer=>ty_code
+        VALUE(result)   TYPE zif_abappm_importer=>ty_code
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS read
       IMPORTING
         !program_name   TYPE progname
-        !program_source TYPE zif_abappm_code_importer=>ty_code OPTIONAL
+        !program_source TYPE zif_abappm_importer=>ty_code OPTIONAL
       RETURNING
-        VALUE(result)   TYPE zif_abappm_code_importer=>ty_code
+        VALUE(result)   TYPE zif_abappm_importer=>ty_code
       RAISING
         zcx_abappm_error.
 

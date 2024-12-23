@@ -124,26 +124,37 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-homepage.
+
         call_browser( zif_abappm_constants=>c_website ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-registry.
+
         call_browser( zif_abappm_constants=>c_registry ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-documentation.
+
         call_browser( zif_abappm_constants=>c_documentation ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-changelog.
+
         call_browser( zif_abappm_constants=>c_changelog ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-sponsor.
+
         call_browser( zif_abappm_constants=>c_sponsor ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
     ENDCASE.
 
   ENDMETHOD.
 
 
   METHOD call_browser.
+
     TRY.
         zcl_abapgit_ui_factory=>get_frontend_services( )->execute( iv_document = |{ url }| ).
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -151,27 +162,36 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
           iv_text     = 'Error opening page in external browser'
           ix_previous = error ).
     ENDTRY.
+
   ENDMETHOD.
 
 
   METHOD command_dialogs.
 
-    DATA(key) = event->query( )->get( 'KEY' ).
+    DATA(package) = CONV devclass( event->query( )->get( 'PACKAGE' ) ).
 
     " TODO: Pass selected package, for example, from Package List
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-apm_init.
+
         result-page  = zcl_abappm_gui_dlg_init=>create( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-apm_install.
+
         result-page  = zcl_abappm_gui_dlg_install=>create( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-apm_publish.
-        result-page  = zcl_abappm_gui_dlg_publish=>create( ).
+
+        result-page  = zcl_abappm_gui_dlg_publish=>create( package ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-apm_uninstall.
-        result-page  = zcl_abappm_gui_dlg_uninstall=>create( ).
+
+        result-page  = zcl_abappm_gui_dlg_uninstall=>create( package ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -183,21 +203,27 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-go_home.
+
         result-page  = zcl_abappm_gui_page_list=>create( ). "TODO main_page( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-go_back.
+
         result-state = zcl_abapgit_gui=>c_event_state-go_back.
 
       WHEN zif_abappm_gui_router=>c_action-apm_home.
+
         result-page  = zcl_abappm_gui_page_list=>create( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
 
       WHEN zif_abappm_gui_router=>c_action-go_settings.
+
         key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ zif_abappm_settings=>c_global }|.
         result-page  = zcl_abappm_gui_page_db_entry=>create( key ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-go_settings_personal.
+
         key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ sy-uname }|.
         result-page  = zcl_abappm_gui_page_db_entry=>create( key ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
@@ -208,12 +234,15 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 *        result-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-favorite_package.
+
         toggle_favorite( event->query( )->get( 'PACKAGE' ) ).
         result-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN zif_abappm_gui_router=>c_action-show_hotkeys.
+
         zcl_abappm_gui_factory=>get_gui_services( )->get_hotkeys_ctl( )->set_visible( abap_true ).
         result-state = zcl_abapgit_gui=>c_event_state-re_render.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -232,6 +261,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
 
   METHOD jump_display_transport.
+
     TRY.
         DATA(is_adt_jump_enabled) = zcl_abappm_settings=>factory( )->load( )->get( )-gui_settings-adt_jump_enabled.
       CATCH zcx_abappm_error ##NO_HANDLER.
@@ -252,6 +282,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         EXPORTING
           i_trkorr = transport.
     ENDIF.
+
   ENDMETHOD.
 
 
@@ -268,21 +299,18 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD jump_object.
 
-    DATA:
-      item          TYPE zif_abapgit_definitions=>ty_item,
-      sub_item      TYPE zif_abapgit_definitions=>ty_item,
-      is_new_window TYPE c LENGTH 1,
-      line_number   TYPE i.
+    DATA(item) = VALUE zif_abapgit_definitions=>ty_item(
+      obj_type = cl_http_utility=>unescape_url( |{ obj_type }| )
+      obj_name = cl_http_utility=>unescape_url( |{ obj_name }| ) ).
 
-    item-obj_type     = cl_http_utility=>unescape_url( |{ obj_type }| ).
-    item-obj_name     = cl_http_utility=>unescape_url( |{ obj_name }| ).
-    sub_item-obj_type = cl_http_utility=>unescape_url( |{ sub_type }| ).
-    sub_item-obj_name = cl_http_utility=>unescape_url( |{ sub_name }| ).
+    DATA(sub_item) = VALUE zif_abapgit_definitions=>ty_item(
+      obj_type = cl_http_utility=>unescape_url( |{ sub_type }| )
+      obj_name = cl_http_utility=>unescape_url( |{ sub_name }| ) ).
 
     IF line CO '0123456789'.
-      line_number = line.
+      DATA(line_number) = CONV i( line ).
     ENDIF.
-    is_new_window = boolc( new_window IS NOT INITIAL ).
+    DATA(is_new_window) = xsdbool( new_window IS NOT INITIAL ).
 
     TRY.
         DATA(html_viewer) = zcl_abapgit_ui_factory=>get_html_viewer( ).
@@ -316,6 +344,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
 
   METHOD main_page.
+
     TRY.
         " Prio 1: Show last viewed package (if it exists)
         DATA(settings) = zcl_abappm_settings=>factory( )->get( ).
@@ -346,6 +375,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
       CATCH zcx_abappm_error INTO DATA(error).
         zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.
+
   ENDMETHOD.
 
 
@@ -357,15 +387,19 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-ie_devtools.
+
         zcl_abapgit_ui_factory=>get_frontend_services( )->open_ie_devtools( ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-clipboard.
+
         DATA(clip_content) = event->query( )->get( 'CLIPBOARD' ).
         APPEND clip_content TO clipboard.
+
         zcl_abapgit_ui_factory=>get_frontend_services( )->clipboard_export( clipboard ).
-        MESSAGE 'Successfully exported to clipboard' TYPE 'S'.
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+
+        MESSAGE 'Successfully exported to clipboard' TYPE 'S'.
 
     ENDCASE.
 
@@ -376,6 +410,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-jump.                          " Open object editor
+
         jump_object(
           obj_type   = event->query( )->get( 'TYPE' )
           obj_name   = event->query( )->get( 'NAME' )
@@ -388,14 +423,17 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-jump_transport.
+
         jump_display_transport( |{ event->query( )->get( 'TRANSPORT' ) }| ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-jump_user.
+
         jump_display_user( |{ event->query( )->get( 'USER' ) }| ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-url.
+
         call_browser( event->query( )->get( 'URL' ) ).
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
@@ -405,6 +443,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
 
   METHOD toggle_favorite.
+
     TRY.
         DATA(ls_settings) = zcl_abappm_settings=>factory( )->load( )->get( ).
 
@@ -423,18 +462,25 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
       CATCH zcx_abappm_error INTO DATA(error).
         zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.
+
   ENDMETHOD.
 
 
   METHOD utility_actions.
+
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-go_db.
+
         result-page  = zcl_abappm_gui_page_db=>create( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-go_debuginfo.
+
         result-page  = zcl_abappm_gui_page_debuginfo=>create( ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
+
     ENDCASE.
+
   ENDMETHOD.
 
 

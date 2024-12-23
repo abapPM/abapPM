@@ -31,7 +31,7 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
         description  TYPE string,
         private      TYPE abap_bool,
         labels       TYPE string,
-        package_json TYPE zif_package_json_types=>ty_package_json,
+        package_json TYPE zif_abappm_types=>ty_package_json,
       END OF ty_params.
 
     CONSTANTS:

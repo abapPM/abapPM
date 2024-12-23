@@ -75,7 +75,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       package      TYPE devclass,
       view         TYPE string,
       markdown     TYPE ty_markdown,
-      package_json TYPE zif_abappm_package_json_types=>ty_package_json.
+      package_json TYPE zif_abappm_types=>ty_package_json.
 
     METHODS get_toolbar
       RETURNING
@@ -91,7 +91,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
 
     METHODS get_package_json
       RETURNING
-        VALUE(result) TYPE zif_abappm_package_json_types=>ty_package_json
+        VALUE(result) TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abapgit_exception.
 
@@ -824,6 +824,27 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           key       = zcl_abappm_package_json=>get_package_key( package )
           edit_mode = abap_true ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+
+      WHEN c_action-update_dependencies.
+
+        TRY.
+            DATA(registry) = zcl_abappm_settings=>factory( )->get( )-registry.
+
+            zcl_abappm_command_update=>run(
+              registry = registry
+              package  = package ).
+          CATCH zcx_abappm_error INTO DATA(error).
+            zcx_abapgit_exception=>raise_with_text( error ).
+        ENDTRY.
+
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+
+      WHEN c_action-add_dependency OR c_action-remove_dependency.
+
+        zcx_abapgit_exception=>raise( 'The feature has not been implemented yet. '
+          && 'Edit package.abap.json and update the dependencies.' ).
+
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
     ENDCASE.
 

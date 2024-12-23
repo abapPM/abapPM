@@ -1,0 +1,4 @@
+INTERFACE zif_abappm_types
+  PUBLIC.
+
+ENDINTERFACE.

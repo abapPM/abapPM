@@ -9,7 +9,7 @@ CLASS zcl_abappm_command_init DEFINITION
     CLASS-METHODS run
       IMPORTING
         !package      TYPE devclass
-        !package_json TYPE zif_abappm_package_json_types=>ty_package_json
+        !package_json TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abappm_error.
 
@@ -26,7 +26,7 @@ CLASS zcl_abappm_command_init IMPLEMENTATION.
 
     DATA:
       markdown               TYPE string,
-      package_json_wo_readme TYPE zif_abappm_package_json_types=>ty_package_json.
+      package_json_wo_readme TYPE zif_abappm_types=>ty_package_json.
 
     " Package JSON
     DATA(package_json_service) = zcl_abappm_package_json=>factory(

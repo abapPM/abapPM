@@ -29,12 +29,6 @@ CLASS zcl_abappm_command_uninstall DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS uninstall_package
-      IMPORTING
-        !package TYPE devclass
-      RAISING
-        zcx_abappm_error.
-
 ENDCLASS.
 
 
@@ -92,18 +86,9 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    uninstall_package( package ).
+    zcl_abappm_command_utils=>uninstall_package( package ).
 
     MESSAGE 'Package successfully uninstalled' TYPE 'S'.
-
-  ENDMETHOD.
-
-
-  METHOD uninstall_package.
-
-    zcl_abappm_installer=>uninstall(
-      iv_apm  = abap_true
-      iv_pack = package ).
 
   ENDMETHOD.
 ENDCLASS.

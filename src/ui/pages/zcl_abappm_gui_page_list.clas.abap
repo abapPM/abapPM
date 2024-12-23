@@ -120,7 +120,8 @@ CLASS zcl_abappm_gui_page_list DEFINITION
         !html TYPE REF TO zif_abapgit_html.
 
     METHODS apply_order_by
-      CHANGING packages TYPE zif_abappm_package_json=>ty_packages.
+      CHANGING
+        packages TYPE zif_abappm_package_json=>ty_packages.
 
     METHODS prepare_packages
       RETURNING
@@ -550,8 +551,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     LOOP AT list ASSIGNING FIELD-SYMBOL(<package>).
       render_table_item(
-        html    = html
-        package = <package> ).
+        html     = html
+        package  = <package> ).
     ENDLOOP.
 
     html->add( |</tbody>| ).
@@ -588,18 +589,10 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_table_item.
 
-    TRY.
-        DATA(settings) = zcl_abappm_settings=>factory( )->load( )->get( ).
-        READ TABLE settings-package_settings INTO DATA(package_settings)
-          WITH KEY package = package-package.
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
-
     " Start of row
-    IF package_settings-favorite = abap_true.
+    IF package-favorite = abap_true.
       DATA(css_class) = ' class="favorite"'.
-      data(css_color) = 'blue'.
+      DATA(css_color) = 'blue'.
     ELSE.
       css_class = ''.
       css_color = 'grey'.
@@ -620,7 +613,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         iv_txt = favorite_icon ) ).
 
     " Package
-    IF package_settings-write_protected = abap_true.
+    IF package-write_protected = abap_true.
       DATA(lock_icon) = html->icon(
         iv_name  = 'lock/grey70'
         iv_class = 'm-em5-sides'
@@ -635,7 +628,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     IF all_labels IS NOT INITIAL.
       html->td(
         iv_content = zcl_abapgit_gui_chunk_lib=>render_label_list(
-          it_labels       = package_settings-labels
+          it_labels       = package-labels
           io_label_colors = label_colors )
         iv_class   = 'labels' ).
     ENDIF.

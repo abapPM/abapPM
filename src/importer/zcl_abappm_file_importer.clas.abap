@@ -62,6 +62,7 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
       extra     = extra
       extension = 'abap' ).
 
+    " TODO: Replace with ZCL_CONVERT
     TRY.
         DATA(code) = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -84,6 +85,7 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
     READ TABLE files ASSIGNING FIELD-SYMBOL(<file>)
       WITH KEY file COMPONENTS filename = condense( to_lower( filename ) ).
     IF sy-subrc = 0.
+      " TODO: Replace with ZCL_CONVERT
       TRY.
           result = zcl_abapgit_convert=>xstring_to_string_utf8( <file>-data ).
         CATCH zcx_abapgit_exception INTO DATA(error).
@@ -100,6 +102,7 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
 
     DATA(file_data) = get_file( 'json' ).
 
+    " TODO: Replace with ZCL_CONVERT
     TRY.
         result = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -113,6 +116,7 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
 
     DATA(file_data) = get_file( 'xml' ).
 
+    " TODO: Replace with ZCL_CONVERT
     TRY.
         result = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
       CATCH zcx_abapgit_exception INTO DATA(error).
