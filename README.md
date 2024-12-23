@@ -11,8 +11,8 @@
 ![Version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/abapPM/abapPM/src/core/zif_abappm_version.intf.abap/c_version&label=Version&color=blue)
 [![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://github.com/abapPM/abapPM/build/zabappm_standalone.abap)
 
-[![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=green)](LICENSE)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?color=green)](https://github.com/abapPM/.github/blob/main/CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=success)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?color=success)](https://github.com/abapPM/.github/blob/main/CODE_OF_CONDUCT.md)
 [![REUSE Status](https://api.reuse.software/badge/github.com/abapPM/abapPM)](https://api.reuse.software/info/github.com/abapPM/abapPM)
 
 # apm
