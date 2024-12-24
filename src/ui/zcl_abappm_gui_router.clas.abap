@@ -129,8 +129,11 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-registry.
-
-        call_browser( zif_abappm_constants=>c_registry ).
+        TRY.
+            DATA(registry) = zcl_abappm_settings=>factory( )->get( )-registry.
+            call_browser( registry ).
+          CATCH zcx_abappm_error ##NO_HANDLER.
+        ENDTRY.
         result-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 
       WHEN zif_abappm_gui_router=>c_action-documentation.
