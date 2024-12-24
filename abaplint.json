@@ -45,10 +45,7 @@
       "exclude": [],
       "severity": "Error"
     },
-    "align_parameters": {
-      "exclude": [],
-      "severity": "Error"
-    },
+    "align_parameters": false,
     "align_pseudo_comments": {
       "exclude": [],
       "severity": "Error"
