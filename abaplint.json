@@ -41,6 +41,23 @@
       "interfaceDefinition": false,
       "severity": "Error"
     },
+    "add_test_attributes": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "align_parameters": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "align_pseudo_comments": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "align_type_expressions": {
+      "exclude": [],
+      "ignoreExceptions": true,
+      "severity": "Error"
+    },
     "allowed_object_naming": {
       "exclude": [],
       "severity": "Error"
@@ -86,6 +103,18 @@
       "exclude": [],
       "severity": "Error"
     },
+    "cds_comment_style": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "cds_legacy_view": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "cds_parser_error": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "chain_mainly_declarations": {
       "check": true,
       "clear": true,
@@ -100,6 +129,11 @@
       "sort": true,
       "unassign": true,
       "write": true
+    },
+    "change_if_to_case": {
+      "exclude": [],
+      "severity": "Error",
+      "skipNames": []
     },
     "check_abstract": {
       "exclude": [],
@@ -145,17 +179,21 @@
       "severity": "Error"
     },
     "class_attribute_names": {
-      "constants": "^C_.+$",
+      "constants": "",
       "exclude": [],
       "ignoreExceptions": true,
       "ignoreInterfaces": false,
       "ignoreLocal": true,
       "ignoreNames": [],
       "ignorePatterns": [],
-      "instance": "^M._.+$",
+      "instance": "",
       "patternKind": "required",
       "severity": "Error",
-      "statics": "^G._.+$"
+      "statics": ""
+    },
+    "classic_exceptions_overlap": {
+      "exclude": [],
+      "severity": "Error"
     },
     "cloud_types": {
       "exclude": [],
@@ -169,6 +207,11 @@
       "allowIncludeInFugr": true,
       "exclude": [],
       "severity": "Warning"
+    },
+    "constant_classes": {
+      "exclude": [],
+      "mapping": [],
+      "severity": "Error"
     },
     "constructor_visibility_public": {
       "exclude": [],
@@ -203,6 +246,7 @@
       "generateReport": true,
       "generateSubroutine": true,
       "insertReport": true,
+      "insertTextpool": true,
       "kernelCall": true,
       "severity": "Error",
       "systemCall": true
@@ -225,9 +269,26 @@
       "exclude": [],
       "keywords": true,
       "severity": "Error",
+      "skipKeywords": [
+        "CHANGING",
+        "EXPORTING",
+        "OTHERS"
+      ],
       "startParen": true
     },
     "downport": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "dynpro_checks": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "easy_to_find_messages": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "empty_event": {
       "exclude": [],
       "severity": "Error"
     },
@@ -260,6 +321,10 @@
       "exclude": [],
       "severity": "Error"
     },
+    "expand_macros": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "exporting": {
       "exclude": [],
       "severity": "Error"
@@ -275,7 +340,7 @@
       "ignoreGlobalInterface": false,
       "pragmas": [],
       "pseudo": [
-        "#EC *"
+        "\"#EC *"
       ],
       "severity": "Error"
     },
@@ -304,36 +369,40 @@
       "exclude": [],
       "severity": "Error"
     },
+    "fully_type_itabs": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "function_module_recommendations": {
       "exclude": [],
       "recommendations": [
         {
-          "name": "SUBST_GET_FILE_LIST",
-          "replace": "see note 1686357"
+          "name": "CALCULATE_HASH_FOR_RAW",
+          "replace": "use CL_ABAP_HMAC or CL_ABAP_MESSAGE_DIGEST"
         },
         {
-          "name": "ROUND",
-          "replace": "use built in function: round()"
+          "name": "CCU_TIMESTAMP_DIFFERENCE",
+          "replace": "use CL_ABAP_TSTMP"
         },
         {
-          "name": "SO_NEW_DOCUMENT_ATT_SEND_API1",
-          "replace": "use CL_BCS"
+          "name": "CONVERT_DATE_TO_EXTERNAL",
+          "replace": "use CL_ABAP_DATFM"
+        },
+        {
+          "name": "CONVERT_TIME_INPUT",
+          "replace": "use CL_ABAP_TIMEFM"
         },
         {
           "name": "ECATT_CONV_XSTRING_TO_STRING",
           "replace": "use CL_BINARY_CONVERT"
         },
         {
-          "name": "SCMS_STRING_TO_XSTRING",
-          "replace": "use CL_BINARY_CONVERT"
+          "name": "F4_FILENAME",
+          "replace": "use CL_GUI_FRONTEND_SERVICES"
         },
         {
-          "name": "JOB_CREATE",
-          "replace": "use CL_BP_ABAP_JOB"
-        },
-        {
-          "name": "JOB_SUBMIT",
-          "replace": "use CL_BP_ABAP_JOB"
+          "name": "FUNCTION_EXISTS",
+          "replace": "surround with try-catch CX_SY_DYN_CALL_ILLEGAL_METHOD instead"
         },
         {
           "name": "GUI_DOWNLOAD",
@@ -344,20 +413,68 @@
           "replace": "use CL_GUI_FRONTEND_SERVICES"
         },
         {
-          "name": "WS_FILENAME_GET",
-          "replace": "use CL_GUI_FRONTEND_SERVICES"
+          "name": "GUID_CREATE",
+          "replace": "use CL_SYSTEM_UUID"
         },
         {
-          "name": "F4_FILENAME",
-          "replace": "use CL_GUI_FRONTEND_SERVICES"
+          "name": "IGN_TIMESTAMP_DIFFERENCE",
+          "replace": "use CL_ABAP_TSTMP"
+        },
+        {
+          "name": "IGN_TIMESTAMP_PLUSMINUS",
+          "replace": "use CL_ABAP_TSTMP"
+        },
+        {
+          "name": "ISM_SD_GET_PRICING_CONDITIONS",
+          "replace": "use CL_PRC_RESULT_FACTORY as per note 2220005"
+        },
+        {
+          "name": "JOB_CREATE",
+          "replace": "use CL_BP_ABAP_JOB"
+        },
+        {
+          "name": "JOB_SUBMIT",
+          "replace": "use CL_BP_ABAP_JOB"
+        },
+        {
+          "name": "POPUP_TO_CONFIRM_STEP",
+          "replace": "use POPUP_TO_CONFIRM"
+        },
+        {
+          "name": "POPUP_TO_DECIDE",
+          "replace": "use POPUP_TO_CONFIRM"
+        },
+        {
+          "name": "POPUP_TO_GET_VALUE",
+          "replace": "use POPUP_GET_VALUES"
+        },
+        {
+          "name": "QF05_RANDOM_INTEGER",
+          "replace": "use CL_ABAP_RANDOM_INT"
+        },
+        {
+          "name": "REUSE_ALV_GRID_DISPLAY",
+          "replace": "use CL_SALV_TABLE=>FACTORY or CL_GUI_ALV_GRID"
+        },
+        {
+          "name": "ROUND",
+          "replace": "use built in function: round()"
         },
         {
           "name": "SAPGUI_PROGRESS_INDICATOR",
           "replace": "use CL_PROGRESS_INDICATOR"
         },
         {
-          "name": "GUID_CREATE",
-          "replace": "use CL_SYSTEM_UUID"
+          "name": "SCMS_BASE64_DECODE_STR",
+          "replace": "use class CL_HTTP_UTILITY methods"
+        },
+        {
+          "name": "SCMS_STRING_TO_XSTRING",
+          "replace": "use CL_BINARY_CONVERT"
+        },
+        {
+          "name": "SO_NEW_DOCUMENT_ATT_SEND_API1",
+          "replace": "use CL_BCS"
         },
         {
           "name": "SSFC_BASE64_DECODE",
@@ -368,24 +485,12 @@
           "replace": "use class CL_HTTP_UTILITY methods"
         },
         {
-          "name": "SCMS_BASE64_DECODE_STR",
-          "replace": "use class CL_HTTP_UTILITY methods"
+          "name": "SUBST_GET_FILE_LIST",
+          "replace": "see note 1686357"
         },
         {
-          "name": "POPUP_TO_DECIDE",
-          "replace": "use POPUP_TO_CONFIRM"
-        },
-        {
-          "name": "REUSE_ALV_GRID_DISPLAY",
-          "replace": "use CL_SALV_TABLE=>FACTORY or CL_GUI_ALV_GRID"
-        },
-        {
-          "name": "CALCULATE_HASH_FOR_RAW",
-          "replace": "use CL_ABAP_HMAC"
-        },
-        {
-          "name": "FUNCTION_EXISTS",
-          "replace": "surround with try-catch CX_SY_DYN_CALL_ILLEGAL_METHOD instead"
+          "name": "WS_FILENAME_GET",
+          "replace": "use CL_GUI_FRONTEND_SERVICES"
         }
       ],
       "severity": "Error"
@@ -423,6 +528,10 @@
       "exclude": [],
       "severity": "Error"
     },
+    "implicit_start_of_selection": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "in_statement_indentation": {
       "blockStatements": 2,
       "exclude": [".*"],
@@ -445,6 +554,10 @@
     },
     "intf_referencing_clas": {
       "allow": [],
+      "exclude": [],
+      "severity": "Error"
+    },
+    "invalid_table_index": {
       "exclude": [],
       "severity": "Error"
     },
@@ -508,6 +621,11 @@
       "patternKind": "required",
       "severity": "Error"
     },
+    "macro_naming": {
+      "exclude": [],
+      "pattern": "^_.+$",
+      "severity": "Error"
+    },
     "main_file_contents": {
       "exclude": [],
       "severity": "Error"
@@ -537,8 +655,8 @@
       "checkForms": true,
       "errorWhenEmpty": true,
       "exclude": [],
-      "ignoreTestClasses": true,
-      "severity": "Warning",
+      "ignoreTestClasses": false,
+      "severity": "Error",
       "statements": 100
     },
     "method_overwrites_builtin": {
@@ -554,7 +672,7 @@
       "ignorePatterns": [],
       "importing": "^I._.+$",
       "patternKind": "required",
-      "returning": "^R._.+|RESULT$",
+      "returning": "^RESULT$",
       "severity": "Error"
     },
     "mix_returning": {
@@ -587,6 +705,33 @@
       "logic": "less",
       "severity": "Error"
     },
+    "no_aliases": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "no_chained_assignment": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "no_external_form_calls": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "no_inline_in_optional_branches": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "no_prefixes": {
+      "allowIsPrefixBoolean": true,
+      "constants": "^[LGM]?C.?_",
+      "data": "^[LGM].?_",
+      "exclude": [],
+      "fieldSymbols": "^<[LGM].?_",
+      "methodParameters": "^[ICER].?_",
+      "severity": "Error",
+      "statics": "^S.?_",
+      "types": "^TY_"
+    },
     "no_public_attributes": {
       "allowReadOnly": true,
       "exclude": [],
@@ -598,13 +743,24 @@
       "onlyConstants": false,
       "severity": "Error"
     },
+    "nrob_consistency": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "object_naming": {
+      "aqbg": "^ZABAPPM",
+      "aqqu": "^ZABAPPM",
+      "aqsg": "^ZABAPPM",
       "auth": "^ZABAPPM",
       "clas": "^ZC(L|X)\\_ABAPPM",
+      "cmod": "^ZABAPPM",
       "doma": "^ZABAPPM",
       "dtel": "^ZABAPPM",
+      "enho": "^ZABAPPM",
+      "enhs": "^ZABAPPM",
       "enqu": "^EZABAPPM",
       "exclude": [],
+      "form": "^ZABAPPM",
       "fugr": "^ZABAPPM",
       "idoc": "^ZABAPPM",
       "ignoreNames": [],
@@ -615,12 +771,19 @@
       "pinf": "^ZABAPPM",
       "prog": "^ZABAPPM",
       "severity": "Error",
+      "sfpf": "^ZABAPPM",
+      "sfpi": "^ZABAPPM",
       "shlp": "^ZABAPPM",
       "ssfo": "^ZABAPPM",
       "ssst": "^ZABAPPM",
+      "sucu": "^ZABAPPM",
+      "suso": "^ZABAPPM",
+      "sxci": "^ZABAPPM",
       "tabl": "^ZABAPPM",
       "tran": "^ZAPM",
       "ttyp": "^ZABAPPM",
+      "wdya": "^ZABAPPM",
+      "wdyn": "^ZABAPPM",
       "xslt": "^ZABAPPM"
     },
     "obsolete_statement": {
@@ -659,6 +822,10 @@
       "exclude": [],
       "severity": "Error"
     },
+    "omit_preceding_zeros": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "omit_receiving": {
       "exclude": [],
       "severity": "Error"
@@ -675,11 +842,42 @@
       "exclude": [],
       "severity": "Error"
     },
+    "pragma_style": {
+      "exclude": [],
+      "severity": "Error",
+      "style": "upper"
+    },
+    "prefer_corresponding": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "prefer_inline": {
       "exclude": [],
       "severity": "Error"
     },
     "prefer_is_not": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "prefer_pragmas": {
+      "check": [
+        {
+          "pragma": "SUBRC_OK",
+          "pseudo": "#EC CI_SUBRC"
+        },
+        {
+          "pragma": "NEEDED",
+          "pseudo": "#EC NEEDED"
+        },
+        {
+          "pragma": "NO_TEXT",
+          "pseudo": "#EC NOTEXT"
+        },
+        {
+          "pragma": "NO_HANDLER",
+          "pseudo": "#EC NO_HANDLER"
+        }
+      ],
       "exclude": [],
       "severity": "Error"
     },
@@ -713,6 +911,11 @@
       "omitMeInstanceCalls": true,
       "severity": "Error"
     },
+    "reduce_procedural_code": {
+      "exclude": [],
+      "maxStatements": 10,
+      "severity": "Error"
+    },
     "reduce_string_templates": {
       "exclude": [],
       "severity": "Error"
@@ -743,6 +946,11 @@
       "severity": "Error",
       "starOkayIfFewColumns": 10
     },
+    "select_single_full_key": {
+      "allowPseudo": true,
+      "exclude": [],
+      "severity": "Error"
+    },
     "selection_screen_naming": {
       "exclude": [],
       "ignoreNames": [],
@@ -766,6 +974,15 @@
     },
     "sicf_consistency": {
       "exclude": [],
+      "severity": "Error",
+      "skipNames": []
+    },
+    "slow_parameter_passing": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "smim_consistency": {
+      "exclude": [],
       "severity": "Error"
     },
     "space_before_colon": {
@@ -782,11 +999,28 @@
       "exclude": [],
       "severity": "Error"
     },
+    "sql_value_conversion": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "start_at_tab": {
       "exclude": [],
       "severity": "Error"
     },
+    "static_call_via_instance": {
+      "allowInTestclassIncludes": false,
+      "exclude": [],
+      "severity": "Error"
+    },
+    "strict_sql": {
+      "exclude": [],
+      "severity": "Error"
+    },
     "superclass_final": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "superfluous_value": {
       "exclude": [],
       "severity": "Error"
     },
@@ -795,6 +1029,10 @@
       "severity": "Error"
     },
     "tabl_enhancement_category": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "tables_declared_locally": {
       "exclude": [],
       "severity": "Error"
     },
@@ -821,6 +1059,20 @@
       "exclude": [],
       "severity": "Error"
     },
+    "unnecessary_chaining": {
+      "exclude": [],
+      "severity": "Error"
+    },
+    "unnecessary_pragma": {
+      "allowNoTextGlobal": false,
+      "exclude": [],
+      "severity": "Error"
+    },
+    "unnecessary_return": {
+      "allowEmpty": false,
+      "exclude": [],
+      "severity": "Error"
+    },
     "unreachable_code": {
       "exclude": [],
       "severity": "Error"
@@ -832,6 +1084,11 @@
     "unused_ddic": {
       "exclude": [],
       "severity": "Error"
+    },
+    "unused_macros": {
+      "exclude": [],
+      "severity": "Error",
+      "skipNames": []
     },
     "unused_methods": {
       "exclude": [],
@@ -878,7 +1135,7 @@
     }
   },
   "syntax": {
-    "errorNamespace": "^(LT?CL_|LIF_|Y|Z)",
+    "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)",
     "globalConstants": [],
     "globalMacros": [],
     "version": "v740sp08"
