@@ -685,13 +685,10 @@
       "exclude": [],
       "severity": "Error"
     },
-    "no_inline_in_optional_branches": {
-      "exclude": [],
-      "severity": "Error"
-    },
+    "no_inline_in_optional_branches": false,
     "no_prefixes": {
       "allowIsPrefixBoolean": true,
-      "constants": "^[LGM]?C.?_",
+      "constants": "^[LGM]C.?_",
       "data": "^[LGM].?_",
       "exclude": [],
       "fieldSymbols": "^<[LGM].?_",
