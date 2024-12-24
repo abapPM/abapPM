@@ -178,19 +178,7 @@
       "exclude": [],
       "severity": "Error"
     },
-    "class_attribute_names": {
-      "constants": "",
-      "exclude": [],
-      "ignoreExceptions": true,
-      "ignoreInterfaces": false,
-      "ignoreLocal": true,
-      "ignoreNames": [],
-      "ignorePatterns": [],
-      "instance": "",
-      "patternKind": "required",
-      "severity": "Error",
-      "statics": ""
-    },
+    "class_attribute_names": false,
     "classic_exceptions_overlap": {
       "exclude": [],
       "severity": "Error"
@@ -611,16 +599,7 @@
       "exclude": [],
       "severity": "Error"
     },
-    "local_variable_names": {
-      "exclude": [],
-      "expectedConstant": "^LC_.+$",
-      "expectedData": "^L._.+$",
-      "expectedFS": "^<L._.+>$",
-      "ignoreNames": [],
-      "ignorePatterns": [],
-      "patternKind": "required",
-      "severity": "Error"
-    },
+    "local_variable_names": false,
     "macro_naming": {
       "exclude": [],
       "pattern": "^_.+$",
@@ -663,18 +642,7 @@
       "exclude": [],
       "severity": "Error"
     },
-    "method_parameter_names": {
-      "changing": "^C._.+$",
-      "exclude": [],
-      "exporting": "^E._.+$",
-      "ignoreExceptions": true,
-      "ignoreNames": [],
-      "ignorePatterns": [],
-      "importing": "^I._.+$",
-      "patternKind": "required",
-      "returning": "^RESULT$",
-      "severity": "Error"
-    },
+    "method_parameter_names": false,
     "mix_returning": {
       "exclude": [],
       "severity": "Error"
