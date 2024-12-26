@@ -26,8 +26,7 @@ FORM open_gui RAISING zcx_abapgit_exception.
 
   DATA:
     action TYPE string,
-    mode   TYPE tabname,
-    router TYPE REF TO zif_abapgit_gui_event_handler.
+    mode   TYPE tabname.
 
   IF sy-batch = abap_true.
     " FUTURE: One day we will add this
@@ -56,7 +55,7 @@ ENDFORM.
 
 FORM output.
 
-  DATA excluded_commands TYPE TABLE OF sy-ucomm.
+  DATA excluded_commands TYPE STANDARD TABLE OF sy-ucomm WITH DEFAULT KEY.
 
   PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
 
@@ -104,22 +103,22 @@ ENDFORM.
 FORM adjust_toolbar USING pv_dynnr TYPE sy-dynnr.
 
   DATA:
-    ls_header               TYPE rpy_dyhead,
-    lt_containers           TYPE dycatt_tab,
-    lt_fields_to_containers TYPE dyfatc_tab,
-    lt_flow_logic           TYPE swydyflow,
-    lv_no_toolbar           LIKE ls_header-no_toolbar.
+    header               TYPE rpy_dyhead,
+    containers           TYPE dycatt_tab,
+    fields_to_containers TYPE dyfatc_tab,
+    flow_logic           TYPE swydyflow,
+    no_toolbar           LIKE header-no_toolbar.
 
   CALL FUNCTION 'RPY_DYNPRO_READ'
     EXPORTING
       progname             = sy-cprog
       dynnr                = pv_dynnr
     IMPORTING
-      header               = ls_header
+      header               = header
     TABLES
-      containers           = lt_containers
-      fields_to_containers = lt_fields_to_containers
-      flow_logic           = lt_flow_logic
+      containers           = containers
+      fields_to_containers = fields_to_containers
+      flow_logic           = flow_logic
     EXCEPTIONS
       cancelled            = 1
       not_found            = 2
@@ -130,22 +129,22 @@ FORM adjust_toolbar USING pv_dynnr TYPE sy-dynnr.
   ENDIF.
 
   " Remove toolbar on html screen
-  lv_no_toolbar = abap_true.
+  no_toolbar = abap_true.
 
-  IF ls_header-no_toolbar = lv_no_toolbar.
+  IF header-no_toolbar = no_toolbar.
     RETURN. " No change required
   ENDIF.
 
-  ls_header-no_toolbar = lv_no_toolbar.
+  header-no_toolbar = no_toolbar.
 
   CALL FUNCTION 'RPY_DYNPRO_INSERT'
     EXPORTING
-      header                 = ls_header
+      header                 = header
       suppress_exist_checks  = abap_true
     TABLES
-      containers             = lt_containers
-      fields_to_containers   = lt_fields_to_containers
-      flow_logic             = lt_flow_logic
+      containers             = containers
+      fields_to_containers   = fields_to_containers
+      flow_logic             = flow_logic
     EXCEPTIONS
       cancelled              = 1
       already_exists         = 2

@@ -253,11 +253,11 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
     " 7. Update package
     IF is_newer = abap_true.
       zcl_abappm_command_utils=>install_package(
-        registry     = registry
-        manifest     = manifest
-        package      = package
-        name         = manifest-name
-        version      = manifest-version ).
+        registry = registry
+        manifest = manifest
+        package  = package
+        name     = manifest-name
+        version  = manifest-version ).
     ENDIF.
 
     MESSAGE 'Package and dependencies successfully updated' TYPE 'S'.

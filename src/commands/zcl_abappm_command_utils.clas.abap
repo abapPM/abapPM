@@ -37,11 +37,11 @@ CLASS zcl_abappm_command_utils DEFINITION
 
     CLASS-METHODS install_package
       IMPORTING
-        !registry     TYPE string
-        !manifest     TYPE zif_abappm_types=>ty_manifest
-        !package      TYPE devclass
-        !name         TYPE string
-        !version      TYPE string
+        !registry TYPE string
+        !manifest TYPE zif_abappm_types=>ty_manifest
+        !package  TYPE devclass
+        !name     TYPE string
+        !version  TYPE string
       RAISING
         zcx_abappm_error.
 
@@ -50,7 +50,6 @@ CLASS zcl_abappm_command_utils DEFINITION
         !package TYPE devclass
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -77,7 +76,7 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    DATA(packument) = zcl_abappm_pacote=>factory(
+    result = zcl_abappm_pacote=>factory(
       registry = registry
       name     = name )->get( ).
 
