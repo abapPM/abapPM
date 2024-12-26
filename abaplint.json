@@ -114,11 +114,9 @@
     "implicit_start_of_selection": true,
     "in_statement_indentation": false,
     "indentation": {
-      "exclude": ["ZABAPPM_PASSWORD_DIALOG"],
-      "severity": "Error",
       "ignoreExceptions": true,
       "alignTryCatch": false,
-      "selectionScreenBlockIndentation": false,
+      "selectionScreenBlockIndentation": true,
       "globalClassSkipFirst": false,
       "ignoreGlobalClassDefinition": false,
       "ignoreGlobalInterface": false
@@ -128,7 +126,9 @@
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
     "keyword_case": true,
-    "line_break_multiple_parameters": true,
+    "line_break_multiple_parameters": {
+      "count": 3
+    },
     "line_break_style": true,
     "line_length": true,
     "line_only_punc": true,
@@ -156,7 +156,9 @@
     "newline_between_methods": true,
     "no_aliases": true,
     "no_chained_assignment": true,
-    "no_external_form_calls": true,
+    "no_external_form_calls": {
+      "exclude": ["ZABAPPM_FORMS"]
+    },
     "no_inline_in_optional_branches": false,
     "no_prefixes": {
       "data": "^[LGM].?_",
