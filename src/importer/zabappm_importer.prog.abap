@@ -35,8 +35,6 @@ SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME.
     p_dryrun AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF BLOCK b3.
 
-CONSTANTS c_width TYPE i VALUE 150.
-
 INITIALIZATION.
   p_defrul = zif_abappm_importer=>c_default_import_rule.
 

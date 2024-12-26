@@ -273,71 +273,71 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD f4.
 
     DATA:
-      lt_list     TYPE zif_abappm_installer_def=>ty_list,
-      lt_selected LIKE lt_list,
-      lo_popup    TYPE REF TO zcl_abappm_installer_popups,
-      lt_columns  TYPE zcl_abappm_installer_popups=>ty_alv_column_tt,
-      question    TYPE string,
-      answer      TYPE sy-input.
+      list     TYPE zif_abappm_installer_def=>ty_list,
+      selected LIKE list,
+      popup    TYPE REF TO zcl_abappm_installer_popups,
+      columns  TYPE zcl_abappm_installer_popups=>ty_alv_column_tt,
+      question TYPE string,
+      answer   TYPE sy-input.
 
     FIELD-SYMBOLS:
-      <column> LIKE LINE OF lt_columns.
+      <column> LIKE LINE OF columns.
 
     init( ).
 
-***    lt_list = db_persist->list( ).
+***    list = db_persist->list( ).
 
-    CHECK _nothing_found( lt_list ) IS INITIAL.
+    CHECK _nothing_found( list ) IS INITIAL.
 
-    APPEND INITIAL LINE TO lt_columns ASSIGNING <column>.
+    APPEND INITIAL LINE TO columns ASSIGNING <column>.
     <column>-name   = 'NAME'.
     <column>-text   = 'Name'.
     <column>-length = 30.
     <column>-key    = abap_true.
-    APPEND INITIAL LINE TO lt_columns ASSIGNING <column>.
+    APPEND INITIAL LINE TO columns ASSIGNING <column>.
     <column>-name   = 'PACK'.
     <column>-text   = 'Package'.
     <column>-length = 30.
     <column>-key    = abap_true.
-    APPEND INITIAL LINE TO lt_columns ASSIGNING <column>.
+    APPEND INITIAL LINE TO columns ASSIGNING <column>.
     <column>-name   = 'VERSION'.
     <column>-text   = 'Version'.
     <column>-length = 15.
-    APPEND INITIAL LINE TO lt_columns ASSIGNING <column>.
+    APPEND INITIAL LINE TO columns ASSIGNING <column>.
     <column>-name   = 'DESCRIPTION'.
     <column>-text   = 'Description'.
     <column>-length = 60.
 
-    CREATE OBJECT lo_popup.
+    CREATE OBJECT popup.
 
     TRY.
-        lo_popup->popup_to_select_from_list(
+        popup->popup_to_select_from_list(
           EXPORTING
-            import_list               = lt_list
+            import_list        = list
             title              = sy-title
             header_text        = |Select the { gv_name } that you want to uninstall:|
             end_column         = 150
             striped_pattern    = abap_true
             optimize_col_width = abap_false
             selection_mode     = if_salv_c_selection_mode=>single
-            columns_to_display = lt_columns
+            columns_to_display = columns
           IMPORTING
-            export_list               = lt_selected ).
+            export_list        = selected ).
       CATCH zcx_abappm_error.
         RETURN.
     ENDTRY.
 
-    IF lt_selected IS INITIAL.
+    IF selected IS INITIAL.
       RETURN.
     ENDIF.
 
-    READ TABLE lt_selected INTO result INDEX 1.
+    READ TABLE selected INTO result INDEX 1.
     ASSERT sy-subrc = 0.
 
     TRY.
         question = |Are you sure, you want to uninstall "{ result-description } ({ result-name })"?|.
 
-        answer = lo_popup->popup_to_confirm(
+        answer = popup->popup_to_confirm(
           title          = sy-title
           question       = question
           default_button = '2' ).
@@ -353,15 +353,15 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD init.
 
-    IF db_persist IS NOT BOUND.
-      IF tabname IS INITIAL AND lock IS INITIAL.
-        db_persist = zcl_abapinst_persistence=>get_instance( ).
-      ELSE.
-        db_persist = zcl_abapinst_persistence=>get_instance(
-          iv_tabname = tabname
-          iv_lock    = lock ).
-      ENDIF.
-    ENDIF.
+*    IF db_persist IS NOT BOUND.
+*      IF tabname IS INITIAL AND lock IS INITIAL.
+*        db_persist = zcl_abapinst_persistence=>get_instance( ).
+*      ELSE.
+*        db_persist = zcl_abapinst_persistence=>get_instance(
+*          iv_tabname = tabname
+*          iv_lock    = lock ).
+*      ENDIF.
+*    ENDIF.
 
     IF name IS NOT INITIAL OR names IS NOT INITIAL.
       gv_name  = name.
@@ -800,39 +800,39 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _deserialize_data.
 
     DATA:
-      lo_support   TYPE REF TO lcl_abapgit_data_supporter,
-      lo_inject    TYPE REF TO zcl_abapgit_data_injector,
-      li_config    TYPE REF TO zif_abapgit_data_config,
-      li_deser     TYPE REF TO zif_abapgit_data_deserializer,
-      ls_checks    TYPE zif_abapgit_definitions=>ty_deserialize_checks,
-      ls_overwrite TYPE LINE OF zif_abapgit_definitions=>ty_deserialize_checks-overwrite,
-      ls_result    TYPE LINE OF zif_abapgit_data_deserializer=>ty_results,
-      lt_result    TYPE zif_abapgit_data_deserializer=>ty_results.
+      support   TYPE REF TO lcl_abapgit_data_supporter,
+      inject    TYPE REF TO zcl_abapgit_data_injector,
+      config    TYPE REF TO zif_abapgit_data_config,
+      deser     TYPE REF TO zif_abapgit_data_deserializer,
+      checks    TYPE zif_abapgit_definitions=>ty_deserialize_checks,
+      overwrite TYPE LINE OF zif_abapgit_definitions=>ty_deserialize_checks-overwrite,
+      result    TYPE LINE OF zif_abapgit_data_deserializer=>ty_results,
+      results   TYPE zif_abapgit_data_deserializer=>ty_results.
 
-    CREATE OBJECT lo_support.
-*** MBT FIXME
-*    CREATE OBJECT lo_inject.
-*    lo_inject->set_supporter( lo_support ).
+    CREATE OBJECT support.
+    " FIXME:
+    "    CREATE OBJECT inject
+    "    inject->set_supporter( lo_support )
 
-    li_config = _find_remote_data_config( ).
+    config = _find_remote_data_config( ).
 
-    li_deser = zcl_abapgit_data_factory=>get_deserializer( ).
+    deser = zcl_abapgit_data_factory=>get_deserializer( ).
 
-    lt_result = li_deser->deserialize(
-      ii_config = li_config
+    results = deser->deserialize(
+      ii_config = config
       it_files  = remote_files ).
 
-    LOOP AT lt_result INTO ls_result.
-      CLEAR ls_overwrite.
-      ls_overwrite-obj_type = ls_result-type.
-      ls_overwrite-obj_name = ls_result-name.
-      ls_overwrite-decision = zif_abapgit_definitions=>c_yes.
-      COLLECT ls_overwrite INTO ls_checks-overwrite.
+    LOOP AT results INTO result.
+      CLEAR overwrite.
+      overwrite-obj_type = result-type.
+      overwrite-obj_name = result-name.
+      overwrite-decision = zif_abapgit_definitions=>c_yes.
+      COLLECT overwrite INTO checks-overwrite.
     ENDLOOP.
 
-    li_deser->actualize(
-      is_checks = ls_checks
-      it_result = lt_result ).
+    deser->actualize(
+      is_checks = checks
+      it_result = results ).
 
   ENDMETHOD.
 
@@ -853,9 +853,11 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _files.
 
     DATA:
-      progress TYPE REF TO zif_abapgit_progress,
-      xstr     TYPE xstring,
-      files    TYPE zcl_tar=>ty_files.
+      progress  TYPE REF TO zif_abapgit_progress,
+      xstr      TYPE xstring,
+      files     TYPE zcl_tar=>ty_files,
+      ls_remote LIKE LINE OF remote_files,
+      lo_tar    TYPE REF TO zcl_abappm_tar.
 
     progress = zcl_abapgit_progress=>get_instance( 100 ).
 
@@ -906,8 +908,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     IF enum_zip = c_enum_zip-registry.
 
-      DATA ls_remote LIKE LINE OF remote_files.
-      DATA lo_tar TYPE REF TO zcl_abappm_tar.
       lo_tar = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( xstr ) ).
       files = lo_tar->list( ).
 

@@ -13,10 +13,8 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !default_rule  TYPE string DEFAULT zif_abappm_importer=>c_default_import_rule
         !is_dryrun     TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
-        !from_registry TYPE abap_bool DEFAULT abap_true
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -309,13 +307,6 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
 
   METHOD run.
-
-    DATA:
-      item              TYPE zif_abappm_object=>ty_item,
-      new_package       TYPE devclass,
-      new_object        TYPE tadir-obj_name,
-      class_handler     TYPE REF TO zcl_abappm_object_clas,
-      interface_handler TYPE REF TO zcl_abappm_object_intf.
 
     " 1. Get all programs that contain IMPORT statements
     DATA(programs) = get_programs( package ).
