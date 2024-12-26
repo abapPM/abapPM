@@ -232,9 +232,9 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
 
 * FUTURE
-*      WHEN zif_abappm_gui_router=>c_action-go_tutorial.
-*        result-page  = zcl_abapgit_gui_page_tutorial=>create( ).
-*        result-state = zcl_abapgit_gui=>c_event_state-new_page.
+*      WHEN zif_abappm_gui_router=>c_action-go_tutorial
+*        result-page  = zcl_abapgit_gui_page_tutorial=>create( )
+*        result-state = zcl_abapgit_gui=>c_event_state-new_page
 
       WHEN zif_abappm_gui_router=>c_action-favorite_package.
 
@@ -354,7 +354,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
         IF settings-show_last_package = abap_true AND settings-last_package IS NOT INITIAL.
           TRY.
-              zcl_abappm_package_json=>factory( settings-last_package )->load(  ).
+              zcl_abappm_package_json=>factory( settings-last_package )->load( ).
 
               result = zcl_abappm_gui_page_package=>create( settings-last_package ).
               RETURN.
@@ -448,12 +448,12 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   METHOD toggle_favorite.
 
     TRY.
-        DATA(ls_settings) = zcl_abappm_settings=>factory( )->load( )->get( ).
+        DATA(settings) = zcl_abappm_settings=>factory( )->load( )->get( ).
 
-        READ TABLE ls_settings-package_settings ASSIGNING FIELD-SYMBOL(<package>)
+        READ TABLE settings-package_settings ASSIGNING FIELD-SYMBOL(<package>)
           WITH KEY package = package.
         IF sy-subrc = 0.
-          <package>-favorite = boolc( <package>-favorite = abap_false ).
+          <package>-favorite = xsdbool( <package>-favorite = abap_false ).
         ELSE.
           DATA(package_setting) = VALUE zif_abappm_settings=>ty_package_settings(
             package  = package
