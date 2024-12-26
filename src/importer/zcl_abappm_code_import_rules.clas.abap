@@ -63,13 +63,9 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
 
   METHOD get_import_rules.
 
-    DATA:
-      tabix  TYPE sy-tabix,
-      pos    TYPE string,
-      tokens TYPE TABLE OF stokesx,
-      rule   TYPE zif_abappm_importer=>ty_rule.
+    DATA rule TYPE zif_abappm_importer=>ty_rule.
 
-    tokens = zcl_abappm_code_importer=>scan( program-program ).
+    DATA(tokens) = zcl_abappm_code_importer=>scan( program-program ).
 
     " Process all IMPORT statements
     "
@@ -95,10 +91,10 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
     " FROM  b
     " '@sbcgua/ajson'  m
     LOOP AT tokens TRANSPORTING NO FIELDS WHERE type = 'c' AND str = 'IMPORT'.
-      tabix = sy-tabix.
+      DATA(tabix) = sy-tabix.
       CLEAR rule.
       DO 5 TIMES.
-        pos = |Tabix { tabix } Index { sy-index }|.
+        DATA(pos) = |Tabix { tabix } Index { sy-index }|.
         READ TABLE tokens ASSIGNING FIELD-SYMBOL(<token>) INDEX tabix + sy-index.
         IF sy-subrc <> 0.
           zcx_abappm_error=>raise( |Error parsing IMPORT statement. { pos }| ).

@@ -53,6 +53,12 @@ INTERFACE zif_abappm_importer PUBLIC.
     ty_packages TYPE STANDARD TABLE OF ty_package WITH KEY name.
 
   TYPES:
+    BEGIN OF ty_item,
+      obj_type TYPE tadir-object,
+      obj_name TYPE tadir-obj_name,
+    END OF ty_item.
+
+  TYPES:
     BEGIN OF ty_map_item,
       object_type    TYPE tadir-object,
       old_object     TYPE tadir-obj_name,

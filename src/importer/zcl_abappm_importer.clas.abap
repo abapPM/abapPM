@@ -22,6 +22,8 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CONSTANTS c_width TYPE i VALUE 150.
 
+    CONSTANTS c_zabappm TYPE tabname VALUE 'ZABAPPM'.
+
     CLASS-DATA is_logging TYPE abap_bool VALUE 'X'.
 
     CLASS-METHODS get_programs
@@ -60,12 +62,6 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         VALUE(result) TYPE zif_abappm_importer=>ty_map
       RAISING
         zcx_abappm_error.
-
-    CLASS-METHODS get_metadata
-      IMPORTING
-        !name         TYPE string
-      RETURNING
-        VALUE(result) TYPE zabappm.
 
     CLASS-METHODS import_objects
       IMPORTING
@@ -106,28 +102,9 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_metadata.
-
-    " For now, check if package is installed with apm
-    DATA(key)  = 'PACKAGE:%:PACKAGE_JSON'.
-    DATA(name_regex) = '"name":\s*"' && name && '"'.
-
-    SELECT * FROM zabappm INTO result WHERE keys LIKE key.
-      FIND REGEX name_regex IN result-value IGNORING CASE.
-      IF sy-subrc = 0.
-        RETURN.
-      ENDIF.
-    ENDSELECT.
-
-    " not found
-    CLEAR result.
-
-  ENDMETHOD.
-
-
   METHOD get_packages.
 
-" FIXME!
+    " FIXME!
     DATA(list) = zcl_package_json=>list( instanciate = abap_true ).
 
     IF is_logging = abap_true.
@@ -218,7 +195,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
         FROM tadir AS a
         JOIN trdir AS b
         ON a~obj_name = b~name
-        WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = sub_package AND b~subc = 'I'.
+        WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = sub_package AND b~subc = 'I' ##SUBRC_OK.
 
       IF is_logging = abap_true AND programs IS NOT INITIAL.
         WRITE: / 'PACKAGE', sub_package, AT c_width space.

@@ -94,7 +94,6 @@ CLASS zcl_abappm_command_publish DEFINITION
         VALUE(result) TYPE string
       RAISING
         zcx_abappm_error.
-
 ENDCLASS.
 
 
@@ -300,19 +299,26 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD init_package.
 
-    result = CORRESPONDING #( package_json ).
-    result-__id = package_json-name.
+    IF packument IS INITIAL.
+      result      = CORRESPONDING #( package_json ).
+      result-__id = package_json-name.
+    ELSE.
+      result = packument.
+    ENDIF.
 
+    " Update dist-tag
     " TODO: Allow publishing with other tag
     DATA(dist_tag) = VALUE zif_abappm_types=>ty_generic(
       key   = 'latest'
       value = package_json-version ).
 
+    DELETE result-dist_tags WHERE key = 'latest'.
     INSERT dist_tag INTO TABLE result-dist_tags.
 
+    " Add new version
     DATA(version) = VALUE zif_abappm_types=>ty_version( key = package_json-version ).
 
-    version-version = CORRESPONDING #( package_json ).
+    version-version                = CORRESPONDING #( package_json ).
     version-version-__id           = |{ package_json-name }@{ package_json-version }|.
     version-version-__abap_version = get_abap_version( ).
     version-version-__apm_version  = zif_abappm_version=>c_version.
