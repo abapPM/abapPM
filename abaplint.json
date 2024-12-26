@@ -76,7 +76,7 @@
     "empty_event": true,
     "empty_line_in_statement": true,
     "empty_statement": true,
-    "empty_structure": true,
+    "empty_structure": false,
     "exit_or_check": {
       "allowCheck": true,
       "allowExit": false
@@ -113,7 +113,16 @@
     "implement_methods": true,
     "implicit_start_of_selection": true,
     "in_statement_indentation": false,
-    "indentation": true,
+    "indentation": {
+      "exclude": ["ZABAPPM_PASSWORD_DIALOG"],
+      "severity": "Error",
+      "ignoreExceptions": true,
+      "alignTryCatch": false,
+      "selectionScreenBlockIndentation": false,
+      "globalClassSkipFirst": false,
+      "ignoreGlobalClassDefinition": false,
+      "ignoreGlobalInterface": false
+    },
     "inline_data_old_versions": true,
     "intf_referencing_clas": true,
     "invalid_table_index": true,
@@ -218,7 +227,9 @@
     "prefer_xsdbool": true,
     "preferred_compare_operator": true,
     "prefix_is_current_class": true,
-    "reduce_procedural_code": true,
+    "reduce_procedural_code": {
+      "maxStatements": 20
+    },
     "reduce_string_templates": true,
     "release_idoc": true,
     "remove_descriptions": true,
