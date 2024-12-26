@@ -2,30 +2,12 @@ CLASS zcl_abappm_file_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
   PUBLIC SECTION.
 
+    INTERFACES zif_abappm_file_importer.
+
     METHODS constructor
       IMPORTING
-        !item  TYPE zif_abappm_object=>ty_item
+        !item  TYPE zif_abappm_importer=>ty_item
         !files TYPE zif_abapgit_git_definitions=>ty_files_tt.
-
-    METHODS get_abap
-      IMPORTING
-        !extra        TYPE string OPTIONAL
-      RETURNING
-        VALUE(result) TYPE string_table
-      RAISING
-        zcx_abappm_error.
-
-    METHODS get_xml
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        zcx_abappm_error.
-
-    METHODS get_json
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -56,24 +38,6 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_abap.
-
-    DATA(file_data) = get_file(
-      extra     = extra
-      extension = 'abap' ).
-
-    " TODO: Replace with ZCL_CONVERT
-    TRY.
-        DATA(code) = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
-
-    SPLIT code AT cl_abap_char_utilities=>newline INTO TABLE result.
-
-  ENDMETHOD.
-
-
   METHOD get_file.
 
     IF extra IS INITIAL.
@@ -98,7 +62,25 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_json.
+  METHOD zif_abappm_file_importer~get_abap.
+
+    DATA(file_data) = get_file(
+      extra     = extra
+      extension = 'abap' ).
+
+    " TODO: Replace with ZCL_CONVERT
+    TRY.
+        DATA(code) = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
+
+    SPLIT code AT cl_abap_char_utilities=>newline INTO TABLE result.
+
+  ENDMETHOD.
+
+
+  METHOD zif_abappm_file_importer~get_json.
 
     DATA(file_data) = get_file( 'json' ).
 
@@ -112,7 +94,7 @@ CLASS zcl_abappm_file_importer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_xml.
+  METHOD zif_abappm_file_importer~get_xml.
 
     DATA(file_data) = get_file( 'xml' ).
 

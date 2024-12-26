@@ -188,7 +188,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
     DATA program TYPE progname.
 
     IF program_source IS INITIAL.
-      SELECT SINGLE name FROM trdir INTO program WHERE name = program_name.
+      SELECT SINGLE name FROM trdir INTO @program WHERE name = @program_name.
       IF sy-subrc = 0.
         READ REPORT program_name INTO result.
         IF sy-subrc <> 0.
@@ -204,7 +204,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
   METHOD scan.
 
-    DATA statements TYPE TABLE OF sstmnt.
+    DATA statements TYPE STANDARD TABLE OF sstmnt WITH DEFAULT KEY.
 
     DATA(source_code) = read(
       program_name    = program_name
@@ -216,8 +216,8 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
     ENDIF.
 
     SCAN ABAP-SOURCE source_code
-      TOKENS      INTO result
-      STATEMENTS  INTO statements
+      TOKENS INTO result
+      STATEMENTS INTO statements
       WITH ANALYSIS
       WITH COMMENTS
       WITHOUT TRMAC.

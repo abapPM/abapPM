@@ -395,7 +395,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD load_settings.
     TRY.
-        settings = zcl_abappm_settings=>factory( )->load( )->get( ).
+        settings = zcl_abappm_settings=>factory( )->get( ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " Settings don't exist (yet)
     ENDTRY.

@@ -109,9 +109,9 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
 
     " Get list of original objects
     TRY.
-        result = zcl_abapgit_factory=>get_tadir( )->read( iv_package = source_package ).
-      CATCH zcx_abapgit_exception INTO DATA(lx_error).
-        zcx_abappm_error=>raise_with_text( lx_error ).
+        result = zcl_abapgit_factory=>get_tadir( )->read( source_package ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
     " Only classes and interfaces
