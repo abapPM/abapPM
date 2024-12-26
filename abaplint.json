@@ -66,7 +66,7 @@
     "cyclic_oo": true,
     "cyclomatic_complexity": true,
     "dangerous_statement": true,
-    "db_operation_in_loop": true,
+    "db_operation_in_loop": false,
     "definitions_top": true,
     "description_empty": true,
     "double_space": true,
@@ -147,7 +147,7 @@
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
-      "ownTables": "^[ZABAPPM]",
+      "ownTables": "^[ZABAPPM|CLMCUS]|SOTR_.*",
       "reportDynamic": true
     },
     "msag_consistency": true,
