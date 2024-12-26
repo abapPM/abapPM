@@ -266,7 +266,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   METHOD jump_display_transport.
 
     TRY.
-        DATA(is_adt_jump_enabled) = zcl_abappm_settings=>factory( )->load( )->get( )-gui_settings-adt_jump_enabled.
+        DATA(is_adt_jump_enabled) = zcl_abappm_settings=>factory( )->get( )-gui_settings-adt_jump_enabled.
       CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
@@ -448,7 +448,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   METHOD toggle_favorite.
 
     TRY.
-        DATA(settings) = zcl_abappm_settings=>factory( )->load( )->get( ).
+        DATA(settings) = zcl_abappm_settings=>factory( )->get( ).
 
         READ TABLE settings-package_settings ASSIGNING FIELD-SYMBOL(<package>)
           WITH KEY package = package.
@@ -458,10 +458,10 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
           DATA(package_setting) = VALUE zif_abappm_settings=>ty_package_settings(
             package  = package
             favorite = abap_true ).
-          INSERT package_setting INTO TABLE ls_settings-package_settings.
+          INSERT package_setting INTO TABLE settings-package_settings.
         ENDIF.
 
-        zcl_abappm_settings=>factory( )->set( ls_settings )->save( ).
+        zcl_abappm_settings=>factory( )->set( settings )->save( ).
       CATCH zcx_abappm_error INTO DATA(error).
         zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.
