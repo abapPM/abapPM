@@ -83,9 +83,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
       READ TABLE list ASSIGNING FIELD-SYMBOL(<package_json>)
         WITH KEY package COMPONENTS package = <package>.
       IF sy-subrc = 0.
-        READ TABLE manifest-bundle_dependencies TRANSPORTING NO FIELDS
-          WITH TABLE KEY table_line = <package_json>-name.
-        IF sy-subrc = 0.
+        IF line_exists( manifest-bundle_dependencies[ table_line = <package_json>-name ] ).
           READ TABLE manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>)
             WITH KEY name = <package_json>-name.
           IF sy-subrc <> 0.
@@ -115,9 +113,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
     LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
       READ TABLE result TRANSPORTING NO FIELDS WITH KEY name = <bundle>.
       IF sy-subrc <> 0.
-        READ TABLE manifest-dependencies ASSIGNING <dependency>
-          WITH KEY name = <bundle>.
-        IF sy-subrc <> 0.
+        IF NOT line_exists( manifest-dependencies[ name = <bundle> ] ).
           zcx_abappm_error=>raise( 'Bundle dependency missing from dependencies' ).
         ENDIF.
         " New bundle dependency which will be added
@@ -247,6 +243,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
     " 6. Import dependencies
     zcl_abappm_importer=>run(
       package       = package
+      dependencies  = import_dependencies
       is_dryrun     = is_dryrun
       is_production = is_production ).
 

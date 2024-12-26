@@ -55,7 +55,7 @@ ENDFORM.
 
 FORM output.
 
-  DATA excluded_commands TYPE STANDARD TABLE OF sy-ucomm WITH DEFAULT KEY.
+  DATA excluded_commands TYPE STANDARD TABLE OF sy-ucomm WITH KEY table_line.
 
   PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
 

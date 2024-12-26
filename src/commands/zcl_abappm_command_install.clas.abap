@@ -70,9 +70,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     DATA(list) = zcl_abappm_package_json=>list( ).
 
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
-      READ TABLE manifest-bundle_dependencies TRANSPORTING NO FIELDS
-        WITH TABLE KEY table_line = <dependency>-name.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-name ] ).
         check_dependency(
           list       = list
           dependency = <dependency>
@@ -249,8 +247,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       version  = package_json-version ).
 
     " 7. Save package.abap.json and readme
-    package_json_init = package_json.
-    MOVE-CORRESPONDING manifest TO package_json_init.
+    package_json_init = CORRESPONDING #( manifest ).
 
     zcl_abappm_command_init=>run(
       package      = package
