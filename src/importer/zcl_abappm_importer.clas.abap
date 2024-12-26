@@ -104,8 +104,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    " FIXME!
-    DATA(list) = zcl_package_json=>list( instanciate = abap_true ).
+    DATA(list) = zcl_abappm_package_json=>list( instanciate = abap_true ).
 
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -134,16 +133,17 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           source_package = <package_json>-package
           target_package = <rule>-target_package ).
 
-        IF <rule>-version = 'latest'.
-          IF dependencies IS NOT INITIAL.
-            package-version = <dependency>-version.
-          ELSE.
-            package-version = <package_json>-version.
-          ENDIF.
-        ELSEIF <rule>-version = <package_json>-version.
-          " TODO: better error
-          zcx_abappm_error=>raise( 'Version mismatch' ).
-        ENDIF.
+        CASE <rule>-version.
+          WHEN 'latest'.
+            IF dependencies IS NOT INITIAL.
+              package-version = <dependency>-version.
+            ELSE.
+              package-version = <package_json>-version.
+            ENDIF.
+          WHEN <package_json>-version.
+            " TODO: better error
+            zcx_abappm_error=>raise( 'Version mismatch' ).
+        ENDCASE.
 
         INSERT package INTO TABLE result.
 
@@ -190,12 +190,12 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       " Find INCLUDEs containing IMPORT statements
       " FUTURE: includes are not available in BTP so this could be the source of an interface
       CLEAR programs.
-      SELECT a~obj_name AS program a~devclass AS package
-        INTO CORRESPONDING FIELDS OF TABLE programs
+      SELECT a~obj_name AS program, a~devclass AS package
+        INTO CORRESPONDING FIELDS OF TABLE @programs
         FROM tadir AS a
         JOIN trdir AS b
         ON a~obj_name = b~name
-        WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = sub_package AND b~subc = 'I' ##SUBRC_OK.
+        WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = @sub_package AND b~subc = 'I' ##SUBRC_OK.
 
       IF is_logging = abap_true AND programs IS NOT INITIAL.
         WRITE: / 'PACKAGE', sub_package, AT c_width space.

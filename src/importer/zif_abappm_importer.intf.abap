@@ -1,12 +1,11 @@
 INTERFACE zif_abappm_importer PUBLIC.
 
-  CONSTANTS:
-    " Examples for class and interface regex matching
-    " YCL_TEST -> $1 = CL, $2 = TEST
-    " ZIF_TEST -> $1 = IF, $2 = TEST
-    " /APMG/CL_TEST, $1 = CL, $2 = TEST
-    " /APMG/IF_TEST, $1 = IF, $2 = TEST
-   c_default_import_rule TYPE string VALUE '(?:\/.+\/|Y|Z)(..)(.*)'.
+  " Examples for class and interface regex matching
+  " YCL_TEST -> $1 = CL, $2 = TEST
+  " ZIF_TEST -> $1 = IF, $2 = TEST
+  " /APMG/CL_TEST, $1 = CL, $2 = TEST
+  " /APMG/IF_TEST, $1 = IF, $2 = TEST
+  CONSTANTS c_default_import_rule TYPE string VALUE '(?:\/.+\/|Y|Z)(..)(.*)'.
 
   CONSTANTS:
     BEGIN OF c_action,
@@ -41,7 +40,7 @@ INTERFACE zif_abappm_importer PUBLIC.
       name           TYPE string,
       version        TYPE string,
     END OF ty_rule,
-    ty_rules TYPE STANDARD TABLE OF ty_rule WITH DEFAULT KEY.
+    ty_rules TYPE STANDARD TABLE OF ty_rule WITH KEY old_object new_object target_package.
 
   TYPES:
     BEGIN OF ty_package,

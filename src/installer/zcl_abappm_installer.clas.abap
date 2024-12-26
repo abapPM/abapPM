@@ -113,7 +113,7 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _nothing_found
       IMPORTING
-        !list      TYPE ANY TABLE
+        !list         TYPE ANY TABLE
       RETURNING
         VALUE(result) TYPE abap_bool.
 
@@ -263,7 +263,6 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _uninstall_sots
       IMPORTING
         !it_tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
-
 ENDCLASS.
 
 
@@ -854,13 +853,13 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _files.
 
     DATA:
-      li_progress TYPE REF TO zif_abapgit_progress,
-      xstr        TYPE xstring,
-      lt_files    TYPE zcl_tar=>ty_files.
+      progress TYPE REF TO zif_abapgit_progress,
+      xstr     TYPE xstring,
+      files    TYPE zcl_tar=>ty_files.
 
-    li_progress = zcl_abapgit_progress=>get_instance( 100 ).
+    progress = zcl_abapgit_progress=>get_instance( 100 ).
 
-    li_progress->show(
+    progress->show(
       iv_text    = 'Uploading package'
       iv_current = 5 ).
 
@@ -895,47 +894,42 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     ENDCASE.
 
     " Scan for viruses and unzip
-    li_progress->show(
+    progress->show(
       iv_text    = 'Scanning package for viruses'
       iv_current = 10 ).
 
     zcl_abappm_installer_files=>virus_scan( xstr ).
 
-    li_progress->show(
+    progress->show(
       iv_text    = 'Unzipping files from package'
       iv_current = 20 ).
 
     IF enum_zip = c_enum_zip-registry.
-      DATA lx_error TYPE REF TO zcx_error.
 
-      TRY.
-          DATA ls_remote LIKE LINE OF remote_files.
-          DATA lo_tar TYPE REF TO zcl_tar.
-          lo_tar = zcl_tar=>new( )->load( zcl_tar=>new( )->gunzip( xstr ) ).
-          lt_files = lo_tar->list( ).
+      DATA ls_remote LIKE LINE OF remote_files.
+      DATA lo_tar TYPE REF TO zcl_abappm_tar.
+      lo_tar = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( xstr ) ).
+      files = lo_tar->list( ).
 
-          LOOP AT lt_files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = '0'.
-            CLEAR ls_remote.
-            IF <file>-name CA '/'.
-              FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES ls_remote-path ls_remote-filename.
-            ELSE.
-              ls_remote-filename = <file>-name.
-            ENDIF.
-            ls_remote-path = '/' && ls_remote-path.
-            ls_remote-path = replace(
-              val   = ls_remote-path
-              sub   = '/package/'
-              with  = '/' ). " packaged with npm
-            ls_remote-data = lo_tar->get( <file>-name ).
-            TRY.
-                ls_remote-sha1 = zcl_abapgit_hash=>sha1_raw( ls_remote-data ).
-              CATCH zcx_abapgit_exception ##NO_HANDLER.
-            ENDTRY.
-            INSERT ls_remote INTO TABLE remote_files.
-          ENDLOOP.
-        CATCH zcx_error INTO lx_error.
-          zcx_abappm_error=>raise_with_text( lx_error ).
-      ENDTRY.
+      LOOP AT files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = '0'.
+        CLEAR ls_remote.
+        IF <file>-name CA '/'.
+          FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES ls_remote-path ls_remote-filename.
+        ELSE.
+          ls_remote-filename = <file>-name.
+        ENDIF.
+        ls_remote-path = '/' && ls_remote-path.
+        ls_remote-path = replace(
+          val   = ls_remote-path
+          sub   = '/package/'
+          with  = '/' ). " packaged with npm
+        ls_remote-data = lo_tar->get( <file>-name ).
+        TRY.
+            ls_remote-sha1 = zcl_abapgit_hash=>sha1_raw( ls_remote-data ).
+          CATCH zcx_abapgit_exception ##NO_HANDLER.
+        ENDTRY.
+        INSERT ls_remote INTO TABLE remote_files.
+      ENDLOOP.
 
     ELSE.
       remote_files = zcl_abappm_installer_files=>unzip( xstr ).
