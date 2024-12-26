@@ -128,9 +128,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD check_packument.
 
-    READ TABLE packument-versions TRANSPORTING NO FIELDS
-      WITH KEY key = package_json-version.
-    IF sy-subrc = 0.
+    IF line_exists( packument-versions[ key = package_json-version ] ).
       zcx_abappm_error=>raise( |Version { package_json-version } already published| ).
     ENDIF.
 
@@ -302,7 +300,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD init_package.
 
-    MOVE-CORRESPONDING package_json TO result.
+    result = CORRESPONDING #( package_json ).
     result-__id = package_json-name.
 
     " TODO: Allow publishing with other tag
@@ -314,7 +312,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(version) = VALUE zif_abappm_types=>ty_version( key = package_json-version ).
 
-    MOVE-CORRESPONDING package_json TO version-version.
+    version-version = CORRESPONDING #( package_json ).
     version-version-__id           = |{ package_json-name }@{ package_json-version }|.
     version-version-__abap_version = get_abap_version( ).
     version-version-__apm_version  = zif_abappm_version=>c_version.
