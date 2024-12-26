@@ -96,7 +96,6 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
             package = <package>
             range   = <dependency>-range
             action  = zif_abappm_importer=>c_action-update ).
-          INSERT dependency INTO TABLE result.
         ELSE.
           " Dependency which is not bundled (anymore) and will be removed
           dependency = VALUE zif_abappm_importer=>ty_dependency(
@@ -104,15 +103,14 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
             version = <package_json>-version
             package = <package>
             action  = zif_abappm_importer=>c_action-remove ).
-          INSERT dependency INTO TABLE result.
         ENDIF.
+        INSERT dependency INTO TABLE result.
       ENDIF.
 
     ENDLOOP.
 
     LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
-      READ TABLE result TRANSPORTING NO FIELDS WITH KEY name = <bundle>.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( result[ name = <bundle> ] ).
         IF NOT line_exists( manifest-dependencies[ name = <bundle> ] ).
           zcx_abappm_error=>raise( 'Bundle dependency missing from dependencies' ).
         ENDIF.

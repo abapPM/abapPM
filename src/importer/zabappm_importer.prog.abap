@@ -15,24 +15,22 @@
 ************************************************************************
 REPORT zabappm_importer LINE-SIZE 255.
 
-TABLES: tadir.
+TABLES tadir.
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME.
-  PARAMETERS:
-    p_pack TYPE tadir-devclass DEFAULT '$ABAPPM'.
+  PARAMETERS p_pack TYPE tadir-devclass DEFAULT '$ABAPPM'.
 SELECTION-SCREEN END OF BLOCK b1.
 
 SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME.
   SELECT-OPTIONS:
-    so_type FOR tadir-object,
-    so_name FOR tadir-obj_name.
+    s_type FOR tadir-object,
+    s_name FOR tadir-obj_name.
 SELECTION-SCREEN END OF BLOCK b2.
 
 SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME.
   PARAMETERS:
     p_defrul TYPE string,
     p_prod   AS CHECKBOX DEFAULT 'X',
-    p_pretty AS CHECKBOX DEFAULT 'X',
     p_log    AS CHECKBOX DEFAULT 'X',
     p_dryrun AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF BLOCK b3.
@@ -50,8 +48,8 @@ START-OF-SELECTION.
   TRY.
       zcl_abappm_importer=>run(
         package       = p_pack
-        object_types  = so_type[]
-        object_names  = so_name[]
+        object_types  = s_type[]
+        object_names  = s_name[]
         default_rule  = p_defrul
         is_dryrun     = p_dryrun
         is_production = p_prod ).
@@ -62,5 +60,5 @@ START-OF-SELECTION.
 
   IF p_log = abap_true.
     SKIP.
-    WRITE: / timer->end( ).
+    WRITE / timer->end( ).
   ENDIF.

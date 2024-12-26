@@ -37,13 +37,7 @@
      <ID>S</ID>
      <KEY>P_PACK</KEY>
      <ENTRY>Package</ENTRY>
-     <LENGTH>15</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>P_PRETTY</KEY>
-     <ENTRY>Pretty Print</ENTRY>
-     <LENGTH>20</LENGTH>
+     <LENGTH>16</LENGTH>
     </item>
     <item>
      <ID>S</ID>
@@ -53,14 +47,14 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>SO_NAME</KEY>
+     <KEY>S_NAME</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
     <item>
      <ID>S</ID>
-     <KEY>SO_TYPE</KEY>
+     <KEY>S_TYPE</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
      <SPLIT>D</SPLIT>
