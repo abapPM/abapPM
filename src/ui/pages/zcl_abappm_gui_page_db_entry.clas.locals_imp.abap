@@ -126,7 +126,8 @@ CLASS lcl_json_editor IMPLEMENTATION.
       && |\n|
       && |    // return the number of sub_string occurrences\n|
       && |    get_number_of_occurrences(string, sub_string) \{\n|
-      && |        return sub_string ? string.replace(new RegExp(`[^$\{this.escape_regex_string(sub_string)\}]`, 'g'), '').length : 0\n|
+      && |        return sub_string ? string.replace(new RegExp(`[^$\{this.escape_regex_string|
+      && |(sub_string)\}]`, 'g'), '').length : 0\n|
       && |    \}\n|
       && |\n|
       && |    // return the element's children text nodes\n|
@@ -152,7 +153,8 @@ CLASS lcl_json_editor IMPLEMENTATION.
       && |        let output = ''\n|
       && |        output += `<span part="braces">\{</span><br>\n`\n|
       && |        output += Object.keys(input).map((key, index, list) => \{\n|
-      && |            return `$\{'&nbsp;'.repeat(offset+this.indent)\}<span part="key" part="key"><span part="key_quotes">\\"</span>|
+      && |            return `$\{'&nbsp;'.repeat(offset+this.indent)\}<span part="key" part="key">|
+      && |<span part="key_quotes">\\"</span>|
       && |$\{this.escape_html(key)\}<span part="key_quotes">\\"</span></span><span part="colon">:</span>|
       && |<span part="value">$\{this.format_input(input[key], offset+this.indent)\}</span>|
       && |$\{index < list.length-1 ? '<span part="comma">,</span>' : ''\}<br>\n`\n|
@@ -167,7 +169,8 @@ CLASS lcl_json_editor IMPLEMENTATION.
       && |        let output = ''\n|
       && |        output += `<span part="brackets">[</span><br>\n`\n|
       && |        output += input.map((value, index, list) => \{\n|
-      && |            return `$\{'&nbsp;'.repeat(offset+this.indent)\}<span>$\{this.format_input(value, offset+this.indent)\}</span>|
+      && |            return `$\{'&nbsp;'.repeat(offset+this.indent)\}<span>$\{this.format_input(value, |
+      && |offset+this.indent)\}</span>|
       && |$\{index < list.length-1 ? '<span part="comma">,</span>' : ''\}<br>\n`\n|
       && |        \}).join('')\n|
       && |        output += '&nbsp;'.repeat(offset)\n|

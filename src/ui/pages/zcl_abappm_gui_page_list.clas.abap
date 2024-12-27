@@ -191,19 +191,21 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     IF strlen( settings-list_settings-filter ) > prefix_length AND
         settings-list_settings-filter+0(prefix_length) = c_label_filter_prefix.
       DATA(filter_label) = settings-list_settings-filter+prefix_length.
-      IF filter_label = 'all'.
-        DELETE packages WHERE labels IS INITIAL.
-      ELSEIF filter_label = 'none'.
-        DELETE packages WHERE labels IS NOT INITIAL.
-      ELSE.
-        LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
-          DATA(tabix) = sy-tabix.
-          READ TABLE <package>-labels TRANSPORTING NO FIELDS WITH KEY table_line = filter_label.
-          IF sy-subrc <> 0.
-            DELETE packages INDEX tabix.
-          ENDIF.
-        ENDLOOP.
-      ENDIF.
+
+      CASE filter_label.
+        WHEN 'all'.
+          DELETE packages WHERE labels IS INITIAL.
+        WHEN 'none'.
+          DELETE packages WHERE labels IS NOT INITIAL.
+        WHEN OTHERS.
+          LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+            DATA(tabix) = sy-tabix.
+            READ TABLE <package>-labels TRANSPORTING NO FIELDS WITH KEY table_line = filter_label.
+            IF sy-subrc <> 0.
+              DELETE packages INDEX tabix.
+            ENDIF.
+          ENDLOOP.
+      ENDCASE.
     ELSE. " Regular filter
       DELETE packages
         WHERE package    NS settings-list_settings-filter
@@ -250,54 +252,54 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     DATA(table_schema) = NEW lcl_table_scheme( ).
 
     table_schema->add_column(
-      iv_tech_name      = 'FAVORITE'
-      iv_css_class      = 'wmin'
-      iv_allow_order_by = abap_false
+      tech_name      = 'FAVORITE'
+      css_class      = 'wmin'
+      allow_order_by = abap_false
     )->add_column(
-      iv_tech_name      = 'PACKAGE'
-      iv_display_name   = 'Package'
-      iv_css_class      = 'package'
-      iv_allow_order_by = abap_true ).
+      tech_name      = 'PACKAGE'
+      display_name   = 'Package'
+      css_class      = 'package'
+      allow_order_by = abap_true ).
 
     IF all_labels IS NOT INITIAL.
       table_schema->add_column(
-        iv_tech_name      = 'LABELS'
-        iv_display_name   = 'Labels'
-        iv_allow_order_by = abap_false ).
+        tech_name      = 'LABELS'
+        display_name   = 'Labels'
+        allow_order_by = abap_false ).
     ENDIF.
 
     table_schema->add_column(
-      iv_tech_name      = 'NAME'
-      iv_display_name   = 'Name'
-      iv_css_class      = 'name'
-      iv_allow_order_by = abap_true
+      tech_name      = 'NAME'
+      display_name   = 'Name'
+      css_class      = 'name'
+      allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'VERSION'
-      iv_display_name   = 'Version'
-      iv_css_class      = 'version'
-      iv_allow_order_by = abap_true
+      tech_name      = 'VERSION'
+      display_name   = 'Version'
+      css_class      = 'version'
+      allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'DESCRIPTION'
-      iv_display_name   = 'Description'
-      iv_css_class      = 'description'
-      iv_allow_order_by = abap_true
+      tech_name      = 'DESCRIPTION'
+      display_name   = 'Description'
+      css_class      = 'description'
+      allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'CHANGED_BY'
-      iv_display_name   = 'Changed by'
-      iv_css_class      = 'ro-detail'
-      iv_allow_order_by = abap_true
+      tech_name      = 'CHANGED_BY'
+      display_name   = 'Changed by'
+      css_class      = 'ro-detail'
+      allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'CHANGED_AT'
-      iv_display_name   = 'Changed at'
-      iv_css_class      = 'ro-detail'
-      iv_add_tz         = abap_true
-      iv_allow_order_by = abap_true
+      tech_name      = 'CHANGED_AT'
+      display_name   = 'Changed at'
+      css_class      = 'ro-detail'
+      add_tz         = abap_true
+      allow_order_by = abap_true
     )->add_column(
-      iv_tech_name      = 'GO'
-      iv_css_class      = 'ro-go wmin'
-      iv_allow_order_by = abap_false ).
+      tech_name      = 'GO'
+      css_class      = 'ro-go wmin'
+      allow_order_by = abap_false ).
 
-    result = table_schema->mt_col_spec.
+    result = table_schema->columns.
 
   ENDMETHOD.
 
@@ -467,16 +469,16 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_filter_help_hint.
 
-    DATA lt_fragments TYPE string_table.
+    DATA fragments TYPE string_table.
 
-    APPEND `Filter is applied to all text fields in the below table.` TO lt_fragments.
-    APPEND ` Search works for any portion of the text (so can be a mid part as well).` TO lt_fragments.
-    APPEND `<br>Starting query from <code>label:xxx</code> will filter appropriate label.` TO lt_fragments.
-    APPEND `Two "special" label queries are available:` TO lt_fragments.
-    APPEND ` <code>all</code> (to select all packages that have at least one label)` TO lt_fragments.
-    APPEND ` and <code>none</code> (to select unlabeled packages).` TO lt_fragments.
+    APPEND `Filter is applied to all text fields in the below table.` TO fragments.
+    APPEND ` Search works for any portion of the text (so can be a mid part as well).` TO fragments.
+    APPEND `<br>Starting query from <code>label:xxx</code> will filter appropriate label.` TO fragments.
+    APPEND `Two "special" label queries are available:` TO fragments.
+    APPEND ` <code>all</code> (to select all packages that have at least one label)` TO fragments.
+    APPEND ` and <code>none</code> (to select unlabeled packages).` TO fragments.
 
-    result = zcl_abapgit_gui_chunk_lib=>render_help_hint( concat_lines_of( table = lt_fragments ) ).
+    result = zcl_abapgit_gui_chunk_lib=>render_help_hint( concat_lines_of( table = fragments ) ).
 
   ENDMETHOD.
 
@@ -484,10 +486,12 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   METHOD render_header_bar.
 
     html->add( |<div class="repo-overview-toolbar">| ).
+
     render_filter_bar( html ).
     render_registry( html ).
     " FUTURE
-    " html->add( render_action_toolbar( ) ).
+    " html->add( render_action_toolbar( ) )
+
     html->add( |</div>| ).
 
   ENDMETHOD.
@@ -622,7 +626,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name(
       iv_package        = package-package
-      iv_suppress_title = boolc( NOT settings-list_settings-only_favorites = abap_true ) )  ).
+      iv_suppress_title = boolc( NOT settings-list_settings-only_favorites = abap_true ) ) ).
 
     " Labels
     IF all_labels IS NOT INITIAL.
@@ -693,7 +697,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     IF sy-subrc = 0.
       FIND FIRST OCCURRENCE OF REGEX 'filter=(.*)'
         IN <postdata>
-        SUBMATCHES settings-list_settings-filter.
+        SUBMATCHES settings-list_settings-filter ##SUBRC_OK.
     ENDIF.
 
     settings-list_settings-filter = condense( settings-list_settings-filter ).
@@ -840,7 +844,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    CONSTANTS lc_dummy_key TYPE string VALUE `?key=#`.
+    CONSTANTS c_dummy_key TYPE string VALUE `?key=#`.
 
     DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'toolbar-main' ).
 
@@ -849,13 +853,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_act = zif_abappm_gui_router=>c_action-apm_init
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'download-solid' ) && ' Install'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_install }{ lc_dummy_key }|
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_install }{ c_dummy_key }|
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'upload-solid' ) && ' Publish'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_publish }{ lc_dummy_key }|
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
     )->add(
       iv_txt = zcl_abapgit_html=>icon( 'times-solid' ) && ' Uninstall'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ lc_dummy_key }|
+      iv_act = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>settings( )
       io_sub = zcl_abappm_gui_menus=>settings( )

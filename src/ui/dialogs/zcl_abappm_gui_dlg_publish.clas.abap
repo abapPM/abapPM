@@ -176,7 +176,7 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
         zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.
 
-    CREATE OBJECT result.
+    result = NEW #( ).
 
     result->set(
       iv_key = c_id-package

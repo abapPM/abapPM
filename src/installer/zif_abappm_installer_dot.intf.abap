@@ -9,7 +9,7 @@ INTERFACE zif_abappm_installer_dot PUBLIC.
       git_url        TYPE string,
       target_package TYPE devclass,
     END OF ty_dependency,
-    ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH NON-UNIQUE DEFAULT KEY.
+    ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH NON-UNIQUE KEY name version.
 
   TYPES:
     BEGIN OF ty_descriptor,

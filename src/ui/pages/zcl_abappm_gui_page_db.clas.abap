@@ -349,11 +349,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<db_entry>).
       CASE <db_entry>-key_type.
-        WHEN zif_persist_apm=>c_key_type-package.
+        WHEN zif_abappm_persist_apm=>c_key_type-package.
           IF <db_entry>-key_extra = zif_abappm_persist_apm=>c_key_extra-package_json.
             package_count = package_count + 1.
           ENDIF.
-        WHEN zif_persist_apm=>c_key_type-settings.
+        WHEN zif_abappm_persist_apm=>c_key_type-settings.
           IF <db_entry>-key_name <> zif_abappm_persist_apm=>c_key_name-global_settings.
             user_count = user_count + 1.
           ENDIF.

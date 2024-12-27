@@ -153,7 +153,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
     form_data->to_struc( CHANGING cs_container = result ).
 
-    MOVE-CORRESPONDING result TO result-package_json.
+    result-package_json = CORRESPONDING #( result ).
 
   ENDMETHOD.
 

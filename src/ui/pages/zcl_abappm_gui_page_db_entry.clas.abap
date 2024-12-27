@@ -191,7 +191,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
     " TODO: Replace with
-    " html->add( lcl_json_editor=>get_javascript( ) ).
+    " html->add( lcl_json_editor=>get_javascript( ) )
 
     result = html.
 
@@ -235,9 +235,9 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
       format = cl_abap_format=>e_html_text ).
 
     IF content_type = zif_abappm_persist_apm=>c_content_type-json.
-      html->add( |<textarea rows="40" cols="200" name="value" id="editor">{ value }</textarea>| ).
+      html->add( |<textarea rows="41" cols="200" name="value" id="editor">{ value }</textarea>| ).
       " TODO: Replace with
-      " ii_html->add( |<json-editor value="{ lv_value }" indent="2"></json-editor>| ).
+      " ii_html->add( |<json-editor value="{ lv_value }" indent="2"></json-editor>| )
     ELSE.
       html->add( |<textarea rows="40" cols="200" name="value" id="editor">{ value }</textarea>| ).
     ENDIF.
@@ -267,7 +267,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   METHOD validate_and_pretty_json.
 
     TRY.
-        result = zcl_abappm_ajson=>new( )->parse(
+        result = zcl_abappm_ajson=>parse(
           iv_json            = value
           iv_keep_item_order = abap_true )->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
@@ -281,7 +281,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-switch_mode.
-        edit_mode        = boolc( edit_mode = abap_false ).
+        edit_mode        = xsdbool( edit_mode = abap_false ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
       WHEN c_action-update.
         do_update(

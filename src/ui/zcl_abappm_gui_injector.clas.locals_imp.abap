@@ -8,7 +8,7 @@ ENDCLASS.
 
 CLASS lcl_gui_services_dummy IMPLEMENTATION.
   METHOD create.
-    CREATE OBJECT result.
+    result = NEW #( ).
   ENDMETHOD.
 
   METHOD zif_abapgit_gui_services~cache_asset.

@@ -24,8 +24,7 @@ INTERFACE zif_abappm_installer_def PUBLIC.
       name TYPE ty_name,
       pack TYPE ty_pack,
       json TYPE string,
-    END OF ty_content,
-    ty_contents TYPE SORTED TABLE OF ty_content WITH UNIQUE KEY name pack.
+    END OF ty_content.
 
   TYPES:
     BEGIN OF ty_version,
@@ -53,7 +52,6 @@ INTERFACE zif_abappm_installer_def PUBLIC.
       installed_at    TYPE timestamp,
       updated_by      TYPE xubname,
       updated_at      TYPE timestamp,
-    END OF ty_inst,
-    ty_list TYPE STANDARD TABLE OF ty_inst WITH KEY name pack.
+    END OF ty_inst.
 
 ENDINTERFACE.

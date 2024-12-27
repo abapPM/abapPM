@@ -148,25 +148,20 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_event_handler~on_event.
 
-    DATA:
-      lv_path     TYPE string,
-      lv_filename TYPE string,
-      li_fe_serv  TYPE REF TO zif_abapgit_frontend_services.
-
     CASE ii_event->mv_action.
       WHEN c_action-save.
 
-        CONCATENATE 'apm_Debug_Info_' sy-datlo '_' sy-timlo '.html' INTO lv_filename.
+        DATA(filename) = |apm_Debug_Info_{ sy-datlo }_{ sy-timlo }.html|.
 
-        li_fe_serv = zcl_abapgit_ui_factory=>get_frontend_services( ).
+        DATA(frontend_services) = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
-        lv_path = li_fe_serv->show_file_save_dialog(
+        DATA(path) = frontend_services->show_file_save_dialog(
           iv_title            = 'apm - Debug Info'
           iv_extension        = 'html'
-          iv_default_filename = lv_filename ).
+          iv_default_filename = filename ).
 
-        li_fe_serv->file_download(
-          iv_path = lv_path
+        frontend_services->file_download(
+          iv_path = path
           iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( html_for_download ) ).
 
         MESSAGE 'apm debug info successfully saved' TYPE 'S'.

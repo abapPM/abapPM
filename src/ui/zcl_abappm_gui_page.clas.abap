@@ -488,7 +488,9 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
 
   METHOD zif_abapgit_gui_modal~is_modal.
-    rv_yes = boolc( page_control-show_as_modal = abap_true ).
+
+    result = xsdbool( page_control-show_as_modal = abap_true ).
+
   ENDMETHOD.
 
 
