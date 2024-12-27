@@ -64,27 +64,23 @@ CLASS zcl_abappm_gui_hotkey_ctl IMPLEMENTATION.
 
   METHOD render_scripts.
 
-    DATA lv_json TYPE string.
+    DATA(json) = `{`.
 
-    FIELD-SYMBOLS: <hotkey> LIKE LINE OF hotkeys.
-
-    lv_json = `{`.
-
-    LOOP AT hotkeys ASSIGNING <hotkey>.
+    LOOP AT hotkeys ASSIGNING FIELD-SYMBOL(<hotkey>).
 
       IF sy-tabix > 1.
-        lv_json = lv_json && |,|.
+        json = json && |,|.
       ENDIF.
 
-      lv_json = lv_json && |  "{ <hotkey>-hotkey }" : "{ <hotkey>-action }" |.
+      json = json && |  "{ <hotkey>-hotkey }" : "{ <hotkey>-action }" |.
 
     ENDLOOP.
 
-    lv_json = lv_json && `}`.
+    json = json && `}`.
 
     result = zcl_abapgit_html=>create( ).
     result->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
-    result->add( |setKeyBindings({ lv_json });| ).
+    result->add( |setKeyBindings({ json });| ).
 
   ENDMETHOD.
 

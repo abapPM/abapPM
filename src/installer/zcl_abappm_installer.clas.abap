@@ -36,13 +36,6 @@ CLASS zcl_abappm_installer DEFINITION
         full    TYPE i VALUE 3,
       END OF c_enum_folder_logic.
 
-    CLASS-METHODS init
-      IMPORTING
-        !tabname TYPE tabname OPTIONAL
-        !lock    TYPE viewname OPTIONAL
-        !name    TYPE string OPTIONAL
-        !names   TYPE string OPTIONAL.
-
     CLASS-METHODS install
       IMPORTING
         !apm_name          TYPE string OPTIONAL
@@ -56,12 +49,6 @@ CLASS zcl_abappm_installer DEFINITION
         !devlayer          TYPE devlayer OPTIONAL
         !enum_transport    TYPE i OPTIONAL
         !transport         TYPE trkorr OPTIONAL
-*        !user              TYPE char255 OPTIONAL
-*        !password          TYPE char255 OPTIONAL
-*        !proxy_host        TYPE char255 OPTIONAL
-*        !proxy_service     TYPE char5 OPTIONAL
-*        !proxy_user        TYPE char255 OPTIONAL
-*        !proxy_password    TYPE char255 OPTIONAL
         !enum_folder_logic TYPE i OPTIONAL
       RAISING
         zcx_abappm_error.
@@ -74,15 +61,6 @@ CLASS zcl_abappm_installer DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS list
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS f4
-      RETURNING
-        VALUE(result) TYPE zif_abappm_installer_def=>ty_inst
-      RAISING
-        zcx_abappm_error.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -91,13 +69,10 @@ CLASS zcl_abappm_installer DEFINITION
         name    TYPE string,
         version TYPE string,
       END OF gs_apm,
-      db_persist    TYPE REF TO zcl_abapinst_persistence,
       remote_files  TYPE zif_abapgit_git_definitions=>ty_files_tt,
       install_data  TYPE zif_abappm_installer_def=>ty_inst,
       dot_abapgit   TYPE REF TO zcl_abapgit_dot_abapgit,
       log           TYPE REF TO zif_abapgit_log,
-      gv_name       TYPE string,
-      gv_names      TYPE string,
       clmcus_backup TYPE STANDARD TABLE OF clmcus WITH DEFAULT KEY.
 
     CONSTANTS:
@@ -111,23 +86,11 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _clear.
 
-    CLASS-METHODS _nothing_found
-      IMPORTING
-        !list         TYPE ANY TABLE
-      RETURNING
-        VALUE(result) TYPE abap_bool.
-
     CLASS-METHODS _files
       IMPORTING
         !enum_zip TYPE i
         !name     TYPE char255 OPTIONAL
         !data     TYPE xstring OPTIONAL
-*        !user           TYPE char255 OPTIONAL
-*        !password       TYPE char255 OPTIONAL
-*        !proxy_host     TYPE char255 OPTIONAL
-*        !proxy_service  TYPE char5 OPTIONAL
-*        !proxy_user     TYPE char255 OPTIONAL
-*        !proxy_password TYPE char255 OPTIONAL
       RAISING
         zcx_abappm_error.
 
@@ -141,12 +104,6 @@ CLASS zcl_abappm_installer DEFINITION
         !package      TYPE devclass OPTIONAL
         !dlvunit      TYPE dlvunit OPTIONAL
         !devlayer     TYPE devlayer OPTIONAL
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _check
-      IMPORTING
-        !force TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
@@ -199,23 +156,6 @@ CLASS zcl_abappm_installer DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    CLASS-METHODS _save
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _load
-      IMPORTING
-        !name         TYPE zif_abappm_installer_def=>ty_name OPTIONAL
-        !pack         TYPE zif_abappm_installer_def=>ty_pack OPTIONAL
-      RETURNING
-        VALUE(result) TYPE zif_abappm_installer_def=>ty_inst
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _delete
-      RAISING
-        zcx_abappm_error.
-
     CLASS-METHODS _log_start.
 
     CLASS-METHODS _log_end
@@ -228,7 +168,7 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _find_remote_dot_abapgit
       IMPORTING
-        !it_remote    TYPE zif_abapgit_git_definitions=>ty_files_tt
+        !remote       TYPE zif_abapgit_git_definitions=>ty_files_tt
       RETURNING
         VALUE(result) TYPE REF TO zcl_abapgit_dot_abapgit
       RAISING
@@ -236,7 +176,7 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _find_remote_dot_apack
       IMPORTING
-        !it_remote    TYPE zif_abapgit_git_definitions=>ty_files_tt
+        !remote       TYPE zif_abapgit_git_definitions=>ty_files_tt
       RETURNING
         VALUE(result) TYPE REF TO zcl_abapgit_dot_abapgit
       RAISING
@@ -254,15 +194,15 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _check_uninstalled
       IMPORTING
-        !it_tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     CLASS-METHODS _uninstall_sotr
       IMPORTING
-        !it_tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     CLASS-METHODS _uninstall_sots
       IMPORTING
-        !it_tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
 ENDCLASS.
 
 
@@ -270,116 +210,10 @@ ENDCLASS.
 CLASS zcl_abappm_installer IMPLEMENTATION.
 
 
-  METHOD f4.
-
-    DATA:
-      list     TYPE zif_abappm_installer_def=>ty_list,
-      selected LIKE list,
-      popup    TYPE REF TO zcl_abappm_installer_popups,
-      columns  TYPE zcl_abappm_installer_popups=>ty_alv_column_tt,
-      question TYPE string,
-      answer   TYPE sy-input.
-
-    FIELD-SYMBOLS:
-      <column> LIKE LINE OF columns.
-
-    init( ).
-
-***    list = db_persist->list( ).
-
-    CHECK _nothing_found( list ) IS INITIAL.
-
-    APPEND INITIAL LINE TO columns ASSIGNING <column>.
-    <column>-name   = 'NAME'.
-    <column>-text   = 'Name'.
-    <column>-length = 30.
-    <column>-key    = abap_true.
-    APPEND INITIAL LINE TO columns ASSIGNING <column>.
-    <column>-name   = 'PACK'.
-    <column>-text   = 'Package'.
-    <column>-length = 30.
-    <column>-key    = abap_true.
-    APPEND INITIAL LINE TO columns ASSIGNING <column>.
-    <column>-name   = 'VERSION'.
-    <column>-text   = 'Version'.
-    <column>-length = 15.
-    APPEND INITIAL LINE TO columns ASSIGNING <column>.
-    <column>-name   = 'DESCRIPTION'.
-    <column>-text   = 'Description'.
-    <column>-length = 60.
-
-    CREATE OBJECT popup.
-
-    TRY.
-        popup->popup_to_select_from_list(
-          EXPORTING
-            import_list        = list
-            title              = sy-title
-            header_text        = |Select the { gv_name } that you want to uninstall:|
-            end_column         = 150
-            striped_pattern    = abap_true
-            optimize_col_width = abap_false
-            selection_mode     = if_salv_c_selection_mode=>single
-            columns_to_display = columns
-          IMPORTING
-            export_list        = selected ).
-      CATCH zcx_abappm_error.
-        RETURN.
-    ENDTRY.
-
-    IF selected IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    READ TABLE selected INTO result INDEX 1.
-    ASSERT sy-subrc = 0.
-
-    TRY.
-        question = |Are you sure, you want to uninstall "{ result-description } ({ result-name })"?|.
-
-        answer = popup->popup_to_confirm(
-          title          = sy-title
-          question       = question
-          default_button = '2' ).
-
-        IF answer <> '1'.
-          CLEAR result.
-        ENDIF.
-      CATCH zcx_abappm_error ##NO_HANDLER.
-    ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD init.
-
-*    IF db_persist IS NOT BOUND.
-*      IF tabname IS INITIAL AND lock IS INITIAL.
-*        db_persist = zcl_abapinst_persistence=>get_instance( ).
-*      ELSE.
-*        db_persist = zcl_abapinst_persistence=>get_instance(
-*          iv_tabname = tabname
-*          iv_lock    = lock ).
-*      ENDIF.
-*    ENDIF.
-
-    IF name IS NOT INITIAL OR names IS NOT INITIAL.
-      gv_name  = name.
-      gv_names = names.
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD install.
-
-    DATA:
-      lx_error TYPE REF TO zcx_abapgit_exception.
 
     gs_apm-name    = apm_name.
     gs_apm-version = apm_version.
-
-    init( ).
 
     TRY.
         _clear( ).
@@ -392,20 +226,12 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           enum_zip       = enum_zip
           name           = name
           data           = data ).
-*          user           = user
-*          password       = password
-*          proxy_host     = proxy_host
-*          proxy_service  = proxy_service
-*          proxy_user     = proxy_user
-*          proxy_password = proxy_password ).
 
         _packaging( ).
 
         _sap_package(
           enum_package = enum_package
           package      = package ).
-
-        _check( ).
 
         _folder_logic( enum_folder_logic ).
 
@@ -421,155 +247,27 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _deserialize_data( ).
 
-      CATCH zcx_abapgit_exception INTO lx_error.
+      CATCH zcx_abapgit_exception INTO DATA(error).
         _transport_reset( ).
 
-        log->add_exception( lx_error ).
+        log->add_exception( error ).
     ENDTRY.
 
     TRY.
         _log_end( ).
 
-        IF gs_apm-name IS INITIAL.
-          _save( ).
-        ENDIF.
-
         _restore_messages( ).
 
         _final_message( 'Installation' ).
 
-      CATCH zcx_abapgit_exception INTO lx_error.
+      CATCH zcx_abapgit_exception INTO error.
         ASSERT 1 = 2.
     ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD list.
-
-    DATA:
-      list         TYPE zif_abappm_installer_def=>ty_list,
-      table        TYPE REF TO cl_salv_table,
-      column_ref   TYPE salv_s_column_ref,
-      columns_ref  TYPE salv_t_column_ref,
-      column_table TYPE REF TO cl_salv_column_table.
-
-    init( ).
-
-***    list = db_persist->list( ).
-
-    CHECK _nothing_found( list ) IS INITIAL.
-
-    LOOP AT list ASSIGNING FIELD-SYMBOL(<list>).
-      CASE <list>-status.
-        WHEN space.
-          <list>-status = icon_led_inactive.
-        WHEN c_success.
-          <list>-status = icon_led_green.
-        WHEN c_warning.
-          <list>-status = icon_led_yellow.
-        WHEN OTHERS.
-          <list>-status = icon_led_red.
-      ENDCASE.
-    ENDLOOP.
-
-    TRY.
-        cl_salv_table=>factory(
-          IMPORTING
-            r_salv_table = table
-          CHANGING
-            t_table      = list ).
-
-        DATA(functions) = table->get_functions( ).
-        functions->set_all( ).
-
-        DATA(columns_table) = table->get_columns( ).
-        columns_table->set_optimize( ).
-
-        DATA(column) = columns_table->get_column( 'NAME' ).
-        column->set_medium_text( 'Name' ).
-        column->set_output_length( 30 ).
-        column_table ?= columns_table->get_column( 'NAME' ).
-        column_table->set_key( ).
-
-        column = columns_table->get_column( 'PACK' ).
-        column->set_medium_text( 'SAP Package' ).
-        column->set_output_length( 30 ).
-        column_table ?= columns_table->get_column( 'PACK' ).
-        column_table->set_key( ).
-
-        column = columns_table->get_column( 'VERSION' ).
-        column->set_medium_text( 'Version' ).
-        column->set_output_length( 12 ).
-
-        columns_ref = columns_table->get( ).
-        LOOP AT columns_ref INTO column_ref WHERE columnname CP 'SEM_VERSION-*'.
-          column_ref-r_column->set_technical( ).
-        ENDLOOP.
-
-        column = columns_table->get_column( 'STATUS' ).
-        column->set_medium_text( 'Status' ).
-        column->set_output_length( 6 ).
-
-        column = columns_table->get_column( 'DESCRIPTION' ).
-        column->set_medium_text( 'Description' ).
-        column->set_output_length( 60 ).
-
-        column = columns_table->get_column( 'SOURCE_TYPE' ).
-        column->set_medium_text( 'Type' ).
-        column->set_output_length( 10 ).
-
-        column = columns_table->get_column( 'SOURCE_NAME' ).
-        column->set_medium_text( 'Source' ).
-        column->set_output_length( 50 ).
-
-        column = columns_table->get_column( 'TRANSPORT' ).
-        column->set_medium_text( 'Transport' ).
-        column->set_output_length( 12 ).
-
-        column = columns_table->get_column( 'FOLDER_LOGIC' ).
-        column->set_medium_text( 'Folder Logic' ).
-        column->set_output_length( 10 ).
-
-        column = columns_table->get_column( 'INSTALLED_LANGU' ).
-        column->set_medium_text( 'Installed Language' ).
-        column->set_output_length( 12 ).
-
-        column = columns_table->get_column( 'INSTALLED_BY' ).
-        column->set_medium_text( 'Installed By' ).
-        column->set_output_length( 12 ).
-
-        column = columns_table->get_column( 'INSTALLED_AT' ).
-        column->set_short_text( 'Installed' ).
-        column->set_medium_text( 'Installed At' ).
-        column->set_output_length( 18 ).
-
-        column = columns_table->get_column( 'UPDATED_BY' ).
-        column->set_medium_text( 'Updated By' ).
-        column->set_output_length( 12 ).
-
-        column = columns_table->get_column( 'UPDATED_AT' ).
-        column->set_short_text( 'Updated' ).
-        column->set_medium_text( 'Updated At' ).
-        column->set_output_length( 18 ).
-
-        DATA(disp_settings) = table->get_display_settings( ).
-        disp_settings->set_list_header( sy-title ).
-        disp_settings->set_fit_column_to_table_size( ).
-
-        table->display( ).
-      CATCH cx_salv_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
-
-  ENDMETHOD.
-
-
   METHOD uninstall.
-
-    IF apm IS INITIAL.
-      init( ).
-    ENDIF.
 
     TRY.
         _clear( ).
@@ -579,14 +277,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         _system_check( ).
 
         IF apm IS INITIAL.
-          install_data = _load(
-            name = name
-            pack = pack ).
-
-          IF install_data IS INITIAL.
-            zcx_abappm_error=>raise( |Package { name } ({ pack }) not found| ).
-          ENDIF.
-
           " TODO: needs to work for apm
           _transport( c_enum_transport-prompt ).
         ELSE.
@@ -624,14 +314,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _check_uninstalled( tadir ).
 
-        IF apm IS INITIAL.
-          IF install_data-status = c_success.
-            _delete( ).
-          ELSE.
-            _save( ).
-          ENDIF.
-        ENDIF.
-
         _restore_messages( ).
 
         _final_message( 'Uninstall' ).
@@ -643,50 +325,20 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _check.
-
-    DATA install_local TYPE zif_abappm_installer_def=>ty_inst.
-
-    IF gs_apm-name IS INITIAL.
-      install_local = _load(
-        name = install_data-name
-        pack = install_data-pack ).
-
-      IF install_local IS INITIAL.
-
-        install_local = _load( pack = install_data-pack ).
-
-        IF install_local IS NOT INITIAL.
-          zcx_abappm_error=>raise( |SAP package { install_data-pack } already contains a different { gv_name }| ).
-        ENDIF.
-
-      ELSE.
-
-        _check_version(
-          new_version       = install_data-sem_version
-          installed_version = install_local-sem_version
-          force             = force ).
-
-      ENDIF.
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD _check_uninstalled.
 
     DATA:
       msg      TYPE string,
-      ls_tadir LIKE LINE OF it_tadir,
-      lt_tadir LIKE it_tadir.
+      ls_tadir LIKE LINE OF tadir,
+      lt_tadir LIKE tadir.
 
-    CHECK it_tadir IS NOT INITIAL.
+    CHECK tadir IS NOT INITIAL.
 
     SELECT pgmid object obj_name FROM tadir INTO CORRESPONDING FIELDS OF TABLE lt_tadir
-      FOR ALL ENTRIES IN it_tadir
-      WHERE pgmid    = it_tadir-pgmid
-        AND object   = it_tadir-object
-        AND obj_name = it_tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
+      FOR ALL ENTRIES IN tadir
+      WHERE pgmid    = tadir-pgmid
+        AND object   = tadir-object
+        AND obj_name = tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
     IF sy-subrc = 0.
       LOOP AT lt_tadir INTO ls_tadir WHERE object <> 'DEVC'.
         EXIT.
@@ -774,15 +426,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _delete.
-
-***    db_persist->delete(
-***      name = install_data-name
-***      pack = install_data-pack ).
-
-  ENDMETHOD.
-
-
   METHOD _deserialize_data.
 
     DATA:
@@ -853,13 +496,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       WHEN c_enum_zip-internet.
         install_data-source_type = 'INTERNET'.
         package_data = zcl_abappm_installer_files=>load_internet( CONV string( name ) ).
-*          url            = |{ name }| )
-*          user           = |{ user }|
-*          password       = |{ password }|
-*          proxy_host     = |{ proxy_host }|
-*          proxy_port     = |{ proxy_service }|
-*          proxy_user     = |{ proxy_user }|
-*          proxy_password = |{ proxy_password }| )
       WHEN c_enum_zip-local.
         install_data-source_type = 'LOCAL'.
         package_data = zcl_abappm_installer_files=>load_local( name ).
@@ -873,48 +509,34 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         install_data-source_type = 'REGISTRY'.
         package_data = data.
       WHEN OTHERS.
-        zcx_abappm_error=>raise( |Unknown source for { gv_name }| ).
+        zcx_abappm_error=>raise( |Unknown source for package| ).
+    ENDCASE.
+
+    progress->show(
+      iv_text    = 'Unpacking files from package'
+      iv_current = 10 ).
+
+    CASE enum_zip.
+      WHEN c_enum_zip-internet.
+        remote_files = zcl_abappm_installer_files=>unzip( package_data ).
+      WHEN c_enum_zip-local.
+        remote_files = zcl_abappm_installer_files=>unzip( package_data ).
+      WHEN c_enum_zip-server.
+        remote_files = zcl_abappm_installer_files=>unzip( package_data ).
+      WHEN c_enum_zip-data.
+        remote_files = zcl_abappm_installer_files=>unzip( package_data ).
+      WHEN c_enum_zip-registry.
+        remote_files = zcl_abappm_installer_files=>untar( package_data ).
+      WHEN OTHERS.
+        zcx_abappm_error=>raise( |Unknown source for package| ).
     ENDCASE.
 
     " Scan for viruses and unzip
     progress->show(
-      iv_text    = 'Scanning package for viruses'
-      iv_current = 10 ).
-
-    zcl_abappm_installer_files=>virus_scan( package_data ).
-
-    progress->show(
-      iv_text    = 'Unzipping files from package'
+      iv_text    = 'Scanning files for viruses'
       iv_current = 20 ).
 
-    IF enum_zip = c_enum_zip-registry.
-
-      DATA(tar) = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( package_data ) ).
-      DATA(files) = tar->list( ).
-
-      LOOP AT files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = '0'.
-        DATA(remote_file) = VALUE zif_abapgit_git_definitions=>ty_file( ).
-        IF <file>-name CA '/'.
-          FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES remote_file-path remote_file-filename.
-        ELSE.
-          remote_file-filename = <file>-name.
-        ENDIF.
-        remote_file-path = '/' && remote_file-path.
-        remote_file-path = replace(
-          val   = remote_file-path
-          sub   = '/package/'
-          with  = '/' ). " packaged with npm
-        remote_file-data = tar->get( <file>-name ).
-        TRY.
-            remote_file-sha1 = zcl_abapgit_hash=>sha1_raw( remote_file-data ).
-          CATCH zcx_abapgit_exception ##NO_HANDLER.
-        ENDTRY.
-        INSERT remote_file INTO TABLE remote_files.
-      ENDLOOP.
-
-    ELSE.
-      remote_files = zcl_abappm_installer_files=>unzip( package_data ).
-    ENDIF.
+    zcl_abappm_installer_files=>virus_scan( package_data ).
 
   ENDMETHOD.
 
@@ -955,9 +577,9 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_dot_abapgit.
 
-    FIELD-SYMBOLS: <remote> LIKE LINE OF it_remote.
+    FIELD-SYMBOLS: <remote> LIKE LINE OF remote.
 
-    READ TABLE it_remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
+    READ TABLE remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
       path     = zif_abapgit_definitions=>c_root_dir
       filename = zif_abapgit_definitions=>c_dot_abapgit.
     IF sy-subrc = 0.
@@ -967,7 +589,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           zcx_abappm_error=>raise( 'Error decoding .abapgit.xml' ).
       ENDTRY.
     ELSE.
-      zcx_abappm_error=>raise( |Error finding .abapgit.xml - Is this an { gv_name }?| ).
+      zcx_abappm_error=>raise( |Error finding .abapgit.xml - Is this an package?| ).
     ENDIF.
 
   ENDMETHOD.
@@ -975,13 +597,13 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_dot_apack.
 
-    FIELD-SYMBOLS: <remote> LIKE LINE OF it_remote.
+    FIELD-SYMBOLS: <remote> LIKE LINE OF remote.
 
-    READ TABLE it_remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
+    READ TABLE remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
       path     = zif_abapgit_definitions=>c_root_dir
       filename = '.apack-manifest.xml'.
     IF sy-subrc = 0.
-      zcx_abappm_error=>raise( |Please migrate APACK to { gv_name } setting| ).
+      zcx_abappm_error=>raise( |Please migrate APACK to package setting| ).
     ENDIF.
 
   ENDMETHOD.
@@ -1012,15 +634,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       WHEN OTHERS.
         zcx_abappm_error=>raise( 'Unknown folder logic' ).
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD _load.
-
-***    result = db_persist->select(
-***      name = name
-***      pack = pack ).
 
   ENDMETHOD.
 
@@ -1064,19 +677,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _nothing_found.
-
-    DATA msg TYPE string.
-
-    IF list IS INITIAL.
-      msg = |No { gv_names } found|.
-      MESSAGE msg TYPE c_success.
-      result = abap_true.
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD _packaging.
 
     DATA:
@@ -1101,9 +701,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _restore_messages.
 
     DELETE FROM clmcus WHERE username = sy-uname ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
     INSERT clmcus FROM TABLE clmcus_backup ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
 
   ENDMETHOD.
 
@@ -1124,49 +722,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     ENDCASE.
 
     install_data-pack = package.
-
-  ENDMETHOD.
-
-
-  METHOD _save.
-
-    GET TIME STAMP FIELD DATA(timestamp).
-
-    DATA(install_local) = _load(
-      name = install_data-name
-      pack = install_data-pack ).
-
-    IF install_local IS INITIAL.
-      install_local-name            = install_data-name.
-      install_local-pack            = install_data-pack.
-      install_local-version         = install_data-version.
-      install_local-sem_version     = install_data-sem_version.
-      install_local-description     = install_data-description.
-      install_local-source_type     = install_data-source_type.
-      install_local-source_name     = install_data-source_name.
-      install_local-transport       = install_data-transport.
-      install_local-folder_logic    = install_data-folder_logic.
-      install_local-installed_langu = install_data-installed_langu.
-      install_local-installed_by    = sy-uname.
-      install_local-installed_at    = timestamp.
-      install_local-status          = install_data-status.
-
-***      db_persist->insert( install_local ).
-    ELSE.
-      install_local-version         = install_data-version.
-      install_local-sem_version     = install_data-sem_version.
-      install_local-description     = install_data-description.
-      install_local-source_type     = install_data-source_type.
-      install_local-source_name     = install_data-source_name.
-      install_local-transport       = install_data-transport.
-      install_local-folder_logic    = install_data-folder_logic.
-      install_local-installed_langu = install_data-installed_langu.
-      install_local-updated_by      = sy-uname.
-      install_local-updated_at      = timestamp.
-      install_local-status          = install_data-status.
-
-***      db_persist->update( install_local ).
-    ENDIF.
 
   ENDMETHOD.
 
@@ -1351,7 +906,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     DATA(use_korr) = xsdbool( install_data-transport IS NOT INITIAL ).
 
-    LOOP AT it_tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
+    LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
       SELECT * FROM sotr_head INTO TABLE @DATA(sotr_head)
         WHERE paket = @<tadir>-obj_name.
@@ -1405,7 +960,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     DATA(use_korr) = xsdbool( install_data-transport IS NOT INITIAL ).
 
-    LOOP AT it_tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
+    LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
       SELECT * FROM sotr_headu INTO TABLE @DATA(sotr_head)
         WHERE paket = @<tadir>-obj_name.

@@ -49,6 +49,14 @@ CLASS zcl_abappm_installer_files DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS untar
+      IMPORTING
+        !xstr         TYPE xstring
+      RETURNING
+        VALUE(result) TYPE zif_abapgit_git_definitions=>ty_files_tt
+      RAISING
+        zcx_abappm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -280,6 +288,40 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
 
     CONCATENATE LINES OF data_table INTO result IN BYTE MODE.
     result = result(file_size).
+
+  ENDMETHOD.
+
+
+  METHOD untar.
+
+    DATA(tar) = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( xstr ) ).
+    DATA(files) = tar->list( ).
+
+    LOOP AT files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = '0'.
+
+      DATA(file) = VALUE zif_abapgit_git_definitions=>ty_file( ).
+
+      IF <file>-name CA '/'.
+        FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES file-path file-filename.
+      ELSE.
+        file-filename = <file>-name.
+      ENDIF.
+
+      file-path = '/' && file-path.
+      file-path = replace(
+        val   = file-path
+        sub   = '/package/'
+        with  = '/' ). " packaged with npm
+      file-data = tar->get( <file>-name ).
+
+      TRY.
+          file-sha1 = zcl_abapgit_hash=>sha1_raw( file-data ).
+        CATCH zcx_abapgit_exception ##NO_HANDLER.
+      ENDTRY.
+
+      INSERT file INTO TABLE result.
+
+    ENDLOOP.
 
   ENDMETHOD.
 

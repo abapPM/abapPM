@@ -22,7 +22,7 @@ INTERFACE zif_abappm_installer_dot PUBLIC.
       logo           TYPE string,
     END OF ty_descriptor.
 
-  TYPES:
+  TYPES
     BEGIN OF ty_packaging.
       INCLUDE TYPE ty_descriptor.
   TYPES:

@@ -182,8 +182,6 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
   METHOD get_version_details.
 
-    DATA lo_frontend_serv TYPE REF TO zif_abapgit_frontend_services.
-
     result = zif_abappm_version=>c_version. " apm
 
     IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
@@ -192,17 +190,17 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
       result = result && ` - Developer Version`.
     ENDIF.
 
-    lo_frontend_serv = zcl_abapgit_ui_factory=>get_frontend_services( ).
+    DATA(frontend_services) = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
     CASE abap_true.
-      WHEN lo_frontend_serv->is_webgui( ).
+      WHEN frontend_services->is_webgui( ).
         result = result && ` - Web`.
-      WHEN lo_frontend_serv->is_sapgui_for_windows( ).
+      WHEN frontend_services->is_sapgui_for_windows( ).
         result = result && ` - Win`.
-      WHEN lo_frontend_serv->is_sapgui_for_java( ).
+      WHEN frontend_services->is_sapgui_for_java( ).
         result = result && ` - Java`.
       WHEN OTHERS.
-* eg. open-abap?
+        " eg. open-abap?
         result = result && ` - Unknown`.
     ENDCASE.
 
@@ -276,10 +274,9 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
   METHOD is_edge_control_warning_needed.
 
     DATA:
-      lv_gui_release       TYPE zif_abapgit_frontend_services=>ty_gui_release,
-      lv_gui_sp            TYPE zif_abapgit_frontend_services=>ty_gui_sp,
-      lv_gui_patch         TYPE zif_abapgit_frontend_services=>ty_gui_patch,
-      li_frontend_services TYPE REF TO zif_abapgit_frontend_services.
+      gui_release TYPE zif_abapgit_frontend_services=>ty_gui_release,
+      gui_sp      TYPE zif_abapgit_frontend_services=>ty_gui_sp,
+      gui_patch   TYPE zif_abapgit_frontend_services=>ty_gui_patch.
 
     " With SAP GUI 8.00 PL3 and 7.70 PL13 Edge browser control is basically working.
     " For lower releases we render the browser control warning
@@ -288,19 +285,19 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     result = abap_true.
 
     TRY.
-        li_frontend_services = zcl_abapgit_ui_factory=>get_frontend_services( ).
-        li_frontend_services->get_gui_version(
-          IMPORTING
-            ev_gui_release        = lv_gui_release
-            ev_gui_sp             = lv_gui_sp
-            ev_gui_patch          = lv_gui_patch ).
+        DATA(frontend_services) = zcl_abapgit_ui_factory=>get_frontend_services( ).
 
+        frontend_services->get_gui_version(
+          IMPORTING
+            ev_gui_release        = gui_release
+            ev_gui_sp             = gui_sp
+            ev_gui_patch          = gui_patch ).
       CATCH zcx_abapgit_exception.
         RETURN.
     ENDTRY.
 
-    IF lv_gui_release >= '7700' AND lv_gui_sp >= '1' AND lv_gui_patch >= '13'
-    OR lv_gui_release >= '8000' AND lv_gui_sp >= '1' AND lv_gui_patch >= '3'.
+    IF gui_release >= '7700' AND gui_sp >= '1' AND gui_patch >= '13'
+    OR gui_release >= '8000' AND gui_sp >= '1' AND gui_patch >= '3'.
       result = abap_false.
     ENDIF.
 

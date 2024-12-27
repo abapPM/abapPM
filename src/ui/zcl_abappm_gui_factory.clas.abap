@@ -38,6 +38,7 @@ CLASS zcl_abappm_gui_factory IMPLEMENTATION.
 
 
   METHOD get_gui.
+
     IF gui IS INITIAL.
       DATA(asset_mananager) = zcl_abapgit_ui_factory=>get_asset_manager( ).
 
@@ -49,15 +50,15 @@ CLASS zcl_abappm_gui_factory IMPLEMENTATION.
       DATA(router)            = NEW zcl_abappm_gui_router( ). " apm: routing
       DATA(hotkey_controller) = NEW zcl_abappm_gui_hotkey_ctl( ). " apm: settings
 
-      CREATE OBJECT gui
-        EXPORTING
-          io_component      = router
-          ii_hotkey_ctl     = hotkey_controller
-          ii_html_processor = html_preprocessor
-          ii_asset_man      = asset_mananager.
+      gui = NEW #(
+        io_component      = router
+        ii_hotkey_ctl     = hotkey_controller
+        ii_html_processor = html_preprocessor
+        ii_asset_man      = asset_mananager ).
     ENDIF.
 
     result = gui.
+
   ENDMETHOD.
 
 

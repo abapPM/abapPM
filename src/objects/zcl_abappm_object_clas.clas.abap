@@ -37,25 +37,14 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
 
   METHOD source.
 
-    DATA:
-      source_handler TYPE REF TO if_oo_clif_source,
-      instance       TYPE REF TO cl_oo_factory.
-
     TRY.
-        CALL METHOD cl_oo_factory=>create_instance
-          RECEIVING
-            result = instance.
+        DATA(instance) = cl_oo_factory=>create_instance( ).
 
-        CALL METHOD instance->create_clif_source
-          EXPORTING
-            clif_name = class_name
-            version   = 'A'
-          RECEIVING
-            result    = source_handler.
+        DATA(source_handler) = instance->create_clif_source(
+          clif_name = class_name
+          version   = 'A' ).
 
-        CALL METHOD source_handler->get_source
-          IMPORTING
-            source = result.
+        source_handler->get_source( IMPORTING source = result ).
       CATCH cx_root INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.

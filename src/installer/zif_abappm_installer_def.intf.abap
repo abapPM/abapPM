@@ -16,18 +16,16 @@ INTERFACE zif_abappm_installer_def PUBLIC.
   CONSTANTS c_name_length TYPE i VALUE 90 ##NO_TEXT.
 
   TYPES:
-    ty_name     TYPE c LENGTH c_name_length,
-    ty_pack     TYPE devclass,
-    ty_base     TYPE c LENGTH 80,
-    ty_base_tab TYPE TABLE OF ty_base.
+    ty_name TYPE c LENGTH c_name_length,
+    ty_pack TYPE devclass,
+    ty_base TYPE c LENGTH 80.
 
   TYPES:
     BEGIN OF ty_content,
       name TYPE ty_name,
       pack TYPE ty_pack,
       json TYPE string,
-    END OF ty_content.
-  TYPES:
+    END OF ty_content,
     ty_contents TYPE SORTED TABLE OF ty_content WITH UNIQUE KEY name pack.
 
   TYPES:
@@ -56,8 +54,7 @@ INTERFACE zif_abappm_installer_def PUBLIC.
       installed_at    TYPE timestamp,
       updated_by      TYPE xubname,
       updated_at      TYPE timestamp,
-    END OF ty_inst.
-  TYPES:
+    END OF ty_inst,
     ty_list TYPE STANDARD TABLE OF ty_inst WITH KEY name pack.
 
 ENDINTERFACE.
