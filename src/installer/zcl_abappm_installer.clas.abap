@@ -448,26 +448,19 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD list.
 
     DATA:
-      lt_list          TYPE zif_abappm_installer_def=>ty_list,
-      lo_list          TYPE REF TO cl_salv_table,
-      lo_disp_settings TYPE REF TO cl_salv_display_settings,
-      lo_functions     TYPE REF TO cl_salv_functions,
-      lo_columns       TYPE REF TO cl_salv_columns_table,
-      ls_column        TYPE salv_s_column_ref,
-      lt_columns       TYPE salv_t_column_ref,
-      lo_column        TYPE REF TO cl_salv_column,
-      lr_column        TYPE REF TO cl_salv_column_table.
-
-    FIELD-SYMBOLS:
-      <list> LIKE LINE OF lt_list.
+      list         TYPE zif_abappm_installer_def=>ty_list,
+      table        TYPE REF TO cl_salv_table,
+      column_ref   TYPE salv_s_column_ref,
+      columns_ref  TYPE salv_t_column_ref,
+      column_table TYPE REF TO cl_salv_column_table.
 
     init( ).
 
-***    lt_list = db_persist->list( ).
+***    list = db_persist->list( ).
 
-    CHECK _nothing_found( lt_list ) IS INITIAL.
+    CHECK _nothing_found( list ) IS INITIAL.
 
-    LOOP AT lt_list ASSIGNING <list>.
+    LOOP AT list ASSIGNING FIELD-SYMBOL(<list>).
       CASE <list>-status.
         WHEN space.
           <list>-status = icon_led_inactive.
@@ -483,88 +476,88 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     TRY.
         cl_salv_table=>factory(
           IMPORTING
-            r_salv_table = lo_list
+            r_salv_table = table
           CHANGING
-            t_table      = lt_list ).
+            t_table      = list ).
 
-        lo_functions = lo_list->get_functions( ).
-        lo_functions->set_all( ).
+        DATA(functions) = table->get_functions( ).
+        functions->set_all( ).
 
-        lo_columns = lo_list->get_columns( ).
-        lo_columns->set_optimize( ).
+        DATA(columns_table) = table->get_columns( ).
+        columns_table->set_optimize( ).
 
-        lo_column = lo_columns->get_column( 'NAME' ).
-        lo_column->set_medium_text( 'Name' ).
-        lo_column->set_output_length( 30 ).
-        lr_column ?= lo_columns->get_column( 'NAME' ).
-        lr_column->set_key( ).
+        DATA(column) = columns_table->get_column( 'NAME' ).
+        column->set_medium_text( 'Name' ).
+        column->set_output_length( 30 ).
+        column_table ?= columns_table->get_column( 'NAME' ).
+        column_table->set_key( ).
 
-        lo_column = lo_columns->get_column( 'PACK' ).
-        lo_column->set_medium_text( 'SAP Package' ).
-        lo_column->set_output_length( 30 ).
-        lr_column ?= lo_columns->get_column( 'PACK' ).
-        lr_column->set_key( ).
+        column = columns_table->get_column( 'PACK' ).
+        column->set_medium_text( 'SAP Package' ).
+        column->set_output_length( 30 ).
+        column_table ?= columns_table->get_column( 'PACK' ).
+        column_table->set_key( ).
 
-        lo_column = lo_columns->get_column( 'VERSION' ).
-        lo_column->set_medium_text( 'Version' ).
-        lo_column->set_output_length( 12 ).
+        column = columns_table->get_column( 'VERSION' ).
+        column->set_medium_text( 'Version' ).
+        column->set_output_length( 12 ).
 
-        lt_columns = lo_columns->get( ).
-        LOOP AT lt_columns INTO ls_column WHERE columnname CP 'SEM_VERSION-*'.
-          ls_column-r_column->set_technical( ).
+        columns_ref = columns_table->get( ).
+        LOOP AT columns_ref INTO column_ref WHERE columnname CP 'SEM_VERSION-*'.
+          column_ref-r_column->set_technical( ).
         ENDLOOP.
 
-        lo_column = lo_columns->get_column( 'STATUS' ).
-        lo_column->set_medium_text( 'Status' ).
-        lo_column->set_output_length( 6 ).
+        column = columns_table->get_column( 'STATUS' ).
+        column->set_medium_text( 'Status' ).
+        column->set_output_length( 6 ).
 
-        lo_column = lo_columns->get_column( 'DESCRIPTION' ).
-        lo_column->set_medium_text( 'Description' ).
-        lo_column->set_output_length( 60 ).
+        column = columns_table->get_column( 'DESCRIPTION' ).
+        column->set_medium_text( 'Description' ).
+        column->set_output_length( 60 ).
 
-        lo_column = lo_columns->get_column( 'SOURCE_TYPE' ).
-        lo_column->set_medium_text( 'Type' ).
-        lo_column->set_output_length( 10 ).
+        column = columns_table->get_column( 'SOURCE_TYPE' ).
+        column->set_medium_text( 'Type' ).
+        column->set_output_length( 10 ).
 
-        lo_column = lo_columns->get_column( 'SOURCE_NAME' ).
-        lo_column->set_medium_text( 'Source' ).
-        lo_column->set_output_length( 50 ).
+        column = columns_table->get_column( 'SOURCE_NAME' ).
+        column->set_medium_text( 'Source' ).
+        column->set_output_length( 50 ).
 
-        lo_column = lo_columns->get_column( 'TRANSPORT' ).
-        lo_column->set_medium_text( 'Transport' ).
-        lo_column->set_output_length( 12 ).
+        column = columns_table->get_column( 'TRANSPORT' ).
+        column->set_medium_text( 'Transport' ).
+        column->set_output_length( 12 ).
 
-        lo_column = lo_columns->get_column( 'FOLDER_LOGIC' ).
-        lo_column->set_medium_text( 'Folder Logic' ).
-        lo_column->set_output_length( 10 ).
+        column = columns_table->get_column( 'FOLDER_LOGIC' ).
+        column->set_medium_text( 'Folder Logic' ).
+        column->set_output_length( 10 ).
 
-        lo_column = lo_columns->get_column( 'INSTALLED_LANGU' ).
-        lo_column->set_medium_text( 'Installed Language' ).
-        lo_column->set_output_length( 12 ).
+        column = columns_table->get_column( 'INSTALLED_LANGU' ).
+        column->set_medium_text( 'Installed Language' ).
+        column->set_output_length( 12 ).
 
-        lo_column = lo_columns->get_column( 'INSTALLED_BY' ).
-        lo_column->set_medium_text( 'Installed By' ).
-        lo_column->set_output_length( 12 ).
+        column = columns_table->get_column( 'INSTALLED_BY' ).
+        column->set_medium_text( 'Installed By' ).
+        column->set_output_length( 12 ).
 
-        lo_column = lo_columns->get_column( 'INSTALLED_AT' ).
-        lo_column->set_short_text( 'Installed' ).
-        lo_column->set_medium_text( 'Installed At' ).
-        lo_column->set_output_length( 18 ).
+        column = columns_table->get_column( 'INSTALLED_AT' ).
+        column->set_short_text( 'Installed' ).
+        column->set_medium_text( 'Installed At' ).
+        column->set_output_length( 18 ).
 
-        lo_column = lo_columns->get_column( 'UPDATED_BY' ).
-        lo_column->set_medium_text( 'Updated By' ).
-        lo_column->set_output_length( 12 ).
+        column = columns_table->get_column( 'UPDATED_BY' ).
+        column->set_medium_text( 'Updated By' ).
+        column->set_output_length( 12 ).
 
-        lo_column = lo_columns->get_column( 'UPDATED_AT' ).
-        lo_column->set_short_text( 'Updated' ).
-        lo_column->set_medium_text( 'Updated At' ).
-        lo_column->set_output_length( 18 ).
+        column = columns_table->get_column( 'UPDATED_AT' ).
+        column->set_short_text( 'Updated' ).
+        column->set_medium_text( 'Updated At' ).
+        column->set_output_length( 18 ).
 
-        lo_disp_settings = lo_list->get_display_settings( ).
-        lo_disp_settings->set_list_header( sy-title ).
-        lo_disp_settings->set_fit_column_to_table_size( ).
+        DATA(disp_settings) = table->get_display_settings( ).
+        disp_settings->set_list_header( sy-title ).
+        disp_settings->set_fit_column_to_table_size( ).
 
-        lo_list->display( ).
+        table->display( ).
       CATCH cx_salv_error INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
@@ -604,17 +597,17 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         " A few tries to tackle dependencies
         DO 3 TIMES.
-          DATA(lt_tadir) = zcl_abapgit_factory=>get_tadir( )->read( install_data-pack ).
+          DATA(tadir) = zcl_abapgit_factory=>get_tadir( )->read( install_data-pack ).
 
-          DELETE lt_tadir WHERE object = 'NSPC'.
+          DELETE tadir WHERE object = 'NSPC'.
 
-          IF lt_tadir IS NOT INITIAL.
-            _uninstall_sotr( lt_tadir ).
+          IF tadir IS NOT INITIAL.
+            _uninstall_sotr( tadir ).
 
-            _uninstall_sots( lt_tadir ).
+            _uninstall_sots( tadir ).
 
             zcl_abapinst_objects=>delete(
-              it_tadir     = lt_tadir
+              it_tadir     = tadir
               iv_transport = install_data-transport
               ii_log       = log ).
           ENDIF.
@@ -629,7 +622,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     TRY.
         _log_end( ).
 
-        _check_uninstalled( lt_tadir ).
+        _check_uninstalled( tadir ).
 
         IF apm IS INITIAL.
           IF install_data-status = c_success.
@@ -757,33 +750,26 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     CONSTANTS c_toolflag_set TYPE funcname VALUE 'SCWG_TOOLFLAG_SET'.
 
-    DATA ls_clmcus TYPE clmcus.
-
     " Set tool flag to avoid messages
-    CALL FUNCTION 'FUNCTION_EXISTS'
-      EXPORTING
-        funcname           = c_toolflag_set
-      EXCEPTIONS
-        function_not_exist = 1
-        OTHERS             = 2.
-    IF sy-subrc = 0.
-      CALL FUNCTION c_toolflag_set.
-    ENDIF.
+    TRY.
+        CALL FUNCTION c_toolflag_set.
+      CATCH cx_root ##NO_HANDLER.
+    ENDTRY.
 
     " Confirm message about modification mode (DT, CLM_INFORMATION)
     " and backup old state (see _restore_messages)
     SELECT * FROM clmcus INTO TABLE clmcus_backup WHERE username = sy-uname ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
-    ls_clmcus-username = sy-uname.
-    ls_clmcus-obj_type = 'CLAS'.
-    INSERT clmcus FROM ls_clmcus ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
-    ls_clmcus-obj_type = 'INTF'.
-    INSERT clmcus FROM ls_clmcus ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
-    ls_clmcus-obj_type = 'METH'.
-    INSERT clmcus FROM ls_clmcus ##SUBRC_OK.
-    CHECK sy-subrc >= 0. "abaplint
+
+    DATA(customizing) = VALUE clmcus(
+      username = sy-uname
+      obj_type = 'CLAS' ).
+    INSERT clmcus FROM customizing ##SUBRC_OK.
+
+    customizing-obj_type = 'INTF'.
+    INSERT clmcus FROM customizing ##SUBRC_OK.
+
+    customizing-obj_type = 'METH'.
+    INSERT clmcus FROM customizing ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -852,14 +838,9 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _files.
 
-    DATA:
-      progress  TYPE REF TO zif_abapgit_progress,
-      xstr      TYPE xstring,
-      files     TYPE zcl_tar=>ty_files,
-      ls_remote LIKE LINE OF remote_files,
-      lo_tar    TYPE REF TO zcl_abappm_tar.
+    DATA package_data TYPE xstring.
 
-    progress = zcl_abapgit_progress=>get_instance( 100 ).
+    DATA(progress) = zcl_abapgit_progress=>get_instance( 100 ).
 
     progress->show(
       iv_text    = 'Uploading package'
@@ -871,26 +852,26 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     CASE enum_zip.
       WHEN c_enum_zip-internet.
         install_data-source_type = 'INTERNET'.
-        xstr = zcl_abappm_installer_files=>load_internet(
-          url            = |{ name }| ).
+        package_data = zcl_abappm_installer_files=>load_internet( CONV string( name ) ).
+*          url            = |{ name }| )
 *          user           = |{ user }|
 *          password       = |{ password }|
 *          proxy_host     = |{ proxy_host }|
 *          proxy_port     = |{ proxy_service }|
 *          proxy_user     = |{ proxy_user }|
-*          proxy_password = |{ proxy_password }| ).
+*          proxy_password = |{ proxy_password }| )
       WHEN c_enum_zip-local.
         install_data-source_type = 'LOCAL'.
-        xstr = zcl_abappm_installer_files=>load_local( name ).
+        package_data = zcl_abappm_installer_files=>load_local( name ).
       WHEN c_enum_zip-server.
         install_data-source_type = 'SERVER'.
-        xstr = zcl_abappm_installer_files=>load_server( name ).
+        package_data = zcl_abappm_installer_files=>load_server( name ).
       WHEN c_enum_zip-data.
         install_data-source_type = 'DATA'.
-        xstr = data.
+        package_data = data.
       WHEN c_enum_zip-registry.
         install_data-source_type = 'REGISTRY'.
-        xstr = data.
+        package_data = data.
       WHEN OTHERS.
         zcx_abappm_error=>raise( |Unknown source for { gv_name }| ).
     ENDCASE.
@@ -900,7 +881,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       iv_text    = 'Scanning package for viruses'
       iv_current = 10 ).
 
-    zcl_abappm_installer_files=>virus_scan( xstr ).
+    zcl_abappm_installer_files=>virus_scan( package_data ).
 
     progress->show(
       iv_text    = 'Unzipping files from package'
@@ -908,31 +889,31 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     IF enum_zip = c_enum_zip-registry.
 
-      lo_tar = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( xstr ) ).
-      files = lo_tar->list( ).
+      DATA(tar) = zcl_abappm_tar=>new( )->load( zcl_abappm_tar=>new( )->gunzip( package_data ) ).
+      DATA(files) = tar->list( ).
 
       LOOP AT files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = '0'.
-        CLEAR ls_remote.
+        DATA(remote_file) = VALUE zif_abapgit_git_definitions=>ty_file( ).
         IF <file>-name CA '/'.
-          FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES ls_remote-path ls_remote-filename.
+          FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES remote_file-path remote_file-filename.
         ELSE.
-          ls_remote-filename = <file>-name.
+          remote_file-filename = <file>-name.
         ENDIF.
-        ls_remote-path = '/' && ls_remote-path.
-        ls_remote-path = replace(
-          val   = ls_remote-path
+        remote_file-path = '/' && remote_file-path.
+        remote_file-path = replace(
+          val   = remote_file-path
           sub   = '/package/'
           with  = '/' ). " packaged with npm
-        ls_remote-data = lo_tar->get( <file>-name ).
+        remote_file-data = tar->get( <file>-name ).
         TRY.
-            ls_remote-sha1 = zcl_abapgit_hash=>sha1_raw( ls_remote-data ).
+            remote_file-sha1 = zcl_abapgit_hash=>sha1_raw( remote_file-data ).
           CATCH zcx_abapgit_exception ##NO_HANDLER.
         ENDTRY.
-        INSERT ls_remote INTO TABLE remote_files.
+        INSERT remote_file INTO TABLE remote_files.
       ENDLOOP.
 
     ELSE.
-      remote_files = zcl_abappm_installer_files=>unzip( xstr ).
+      remote_files = zcl_abappm_installer_files=>unzip( package_data ).
     ENDIF.
 
   ENDMETHOD.

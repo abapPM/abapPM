@@ -154,7 +154,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       ELSE.
         IF is_logging = abap_true.
           FORMAT COLOR COL_NEGATIVE.
-          WRITE: AT /5 <rule>-name , 'not found in global namespace', AT c_width space.
+          WRITE: AT /5 <rule>-name , 'not found in global namespace', AT c_width ''.
         ENDIF.
       ENDIF.
     ENDLOOP.

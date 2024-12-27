@@ -112,13 +112,9 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
       WITH KEY name COMPONENTS name = dependency-name.
     IF sy-subrc = 0.
-      TRY.
-          DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
-            version = <package>-version
-            range   = dependency-range ).
-        CATCH zcx_abappm_semver_error INTO DATA(error).
-          zcx_abappm_error=>raise_with_text( error ).
-      ENDTRY.
+      DATA(satisfies) = zcl_abappm_command_semver=>satisfies(
+        version = <package>-version
+        range   = dependency-range ).
 
       IF satisfies = abap_false.
         IF is_optional = abap_true.
