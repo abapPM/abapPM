@@ -81,10 +81,10 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
     super->constructor( ).
 
-    CREATE OBJECT validation_log.
-    CREATE OBJECT form_data.
-    form = get_form_schema( ).
-    form_util = zcl_abappm_html_form_utils=>create( form ).
+    validation_log = NEW #( ).
+    form_data      = NEW #( ).
+    form           = get_form_schema( ).
+    form_util      = zcl_abappm_html_form_utils=>create( form ).
 
     TRY.
         registry = zcl_abappm_settings=>factory( )->get( )-registry.

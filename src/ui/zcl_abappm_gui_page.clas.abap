@@ -13,10 +13,11 @@ CLASS zcl_abappm_gui_page DEFINITION
 * adapted: gui_component, settings, title, and footer
   PUBLIC SECTION.
 
-    INTERFACES zif_abapgit_gui_modal.
-    INTERFACES zif_abapgit_gui_renderable.
-    INTERFACES zif_abapgit_gui_event_handler.
-    INTERFACES zif_abapgit_gui_error_handler.
+    INTERFACES:
+      zif_abapgit_gui_modal,
+      zif_abapgit_gui_renderable,
+      zif_abapgit_gui_event_handler,
+      zif_abapgit_gui_error_handler.
 
     TYPES:
       BEGIN OF ty_control,
@@ -67,7 +68,7 @@ CLASS zcl_abappm_gui_page DEFINITION
 
     METHODS html_head
       RETURNING
-        VALUE(ri_html) TYPE REF TO zif_abapgit_html.
+        VALUE(result) TYPE REF TO zif_abapgit_html.
 
     METHODS header_stylesheet_links
       IMPORTING
@@ -134,7 +135,6 @@ CLASS zcl_abappm_gui_page DEFINITION
     METHODS is_edge_control_warning_needed
       RETURNING
         VALUE(result) TYPE abap_bool.
-
 ENDCLASS.
 
 
@@ -244,6 +244,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
 
   METHOD html_head.
+
     DATA(html) = zcl_abapgit_html=>create( ).
 
     html->add( '<head>' ).
@@ -266,7 +267,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     html->add( '</head>' ).
 
-    ri_html = html.
+    result = html.
 
   ENDMETHOD.
 
@@ -348,6 +349,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
 
   METHOD render_error_message_box.
+
     " You should remember that the we have to instantiate ro_html even
     " it's overwritten further down. Because ADD checks whether it's
     " bound.
@@ -363,13 +365,12 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     " You should remember that the exception viewer dispatches the events of
     " error message panel
-    CREATE OBJECT exception_viewer
-      EXPORTING
-        ix_error = error.
+    exception_viewer = NEW #( error ).
 
     " You should remember that we render the message panel just once
     " for each exception/error text.
     CLEAR error.
+
   ENDMETHOD.
 
 

@@ -95,24 +95,17 @@ CLASS zcl_abappm_gui_router DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    METHODS get_state_settings
-      IMPORTING
-        !event        TYPE REF TO zif_abapgit_gui_event
-      RETURNING
-        VALUE(result) TYPE i.
-
     METHODS main_page
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abapgit_exception ##NEEDED.
 
     METHODS toggle_favorite
       IMPORTING
         !package TYPE csequence
       RAISING
         zcx_abapgit_exception.
-
 ENDCLASS.
 
 
@@ -202,8 +195,6 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD general_page_routing.
 
-    DATA key TYPE zif_abappm_persist_apm=>ty_key.
-
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-go_home.
 
@@ -221,13 +212,13 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
       WHEN zif_abappm_gui_router=>c_action-go_settings.
 
-        key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ zif_abappm_settings=>c_global }|.
+        DATA(key) = zcl_abappm_settings=>get_setting_key( zif_abappm_settings=>c_global ).
         result-page  = zcl_abappm_gui_page_db_entry=>create( key ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
 
       WHEN zif_abappm_gui_router=>c_action-go_settings_personal.
 
-        key = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ sy-uname }|.
+        key = zcl_abappm_settings=>get_setting_key( sy-uname ).
         result-page  = zcl_abappm_gui_page_db_entry=>create( key ).
         result-state = zcl_abapgit_gui=>c_event_state-new_page.
 
@@ -247,18 +238,6 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         result-state = zcl_abapgit_gui=>c_event_state-re_render.
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD get_state_settings.
-
-    " Bookmark current page before jumping to any settings page
-    IF event->mv_current_page_name CP 'ZCL_ABAPPM_GUI_PAGE_SETT_*'.
-      result = zcl_abapgit_gui=>c_event_state-new_page_replacing.
-    ELSE.
-      result = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
-    ENDIF.
 
   ENDMETHOD.
 
@@ -386,7 +365,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
     TYPES ty_char TYPE c LENGTH 1024.
 
-    DATA clipboard TYPE STANDARD TABLE OF ty_char.
+    DATA clipboard TYPE STANDARD TABLE OF ty_char WITH KEY table_line.
 
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-ie_devtools.

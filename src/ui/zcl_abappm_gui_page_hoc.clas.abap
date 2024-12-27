@@ -123,10 +123,12 @@ CLASS zcl_abappm_gui_page_hoc IMPLEMENTATION.
 
 
   METHOD detect_menu_provider.
+
     TRY.
         result ?= child_component.
       CATCH cx_sy_move_cast_error.
     ENDTRY.
+
   ENDMETHOD.
 
 
@@ -144,21 +146,27 @@ CLASS zcl_abappm_gui_page_hoc IMPLEMENTATION.
 
 
   METHOD detect_title_provider.
+
     TRY.
         result ?= child_component.
       CATCH cx_sy_move_cast_error.
     ENDTRY.
+
   ENDMETHOD.
 
 
   METHOD get_child.
+
     result = child_component.
+
   ENDMETHOD.
 
 
   METHOD render_content.
+
     IF child_component IS BOUND.
       result = child_component->render( ).
     ENDIF.
+
   ENDMETHOD.
 ENDCLASS.

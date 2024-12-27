@@ -93,10 +93,10 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
 
     super->constructor( ).
 
-    CREATE OBJECT validation_log.
-    CREATE OBJECT form_data.
-    form = get_form_schema( ).
-    form_util = zcl_abappm_html_form_utils=>create( form ).
+    validation_log = NEW #( ).
+    form_data      = NEW #( ).
+    form           = get_form_schema( ).
+    form_util      = zcl_abappm_html_form_utils=>create( form ).
 
     pubish_package = package.
     IF pubish_package IS NOT INITIAL.

@@ -74,10 +74,8 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
   METHOD register_event_handler.
 
-    DATA handler TYPE REF TO zif_abapgit_gui_event_handler.
-
     IF event_handler IS BOUND.
-      handler = event_handler.
+      DATA(handler) = event_handler.
     ELSE.
       TRY.
           handler ?= me.
@@ -99,10 +97,8 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
   METHOD register_hotkeys.
 
-    DATA provider TYPE REF TO zif_abapgit_gui_hotkeys.
-
     IF hotkey_provider IS BOUND.
-      provider = hotkey_provider.
+      DATA(provider) = hotkey_provider.
     ELSE.
       TRY.
           provider ?= me.

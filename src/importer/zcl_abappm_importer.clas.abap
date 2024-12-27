@@ -15,12 +15,11 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !is_production TYPE abap_bool DEFAULT abap_true
       RAISING
         zcx_abappm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CONSTANTS c_width TYPE i VALUE 150.
-
-    CONSTANTS c_zabappm TYPE tabname VALUE 'ZABAPPM'.
 
     CLASS-DATA is_logging TYPE abap_bool VALUE 'X'.
 

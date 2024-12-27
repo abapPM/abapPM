@@ -13,12 +13,11 @@ INTERFACE zif_abappm_installer_def PUBLIC.
     c_url_repo        TYPE string VALUE 'https://github.com/abapGit/abapinst' ##NO_TEXT.
 
   " Avoids warning due to key length
-  CONSTANTS c_name_length TYPE i VALUE 90 ##NO_TEXT.
+  CONSTANTS c_name_length TYPE i VALUE 90.
 
   TYPES:
     ty_name TYPE c LENGTH c_name_length,
-    ty_pack TYPE devclass,
-    ty_base TYPE c LENGTH 80.
+    ty_pack TYPE devclass.
 
   TYPES:
     BEGIN OF ty_content,

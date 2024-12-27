@@ -104,10 +104,10 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
     super->constructor( ).
 
-    CREATE OBJECT validation_log.
-    CREATE OBJECT form_data.
-    form = get_form_schema( ).
-    form_util = zcl_abappm_html_form_utils=>create( form ).
+    validation_log = NEW #( ).
+    form_data      = NEW #( ).
+    form           = get_form_schema( ).
+    form_util      = zcl_abappm_html_form_utils=>create( form ).
 
   ENDMETHOD.
 
@@ -183,8 +183,8 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 *        iv_value       = zif_abapgit_dot_abapgit=>c_abap_language_version-key_user
 *      )->option(
 *        iv_label       = 'For Cloud Development'
-*        iv_value       = zif_abapgit_dot_abapgit=>c_abap_language_version-cloud_development ).
-*    ENDIF.
+*        iv_value       = zif_abapgit_dot_abapgit=>c_abap_language_version-cloud_development )
+*    ENDIF
 
     result->command(
       iv_label       = 'Init Package'
@@ -204,7 +204,7 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
     form_data->to_struc( CHANGING cs_container = result ).
 
-    MOVE-CORRESPONDING result TO result-package_json.
+    result-package_json = CORRESPONDING #( result ).
 
   ENDMETHOD.
 
