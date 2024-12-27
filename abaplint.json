@@ -14,7 +14,12 @@
   "global": {
     "exclude": [],
     "files": "/src/**/*.*",
-    "noIssues": ["/src/modules/*.*", "zcl_abappm_html*", "zcl_abapgit_*"],
+    "noIssues": [
+      "/src/modules/*.*",
+      "zcl_abappm_installer*",
+      "zcl_abappm_html_*",
+      "zcl_abapgit_*"
+    ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
     "skipGeneratedGatewayClasses": true,
@@ -164,8 +169,8 @@
       "data": "^[LGM].?_",
       "statics": "^S.?_",
       "fieldSymbols": "^<[LGM].?_",
-      "constants": "^[LGM]?C.+_",
-      "types": "^XXX",
+      "constants": "^[LGM]C_",
+      "types": "^.*_TY_",
       "methodParameters": "^[ICER].?_",
       "allowIsPrefixBoolean": true
     },
