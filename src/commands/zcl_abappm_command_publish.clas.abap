@@ -170,7 +170,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     TRY.
         DATA(semver) = NEW zcl_abappm_semver_sap( ).
         result = semver->sap_component_to_semver( 'SAP_BASIS' ).
-      CATCH cx_root INTO DATA(error).
+      CATCH cx_abap_invalid_value INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 

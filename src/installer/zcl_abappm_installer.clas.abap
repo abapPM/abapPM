@@ -41,7 +41,7 @@ CLASS zcl_abappm_installer DEFINITION
         !apm_name          TYPE string OPTIONAL
         !apm_version       TYPE string OPTIONAL
         !enum_zip          TYPE i OPTIONAL
-        !name              TYPE char255 OPTIONAL
+        !name              TYPE string OPTIONAL
         !data              TYPE xstring OPTIONAL
         !enum_package      TYPE i OPTIONAL
         !package           TYPE devclass OPTIONAL
@@ -50,6 +50,7 @@ CLASS zcl_abappm_installer DEFINITION
         !enum_transport    TYPE i OPTIONAL
         !transport         TYPE trkorr OPTIONAL
         !enum_folder_logic TYPE i OPTIONAL
+        !is_production     TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
@@ -89,7 +90,7 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _files
       IMPORTING
         !enum_zip TYPE i
-        !name     TYPE char255 OPTIONAL
+        !name     TYPE string OPTIONAL
         !data     TYPE xstring OPTIONAL
       RAISING
         zcx_abappm_error.
@@ -495,7 +496,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     CASE enum_zip.
       WHEN c_enum_zip-internet.
         install_data-source_type = 'INTERNET'.
-        package_data = zcl_abappm_installer_files=>load_internet( CONV string( name ) ).
+        package_data = zcl_abappm_installer_files=>load_internet( name ).
       WHEN c_enum_zip-local.
         install_data-source_type = 'LOCAL'.
         package_data = zcl_abappm_installer_files=>load_local( name ).

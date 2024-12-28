@@ -236,11 +236,12 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " 6. Get tarball from registry and install it into package
     zcl_abappm_command_utils=>install_package(
-      registry = registry
-      manifest = manifest
-      package  = package
-      name     = package_json-name
-      version  = package_json-version ).
+      registry      = registry
+      manifest      = manifest
+      package       = package
+      name          = package_json-name
+      version       = package_json-version
+      is_production = is_production ).
 
     " 7. Save package.abap.json and readme
     package_json_init = CORRESPONDING #( manifest ).

@@ -20,13 +20,6 @@ INTERFACE zif_abappm_installer_def PUBLIC.
     ty_pack TYPE devclass.
 
   TYPES:
-    BEGIN OF ty_content,
-      name TYPE ty_name,
-      pack TYPE ty_pack,
-      json TYPE string,
-    END OF ty_content.
-
-  TYPES:
     BEGIN OF ty_version,
       major           TYPE i,
       minor           TYPE i,

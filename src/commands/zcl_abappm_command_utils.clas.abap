@@ -37,11 +37,12 @@ CLASS zcl_abappm_command_utils DEFINITION
 
     CLASS-METHODS install_package
       IMPORTING
-        !registry TYPE string
-        !manifest TYPE zif_abappm_types=>ty_manifest
-        !package  TYPE devclass
-        !name     TYPE string
-        !version  TYPE string
+        !registry      TYPE string
+        !manifest      TYPE zif_abappm_types=>ty_manifest
+        !package       TYPE devclass
+        !name          TYPE string
+        !version       TYPE string
+        !is_production TYPE abap_bool
       RAISING
         zcx_abappm_error.
 
@@ -50,6 +51,7 @@ CLASS zcl_abappm_command_utils DEFINITION
         !package TYPE devclass
       RAISING
         zcx_abappm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -110,7 +112,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
       enum_package      = zcl_abappm_installer=>c_enum_package-local
       package           = package
       enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
-      enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix ).
+      enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix
+      is_production     = is_production ).
 
   ENDMETHOD.
 

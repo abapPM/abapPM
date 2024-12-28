@@ -99,7 +99,7 @@ CLASS zcl_abappm_gui_router DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
-        zcx_abapgit_exception ##NEEDED.
+        zcx_abapgit_exception.
 
     METHODS toggle_favorite
       IMPORTING
@@ -325,7 +325,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD main_page.
+  METHOD main_page ##NEEDED.
 
     TRY.
         " Prio 1: Show last viewed package (if it exists)

@@ -199,10 +199,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
           DELETE packages WHERE labels IS NOT INITIAL.
         WHEN OTHERS.
           LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
-            DATA(tabix) = sy-tabix.
-            READ TABLE <package>-labels TRANSPORTING NO FIELDS WITH KEY table_line = filter_label.
-            IF sy-subrc <> 0.
-              DELETE packages INDEX tabix.
+            IF line_exists( <package>-labels[ filter_label ] ).
+              DELETE packages INDEX sy-tabix.
             ENDIF.
           ENDLOOP.
       ENDCASE.
@@ -433,6 +431,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_action_toolbar.
     " FUTURE
+    html->add( '' ).
+
   ENDMETHOD.
 
 
@@ -489,8 +489,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     render_filter_bar( html ).
     render_registry( html ).
-    " FUTURE
-    " html->add( render_action_toolbar( ) )
+    render_action_toolbar( html ).
 
     html->add( |</div>| ).
 
@@ -542,7 +541,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_txt   = settings-registry
       iv_act   = |{ zif_abapgit_definitions=>c_action-url }?url={ settings-registry }| ).
     html->add( '</span>' ).
-    html->add( '</span>').
+    html->add( '</span>' ).
 
   ENDMETHOD.
 
@@ -660,7 +659,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_class   = 'ro-detail'
       ii_content = zcl_abapgit_gui_chunk_lib=>render_user_name(
         iv_username       = package-changed_by
-        iv_suppress_title = boolc( NOT settings-list_settings-only_favorites = abap_true ) ) ).
+        iv_suppress_title = xsdbool( settings-list_settings-only_favorites = abap_false ) ) ).
 
     " Details: changed at
     html->td(
@@ -752,14 +751,14 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         IF ii_event->query( )->has( 'FORCE_STATE' ) = abap_true.
           settings-list_settings-only_favorites = ii_event->query( )->get( 'FORCE_STATE' ).
         ELSE.
-          settings-list_settings-only_favorites = boolc( settings-list_settings-only_favorites = abap_false ).
+          settings-list_settings-only_favorites = xsdbool( settings-list_settings-only_favorites = abap_false ).
         ENDIF.
         save_settings( ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN c_action-direction.
 
-        set_order_direction( boolc( ii_event->query( )->get( 'DIRECTION' ) = 'DESCENDING' ) ).
+        set_order_direction( xsdbool( ii_event->query( )->get( 'DIRECTION' ) = 'DESCENDING' ) ).
         rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
 
       WHEN c_action-apply_filter.

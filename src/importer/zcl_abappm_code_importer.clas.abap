@@ -204,7 +204,8 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
   METHOD scan.
 
-    DATA statements TYPE STANDARD TABLE OF sstmnt WITH DEFAULT KEY.
+    DATA statements TYPE STANDARD TABLE OF sstmnt
+      WITH KEY level struc from to number.
 
     DATA(source_code) = read(
       program_name    = program_name

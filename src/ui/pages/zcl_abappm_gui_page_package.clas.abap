@@ -68,8 +68,7 @@ CLASS zcl_abappm_gui_page_package DEFINITION
         path     TYPE string,
         filename TYPE string,
         data     TYPE string,
-      END OF ty_markdown,
-      ty_markdown_files TYPE SORTED TABLE OF ty_markdown WITH UNIQUE KEY path filename.
+      END OF ty_markdown.
 
     DATA:
       package      TYPE devclass,
@@ -190,7 +189,6 @@ CLASS zcl_abappm_gui_page_package DEFINITION
         !html TYPE REF TO zif_abapgit_html
       RAISING
         zcx_abapgit_exception.
-
 ENDCLASS.
 
 
@@ -263,7 +261,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     DATA:
       size_value TYPE wwwparams-value,
-      mime_data  TYPE STANDARD TABLE OF w3mime.
+      mime_data  TYPE STANDARD TABLE OF w3mime WITH KEY line.
 
     DATA(key) = VALUE wwwdatatab(
       relid = 'MI'
