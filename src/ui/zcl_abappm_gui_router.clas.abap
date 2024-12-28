@@ -106,6 +106,7 @@ CLASS zcl_abappm_gui_router DEFINITION
         !package TYPE csequence
       RAISING
         zcx_abapgit_exception.
+
 ENDCLASS.
 
 
@@ -270,7 +271,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD jump_display_user.
 
-    " todo, user display in ADT
+    " TODO: user display in ADT
 
     CALL FUNCTION 'BAPI_USER_DISPLAY'
       EXPORTING
@@ -325,7 +326,7 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD main_page ##NEEDED.
+  METHOD main_page ##CALLED.
 
     TRY.
         " Prio 1: Show last viewed package (if it exists)

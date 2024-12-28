@@ -181,13 +181,13 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
       ENDTRY.
     ENDIF.
 
-    IF zcl_package_json_valid=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+    IF zcl_abappm_package_json_valid=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
       result->set(
         iv_key = c_id-name
         iv_val = 'Invalid name' ).
     ENDIF.
 
-    IF zcl_package_json_valid=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
+    IF zcl_abappm_package_json_valid=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
       result->set(
         iv_key = c_id-version
         iv_val = 'Invalid version' ).

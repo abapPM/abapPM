@@ -625,7 +625,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name(
       iv_package        = package-package
-      iv_suppress_title = boolc( NOT settings-list_settings-only_favorites = abap_true ) ) ).
+      iv_suppress_title = xsdbool( settings-list_settings-only_favorites = abap_false ) ) ).
 
     " Labels
     IF all_labels IS NOT INITIAL.
