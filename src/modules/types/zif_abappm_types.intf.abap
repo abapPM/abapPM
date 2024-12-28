@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_TYPES PUBLIC.
+INTERFACE zif_abappm_types PUBLIC.
 
 ************************************************************************
 * apm Types

@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_PACOTE DEFINITION
+CLASS zcl_abappm_pacote DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
@@ -11,7 +11,7 @@ CLASS ZCL_ABAPPM_PACOTE DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_PACOTE.
+    INTERFACES zif_abappm_pacote.
 
     CLASS-METHODS class_constructor.
 
@@ -21,14 +21,14 @@ CLASS ZCL_ABAPPM_PACOTE DEFINITION
         !name         TYPE string
         !packument    TYPE string OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+        VALUE(result) TYPE REF TO zif_abappm_pacote
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS injector
       IMPORTING
         !name TYPE string
-        !mock TYPE REF TO ZIF_ABAPPM_PACOTE.
+        !mock TYPE REF TO zif_abappm_pacote.
 
     METHODS constructor
       IMPORTING
@@ -36,17 +36,17 @@ CLASS ZCL_ABAPPM_PACOTE DEFINITION
         !name      TYPE string
         !packument TYPE string OPTIONAL
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS get_packument_key
       IMPORTING
         !name         TYPE string
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY.
+        VALUE(result) TYPE zif_abappm_persist_apm=>ty_key.
 
     CLASS-METHODS get_packument_from_key
       IMPORTING
-        !key          TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY
+        !key          TYPE zif_abappm_persist_apm=>ty_key
       RETURNING
         VALUE(result) TYPE string.
 
@@ -54,17 +54,17 @@ CLASS ZCL_ABAPPM_PACOTE DEFINITION
       IMPORTING
         !json         TYPE string
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT
+        VALUE(result) TYPE zif_abappm_types=>ty_packument
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS convert_packument_to_json
       IMPORTING
-        !packument    TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT
+        !packument    TYPE zif_abappm_types=>ty_packument
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -72,81 +72,81 @@ CLASS ZCL_ABAPPM_PACOTE DEFINITION
     TYPES:
       BEGIN OF ty_instance,
         name     TYPE string,
-        instance TYPE REF TO ZIF_ABAPPM_PACOTE,
+        instance TYPE REF TO zif_abappm_pacote,
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY name.
 
     CLASS-DATA:
-      db_persist TYPE REF TO ZIF_ABAPPM_PERSIST_APM,
+      db_persist TYPE REF TO zif_abappm_persist_apm,
       instances  TYPE ty_instances.
 
     DATA:
       registry TYPE string,
-      pacote   TYPE ZIF_ABAPPM_PACOTE=>TY_PACOTE.
+      pacote   TYPE zif_abappm_pacote=>ty_pacote.
 
     METHODS get_agent
       IMPORTING
         !url          TYPE string
         !abbreviated  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_HTTP_AGENT
+        VALUE(result) TYPE REF TO zif_abappm_http_agent
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS request
       IMPORTING
         !url          TYPE string
         !abbreviated  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_HTTP_RESPONSE
+        VALUE(result) TYPE REF TO zif_abappm_http_response
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS check_result
       IMPORTING
         !json TYPE string
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     CLASS-METHODS sort_packument
       IMPORTING
-        !packument    TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT
+        !packument    TYPE zif_abappm_types=>ty_packument
       RETURNING
-        VALUE(result) TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT
+        VALUE(result) TYPE zif_abappm_types=>ty_packument
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
+CLASS zcl_abappm_pacote IMPLEMENTATION.
 
 
   METHOD check_result.
 
     TRY.
-        DATA(error_message) = ZCL_ABAPPM_AJSON=>PARSE( json )->get_string( '/error' ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO DATA(error).
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( error ).
+        DATA(error_message) = zcl_abappm_ajson=>parse( json )->get_string( '/error' ).
+      CATCH zcx_abappm_ajson_error INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
     IF error_message IS NOT INITIAL.
-      ZCX_ABAPPM_ERROR=>RAISE( error_message ).
+      zcx_abappm_error=>raise( error_message ).
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD class_constructor.
-    db_persist = ZCL_ABAPPM_PERSIST_APM=>GET_INSTANCE( ).
+    db_persist = zcl_abappm_persist_apm=>get_instance( ).
   ENDMETHOD.
 
 
   METHOD constructor.
 
     IF registry <> 'https://playground.abappm.com'.
-      ZCX_ABAPPM_ERROR=>RAISE( 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)' ).
+      zcx_abappm_error=>raise( 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)' ).
     ENDIF.
 
     me->registry = registry.
@@ -161,8 +161,8 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
       pacote-packument = convert_json_to_packument( pacote-json ).
     ELSE.
       TRY.
-          ZIF_ABAPPM_PACOTE~LOAD( ).
-        CATCH ZCX_ABAPPM_ERROR ##NO_HANDLER.
+          zif_abappm_pacote~load( ).
+        CATCH zcx_abappm_error ##NO_HANDLER.
       ENDTRY.
     ENDIF.
 
@@ -179,15 +179,15 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
         readme      TYPE string,
         homepage    TYPE string,
         BEGIN OF bugs,
-          url   TYPE ZIF_ABAPPM_TYPES=>TY_URI,
-          email TYPE ZIF_ABAPPM_TYPES=>TY_EMAIL,
+          url   TYPE zif_abappm_types=>ty_uri,
+          email TYPE zif_abappm_types=>ty_email,
         END OF bugs,
         license     TYPE string,
         keywords    TYPE string_table,
-        author      TYPE ZIF_ABAPPM_TYPES=>TY_PERSON,
+        author      TYPE zif_abappm_types=>ty_person,
         BEGIN OF repository,
           type      TYPE string,
-          url       TYPE ZIF_ABAPPM_TYPES=>TY_URI,
+          url       TYPE zif_abappm_types=>ty_uri,
           directory TYPE string,
         END OF repository,
         _id         TYPE string,
@@ -197,18 +197,18 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
     DATA:
       json_partial TYPE ty_packument_partial,
-      generic      TYPE ZIF_ABAPPM_TYPES=>TY_GENERIC,
-      time         TYPE ZIF_ABAPPM_TYPES=>TY_TIME,
-      person       TYPE ZIF_ABAPPM_TYPES=>TY_PERSON,
-      user         TYPE ZIF_ABAPPM_TYPES=>TY_USER,
-      package_json TYPE ZIF_ABAPPM_TYPES=>TY_PACKAGE_JSON,
-      version      TYPE ZIF_ABAPPM_TYPES=>TY_VERSION,
-      attachment   TYPE ZIF_ABAPPM_TYPES=>TY_ATTACHMENT,
-      packument    TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT.
+      generic      TYPE zif_abappm_types=>ty_generic,
+      time         TYPE zif_abappm_types=>ty_time,
+      person       TYPE zif_abappm_types=>ty_person,
+      user         TYPE zif_abappm_types=>ty_user,
+      package_json TYPE zif_abappm_types=>ty_package_json,
+      version      TYPE zif_abappm_types=>ty_version,
+      attachment   TYPE zif_abappm_types=>ty_attachment,
+      packument    TYPE zif_abappm_types=>ty_packument.
 
     TRY.
-        DATA(ajson) = ZCL_ABAPPM_AJSON=>PARSE( json
-          )->map( ZCL_ABAPPM_AJSON_MAPPING=>CREATE_TO_SNAKE_CASE( )
+        DATA(ajson) = zcl_abappm_ajson=>parse( json
+          )->map( zcl_abappm_ajson_mapping=>create_to_snake_case( )
           )->to_abap_corresponding_only( ).
 
         ajson->to_abap( IMPORTING ev_container = json_partial ).
@@ -248,7 +248,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
         LOOP AT ajson->members( '/versions' ) INTO version-key.
           DATA(ajson_version) = ajson->slice( '/versions/' && version-key ).
-          version-version = ZCL_ABAPPM_PACKAGE_JSON=>CONVERT_JSON_TO_MANIFEST( ajson_version->stringify( ) ).
+          version-version = zcl_abappm_package_json=>convert_json_to_manifest( ajson_version->stringify( ) ).
           INSERT version INTO TABLE packument-versions.
         ENDLOOP.
 
@@ -256,8 +256,8 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
         result = sort_packument( packument ).
 
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO DATA(error).
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( error ).
+      CATCH zcx_abappm_ajson_error INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -266,20 +266,20 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   METHOD convert_packument_to_json.
 
     DATA:
-      generic    TYPE ZIF_ABAPPM_TYPES=>TY_GENERIC,
-      time       TYPE ZIF_ABAPPM_TYPES=>TY_TIME,
-      person     TYPE ZIF_ABAPPM_TYPES=>TY_PERSON,
-      user       TYPE ZIF_ABAPPM_TYPES=>TY_USER,
-      version    TYPE ZIF_ABAPPM_TYPES=>TY_VERSION,
-      attachment TYPE ZIF_ABAPPM_TYPES=>TY_ATTACHMENT.
+      generic    TYPE zif_abappm_types=>ty_generic,
+      time       TYPE zif_abappm_types=>ty_time,
+      person     TYPE zif_abappm_types=>ty_person,
+      user       TYPE zif_abappm_types=>ty_user,
+      version    TYPE zif_abappm_types=>ty_version,
+      attachment TYPE zif_abappm_types=>ty_attachment.
 
     TRY.
-        DATA(ajson) = ZCL_ABAPPM_AJSON=>NEW(
+        DATA(ajson) = zcl_abappm_ajson=>new(
           )->keep_item_order(
           )->set(
             iv_path = '/'
             iv_val  = packument
-          )->map( ZCL_ABAPPM_AJSON_MAPPING=>CREATE_TO_CAMEL_CASE( ) ).
+          )->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
 
         " Transpose dist-tags, times, users, versions...
         ajson->delete( '/distTags' ). " created incorrectly due to underscope
@@ -335,9 +335,9 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
         ajson->setx( '/versions:{ }' ).
         LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
-          DATA(version_json) = ZCL_ABAPPM_PACKAGE_JSON=>CONVERT_MANIFEST_TO_JSON( manifest = <version>-version ).
+          DATA(version_json) = zcl_abappm_package_json=>convert_manifest_to_json( manifest = <version>-version ).
 
-          DATA(ajson_version) = ZCL_ABAPPM_AJSON=>PARSE( version_json )->keep_item_order( ).
+          DATA(ajson_version) = zcl_abappm_ajson=>parse( version_json )->keep_item_order( ).
 
           ajson->set(
             iv_path = 'versions/' && <version>-key
@@ -345,8 +345,8 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
         ENDLOOP.
 
         result = ajson->stringify( 2 ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO DATA(error).
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( error ).
+      CATCH zcx_abappm_ajson_error INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -358,7 +358,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE ZCL_ABAPPM_PACOTE
+      CREATE OBJECT result TYPE zcl_abappm_pacote
         EXPORTING
           registry  = registry
           name      = name
@@ -375,7 +375,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
   METHOD get_agent.
 
-    result = ZCL_ABAPPM_HTTP_AGENT=>CREATE( ).
+    result = zcl_abappm_http_agent=>create( ).
 
     IF abbreviated = abap_true.
       result->global_headers( )->set(
@@ -391,10 +391,10 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
     DATA(login_url) = url && '/apm/apm.git'.
 
     " Get auth token from URL
-    IF ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>GET( login_url ) IS NOT INITIAL.
+    IF zcl_abappm_http_login_manager=>get( login_url ) IS NOT INITIAL.
       result->global_headers( )->set(
         iv_key = 'Authorization'
-        iv_val = ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>GET( login_url ) ).
+        iv_val = zcl_abappm_http_login_manager=>get( login_url ) ).
     ENDIF.
 
   ENDMETHOD.
@@ -410,7 +410,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
 
   METHOD get_packument_key.
 
-    result = |{ ZIF_ABAPPM_PERSIST_APM=>C_KEY_TYPE-PACKUMENT }:{ to_upper( name ) }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-packument }:{ to_upper( name ) }|.
 
   ENDMETHOD.
 
@@ -435,7 +435,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
     TRY.
         result = get_agent( registry )->request( url ).
       CATCH zcx_abapgit_exception INTO DATA(error).
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( error ).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -454,40 +454,40 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~DELETE.
+  METHOD zif_abappm_pacote~delete.
 
     db_persist->delete( pacote-key ).
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~EXISTS.
+  METHOD zif_abappm_pacote~exists.
 
     TRY.
         db_persist->load( pacote-key ).
         result = abap_true.
-      CATCH ZCX_ABAPPM_ERROR.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~GET.
+  METHOD zif_abappm_pacote~get.
 
     result = pacote-packument.
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~GET_JSON.
+  METHOD zif_abappm_pacote~get_json.
 
     result = pacote-json.
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~GET_VERSION.
+  METHOD zif_abappm_pacote~get_version.
 
     READ TABLE pacote-packument-versions INTO result
       WITH TABLE KEY key = version.
@@ -495,7 +495,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~LOAD.
+  METHOD zif_abappm_pacote~load.
 
     pacote-json      = db_persist->load( pacote-key )-value.
     pacote-packument = convert_json_to_packument( pacote-json ).
@@ -505,7 +505,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~MANIFEST.
+  METHOD zif_abappm_pacote~manifest.
 
     result = request(
       url         = |{ registry }/{ pacote-name }/{ version }|
@@ -516,17 +516,17 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~PACKUMENT.
+  METHOD zif_abappm_pacote~packument.
 
     result = request( |{ registry }/{ pacote-name }| )->cdata( ).
 
     check_result( result ).
-    ZIF_ABAPPM_PACOTE~SET_JSON( result ).
+    zif_abappm_pacote~set_json( result ).
 
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~SAVE.
+  METHOD zif_abappm_pacote~save.
 
     db_persist->save(
       key   = pacote-key
@@ -535,7 +535,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~SET.
+  METHOD zif_abappm_pacote~set.
 
     pacote-packument = packument.
     pacote-json      = convert_packument_to_json( packument ).
@@ -545,7 +545,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~SET_JSON.
+  METHOD zif_abappm_pacote~set_json.
 
     pacote-json      = json.
     pacote-packument = convert_json_to_packument( json ).
@@ -555,7 +555,7 @@ CLASS ZCL_ABAPPM_PACOTE IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD ZIF_ABAPPM_PACOTE~TARBALL.
+  METHOD zif_abappm_pacote~tarball.
 
     " TODO: Error check (HTTP status)
     result = request( filename )->data( ).

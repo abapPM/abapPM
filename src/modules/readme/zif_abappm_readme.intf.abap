@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_README PUBLIC.
+INTERFACE zif_abappm_readme PUBLIC.
 
 
 ************************************************************************
@@ -11,9 +11,9 @@ INTERFACE ZIF_ABAPPM_README PUBLIC.
 
   TYPES:
     BEGIN OF ty_readme,
-      key      TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
+      key      TYPE zif_abappm_persist_apm=>ty_key,
       markdown TYPE string,
-      instance TYPE REF TO ZIF_ABAPPM_README,
+      instance TYPE REF TO zif_abappm_readme,
     END OF ty_readme.
   TYPES:
     ty_readmes TYPE STANDARD TABLE OF ty_readme WITH KEY key.
@@ -24,11 +24,11 @@ INTERFACE ZIF_ABAPPM_README PUBLIC.
 
   METHODS set
     IMPORTING
-      !markdown  TYPE string
+      !markdown     TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_README
+      VALUE(result) TYPE REF TO zif_abappm_readme
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -36,16 +36,16 @@ INTERFACE ZIF_ABAPPM_README PUBLIC.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_README
+      VALUE(result) TYPE REF TO zif_abappm_readme
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
 ENDINTERFACE.

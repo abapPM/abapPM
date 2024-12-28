@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
+INTERFACE zif_abappm_package_json PUBLIC.
 
 ************************************************************************
 * Package JSON
@@ -13,11 +13,11 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
-  INTERFACES ZIF_ABAPPM_TYPES.
+  INTERFACES zif_abappm_types.
 
   TYPES:
     BEGIN OF ty_package,
-      key             TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
+      key             TYPE zif_abappm_persist_apm=>ty_key,
       package         TYPE devclass,
       name            TYPE string,
       version         TYPE string,
@@ -30,7 +30,7 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
       favorite        TYPE abap_bool, " settings
       write_protected TYPE abap_bool, " settings
       labels          TYPE string_table, " settings
-      instance        TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON,
+      instance        TYPE REF TO zif_abappm_package_json,
     END OF ty_package,
     ty_packages TYPE STANDARD TABLE OF ty_package
       WITH NON-UNIQUE KEY primary_key COMPONENTS key
@@ -39,7 +39,7 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 
   METHODS get
     RETURNING
-      VALUE(result) TYPE ZIF_ABAPPM_TYPES=>TY_PACKAGE_JSON.
+      VALUE(result) TYPE zif_abappm_types=>ty_package_json.
 
   METHODS get_json
     IMPORTING
@@ -47,23 +47,23 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set
     IMPORTING
-      !package_json TYPE ZIF_ABAPPM_TYPES=>TY_PACKAGE_JSON
+      !package_json TYPE zif_abappm_types=>ty_package_json
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set_json
     IMPORTING
       !json         TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -71,17 +71,17 @@ INTERFACE ZIF_ABAPPM_PACKAGE_JSON PUBLIC.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACKAGE_JSON
+      VALUE(result) TYPE REF TO zif_abappm_package_json
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS is_valid
     RETURNING

@@ -1,262 +1,262 @@
-interface ZIF_ABAPPM_AJSON
-  public.
+INTERFACE zif_abappm_ajson
+  PUBLIC.
 
-  constants version type string value 'v1.1.10'. "#EC NOTEXT
-  constants origin type string value 'https://github.com/sbcgua/ajson'. "#EC NOTEXT
-  constants license type string value 'MIT'. "#EC NOTEXT
+  CONSTANTS version TYPE string VALUE 'v1.1.10'.            "#EC NOTEXT
+  CONSTANTS origin TYPE string VALUE 'https://github.com/sbcgua/ajson'. "#EC NOTEXT
+  CONSTANTS license TYPE string VALUE 'MIT'.                "#EC NOTEXT
 
-  types:
-    begin of ty_opts,
-      read_only type abap_bool,
-      keep_item_order type abap_bool,
-      format_datetime type abap_bool,
-      to_abap_corresponding_only type abap_bool,
-    end of ty_opts.
+  TYPES:
+    BEGIN OF ty_opts,
+      read_only                  TYPE abap_bool,
+      keep_item_order            TYPE abap_bool,
+      format_datetime            TYPE abap_bool,
+      to_abap_corresponding_only TYPE abap_bool,
+    END OF ty_opts.
 
   " DATA
 
-  data mt_json_tree type ZIF_ABAPPM_AJSON_TYPES=>TY_NODES_TS read-only.
+  DATA mt_json_tree TYPE zif_abappm_ajson_types=>ty_nodes_ts READ-ONLY.
 
   " CLONING
 
-  methods clone
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
-  methods filter
-    importing
-      ii_filter type ref to ZIF_ABAPPM_AJSON_FILTER
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
-  methods map
-    importing
-      ii_mapper type ref to ZIF_ABAPPM_AJSON_MAPPING
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS clone
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
+  METHODS filter
+    IMPORTING
+      ii_filter      TYPE REF TO zif_abappm_ajson_filter
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
+  METHODS map
+    IMPORTING
+      ii_mapper      TYPE REF TO zif_abappm_ajson_mapping
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
   " METHODS
 
-  methods freeze.
-  methods keep_item_order
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON.
-  methods format_datetime
-    importing
-      iv_use_iso type abap_bool default abap_true
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON.
-  methods to_abap_corresponding_only
-    importing
-      iv_enable type abap_bool default abap_true
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON.
-  methods opts
-    returning
-      value(rs_opts) type ty_opts.
+  METHODS freeze.
+  METHODS keep_item_order
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson.
+  METHODS format_datetime
+    IMPORTING
+      iv_use_iso     TYPE abap_bool DEFAULT abap_true
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson.
+  METHODS to_abap_corresponding_only
+    IMPORTING
+      iv_enable      TYPE abap_bool DEFAULT abap_true
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson.
+  METHODS opts
+    RETURNING
+      VALUE(rs_opts) TYPE ty_opts.
 
   " METHODS ex.reader
 
-  methods is_empty
-    returning
-      value(rv_yes) type abap_bool.
+  METHODS is_empty
+    RETURNING
+      VALUE(rv_yes) TYPE abap_bool.
 
-  methods exists
-    importing
-      iv_path type string
-    returning
-      value(rv_exists) type abap_bool.
+  METHODS exists
+    IMPORTING
+      iv_path          TYPE string
+    RETURNING
+      VALUE(rv_exists) TYPE abap_bool.
 
-  methods members
-    importing
-      iv_path type string
-    returning
-      value(rt_members) type string_table.
+  METHODS members
+    IMPORTING
+      iv_path           TYPE string
+    RETURNING
+      VALUE(rt_members) TYPE string_table.
 
-  methods get
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type string.
+  METHODS get
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE string.
 
-  methods get_node_type
-    importing
-      iv_path type string
-    returning
-      value(rv_node_type) type ZIF_ABAPPM_AJSON_TYPES=>TY_NODE_TYPE.
+  METHODS get_node_type
+    IMPORTING
+      iv_path             TYPE string
+    RETURNING
+      VALUE(rv_node_type) TYPE zif_abappm_ajson_types=>ty_node_type.
 
-  methods get_boolean
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type abap_bool.
+  METHODS get_boolean
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE abap_bool.
 
-  methods get_integer
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type i.
+  METHODS get_integer
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE i.
 
-  methods get_number
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type f.
+  METHODS get_number
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE f.
 
-  methods get_date
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type d.
+  METHODS get_date
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE d.
 
-  methods get_timestamp
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type timestamp.
+  METHODS get_timestamp
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE timestamp.
 
-  methods get_string
-    importing
-      iv_path type string
-    returning
-      value(rv_value) type string.
+  METHODS get_string
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE string.
 
-  methods slice
-    importing
-      iv_path type string
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON.
+  METHODS slice
+    IMPORTING
+      iv_path        TYPE string
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson.
 
-  methods to_abap
-    importing
-      iv_corresponding type abap_bool default abap_false
-    exporting
-      ev_container type any
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS to_abap
+    IMPORTING
+      iv_corresponding TYPE abap_bool DEFAULT abap_false
+    EXPORTING
+      ev_container     TYPE any
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods array_to_string_table
-    importing
-      iv_path type string
-    returning
-      value(rt_string_table) type string_table
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS array_to_string_table
+    IMPORTING
+      iv_path                TYPE string
+    RETURNING
+      VALUE(rt_string_table) TYPE string_table
+    RAISING
+      zcx_abappm_ajson_error.
 
   " METHODS ex.writer
 
-  methods clear
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS clear
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set
-    importing
-      iv_path type string
-      iv_val type any
-      iv_ignore_empty type abap_bool default abap_true
-      iv_node_type type ZIF_ABAPPM_AJSON_TYPES=>TY_NODE_TYPE optional
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set
+    IMPORTING
+      iv_path         TYPE string
+      iv_val          TYPE any
+      iv_ignore_empty TYPE abap_bool DEFAULT abap_true
+      iv_node_type    TYPE zif_abappm_ajson_types=>ty_node_type OPTIONAL
+    RETURNING
+      VALUE(ri_json)  TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods setx
-    importing
-      iv_param type string
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS setx
+    IMPORTING
+      iv_param       TYPE string
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_boolean
-    importing
-      iv_path type string
-      iv_val type any
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_boolean
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE any
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_string
-    importing
-      iv_path type string
-      iv_val type clike
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_string
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE clike
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_integer
-    importing
-      iv_path type string
-      iv_val type i
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_integer
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE i
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_date
-    importing
-      iv_path type string
-      iv_val type d
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_date
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE d
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_timestamp
-    importing
-      iv_path type string
-      iv_val type timestamp
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_timestamp
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE timestamp
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods set_null
-    importing
-      iv_path type string
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS set_null
+    IMPORTING
+      iv_path        TYPE string
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods delete
-    importing
-      iv_path type string
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS delete
+    IMPORTING
+      iv_path        TYPE string
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods touch_array
-    importing
-      iv_path type string
-      iv_clear type abap_bool default abap_false
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS touch_array
+    IMPORTING
+      iv_path        TYPE string
+      iv_clear       TYPE abap_bool DEFAULT abap_false
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods push
-    importing
-      iv_path type string
-      iv_val type any
-    returning
-      value(ri_json) type ref to ZIF_ABAPPM_AJSON
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS push
+    IMPORTING
+      iv_path        TYPE string
+      iv_val         TYPE any
+    RETURNING
+      VALUE(ri_json) TYPE REF TO zif_abappm_ajson
+    RAISING
+      zcx_abappm_ajson_error.
 
-  methods stringify
-    importing
-      iv_indent type i default 0
-    returning
-      value(rv_json) type string
-    raising
-      ZCX_ABAPPM_AJSON_ERROR.
+  METHODS stringify
+    IMPORTING
+      iv_indent      TYPE i DEFAULT 0
+    RETURNING
+      VALUE(rv_json) TYPE string
+    RAISING
+      zcx_abappm_ajson_error.
 
-endinterface.
+ENDINTERFACE.

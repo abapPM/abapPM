@@ -90,10 +90,13 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
           class_code = files->get_abap( ).
         ENDIF.
 
+        DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+
         class_code = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
           program_source = class_code
-          map            = map ).
+          map            = map
+          is_pretty      = is_pretty ).
 
         IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(

@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_TAR DEFINITION
+CLASS zcl_abappm_tar DEFINITION
   PUBLIC
   CREATE PRIVATE.
 
@@ -49,7 +49,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       IMPORTING
         !force_ustar  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR.
+        VALUE(result) TYPE REF TO zcl_abappm_tar.
 
     METHODS constructor
       IMPORTING
@@ -60,16 +60,16 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       IMPORTING
         !tar          TYPE xstring
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Create archive
     METHODS save
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Read file from archive
     METHODS get
@@ -78,14 +78,14 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! List the table of contents of an archive (no data)
     METHODS list
       RETURNING
         VALUE(result) TYPE ty_files
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Append file to archive
     METHODS append
@@ -97,18 +97,18 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
         !mode         TYPE i OPTIONAL
         !typeflag     TYPE c OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Delete file from archive
     METHODS delete
       IMPORTING
         !name         TYPE string
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_TAR
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Gzip archive
     METHODS gzip
@@ -117,7 +117,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     "! Gunzip archive
     METHODS gunzip
@@ -126,7 +126,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -216,7 +216,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS _to_xstring
       IMPORTING
@@ -224,7 +224,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS _from_filename
       IMPORTING
@@ -233,7 +233,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
         !prefix   TYPE ty_header-prefix
         !name     TYPE ty_header-name
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS _to_filename
       IMPORTING
@@ -249,7 +249,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
         !date     TYPE d
         !time     TYPE t
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS _to_unixtime
       IMPORTING
@@ -258,7 +258,7 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
     METHODS _checksum
       IMPORTING
@@ -266,13 +266,13 @@ CLASS ZCL_ABAPPM_TAR DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        ZCX_ABAPPM_ERROR.
+        zcx_abappm_error.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
+CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD append.
@@ -308,7 +308,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
     INSERT file INTO TABLE tar_files.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error adding file (list)' ).
+      zcx_abappm_error=>raise( 'Error adding file (list)' ).
     ENDIF.
 
     " Data
@@ -316,7 +316,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
     item-content = content.
     INSERT item INTO TABLE tar_list.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error adding file (data)' ).
+      zcx_abappm_error=>raise( 'Error adding file (data)' ).
     ENDIF.
 
     result = me.
@@ -356,12 +356,12 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
     DELETE tar_files WHERE name = name.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error deleting file (list)' ).
+      zcx_abappm_error=>raise( 'Error deleting file (list)' ).
     ENDIF.
 
     DELETE tar_list WHERE name = name.
     IF sy-subrc <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error deleting file (data)' ).
+      zcx_abappm_error=>raise( 'Error deleting file (data)' ).
     ENDIF.
 
     result = me.
@@ -375,7 +375,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <item>-content.
     ELSE.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error getting file' ).
+      zcx_abappm_error=>raise( 'Error getting file' ).
     ENDIF.
 
   ENDMETHOD.
@@ -424,7 +424,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
     DATA(size) = xstrlen( tar ).
 
     IF size = 0 OR size MOD c_blocksize <> 0.
-      ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (blocksize)' ).
+      zcx_abappm_error=>raise( 'Error loading file (blocksize)' ).
     ENDIF.
 
     CLEAR tar_files.
@@ -448,9 +448,9 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
       IF force_ustar = abap_true.
         IF header-magic <> c_ustar_magic.
-          ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (ustar)' ).
+          zcx_abappm_error=>raise( 'Error loading file (ustar)' ).
         ELSEIF header-version <> c_ustar_version AND header-version <> ` `.
-          ZCX_ABAPPM_ERROR=>RAISE( 'Error loading file (version)' ).
+          zcx_abappm_error=>raise( 'Error loading file (version)' ).
         ENDIF.
       ENDIF.
 
@@ -524,9 +524,9 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
       WHERE typeflag = c_typeflag-file OR typeflag = c_typeflag-directory.
 
       IF strlen( <file>-name ) > 255.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (name)' ).
+        zcx_abappm_error=>raise( 'Error saving file (name)' ).
       ELSEIF <file>-name CA '\'.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (path)' ).
+        zcx_abappm_error=>raise( 'Error saving file (path)' ).
       ENDIF.
 
       " Header block
@@ -565,7 +565,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
       " Data blocks
       READ TABLE tar_list ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
       IF sy-subrc <> 0.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error saving file (data)' ).
+        zcx_abappm_error=>raise( 'Error saving file (data)' ).
       ENDIF.
 
       offset = 0.
@@ -633,7 +633,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
       " Shorten name by moving part of path to prefix
       SPLIT temp_name AT c_path_sep INTO temp_prefix temp_name.
       IF sy-subrc <> 0.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error file name too long' ).
+        zcx_abappm_error=>raise( 'Error file name too long' ).
       ENDIF.
 
       IF prefix IS INITIAL.
@@ -667,7 +667,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting from UNIX time' ).
+        zcx_abappm_error=>raise( 'Error converting from UNIX time' ).
     ENDTRY.
 
     CONVERT TIME STAMP timestamp TIME ZONE 'UTC' INTO DATE date TIME time.
@@ -688,7 +688,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting from xstring' ).
+        zcx_abappm_error=>raise( 'Error converting from xstring' ).
     ENDTRY.
 
   ENDMETHOD.
@@ -757,7 +757,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting to UNIX time' ).
+        zcx_abappm_error=>raise( 'Error converting to UNIX time' ).
     ENDTRY.
 
   ENDMETHOD.
@@ -777,7 +777,7 @@ CLASS ZCL_ABAPPM_TAR IMPLEMENTATION.
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        ZCX_ABAPPM_ERROR=>RAISE( 'Error converting to xstring' ).
+        zcx_abappm_error=>raise( 'Error converting to xstring' ).
     ENDTRY.
 
   ENDMETHOD.

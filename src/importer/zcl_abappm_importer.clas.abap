@@ -101,7 +101,8 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    DATA(list) = zcl_abappm_package_json=>list( instanciate = abap_true ).
+    " FIXME!
+    DATA(list) = zcl_package_json=>list( instanciate = abap_true ).
 
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -153,7 +154,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       ELSE.
         IF is_logging = abap_true.
           FORMAT COLOR COL_NEGATIVE.
-          WRITE: AT /5 <rule>-name, 'not found in global namespace', AT c_width ''.
+          WRITE: AT /5 <rule>-name, 'not found in global namespace', AT c_width space.
         ENDIF.
       ENDIF.
     ENDLOOP.

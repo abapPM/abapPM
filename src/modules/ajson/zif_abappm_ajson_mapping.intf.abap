@@ -1,44 +1,44 @@
-interface ZIF_ABAPPM_AJSON_MAPPING
-  public.
+INTERFACE zif_abappm_ajson_mapping
+  PUBLIC.
 
-  types:
-    begin of ty_mapping_field, " deprecated, will be removed
-      abap type string,
-      json type string,
-    end of ty_mapping_field,
-    ty_mapping_fields type standard table of ty_mapping_field
-      with unique sorted key abap components abap
-      with unique sorted key json components json.
+  TYPES:
+    BEGIN OF ty_mapping_field, " deprecated, will be removed
+      abap TYPE string,
+      json TYPE string,
+    END OF ty_mapping_field,
+    ty_mapping_fields TYPE STANDARD TABLE OF ty_mapping_field
+      WITH UNIQUE SORTED KEY abap COMPONENTS abap
+      WITH UNIQUE SORTED KEY json COMPONENTS json.
 
-  types:
-    begin of ty_rename,
-      from type string,
-      to type string,
-    end of ty_rename,
-    tty_rename_map type standard table of ty_rename
-      with unique sorted key by_name components from.
+  TYPES:
+    BEGIN OF ty_rename,
+      from TYPE string,
+      to   TYPE string,
+    END OF ty_rename,
+    tty_rename_map TYPE STANDARD TABLE OF ty_rename
+      WITH UNIQUE SORTED KEY by_name COMPONENTS from.
 
-  types:
-    ty_table_of type standard table of ref to ZIF_ABAPPM_AJSON_MAPPING.
+  TYPES:
+    ty_table_of TYPE STANDARD TABLE OF REF TO zif_abappm_ajson_mapping.
 
-  methods to_abap " deprecated, will be removed
-    importing
-      !iv_path         type string
-      !iv_name         type string
-    returning
-      value(rv_result) type string.
+  METHODS to_abap " deprecated, will be removed
+    IMPORTING
+      !iv_path         TYPE string
+      !iv_name         TYPE string
+    RETURNING
+      VALUE(rv_result) TYPE string.
 
-  methods to_json " deprecated, will be removed
-    importing
-      !iv_path         type string
-      !iv_name         type string
-    returning
-      value(rv_result) type string.
+  METHODS to_json " deprecated, will be removed
+    IMPORTING
+      !iv_path         TYPE string
+      !iv_name         TYPE string
+    RETURNING
+      VALUE(rv_result) TYPE string.
 
-  methods rename_node
-    importing
-      !is_node type ZIF_ABAPPM_AJSON_TYPES=>TY_NODE
-    changing
-      !cv_name type ZIF_ABAPPM_AJSON_TYPES=>TY_NODE-NAME.
+  METHODS rename_node
+    IMPORTING
+      !is_node TYPE zif_abappm_ajson_types=>ty_node
+    CHANGING
+      !cv_name TYPE zif_abappm_ajson_types=>ty_node-name.
 
-endinterface.
+ENDINTERFACE.

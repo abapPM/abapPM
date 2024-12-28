@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_HTTP_AGENT PUBLIC.
+INTERFACE zif_abappm_http_agent PUBLIC.
 
 ************************************************************************
 * HTTP Agent
@@ -19,19 +19,19 @@ INTERFACE ZIF_ABAPPM_HTTP_AGENT PUBLIC.
 
   METHODS global_headers
     RETURNING
-      VALUE(result) TYPE REF TO ZCL_ABAPPM_STRING_MAP.
+      VALUE(result) TYPE REF TO zcl_abappm_string_map.
 
   METHODS request
     IMPORTING
       !url          TYPE string
       !ssl_id       TYPE ssfapplssl DEFAULT 'ANONYM'
       !method       TYPE string DEFAULT c_methods-get
-      !query        TYPE REF TO ZCL_ABAPPM_STRING_MAP OPTIONAL
-      !headers      TYPE REF TO ZCL_ABAPPM_STRING_MAP OPTIONAL
+      !query        TYPE REF TO zcl_abappm_string_map OPTIONAL
+      !headers      TYPE REF TO zcl_abappm_string_map OPTIONAL
       !payload      TYPE any OPTIONAL " can be string, xstring
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_HTTP_RESPONSE
+      VALUE(result) TYPE REF TO zif_abappm_http_response
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
 ENDINTERFACE.

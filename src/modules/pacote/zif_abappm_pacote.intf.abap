@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
+INTERFACE zif_abappm_pacote PUBLIC.
 
 
 ************************************************************************
@@ -11,18 +11,18 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
 
   TYPES:
     BEGIN OF ty_pacote,
-      key       TYPE ZIF_ABAPPM_PERSIST_APM=>TY_KEY,
+      key       TYPE zif_abappm_persist_apm=>ty_key,
       name      TYPE string,
       json      TYPE string,
-      packument TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT,
-      instance  TYPE REF TO ZIF_ABAPPM_PACOTE,
+      packument TYPE zif_abappm_types=>ty_packument,
+      instance  TYPE REF TO zif_abappm_pacote,
     END OF ty_pacote.
   TYPES:
     ty_pacotes TYPE STANDARD TABLE OF ty_pacote WITH KEY key.
 
   METHODS get
     RETURNING
-      VALUE(result) TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT.
+      VALUE(result) TYPE zif_abappm_types=>ty_packument.
 
   METHODS get_json
     RETURNING
@@ -32,23 +32,23 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     IMPORTING
       !version      TYPE string
     RETURNING
-      VALUE(result) TYPE ZIF_ABAPPM_TYPES=>TY_VERSION.
+      VALUE(result) TYPE zif_abappm_types=>ty_version.
 
   METHODS set
     IMPORTING
-      !packument    TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT
+      !packument    TYPE zif_abappm_types=>ty_packument
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set_json
     IMPORTING
       !json         TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS exists
     RETURNING
@@ -56,17 +56,17 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_PACOTE
+      VALUE(result) TYPE REF TO zif_abappm_pacote
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS manifest
     IMPORTING
@@ -75,13 +75,13 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS packument
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS tarball
     IMPORTING
@@ -89,6 +89,6 @@ INTERFACE ZIF_ABAPPM_PACOTE PUBLIC.
     RETURNING
       VALUE(result) TYPE xstring
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
 ENDINTERFACE.

@@ -1,542 +1,542 @@
-class ZCL_ABAPPM_STRING_MAP definition
-  public
-  final
-  create public .
+CLASS zcl_abappm_string_map DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-  public section.
+  PUBLIC SECTION.
 
-    constants version type string value 'v1.0.5'.
-    constants origin type string value 'https://github.com/sbcgua/abap-string-map'.
-    constants license type string value 'MIT'.
+    CONSTANTS version TYPE string VALUE 'v1.0.5'.
+    CONSTANTS origin TYPE string VALUE 'https://github.com/sbcgua/abap-string-map'.
+    CONSTANTS license TYPE string VALUE 'MIT'.
 
-    types:
-      begin of ty_entry,
-        k type string,
-        v type string,
-      end of ty_entry.
-    types:
-      tty_entries type standard table of ty_entry with key k.
-    types:
-      tts_entries type sorted table of ty_entry with non-unique key k.
+    TYPES:
+      BEGIN OF ty_entry,
+        k TYPE string,
+        v TYPE string,
+      END OF ty_entry.
+    TYPES:
+      tty_entries TYPE STANDARD TABLE OF ty_entry WITH KEY k.
+    TYPES:
+      tts_entries TYPE SORTED TABLE OF ty_entry WITH NON-UNIQUE KEY k.
 
-    data mt_entries type tts_entries read-only.
+    DATA mt_entries TYPE tts_entries READ-ONLY.
 
-    class-methods create
-      importing
-        !iv_case_insensitive type abap_bool default abap_false
-        !iv_list_mode type abap_bool default abap_false " removes uniqueness requirement,
-                                                        " use with care: it is not the primary scenario
-        !iv_from type any optional
-        preferred parameter iv_from
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods constructor
-      importing
-        !iv_case_insensitive type abap_bool default abap_false
-        !iv_list_mode type abap_bool default abap_false " removes uniqueness requirement,
-                                                        " use with care: it is not the primary scenario
-        !iv_from type any optional.
+    CLASS-METHODS create
+      IMPORTING
+        !iv_case_insensitive TYPE abap_bool DEFAULT abap_false
+        !iv_list_mode        TYPE abap_bool DEFAULT abap_false " removes uniqueness requirement,
+        " use with care: it is not the primary scenario
+        !iv_from             TYPE any OPTIONAL
+          PREFERRED PARAMETER iv_from
+      RETURNING
+        VALUE(ro_instance)   TYPE REF TO zcl_abappm_string_map.
+    METHODS constructor
+      IMPORTING
+        !iv_case_insensitive TYPE abap_bool DEFAULT abap_false
+        !iv_list_mode        TYPE abap_bool DEFAULT abap_false " removes uniqueness requirement,
+        " use with care: it is not the primary scenario
+        !iv_from             TYPE any OPTIONAL.
 
-    methods get
-      importing
-        !iv_key type clike
-      returning
-        value(rv_val) type string.
-    methods has
-      importing
-        !iv_key type clike
-      returning
-        value(rv_has) type abap_bool.
-    methods set
-      importing
-        !iv_key type clike
-        !iv_val type clike
-      returning
-        value(ro_map) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods setx
-      importing
-        !iv_str type csequence
-      returning
-        value(ro_map) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods size
-      returning
-        value(rv_size) type i.
-    methods is_empty
-      returning
-        value(rv_yes) type abap_bool.
-    methods delete
-      importing
-        !iv_key type clike.
-    methods keys
-      returning
-        value(rt_keys) type string_table.
-    methods values
-      returning
-        value(rt_values) type string_table.
-    methods clear.
+    METHODS get
+      IMPORTING
+        !iv_key       TYPE clike
+      RETURNING
+        VALUE(rv_val) TYPE string.
+    METHODS has
+      IMPORTING
+        !iv_key       TYPE clike
+      RETURNING
+        VALUE(rv_has) TYPE abap_bool.
+    METHODS set
+      IMPORTING
+        !iv_key       TYPE clike
+        !iv_val       TYPE clike
+      RETURNING
+        VALUE(ro_map) TYPE REF TO zcl_abappm_string_map.
+    METHODS setx
+      IMPORTING
+        !iv_str       TYPE csequence
+      RETURNING
+        VALUE(ro_map) TYPE REF TO zcl_abappm_string_map.
+    METHODS size
+      RETURNING
+        VALUE(rv_size) TYPE i.
+    METHODS is_empty
+      RETURNING
+        VALUE(rv_yes) TYPE abap_bool.
+    METHODS delete
+      IMPORTING
+        !iv_key TYPE clike.
+    METHODS keys
+      RETURNING
+        VALUE(rt_keys) TYPE string_table.
+    METHODS values
+      RETURNING
+        VALUE(rt_values) TYPE string_table.
+    METHODS clear.
 
-    methods from_struc
-      importing
-        !is_container type any
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods from_entries
-      importing
-        !it_entries type any table
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods from_string
-      importing
-        !iv_string_params type csequence
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods from_map
-      importing
-        !io_string_map type ref to ZCL_ABAPPM_STRING_MAP
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods merge
-      importing
-        !io_string_map type ref to ZCL_ABAPPM_STRING_MAP
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
+    METHODS from_struc
+      IMPORTING
+        !is_container      TYPE any
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
+    METHODS from_entries
+      IMPORTING
+        !it_entries        TYPE ANY TABLE
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
+    METHODS from_string
+      IMPORTING
+        !iv_string_params  TYPE csequence
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
+    METHODS from_map
+      IMPORTING
+        !io_string_map     TYPE REF TO zcl_abappm_string_map
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
+    METHODS merge
+      IMPORTING
+        !io_string_map     TYPE REF TO zcl_abappm_string_map
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
 
-    methods to_struc
-      changing
-        !cs_container type any.
-    methods to_string
-      returning
-        value(rv_string) type string.
-    methods to_entries
-      changing
-        !ct_entries type standard table.
+    METHODS to_struc
+      CHANGING
+        !cs_container TYPE any.
+    METHODS to_string
+      RETURNING
+        VALUE(rv_string) TYPE string.
+    METHODS to_entries
+      CHANGING
+        !ct_entries TYPE STANDARD TABLE.
 
-    methods strict
-      importing
-        !iv_strict type abap_bool default abap_true
-      returning
-        value(ro_instance) type ref to ZCL_ABAPPM_STRING_MAP.
-    methods freeze.
+    METHODS strict
+      IMPORTING
+        !iv_strict         TYPE abap_bool DEFAULT abap_true
+      RETURNING
+        VALUE(ro_instance) TYPE REF TO zcl_abappm_string_map.
+    METHODS freeze.
 
-  protected section.
-  private section.
-    data mv_is_strict type abap_bool.
-    data mv_read_only type abap_bool.
-    data mv_case_insensitive type abap_bool.
-    data mv_list_mode type abap_bool.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    DATA mv_is_strict TYPE abap_bool.
+    DATA mv_read_only TYPE abap_bool.
+    DATA mv_case_insensitive TYPE abap_bool.
+    DATA mv_list_mode TYPE abap_bool.
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_STRING_MAP IMPLEMENTATION.
+CLASS zcl_abappm_string_map IMPLEMENTATION.
 
 
-  method clear.
+  METHOD clear.
 
-    if mv_read_only = abap_true.
+    IF mv_read_only = abap_true.
       lcx_error=>raise( 'String map is read only' ).
-    endif.
+    ENDIF.
 
-    clear mt_entries.
+    CLEAR mt_entries.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method constructor.
+  METHOD constructor.
     mv_is_strict = abap_true.
     mv_case_insensitive = iv_case_insensitive.
     mv_list_mode = iv_list_mode.
 
-    if iv_from is not initial.
-      data lo_type type ref to cl_abap_typedescr.
+    IF iv_from IS NOT INITIAL.
+      DATA lo_type TYPE REF TO cl_abap_typedescr.
       lo_type = cl_abap_typedescr=>describe_by_data( iv_from ).
 
-      case lo_type->type_kind.
-        when cl_abap_typedescr=>typekind_struct1 or cl_abap_typedescr=>typekind_struct2.
+      CASE lo_type->type_kind.
+        WHEN cl_abap_typedescr=>typekind_struct1 OR cl_abap_typedescr=>typekind_struct2.
           me->from_struc( iv_from ).
 
-        when cl_abap_typedescr=>typekind_oref.
-          data lo_from type ref to ZCL_ABAPPM_STRING_MAP.
-          try.
-            lo_from ?= iv_from.
-          catch cx_sy_move_cast_error.
-            lcx_error=>raise( 'Incorrect string map instance to copy from' ).
-          endtry.
+        WHEN cl_abap_typedescr=>typekind_oref.
+          DATA lo_from TYPE REF TO zcl_abappm_string_map.
+          TRY.
+              lo_from ?= iv_from.
+            CATCH cx_sy_move_cast_error.
+              lcx_error=>raise( 'Incorrect string map instance to copy from' ).
+          ENDTRY.
 
-          if mt_entries is initial and mv_case_insensitive = abap_false.
+          IF mt_entries IS INITIAL AND mv_case_insensitive = abap_false.
             me->mt_entries = lo_from->mt_entries. " shortcut, maybe remove for safety
-          else.
+          ELSE.
             me->from_map( lo_from ).
-          endif.
+          ENDIF.
 
-        when cl_abap_typedescr=>typekind_table.
+        WHEN cl_abap_typedescr=>typekind_table.
           me->from_entries( iv_from ).
 
-        when cl_abap_typedescr=>typekind_string or cl_abap_typedescr=>typekind_char.
+        WHEN cl_abap_typedescr=>typekind_string OR cl_abap_typedescr=>typekind_char.
           me->from_string( iv_from ).
 
-        when others.
+        WHEN OTHERS.
           lcx_error=>raise( |Incorrect input for string_map=>create, typekind { lo_type->type_kind }| ).
-      endcase.
-    endif.
+      ENDCASE.
+    ENDIF.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method create.
-    create object ro_instance
-      exporting
-        iv_list_mode = iv_list_mode
+  METHOD create.
+    CREATE OBJECT ro_instance
+      EXPORTING
+        iv_list_mode        = iv_list_mode
         iv_case_insensitive = iv_case_insensitive
-        iv_from = iv_from.
-  endmethod.
+        iv_from             = iv_from.
+  ENDMETHOD.
 
 
-  method delete.
+  METHOD delete.
 
-    if mv_read_only = abap_true.
+    IF mv_read_only = abap_true.
       lcx_error=>raise( 'String map is read only' ).
-    endif.
+    ENDIF.
 
-    data lv_key type string.
+    DATA lv_key TYPE string.
 
-    if mv_case_insensitive = abap_true.
+    IF mv_case_insensitive = abap_true.
       lv_key = to_upper( iv_key ).
-    else.
+    ELSE.
       lv_key = iv_key.
-    endif.
+    ENDIF.
 
-    delete mt_entries where k = lv_key.
+    DELETE mt_entries WHERE k = lv_key.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method freeze.
+  METHOD freeze.
     mv_read_only = abap_true.
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_entries.
+  METHOD from_entries.
 
-    field-symbols <i> type ty_entry.
+    FIELD-SYMBOLS <i> TYPE ty_entry.
 
-    loop at it_entries assigning <i> casting.
+    LOOP AT it_entries ASSIGNING <i> CASTING.
       set(
         iv_key = <i>-k
         iv_val = <i>-v ).
-    endloop.
+    ENDLOOP.
 
     ro_instance = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_map.
+  METHOD from_map.
 
     from_entries( io_string_map->mt_entries ).
     ro_instance = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_string.
+  METHOD from_string.
 
-    if iv_string_params is initial.
-      return.
-    endif.
+    IF iv_string_params IS INITIAL.
+      RETURN.
+    ENDIF.
 
-    data lt_lines type string_table.
-    field-symbols <i> like line of lt_lines.
-    split iv_string_params at ',' into table lt_lines.
+    DATA lt_lines TYPE string_table.
+    FIELD-SYMBOLS <i> LIKE LINE OF lt_lines.
+    SPLIT iv_string_params AT ',' INTO TABLE lt_lines.
 
-    data lv_key type string.
-    data lv_val type string.
+    DATA lv_key TYPE string.
+    DATA lv_val TYPE string.
 
-    loop at lt_lines assigning <i>.
-      split <i> at '=' into lv_key lv_val.
-      shift lv_key right deleting trailing space.
-      shift lv_key left deleting leading space.
-      shift lv_val right deleting trailing space.
-      shift lv_val left deleting leading space.
-      if lv_key is initial.
+    LOOP AT lt_lines ASSIGNING <i>.
+      SPLIT <i> AT '=' INTO lv_key lv_val.
+      SHIFT lv_key RIGHT DELETING TRAILING space.
+      SHIFT lv_key LEFT DELETING LEADING space.
+      SHIFT lv_val RIGHT DELETING TRAILING space.
+      SHIFT lv_val LEFT DELETING LEADING space.
+      IF lv_key IS INITIAL.
         lcx_error=>raise( 'Empty key in initialization string is not allowed' ).
         " value can be initial, even a,b,c is ok to create sets
-      endif.
+      ENDIF.
       set(
         iv_key = lv_key
         iv_val = lv_val ).
-    endloop.
+    ENDLOOP.
 
     ro_instance = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_struc.
+  METHOD from_struc.
 
-    data lo_type type ref to cl_abap_typedescr.
-    data lo_struc type ref to cl_abap_structdescr.
-    field-symbols <c> like line of lo_struc->components.
-    field-symbols <val> type any.
+    DATA lo_type TYPE REF TO cl_abap_typedescr.
+    DATA lo_struc TYPE REF TO cl_abap_structdescr.
+    FIELD-SYMBOLS <c> LIKE LINE OF lo_struc->components.
+    FIELD-SYMBOLS <val> TYPE any.
 
     lo_type = cl_abap_typedescr=>describe_by_data( is_container ).
-    if lo_type->type_kind <> cl_abap_typedescr=>typekind_struct1
-      and lo_type->type_kind <> cl_abap_typedescr=>typekind_struct2.
+    IF lo_type->type_kind <> cl_abap_typedescr=>typekind_struct1
+      AND lo_type->type_kind <> cl_abap_typedescr=>typekind_struct2.
       lcx_error=>raise( 'Only structures supported' ).
-    endif.
+    ENDIF.
 
     lo_struc ?= lo_type.
-    loop at lo_struc->components assigning <c>.
-      check <c>-type_kind co 'bsI8PaeFCNgXyDT'. " values
-      assign component <c>-name of structure is_container to <val>.
-      assert sy-subrc = 0.
+    LOOP AT lo_struc->components ASSIGNING <c>.
+      CHECK <c>-type_kind CO 'bsI8PaeFCNgXyDT'. " values
+      ASSIGN COMPONENT <c>-name OF STRUCTURE is_container TO <val>.
+      ASSERT sy-subrc = 0.
       set(
         iv_key = |{ <c>-name }|
         iv_val = |{ <val> }| ).
-    endloop.
+    ENDLOOP.
 
     ro_instance = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method get.
+  METHOD get.
 
-    data lv_key type string.
-    field-symbols <entry> like line of mt_entries.
+    DATA lv_key TYPE string.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
 
-    if mv_case_insensitive = abap_true.
+    IF mv_case_insensitive = abap_true.
       lv_key = to_upper( iv_key ).
-    else.
+    ELSE.
       lv_key = iv_key.
-    endif.
+    ENDIF.
 
-    read table mt_entries assigning <entry> with key k = lv_key.
-    if sy-subrc = 0.
+    READ TABLE mt_entries ASSIGNING <entry> WITH KEY k = lv_key.
+    IF sy-subrc = 0.
       rv_val = <entry>-v.
-    endif.
+    ENDIF.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method has.
+  METHOD has.
 
-    data lv_key type string.
+    DATA lv_key TYPE string.
 
-    if mv_case_insensitive = abap_true.
+    IF mv_case_insensitive = abap_true.
       lv_key = to_upper( iv_key ).
-    else.
+    ELSE.
       lv_key = iv_key.
-    endif.
+    ENDIF.
 
-    read table mt_entries transporting no fields with key k = lv_key.
+    READ TABLE mt_entries TRANSPORTING NO FIELDS WITH KEY k = lv_key.
     rv_has = boolc( sy-subrc = 0 ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method is_empty.
+  METHOD is_empty.
     rv_yes = boolc( lines( mt_entries ) = 0 ).
-  endmethod.
+  ENDMETHOD.
 
 
-  method keys.
+  METHOD keys.
 
-    field-symbols <entry> like line of mt_entries.
-    loop at mt_entries assigning <entry>.
-      append <entry>-k to rt_keys.
-    endloop.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
+    LOOP AT mt_entries ASSIGNING <entry>.
+      APPEND <entry>-k TO rt_keys.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method merge.
+  METHOD merge.
 
-    field-symbols <entry> like line of mt_entries.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
 
-    loop at io_string_map->mt_entries assigning <entry>.
+    LOOP AT io_string_map->mt_entries ASSIGNING <entry>.
       set(
         iv_key = <entry>-k
         iv_val = <entry>-v ).
-    endloop.
+    ENDLOOP.
 
     ro_instance = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method set.
+  METHOD set.
 
-    data ls_entry like line of mt_entries.
-    data lv_key type string.
-    field-symbols <entry> like line of mt_entries.
+    DATA ls_entry LIKE LINE OF mt_entries.
+    DATA lv_key TYPE string.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
 
-    if mv_read_only = abap_true.
+    IF mv_read_only = abap_true.
       lcx_error=>raise( 'String map is read only' ).
-    endif.
+    ENDIF.
 
-    if mv_case_insensitive = abap_true.
+    IF mv_case_insensitive = abap_true.
       lv_key = to_upper( iv_key ).
-    else.
+    ELSE.
       lv_key = iv_key.
-    endif.
+    ENDIF.
 
-    if mv_list_mode = abap_true.
+    IF mv_list_mode = abap_true.
       ls_entry-k = lv_key.
       ls_entry-v = iv_val.
-      insert ls_entry into table mt_entries.
-    else.
-      read table mt_entries assigning <entry> with key k = lv_key.
-      if sy-subrc = 0.
+      INSERT ls_entry INTO TABLE mt_entries.
+    ELSE.
+      READ TABLE mt_entries ASSIGNING <entry> WITH KEY k = lv_key.
+      IF sy-subrc = 0.
         <entry>-v = iv_val.
-      else.
+      ELSE.
         ls_entry-k = lv_key.
         ls_entry-v = iv_val.
-        insert ls_entry into table mt_entries.
-      endif.
-    endif.
+        INSERT ls_entry INTO TABLE mt_entries.
+      ENDIF.
+    ENDIF.
 
     ro_map = me.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method setx.
+  METHOD setx.
 
-    data lv_key type string.
-    data lv_val type string.
+    DATA lv_key TYPE string.
+    DATA lv_val TYPE string.
 
     ro_map = me.
 
-    if iv_str is initial.
-      return.
-    endif.
+    IF iv_str IS INITIAL.
+      RETURN.
+    ENDIF.
 
-    split iv_str at ':' into lv_key lv_val.
-    condense lv_key.
-    condense lv_val.
+    SPLIT iv_str AT ':' INTO lv_key lv_val.
+    CONDENSE lv_key.
+    CONDENSE lv_val.
 
-    if lv_key is initial.
-      return.
-    endif.
+    IF lv_key IS INITIAL.
+      RETURN.
+    ENDIF.
 
     set(
       iv_key = lv_key
       iv_val = lv_val ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method size.
+  METHOD size.
 
     rv_size = lines( mt_entries ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method strict.
+  METHOD strict.
     mv_is_strict = iv_strict.
     ro_instance = me.
-  endmethod.
+  ENDMETHOD.
 
 
-  method to_entries.
+  METHOD to_entries.
 
-    data lo_ttype type ref to cl_abap_tabledescr.
-    data lo_dtype type ref to cl_abap_datadescr.
-    data lo_stype type ref to cl_abap_structdescr.
+    DATA lo_ttype TYPE REF TO cl_abap_tabledescr.
+    DATA lo_dtype TYPE REF TO cl_abap_datadescr.
+    DATA lo_stype TYPE REF TO cl_abap_structdescr.
 
     lo_ttype ?= cl_abap_typedescr=>describe_by_data( ct_entries ).
     lo_dtype = lo_ttype->get_table_line_type( ).
 
-    if lo_dtype->kind <> cl_abap_typedescr=>kind_struct.
+    IF lo_dtype->kind <> cl_abap_typedescr=>kind_struct.
       lcx_error=>raise( 'Unsupported table line type' ).
-    endif.
+    ENDIF.
 
     lo_stype ?= lo_dtype.
 
-    if lines( lo_stype->components ) <> 2.
+    IF lines( lo_stype->components ) <> 2.
       lcx_error=>raise( 'Wrong number of fields in target table (must be 2)' ).
-    endif.
+    ENDIF.
 
-    field-symbols <c> like line of lo_stype->components.
-    loop at lo_stype->components assigning <c>.
-      if not ( <c>-type_kind = cl_abap_typedescr=>typekind_char or <c>-type_kind = cl_abap_typedescr=>typekind_string ).
+    FIELD-SYMBOLS <c> LIKE LINE OF lo_stype->components.
+    LOOP AT lo_stype->components ASSIGNING <c>.
+      IF NOT ( <c>-type_kind = cl_abap_typedescr=>typekind_char OR <c>-type_kind = cl_abap_typedescr=>typekind_string ).
         lcx_error=>raise( 'Wrong type of fields in target table (must be char or string)' ).
-      endif.
-    endloop.
+      ENDIF.
+    ENDLOOP.
 
-    field-symbols <entry> like line of mt_entries.
-    field-symbols <to> type any.
-    field-symbols <k> type any.
-    field-symbols <v> type any.
-    loop at mt_entries assigning <entry>.
-      append initial line to ct_entries assigning <to>.
-      assert sy-subrc = 0.
-      assign component 1 of structure <to> to <k>.
-      assert sy-subrc = 0.
-      assign component 2 of structure <to> to <v>.
-      assert sy-subrc = 0.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
+    FIELD-SYMBOLS <to> TYPE any.
+    FIELD-SYMBOLS <k> TYPE any.
+    FIELD-SYMBOLS <v> TYPE any.
+    LOOP AT mt_entries ASSIGNING <entry>.
+      APPEND INITIAL LINE TO ct_entries ASSIGNING <to>.
+      ASSERT sy-subrc = 0.
+      ASSIGN COMPONENT 1 OF STRUCTURE <to> TO <k>.
+      ASSERT sy-subrc = 0.
+      ASSIGN COMPONENT 2 OF STRUCTURE <to> TO <v>.
+      ASSERT sy-subrc = 0.
       <k> = <entry>-k.
       <v> = <entry>-v.
-    endloop.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method to_string.
+  METHOD to_string.
 
-    data lv_size type i.
-    field-symbols <entry> like line of mt_entries.
+    DATA lv_size TYPE i.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
 
     lv_size = lines( mt_entries ).
-    loop at mt_entries assigning <entry>.
+    LOOP AT mt_entries ASSIGNING <entry>.
       rv_string = rv_string && <entry>-k && '=' && <entry>-v.
-      if sy-tabix < lv_size.
+      IF sy-tabix < lv_size.
         rv_string = rv_string && ','.
-      endif.
-    endloop.
+      ENDIF.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method to_struc.
+  METHOD to_struc.
 
-    data lo_type type ref to cl_abap_typedescr.
-    data lo_struc type ref to cl_abap_structdescr.
-    data lv_field type string.
-    field-symbols <entry> like line of mt_entries.
-    field-symbols <val> type any.
+    DATA lo_type TYPE REF TO cl_abap_typedescr.
+    DATA lo_struc TYPE REF TO cl_abap_structdescr.
+    DATA lv_field TYPE string.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
+    FIELD-SYMBOLS <val> TYPE any.
 
     lo_type = cl_abap_typedescr=>describe_by_data( cs_container ).
-    if lo_type->type_kind <> cl_abap_typedescr=>typekind_struct1
-      and lo_type->type_kind <> cl_abap_typedescr=>typekind_struct2.
+    IF lo_type->type_kind <> cl_abap_typedescr=>typekind_struct1
+      AND lo_type->type_kind <> cl_abap_typedescr=>typekind_struct2.
       lcx_error=>raise( 'Only structures supported' ).
-    endif.
+    ENDIF.
 
     lo_struc ?= lo_type.
-    loop at mt_entries assigning <entry>.
+    LOOP AT mt_entries ASSIGNING <entry>.
       lv_field = to_upper( <entry>-k ).
-      assign component lv_field of structure cs_container to <val>.
-      if sy-subrc = 0.
+      ASSIGN COMPONENT lv_field OF STRUCTURE cs_container TO <val>.
+      IF sy-subrc = 0.
         " TODO check target type ?
         <val> = <entry>-v.
-      elseif mv_is_strict = abap_false.
-        continue.
-      else.
+      ELSEIF mv_is_strict = abap_false.
+        CONTINUE.
+      ELSE.
         lcx_error=>raise( |Component { lv_field } not found in target| ).
-      endif.
-    endloop.
+      ENDIF.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method values.
+  METHOD values.
 
-    field-symbols <entry> like line of mt_entries.
-    loop at mt_entries assigning <entry>.
-      append <entry>-v to rt_values.
-    endloop.
+    FIELD-SYMBOLS <entry> LIKE LINE OF mt_entries.
+    LOOP AT mt_entries ASSIGNING <entry>.
+      APPEND <entry>-v TO rt_values.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 ENDCLASS.

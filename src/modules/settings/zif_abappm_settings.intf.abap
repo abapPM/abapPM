@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_SETTINGS PUBLIC.
+INTERFACE zif_abappm_settings PUBLIC.
 
 ************************************************************************
 * apm Settings
@@ -51,7 +51,7 @@ INTERFACE ZIF_ABAPPM_SETTINGS PUBLIC.
 
   CONSTANTS:
     c_registry TYPE string VALUE 'https://registry.abappm.com',
-    c_global   TYPE ty_name VALUE ZIF_ABAPPM_PERSIST_APM=>C_KEY_NAME-GLOBAL_SETTINGS.
+    c_global   TYPE ty_name VALUE zif_abappm_persist_apm=>c_key_name-global_settings.
 
   METHODS get
     RETURNING
@@ -63,37 +63,37 @@ INTERFACE ZIF_ABAPPM_SETTINGS PUBLIC.
     RETURNING
       VALUE(result) TYPE string
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set
     IMPORTING
       !settings     TYPE ty_settings
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_SETTINGS
+      VALUE(result) TYPE REF TO zif_abappm_settings
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS set_json
     IMPORTING
       !json         TYPE string
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_SETTINGS
+      VALUE(result) TYPE REF TO zif_abappm_settings
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS load
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_SETTINGS
+      VALUE(result) TYPE REF TO zif_abappm_settings
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS save
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS delete
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS is_valid
     RETURNING

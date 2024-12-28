@@ -99,13 +99,13 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       tokens         TYPE stokesx_tab,
       tokens_checked TYPE stokesx_tab.
 
-    result = read(
+    DATA(code) = read(
       program_name   = program_name
       program_source = program_source ).
 
     tokens = scan(
       program_name   = program_name
-      program_source = result ).
+      program_source = code ).
 
     IF tokens IS INITIAL.
       RETURN.
@@ -149,7 +149,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
     LOOP AT tokens_checked ASSIGNING <token>.
 
-      READ TABLE result ASSIGNING FIELD-SYMBOL(<source>) INDEX <token>-row.
+      READ TABLE code ASSIGNING FIELD-SYMBOL(<source>) INDEX <token>-row.
       ASSERT sy-subrc = 0.
 
       <source> =
@@ -168,7 +168,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
           inctoo             = abap_false
         TABLES
           ntext              = result
-          otext              = result
+          otext              = code
         EXCEPTIONS
           enqueue_table_full = 1
           include_enqueued   = 2
@@ -178,6 +178,8 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       IF sy-subrc <> 0.
         zcx_abappm_error=>raise( |Error pretty printing code: { program_name }| ).
       ENDIF.
+    ELSE.
+      result = code.
     ENDIF.
 
   ENDMETHOD.

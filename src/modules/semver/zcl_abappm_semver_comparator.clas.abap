@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_COMPARATOR DEFINITION
+CLASS zcl_abappm_semver_comparator DEFINITION
   PUBLIC
   CREATE PRIVATE.
 
@@ -11,12 +11,12 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CLASS-DATA any_semver TYPE REF TO ZCL_ABAPPM_SEMVER.
+    CLASS-DATA any_semver TYPE REF TO zcl_abappm_semver.
 
     DATA:
       operator TYPE string READ-ONLY,
       value    TYPE string READ-ONLY,
-      semver   TYPE REF TO ZCL_ABAPPM_SEMVER READ-ONLY.
+      semver   TYPE REF TO zcl_abappm_semver READ-ONLY.
 
     CLASS-METHODS class_constructor.
 
@@ -26,7 +26,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR DEFINITION
         loose  TYPE abap_bool DEFAULT abap_false
         incpre TYPE abap_bool DEFAULT abap_false
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     CLASS-METHODS create
       IMPORTING
@@ -34,15 +34,15 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR DEFINITION
         loose         TYPE abap_bool DEFAULT abap_false
         incpre        TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO ZCL_ABAPPM_SEMVER_COMPARATOR
+        VALUE(result) TYPE REF TO zcl_abappm_semver_comparator
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     METHODS parse
       IMPORTING
         comp TYPE string
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
     METHODS to_string
       RETURNING
@@ -62,25 +62,25 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        ZCX_ABAPPM_SEMVER_ERROR.
+        zcx_abappm_semver_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA options TYPE ZIF_ABAPPM_SEMVER_OPTIONS=>TY_OPTIONS.
+    DATA options TYPE zif_abappm_semver_options=>ty_options.
 
 ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
+CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
 
 
   METHOD class_constructor.
 
     TRY.
-        any_semver = ZCL_ABAPPM_SEMVER=>CREATE( '9999.9999.9999' ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+        any_semver = zcl_abappm_semver=>create( '9999.9999.9999' ).
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
     " any_semver must be valid
@@ -94,7 +94,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
     options-loose  = loose.
     options-incpre = incpre.
 
-    parse( ZCL_ABAPPM_SEMVER_UTILS=>TRIM( comp ) ).
+    parse( zcl_abappm_semver_utils=>trim( comp ) ).
 
     IF semver = any_semver.
       value = ''.
@@ -109,7 +109,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
 
     DATA(kind) = cl_abap_typedescr=>describe_by_data( comp )->type_kind.
 
-    IF kind = cl_abap_typedescr=>typekind_oref AND comp IS INSTANCE OF ZCL_ABAPPM_SEMVER_COMPARATOR.
+    IF kind = cl_abap_typedescr=>typekind_oref AND comp IS INSTANCE OF zcl_abappm_semver_comparator.
 
       result = comp.
 
@@ -117,14 +117,14 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      result = NEW ZCL_ABAPPM_SEMVER_COMPARATOR( comp = |{ result->value }| loose = loose incpre = incpre ).
+      result = NEW zcl_abappm_semver_comparator( comp = |{ result->value }| loose = loose incpre = incpre ).
 
     ELSEIF kind = cl_abap_typedescr=>typekind_char OR kind = cl_abap_typedescr=>typekind_string.
 
-      result = NEW ZCL_ABAPPM_SEMVER_COMPARATOR( comp = |{ comp }| loose = loose incpre = incpre ).
+      result = NEW zcl_abappm_semver_comparator( comp = |{ comp }| loose = loose incpre = incpre ).
 
     ELSE.
-      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'Invalid parameter type' ).
+      zcx_abappm_semver_error=>raise( 'Invalid parameter type' ).
     ENDIF.
 
   ENDMETHOD.
@@ -133,10 +133,10 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
   METHOD intersects.
 
     IF comp IS INITIAL.
-      ZCX_ABAPPM_SEMVER_ERROR=>RAISE( 'A comparator is required' ).
+      zcx_abappm_semver_error=>raise( 'A comparator is required' ).
     ENDIF.
 
-    DATA(semcomp) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( comp ).
+    DATA(semcomp) = zcl_abappm_semver_comparator=>create( comp ).
 
     CHECK semcomp IS BOUND.
 
@@ -144,7 +144,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
       IF value = ''.
         result = abap_true.
       ELSE.
-        DATA(semrange) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = semcomp->value loose = loose incpre = incpre ).
+        DATA(semrange) = zcl_abappm_semver_range=>create( range = semcomp->value loose = loose incpre = incpre ).
 
         CHECK semrange IS BOUND.
 
@@ -154,7 +154,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
       IF semcomp->value = ''.
         result = abap_true.
       ELSE.
-        semrange = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = value loose = loose incpre = incpre ).
+        semrange = zcl_abappm_semver_range=>create( range = value loose = loose incpre = incpre ).
 
         CHECK semrange IS BOUND.
 
@@ -189,7 +189,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
       ENDIF.
 
       " opposite directions less than
-      IF ZCL_ABAPPM_SEMVER_FUNCTIONS=>CMP(
+      IF zcl_abappm_semver_functions=>cmp(
         a      = semver->version
         op     = '<'
         b      = semcomp->semver->version
@@ -199,7 +199,7 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
         RETURN.
       ENDIF.
       " opposite directions greater than
-      IF ZCL_ABAPPM_SEMVER_FUNCTIONS=>CMP(
+      IF zcl_abappm_semver_functions=>cmp(
         a      = semver->version
         op     = '>'
         b      = semcomp->semver->version
@@ -260,14 +260,14 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
 
     DATA(r) = COND #(
       WHEN options-loose = abap_true
-      THEN ZCL_ABAPPM_SEMVER_RE=>TOKEN-COMPARATORLOOSE-SAFE_REGEX
-      ELSE ZCL_ABAPPM_SEMVER_RE=>TOKEN-COMPARATOR-SAFE_REGEX ).
+      THEN zcl_abappm_semver_re=>token-comparatorloose-safe_regex
+      ELSE zcl_abappm_semver_re=>token-comparator-safe_regex ).
 
     TRY.
         DATA(m) = r->create_matcher( text = comp ).
 
         IF NOT m->match( ).
-          ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Invalid comparator: { comp }| ).
+          zcx_abappm_semver_error=>raise( |Invalid comparator: { comp }| ).
         ENDIF.
 
         operator = m->get_submatch( 1 ).
@@ -280,11 +280,11 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
         IF m->get_submatch( 2 ) IS INITIAL.
           semver = any_semver.
         ELSE.
-          semver = ZCL_ABAPPM_SEMVER=>CREATE( version = m->get_submatch( 2 ) loose = options-loose incpre = options-incpre ).
+          semver = zcl_abappm_semver=>create( version = m->get_submatch( 2 ) loose = options-loose incpre = options-incpre ).
         ENDIF.
 
       CATCH cx_sy_matcher.
-        ZCX_ABAPPM_SEMVER_ERROR=>RAISE( |Error evaluating regex for { comp }| ).
+        zcx_abappm_semver_error=>raise( |Error evaluating regex for { comp }| ).
     ENDTRY.
 
   ENDMETHOD.
@@ -293,19 +293,19 @@ CLASS ZCL_ABAPPM_SEMVER_COMPARATOR IMPLEMENTATION.
   METHOD test.
 
     TRY.
-        DATA(testver) = ZCL_ABAPPM_SEMVER=>CREATE( version = version loose = options-loose incpre = options-incpre ).
+        DATA(testver) = zcl_abappm_semver=>create( version = version loose = options-loose incpre = options-incpre ).
 
         IF semver = any_semver OR testver = any_semver.
           result = abap_true.
         ELSE.
-          result = ZCL_ABAPPM_SEMVER_FUNCTIONS=>CMP(
+          result = zcl_abappm_semver_functions=>cmp(
             a     = testver->version
             op    = operator
             b     = semver->version
             loose = options-loose ).
         ENDIF.
 
-      CATCH ZCX_ABAPPM_SEMVER_ERROR.
+      CATCH zcx_abappm_semver_error.
         result = abap_false.
     ENDTRY.
 

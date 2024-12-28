@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_FIXTURES DEFINITION
+CLASS zcl_abappm_semver_fixtures DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -148,7 +148,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_FIXTURES IMPLEMENTATION.
+CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
 
 
   METHOD comparator_intersection.
@@ -422,10 +422,10 @@ CLASS ZCL_ABAPPM_SEMVER_FIXTURES IMPLEMENTATION.
 
     " none of these are semvers
     result = VALUE #(
-      ( value = |{ repeat( val = '1' occ = ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_LENGTH ) }.0.0| reason = 'too long' )
-      ( value = |{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }0.0.0| reason = 'too big' )
-      ( value = |0.{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }0.0| reason = 'too big' )
-      ( value = |0.0.{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }0| reason = 'too big' )
+      ( value = |{ repeat( val = '1' occ = zif_abappm_semver_constants=>max_length ) }.0.0| reason = 'too long' )
+      ( value = |{ zif_abappm_semver_constants=>max_safe_integer }0.0.0| reason = 'too big' )
+      ( value = |0.{ zif_abappm_semver_constants=>max_safe_integer }0.0| reason = 'too big' )
+      ( value = |0.0.{ zif_abappm_semver_constants=>max_safe_integer }0| reason = 'too big' )
       ( value = 'hello, world' reason = 'not a version' )
       ( value = 'hello, world' reason = 'even loose, it''s still junk' loose = abap_true )
       ( value = 'xyz' reason = 'even loose as an opt, same' loose = abap_true )
@@ -837,12 +837,12 @@ CLASS ZCL_ABAPPM_SEMVER_FIXTURES IMPLEMENTATION.
       ( range = '>=09090' res = '>=9090.0.0' loose = abap_true )
       ( range = '>=09090-0' res = '' incpre = abap_true )
       ( range = '>=09090-0' res = '' loose = abap_true incpre = abap_true )
-      ( range = |^{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }.0.0| res = '' )
-      ( range = |={ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }.0.0|
-          res = |{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }.0.0| )
-      ( range = |^{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER - 1 }.0.0|
-          res = |>={ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER - 1 }.0.0 | &&
-                |<{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_INTEGER }.0.0-0| ) ).
+      ( range = |^{ zif_abappm_semver_constants=>max_safe_integer }.0.0| res = '' )
+      ( range = |={ zif_abappm_semver_constants=>max_safe_integer }.0.0|
+          res = |{ zif_abappm_semver_constants=>max_safe_integer }.0.0| )
+      ( range = |^{ zif_abappm_semver_constants=>max_safe_integer - 1 }.0.0|
+          res = |>={ zif_abappm_semver_constants=>max_safe_integer - 1 }.0.0 | &&
+                |<{ zif_abappm_semver_constants=>max_safe_integer }.0.0-0| ) ).
 
   ENDMETHOD.
 

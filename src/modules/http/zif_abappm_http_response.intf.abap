@@ -1,4 +1,4 @@
-INTERFACE ZIF_ABAPPM_HTTP_RESPONSE PUBLIC.
+INTERFACE zif_abappm_http_response PUBLIC.
 
 ************************************************************************
 * HTTP Response
@@ -17,9 +17,9 @@ INTERFACE ZIF_ABAPPM_HTTP_RESPONSE PUBLIC.
 
   METHODS json
     RETURNING
-      VALUE(result) TYPE REF TO ZIF_ABAPPM_AJSON
+      VALUE(result) TYPE REF TO zif_abappm_ajson
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS is_ok
     RETURNING
@@ -35,9 +35,9 @@ INTERFACE ZIF_ABAPPM_HTTP_RESPONSE PUBLIC.
 
   METHODS headers
     RETURNING
-      VALUE(result) TYPE REF TO ZCL_ABAPPM_STRING_MAP
+      VALUE(result) TYPE REF TO zcl_abappm_string_map
     RAISING
-      ZCX_ABAPPM_ERROR.
+      zcx_abappm_error.
 
   METHODS close.
 

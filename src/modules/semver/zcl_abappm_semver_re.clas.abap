@@ -1,4 +1,4 @@
-CLASS ZCL_ABAPPM_SEMVER_RE DEFINITION
+CLASS zcl_abappm_semver_re DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -100,7 +100,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ABAPPM_SEMVER_RE IMPLEMENTATION.
+CLASS zcl_abappm_semver_re IMPLEMENTATION.
 
 
   METHOD class_constructor.
@@ -270,9 +270,9 @@ CLASS ZCL_ABAPPM_SEMVER_RE IMPLEMENTATION.
 
     create_token(
       name  = 'COERCEPLAIN'
-      value = |(^\|[^\\d])(\\d\{1,{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_COMPONENT_LENGTH }\})| &&
-              |(?:\\.(\\d\{1,{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_COMPONENT_LENGTH }\}))?| &&
-              |(?:\\.(\\d\{1,{ ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_COMPONENT_LENGTH }\}))?| ).
+      value = |(^\|[^\\d])(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\})| &&
+              |(?:\\.(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\}))?| &&
+              |(?:\\.(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\}))?| ).
     create_token(
       name  = 'COERCE'
       value = |{ token-coerceplain-src }(?:$\|[^\\d])| ).
@@ -418,8 +418,8 @@ CLASS ZCL_ABAPPM_SEMVER_RE IMPLEMENTATION.
 
     DATA(safe_regex_replacements) = VALUE ty_regex_replacements(
       ( token = `\s`               max = 1 )
-      ( token = `\d`               max = ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_LENGTH )
-      ( token = letter_dash_number max = ZIF_ABAPPM_SEMVER_CONSTANTS=>MAX_SAFE_BUILD_LENGTH ) ).
+      ( token = `\d`               max = zif_abappm_semver_constants=>max_length )
+      ( token = letter_dash_number max = zif_abappm_semver_constants=>max_safe_build_length ) ).
 
     result = value.
 
