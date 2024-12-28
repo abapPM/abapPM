@@ -99,14 +99,13 @@ CLASS zcl_abappm_gui_router DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abapgit_exception ##CALLED.
 
     METHODS toggle_favorite
       IMPORTING
         !package TYPE csequence
       RAISING
         zcx_abapgit_exception.
-
 ENDCLASS.
 
 
