@@ -770,8 +770,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-add_dependency OR c_action-remove_dependency.
 
-        zcx_abapgit_exception=>raise( 'The feature has not been implemented yet. '
-          && 'Edit package.abap.json and update the dependencies.' ).
+        zcx_abapgit_exception=>raise( `The feature has not been implemented yet. `
+          && `Edit the manifest and then update the dependencies.` ).
 
         rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
 

@@ -529,13 +529,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   METHOD render_registry.
 
     IF settings-registry CS 'registry.abappm.com'.
-      DATA(css_class) = 'transport-box'. " green
+      DATA(fav_class) = 'transport-box'. " green
     ELSE.
-      css_class = 'user-box'. " blue
+      fav_class = 'user-box'. " blue
     ENDIF.
 
     html->add( '<span style="float:right">' ).
-    html->add( |<span class="{ css_class }">| ).
+    html->add( |<span class="{ fav_class }">| ).
     html->add_a(
       iv_title = 'Registry'
       iv_txt   = settings-registry
@@ -594,18 +594,18 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     " Start of row
     IF package-favorite = abap_true.
-      DATA(css_class) = ' class="favorite"'.
-      DATA(css_color) = 'blue'.
+      DATA(fav_class) = ' class="favorite"'.
+      DATA(fav_color) = 'blue'.
     ELSE.
-      css_class = ''.
-      css_color = 'grey'.
+      fav_class = ''.
+      fav_color = 'grey'.
     ENDIF.
 
-    html->add( |<tr{ css_class } data-key="{ package-package }">| ).
+    html->add( |<tr data-key="{ package-package }{ fav_class }">| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
-      iv_name  = |star/{ css_color }|
+      iv_name  = |star/{ fav_color }|
       iv_class = 'pad-sides'
       iv_hint  = 'Click to toggle favorite' ).
 
