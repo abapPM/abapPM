@@ -96,8 +96,8 @@ CLASS ltcl_syntax_basic_logic IMPLEMENTATION.
 
     " Call the method and compare results
     lv_line_act = mo_syntax_highlighter->apply_style(
-      iv_line  = 'CALL FUNCTION'
-      iv_class = zcl_abappm_highlighter_abap=>c_css-keyword ).
+      line  = 'CALL FUNCTION'
+      class = zcl_abappm_highlighter_abap=>c_css-keyword ).
 
     cl_abap_unit_assert=>assert_equals(
       act = lv_line_act
@@ -191,8 +191,8 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                                         act = lt_matches_act
                                         msg = |Error during parsing: { iv_line }| ).
 
-    lo_syntax->order_matches( EXPORTING iv_line    = iv_line
-                       CHANGING  ct_matches = lt_matches_act ).
+    lo_syntax->order_matches( EXPORTING line    = iv_line
+                              CHANGING  matches = lt_matches_act ).
 
     cl_abap_unit_assert=>assert_equals( exp = mt_after_order
                                         act = lt_matches_act
@@ -200,9 +200,9 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 
     lo_syntax->extend_matches(
       EXPORTING
-        iv_line    = iv_line
+        line    = iv_line
       CHANGING
-        ct_matches = lt_matches_act ).
+        matches = lt_matches_act ).
 
     cl_abap_unit_assert=>assert_equals( exp = mt_after_extend
                                         act = lt_matches_act

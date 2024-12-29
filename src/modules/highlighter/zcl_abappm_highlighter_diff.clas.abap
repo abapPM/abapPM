@@ -42,21 +42,21 @@ CLASS zcl_abappm_highlighter_diff IMPLEMENTATION.
 
     " Initialize instances of regular expressions
 
-    add_rule( iv_regex = c_regex-ins
-              iv_token = c_token-ins
-              iv_style = c_css-ins ).
+    add_rule( regex = c_regex-ins
+              token = c_token-ins
+              style = c_css-ins ).
 
-    add_rule( iv_regex = c_regex-del
-              iv_token = c_token-del
-              iv_style = c_css-del ).
+    add_rule( regex = c_regex-del
+              token = c_token-del
+              style = c_css-del ).
 
-    add_rule( iv_regex = c_regex-test
-              iv_token = c_token-test
-              iv_style = c_css-test ).
+    add_rule( regex = c_regex-test
+              token = c_token-test
+              style = c_css-test ).
 
-    add_rule( iv_regex = c_regex-comment
-              iv_token = c_token-comment
-              iv_style = c_css-comment ).
+    add_rule( regex = c_regex-comment
+              token = c_token-comment
+              style = c_css-comment ).
 
   ENDMETHOD.
 ENDCLASS.

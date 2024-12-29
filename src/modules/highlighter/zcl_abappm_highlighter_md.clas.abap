@@ -45,7 +45,7 @@ CLASS zcl_abappm_highlighter_md DEFINITION
 
   PROTECTED SECTION.
 
-    CLASS-DATA gv_comment TYPE abap_bool.
+    CLASS-DATA comment TYPE abap_bool.
 
     METHODS order_matches REDEFINITION.
 
@@ -63,156 +63,147 @@ CLASS zcl_abappm_highlighter_md IMPLEMENTATION.
 
     " Initialize instances of regular expressions
 
-    add_rule( iv_regex    = c_regex-xml_tag
-              iv_token    = c_token-xml_tag
-              iv_style    = c_css-xml_tag
-              iv_submatch = 1 ).
+    add_rule( regex    = c_regex-xml_tag
+              token    = c_token-xml_tag
+              style    = c_css-xml_tag
+              submatch = 1 ).
 
-    add_rule( iv_regex = c_regex-attr
-              iv_token = c_token-attr
-              iv_style = c_css-attr ).
+    add_rule( regex = c_regex-attr
+              token = c_token-attr
+              style = c_css-attr ).
 
-    add_rule( iv_regex = c_regex-attr_val
-              iv_token = c_token-attr_val
-              iv_style = c_css-attr_val ).
+    add_rule( regex = c_regex-attr_val
+              token = c_token-attr_val
+              style = c_css-attr_val ).
 
-    add_rule( iv_regex = c_regex-heading
-              iv_token = c_token-heading
-              iv_style = c_css-heading ).
+    add_rule( regex = c_regex-heading
+              token = c_token-heading
+              style = c_css-heading ).
 
-    add_rule( iv_regex = c_regex-link
-              iv_token = c_token-link
-              iv_style = c_css-link ).
+    add_rule( regex = c_regex-link
+              token = c_token-link
+              style = c_css-link ).
 
-    add_rule( iv_regex = c_regex-url
-              iv_token = c_token-url
-              iv_style = c_css-url ).
+    add_rule( regex = c_regex-url
+              token = c_token-url
+              style = c_css-url ).
 
     " TODO: Rules for strong and emphasis conflict with others
-    " add_rule( iv_regex = c_regex-strong
-    "           iv_token = c_token-strong
-    "           iv_style = c_css-strong )
-    " add_rule( iv_regex = c_regex-emphasis
-    "           iv_token = c_token-emphasis
-    "           iv_style = c_css-emphasis )
+    " add_rule( regex = c_regex-strong
+    "           token = c_token-strong
+    "           style = c_css-strong )
+    " add_rule( regex = c_regex-emphasis
+    "           token = c_token-emphasis
+    "           style = c_css-emphasis )
 
-    add_rule( iv_regex = c_regex-comment
-              iv_token = c_token-comment
-              iv_style = c_css-comment ).
+    add_rule( regex = c_regex-comment
+              token = c_token-comment
+              style = c_css-comment ).
 
   ENDMETHOD.
 
 
   METHOD order_matches.
 
-    DATA:
-      lv_match      TYPE string,
-      lv_line_len   TYPE i,
-      lv_cmmt_end   TYPE i,
-      lv_new_len    TYPE i,
-      lv_index      TYPE sy-tabix,
-      lv_prev_token TYPE c,
-      lv_state      TYPE c VALUE 'O'. " O - for open tag; C - for closed tag;
+    FIELD-SYMBOLS <prev_match> TYPE ty_match.
 
-    FIELD-SYMBOLS:
-      <ls_prev>  TYPE ty_match,
-      <ls_match> TYPE ty_match.
+    SORT matches BY offset.
 
-    SORT ct_matches BY offset.
-
-    lv_line_len = strlen( iv_line ).
+    DATA(line_len)   = strlen( line ).
+    DATA(prev_token) = ''.
+    DATA(state) = 'O'. " O - for open tag; C - for closed tag;
 
     " Check if this is part of multi-line comment and mark it accordingly
-    IF gv_comment = abap_true.
-      READ TABLE ct_matches WITH KEY token = c_token-comment TRANSPORTING NO FIELDS.
+    IF comment = abap_true.
+      READ TABLE matches WITH KEY token = c_token-comment TRANSPORTING NO FIELDS.
       IF sy-subrc <> 0.
-        CLEAR ct_matches.
-        APPEND INITIAL LINE TO ct_matches ASSIGNING <ls_match>.
-        <ls_match>-token = c_token-comment.
-        <ls_match>-offset = 0.
-        <ls_match>-length = lv_line_len.
+        CLEAR matches.
+        APPEND INITIAL LINE TO matches ASSIGNING FIELD-SYMBOL(<match>).
+        <match>-token = c_token-comment.
+        <match>-offset = 0.
+        <match>-length = line_len.
         RETURN.
       ENDIF.
     ENDIF.
 
-    LOOP AT ct_matches ASSIGNING <ls_match>.
-      lv_index = sy-tabix.
+    LOOP AT matches ASSIGNING <match>.
+      DATA(index) = sy-tabix.
 
-      lv_match = substring( val = iv_line
-                            off = <ls_match>-offset
-                            len = <ls_match>-length ).
+      DATA(match) = substring( val = line
+                               off = <match>-offset
+                               len = <match>-length ).
 
-      CASE <ls_match>-token.
+      CASE <match>-token.
         WHEN c_token-xml_tag.
-          <ls_match>-text_tag = lv_match.
+          <match>-text_tag = match.
 
           " No other matches between two tags
-          IF <ls_match>-text_tag = '>' AND lv_prev_token = c_token-xml_tag.
-            lv_state = 'C'.
-            <ls_prev>-length = <ls_match>-offset - <ls_prev>-offset + <ls_match>-length.
-            DELETE ct_matches INDEX lv_index.
+          IF <match>-text_tag = '>' AND prev_token = c_token-xml_tag.
+            state = 'C'.
+            <prev_match>-length = <match>-offset - <prev_match>-offset + <match>-length.
+            DELETE matches INDEX index.
             CONTINUE.
 
             " Adjust length and offset of closing tag
-          ELSEIF <ls_match>-text_tag = '>' AND lv_prev_token <> c_token-xml_tag.
-            lv_state = 'C'.
-            IF <ls_prev> IS ASSIGNED.
-              lv_new_len = <ls_match>-offset - <ls_prev>-offset - <ls_prev>-length + <ls_match>-length.
-              IF lv_new_len < 0.
+          ELSEIF <match>-text_tag = '>' AND prev_token <> c_token-xml_tag.
+            state = 'C'.
+            IF <prev_match> IS ASSIGNED.
+              DATA(new_len) = <match>-offset - <prev_match>-offset - <prev_match>-length + <match>-length.
+              IF new_len < 0.
                 " Something went wrong. Ignore the match
-                DELETE ct_matches INDEX lv_index.
+                DELETE matches INDEX index.
                 CONTINUE.
               ENDIF.
-              <ls_match>-length = lv_new_len.
-              <ls_match>-offset = <ls_prev>-offset + <ls_prev>-length.
+              <match>-length = new_len.
+              <match>-offset = <prev_match>-offset + <prev_match>-length.
             ENDIF.
           ELSE.
-            lv_state = 'O'.
+            state = 'O'.
           ENDIF.
 
         WHEN c_token-comment.
-          IF lv_match = '<!--'.
-            DELETE ct_matches WHERE offset > <ls_match>-offset.
-            DELETE ct_matches WHERE offset = <ls_match>-offset AND token = c_token-xml_tag.
-            <ls_match>-length = lv_line_len - <ls_match>-offset.
-            gv_comment = abap_true.
-          ELSEIF lv_match = '-->'.
-            DELETE ct_matches WHERE offset < <ls_match>-offset.
-            <ls_match>-length = <ls_match>-offset + 3.
-            <ls_match>-offset = 0.
-            gv_comment = abap_false.
+          IF match = '<!--'.
+            DELETE matches WHERE offset > <match>-offset.
+            DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
+            <match>-length = line_len - <match>-offset.
+            comment = abap_true.
+          ELSEIF match = '-->'.
+            DELETE matches WHERE offset < <match>-offset.
+            <match>-length = <match>-offset + 3.
+            <match>-offset = 0.
+            comment = abap_false.
           ELSE.
-            lv_cmmt_end = <ls_match>-offset + <ls_match>-length.
-            DELETE ct_matches WHERE offset > <ls_match>-offset AND offset <= lv_cmmt_end.
-            DELETE ct_matches WHERE offset = <ls_match>-offset AND token = c_token-xml_tag.
+            DATA(cmmt_end) = <match>-offset + <match>-length.
+            DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
+            DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
           ENDIF.
 
         WHEN OTHERS.
-          IF lv_prev_token = c_token-xml_tag.
-            <ls_prev>-length = <ls_match>-offset - <ls_prev>-offset. " Extend length of the opening tag
+          IF prev_token = c_token-xml_tag.
+            <prev_match>-length = <match>-offset - <prev_match>-offset. " Extend length of the opening tag
           ENDIF.
 
-          IF lv_state = 'C'.  " Delete all matches between tags
-            DELETE ct_matches INDEX lv_index.
+          IF state = 'C'.  " Delete all matches between tags
+            DELETE matches INDEX index.
             CONTINUE.
           ENDIF.
 
       ENDCASE.
 
-      lv_prev_token = <ls_match>-token.
-      ASSIGN <ls_match> TO <ls_prev>.
+      prev_token = <match>-token.
+      ASSIGN <match> TO <prev_match>.
       CHECK sy-subrc >= 0. "abaplint false positive
     ENDLOOP.
 
     "if the last XML tag is not closed, extend it to the end of the tag
-    IF lv_prev_token = c_token-xml_tag
-        AND <ls_prev> IS ASSIGNED
-        AND <ls_prev>-length  = 1
-        AND <ls_prev>-text_tag = '<'.
+    IF prev_token = c_token-xml_tag
+        AND <prev_match> IS ASSIGNED
+        AND <prev_match>-length  = 1
+        AND <prev_match>-text_tag = '<'.
 
-      FIND REGEX '<\s*[^\s]*' IN iv_line+<ls_prev>-offset MATCH LENGTH <ls_prev>-length.
+      FIND REGEX '<\s*[^\s]*' IN line+<prev_match>-offset MATCH LENGTH <prev_match>-length.
       IF sy-subrc <> 0.
-        <ls_prev>-length = 1.
+        <prev_match>-length = 1.
       ENDIF.
 
     ENDIF.

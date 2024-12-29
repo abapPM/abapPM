@@ -49,79 +49,74 @@ CLASS zcl_abappm_highlighter_json IMPLEMENTATION.
 
     " Initialize instances of regular expression
 
-    add_rule( iv_regex = c_regex-keyword
-              iv_token = c_token-keyword
-              iv_style = c_css-keyword ).
+    add_rule( regex = c_regex-keyword
+              token = c_token-keyword
+              style = c_css-keyword ).
 
     " Style for keys
-    add_rule( iv_regex = c_regex-text
-              iv_token = c_token-text
-              iv_style = c_css-text ).
+    add_rule( regex = c_regex-text
+              token = c_token-text
+              style = c_css-text ).
 
     " Style for values
-    add_rule( iv_regex = ''
-              iv_token = c_token-values
-              iv_style = c_css-values ).
+    add_rule( regex = ''
+              token = c_token-values
+              style = c_css-values ).
 
     " JSONC comments
-    add_rule( iv_regex = c_regex-comment
-              iv_token = c_token-comment
-              iv_style = c_css-comment ).
+    add_rule( regex = c_regex-comment
+              token = c_token-comment
+              style = c_css-comment ).
 
   ENDMETHOD.
 
 
   METHOD order_matches.
 
-    DATA:
-      lv_match      TYPE string,
-      lv_count      TYPE i,
-      lv_line_len   TYPE i,
-      lv_prev_token TYPE c.
-
-    FIELD-SYMBOLS:
-      <ls_prev>  TYPE ty_match,
-      <ls_match> TYPE ty_match.
+    FIELD-SYMBOLS <prev_match> TYPE ty_match.
 
     " Longest matches
-    SORT ct_matches BY offset length DESCENDING.
+    SORT matches BY offset length DESCENDING.
 
-    lv_line_len = strlen( iv_line ).
+    DATA(line_len)   = strlen( line ).
+    DATA(prev_token) = ''.
+    DATA(prev_end)   = ''.
 
-    LOOP AT ct_matches ASSIGNING <ls_match>.
+    LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
       " Delete matches after open text match
-      IF lv_prev_token = c_token-text AND <ls_match>-token <> c_token-text.
-        CLEAR <ls_match>-token.
+      IF prev_token = c_token-text AND <match>-token <> c_token-text.
+        CLEAR <match>-token.
         CONTINUE.
       ENDIF.
 
-      lv_match = substring( val = iv_line
-                            off = <ls_match>-offset
-                            len = <ls_match>-length ).
+      DATA(match) = substring( val = line
+                               off = <match>-offset
+                               len = <match>-length ).
 
-      IF <ls_match>-token = c_token-text.
-        <ls_match>-text_tag = lv_match.
-        IF lv_prev_token = c_token-text.
-          IF <ls_match>-text_tag = <ls_prev>-text_tag.
-            <ls_prev>-length = <ls_match>-offset + <ls_match>-length - <ls_prev>-offset.
-            CLEAR lv_prev_token.
+      IF <match>-token = c_token-text.
+        <match>-text_tag = match.
+        IF prev_token = c_token-text.
+          IF <match>-text_tag = <prev_match>-text_tag.
+            <prev_match>-length = <match>-offset + <match>-length - <prev_match>-offset.
+            CLEAR prev_token.
           ENDIF.
-          CLEAR <ls_match>-token.
+          CLEAR <match>-token.
           CONTINUE.
         ENDIF.
       ENDIF.
 
-      lv_prev_token = <ls_match>-token.
-      ASSIGN <ls_match> TO <ls_prev>.
+      prev_token = <match>-token.
+      ASSIGN <match> TO <prev_match>.
     ENDLOOP.
 
-    DELETE ct_matches WHERE token IS INITIAL.
+    DELETE matches WHERE token IS INITIAL.
 
     " Switch style of second text match to values
-    LOOP AT ct_matches ASSIGNING <ls_match> WHERE token = c_token-text.
-      lv_count = lv_count + 1.
-      IF lv_count >= 2.
-        <ls_match>-token = c_token-values.
+    DATA(count) = 0.
+    LOOP AT matches ASSIGNING <match> WHERE token = c_token-text.
+      count = count + 1.
+      IF count >= 2.
+        <match>-token = c_token-values.
       ENDIF.
     ENDLOOP.
 

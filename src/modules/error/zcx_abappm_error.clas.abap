@@ -53,13 +53,13 @@ CLASS zcx_abappm_error DEFINITION
     "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise_t100
       IMPORTING
-        VALUE(msgid) TYPE symsgid DEFAULT sy-msgid
-        VALUE(msgno) TYPE symsgno DEFAULT sy-msgno
-        VALUE(msgv1) TYPE symsgv DEFAULT sy-msgv1
-        VALUE(msgv2) TYPE symsgv DEFAULT sy-msgv2
-        VALUE(msgv3) TYPE symsgv DEFAULT sy-msgv3
-        VALUE(msgv4) TYPE symsgv DEFAULT sy-msgv4
-        !previous    TYPE REF TO cx_root OPTIONAL
+        msgid     TYPE symsgid DEFAULT sy-msgid
+        msgno     TYPE symsgno DEFAULT sy-msgno
+        msgv1     TYPE symsgv DEFAULT sy-msgv1
+        msgv2     TYPE symsgv DEFAULT sy-msgv2
+        msgv3     TYPE symsgv DEFAULT sy-msgv3
+        msgv4     TYPE symsgv DEFAULT sy-msgv4
+        !previous TYPE REF TO cx_root OPTIONAL
       RAISING
         zcx_abappm_error.
 
@@ -164,18 +164,22 @@ CLASS zcx_abappm_error IMPLEMENTATION.
 
     CONSTANTS:
       c_length_of_msgv           TYPE i VALUE 50,
+      c_max_length_of_text       TYPE i VALUE 200,
       c_offset_of_last_character TYPE i VALUE 49.
 
-    DATA:
-      msg_text TYPE c LENGTH 200,
-      rest     TYPE c LENGTH 200,
-      msg_var  TYPE c LENGTH c_length_of_msgv,
-      index    TYPE sy-index.
+    TYPES:
+      ty_msgv TYPE c LENGTH c_length_of_msgv,
+      ty_text TYPE c LENGTH c_max_length_of_text.
 
-    msg_text = text.
+    DATA:
+      msg_var TYPE ty_msgv,
+      rest    TYPE ty_text.
+
+    " Note: Texts longer than 200 characters truncated
+    DATA(msg_text) = CONV ty_text( text ).
 
     DO 4 TIMES.
-      index = sy-index.
+      DATA(index) = sy-index.
 
       CALL FUNCTION 'TEXT_SPLIT'
         EXPORTING

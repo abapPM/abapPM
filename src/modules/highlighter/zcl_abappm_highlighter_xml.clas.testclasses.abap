@@ -148,18 +148,18 @@ CLASS ltcl_syntax_cases DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS
       mt_after_extend TYPE zcl_abappm_highlighter_xml=>ty_match_tt.
 
     METHODS:
-      do_test IMPORTING iv_line TYPE string,
-      generate_parse IMPORTING iv_token  TYPE c
-                               iv_offset TYPE i
-                               iv_length TYPE i,
-      generate_order IMPORTING iv_token    TYPE c
-                               iv_offset   TYPE i
-                               iv_length   TYPE i
-                               iv_text_tag TYPE string,
-      generate_extend IMPORTING iv_token    TYPE c
-                                iv_offset   TYPE i
-                                iv_length   TYPE i
-                                iv_text_tag TYPE string,
+      do_test IMPORTING line TYPE string,
+      generate_parse IMPORTING token  TYPE c
+                               offset TYPE i
+                               length TYPE i,
+      generate_order IMPORTING token    TYPE c
+                               offset   TYPE i
+                               length   TYPE i
+                               text_tag TYPE string,
+      generate_extend IMPORTING token    TYPE c
+                                offset   TYPE i
+                                length   TYPE i
+                                text_tag TYPE string,
       test_xml_01 FOR TESTING,
       test_xml_02 FOR TESTING,
       test_xml_03 FOR TESTING,
@@ -185,30 +185,30 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 
 
     CREATE OBJECT lo_syntax.
-    lt_matches_act = lo_syntax->parse_line( iv_line ).
+    lt_matches_act = lo_syntax->parse_line( line ).
 
     SORT lt_matches_act BY offset.
 
     cl_abap_unit_assert=>assert_equals( exp = mt_after_parse
                                         act = lt_matches_act
-                                        msg = | Error during parsing: { iv_line }| ).
+                                        msg = | Error during parsing: { line }| ).
 
-    lo_syntax->order_matches( EXPORTING iv_line    = iv_line
-                       CHANGING  ct_matches = lt_matches_act ).
+    lo_syntax->order_matches( EXPORTING line    = line
+                       CHANGING  matches = lt_matches_act ).
 
     cl_abap_unit_assert=>assert_equals( exp = mt_after_order
                                         act = lt_matches_act
-                                        msg = | Error during ordering: { iv_line }| ).
+                                        msg = | Error during ordering: { line }| ).
 
     lo_syntax->extend_matches(
       EXPORTING
-        iv_line    = iv_line
+        line    = line
       CHANGING
-        ct_matches = lt_matches_act ).
+        matches = lt_matches_act ).
 
     cl_abap_unit_assert=>assert_equals( exp = mt_after_extend
                                         act = lt_matches_act
-                                        msg = | Error during extending: { iv_line }| ).
+                                        msg = | Error during extending: { line }| ).
 
     " Check consistency
     lv_offs = 0.
@@ -226,29 +226,29 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   METHOD generate_parse.
     DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
-    ls_match-token    = iv_token.
-    ls_match-offset   = iv_offset.
-    ls_match-length   = iv_length.
+    ls_match-token    = token.
+    ls_match-offset   = offset.
+    ls_match-length   = length.
     APPEND ls_match TO mt_after_parse.
   ENDMETHOD.
 
   METHOD generate_order.
     DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
-    ls_match-token    = iv_token.
-    ls_match-offset   = iv_offset.
-    ls_match-length   = iv_length.
-    ls_match-text_tag = iv_text_tag.
+    ls_match-token    = token.
+    ls_match-offset   = offset.
+    ls_match-length   = length.
+    ls_match-text_tag = text_tag.
     APPEND ls_match TO mt_after_order.
   ENDMETHOD.
 
   METHOD generate_extend.
     DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
-    ls_match-token    = iv_token.
-    ls_match-offset   = iv_offset.
-    ls_match-length   = iv_length.
-    ls_match-text_tag = iv_text_tag.
+    ls_match-token    = token.
+    ls_match-offset   = offset.
+    ls_match-length   = length.
+    ls_match-text_tag = text_tag.
     APPEND ls_match TO mt_after_extend.
   ENDMETHOD.
 
@@ -262,43 +262,43 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<tag>Text</tag>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 4
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 9
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 14
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 4
+                    length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 9
+                    length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 14
+                    length = 1 ).
 
     " Generate table with expected values after ordering
 
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 5
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 9
-                    iv_length   = 6
-                    iv_text_tag = '<' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 5
+                    text_tag = '<' ).
+    generate_order( token    = 'X'
+                    offset   = 9
+                    length   = 6
+                    text_tag = '<' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 5
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 5
-                     iv_length   = 4
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 9
-                     iv_length   = 6
-                     iv_text_tag = '<' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 5
+                     text_tag = '<' ).
+    generate_extend( token    = '.'
+                     offset   = 5
+                     length   = 4
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 9
+                     length   = 6
+                     text_tag = '<' ).
 
     do_test( lv_line ).
 
@@ -311,23 +311,23 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<tag/>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 5
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 5
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 6
-                    iv_text_tag = '<' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 6
+                    text_tag = '<' ).
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 6
-                     iv_text_tag = '<' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 6
+                     text_tag = '<' ).
 
     do_test( lv_line ).
 
@@ -340,58 +340,58 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<tag attribute="value"/>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 4
-                    iv_length = 10 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 15
-                    iv_length = 7 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 23
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 4
+                    length = 10 ).
+    generate_parse( token  = 'V'
+                    offset = 15
+                    length = 7 ).
+    generate_parse( token  = 'X'
+                    offset = 23
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 4
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 4
-                    iv_length   = 10
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 15
-                    iv_length   = 7
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 22
-                    iv_length   = 2
-                    iv_text_tag = '>' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 4
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 4
+                    length   = 10
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 15
+                    length   = 7
+                    text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 22
+                    length   = 2
+                    text_tag = '>' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 4
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 4
-                     iv_length   = 10
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 14
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 15
-                     iv_length   = 7
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 22
-                     iv_length   = 2
-                     iv_text_tag = '>' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 4
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 4
+                     length   = 10
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 14
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 15
+                     length   = 7
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 22
+                     length   = 2
+                     text_tag = '>' ).
 
     do_test( lv_line ).
 
@@ -404,58 +404,58 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<?xml version="1.0"?>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 5
-                    iv_length = 8 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 14
-                    iv_length = 5 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 20
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 5
+                    length = 8 ).
+    generate_parse( token  = 'V'
+                    offset = 14
+                    length = 5 ).
+    generate_parse( token  = 'X'
+                    offset = 20
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 5
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 5
-                    iv_length   = 8
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 14
-                    iv_length   = 5
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 19
-                    iv_length   = 2
-                    iv_text_tag = '>' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 5
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 5
+                    length   = 8
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 14
+                    length   = 5
+                    text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 19
+                    length   = 2
+                    text_tag = '>' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 5
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 5
-                     iv_length   = 8
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 13
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 14
-                     iv_length   = 5
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 19
-                     iv_length   = 2
-                     iv_text_tag = '>' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 5
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 5
+                     length   = 8
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 13
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 14
+                     length   = 5
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 19
+                     length   = 2
+                     text_tag = '>' ).
 
     do_test( lv_line ).
 
@@ -468,105 +468,105 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<ns:tag ns:a1="v1" ns:a2=''v2''>"text"</ns:tag>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 7
-                    iv_length = 6 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 14
-                    iv_length = 4 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 18
-                    iv_length = 6 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 25
-                    iv_length = 4 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 29
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 30
-                    iv_length = 6 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 36
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 44
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 7
+                    length = 6 ).
+    generate_parse( token  = 'V'
+                    offset = 14
+                    length = 4 ).
+    generate_parse( token  = 'A'
+                    offset = 18
+                    length = 6 ).
+    generate_parse( token  = 'V'
+                    offset = 25
+                    length = 4 ).
+    generate_parse( token  = 'X'
+                    offset = 29
+                    length = 1 ).
+    generate_parse( token  = 'V'
+                    offset = 30
+                    length = 6 ).
+    generate_parse( token  = 'X'
+                    offset = 36
+                    length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 44
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 7
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 7
-                    iv_length   = 6
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 14
-                    iv_length   = 4
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 18
-                    iv_length   = 6
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 25
-                    iv_length   = 4
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 29
-                    iv_length   = 1
-                    iv_text_tag = '>' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 36
-                    iv_length   = 9
-                    iv_text_tag = '<' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 7
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 7
+                    length   = 6
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 14
+                    length   = 4
+                    text_tag = '' ).
+    generate_order( token    = 'A'
+                    offset   = 18
+                    length   = 6
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 25
+                    length   = 4
+                    text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 29
+                    length   = 1
+                    text_tag = '>' ).
+    generate_order( token    = 'X'
+                    offset   = 36
+                    length   = 9
+                    text_tag = '<' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 7
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 7
-                     iv_length   = 6
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 13
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 14
-                     iv_length   = 4
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 18
-                     iv_length   = 6
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 24
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 25
-                     iv_length   = 4
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 29
-                     iv_length   = 1
-                     iv_text_tag = '>' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 30
-                     iv_length   = 6
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 36
-                     iv_length   = 9
-                     iv_text_tag = '<' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 7
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 7
+                     length   = 6
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 13
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 14
+                     length   = 4
+                     text_tag = '' ).
+    generate_extend( token    = 'A'
+                     offset   = 18
+                     length   = 6
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 24
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 25
+                     length   = 4
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 29
+                     length   = 1
+                     text_tag = '>' ).
+    generate_extend( token    = '.'
+                     offset   = 30
+                     length   = 6
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 36
+                     length   = 9
+                     text_tag = '<' ).
 
     do_test( lv_line ).
 
@@ -579,47 +579,47 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<ns:tag ns:a1="v1"'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 7
-                    iv_length = 6 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 14
-                    iv_length = 4 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 7
+                    length = 6 ).
+    generate_parse( token  = 'V'
+                    offset = 14
+                    length = 4 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 7
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 7
-                    iv_length   = 6
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 14
-                    iv_length   = 4
-                    iv_text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 7
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 7
+                    length   = 6
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 14
+                    length   = 4
+                    text_tag = '' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 7
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 7
-                     iv_length   = 6
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 13
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 14
-                     iv_length   = 4
-                     iv_text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 7
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 7
+                     length   = 6
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 13
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 14
+                     length   = 4
+                     text_tag = '' ).
 
     do_test( lv_line ).
 
@@ -633,58 +633,58 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<tag attribute=" '' > "/>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 4
-                    iv_length = 10 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 15
-                    iv_length = 7 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 23
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 4
+                    length = 10 ).
+    generate_parse( token  = 'V'
+                    offset = 15
+                    length = 7 ).
+    generate_parse( token  = 'X'
+                    offset = 23
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 4
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 4
-                    iv_length   = 10
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 15
-                    iv_length   = 7
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 22
-                    iv_length   = 2
-                    iv_text_tag = '>' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 4
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 4
+                    length   = 10
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 15
+                    length   = 7
+                    text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 22
+                    length   = 2
+                    text_tag = '>' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 4
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 4
-                     iv_length   = 10
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 14
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 15
-                     iv_length   = 7
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 22
-                     iv_length   = 2
-                     iv_text_tag = '>' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 4
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 4
+                     length   = 10
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 14
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 15
+                     length   = 7
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 22
+                     length   = 2
+                     text_tag = '>' ).
 
     do_test( lv_line ).
 
@@ -698,36 +698,36 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = 'attribute=''>" '''.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 0
-                    iv_length = 9 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 10
-                    iv_length = 5 ).
+    generate_parse( token  = 'A'
+                    offset = 0
+                    length = 9 ).
+    generate_parse( token  = 'V'
+                    offset = 10
+                    length = 5 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 0
-                    iv_length   = 9
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 10
-                    iv_length   = 5
-                    iv_text_tag = '' ).
+    generate_order( token    = 'A'
+                    offset   = 0
+                    length   = 9
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 10
+                    length   = 5
+                    text_tag = '' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 0
-                     iv_length   = 9
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 9
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 10
-                     iv_length   = 5
-                     iv_text_tag = '' ).
+    generate_extend( token    = 'A'
+                     offset   = 0
+                     length   = 9
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 9
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 10
+                     length   = 5
+                     text_tag = '' ).
 
     do_test( lv_line ).
 
@@ -740,58 +740,58 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
     lv_line = '<tag attribute=`value`/>'.
 
     " Generate table with expected values after parsing
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 0
-                    iv_length = 1 ).
-    generate_parse( iv_token  = 'A'
-                    iv_offset = 4
-                    iv_length = 10 ).
-    generate_parse( iv_token  = 'V'
-                    iv_offset = 15
-                    iv_length = 7 ).
-    generate_parse( iv_token  = 'X'
-                    iv_offset = 23
-                    iv_length = 1 ).
+    generate_parse( token  = 'X'
+                    offset = 0
+                    length = 1 ).
+    generate_parse( token  = 'A'
+                    offset = 4
+                    length = 10 ).
+    generate_parse( token  = 'V'
+                    offset = 15
+                    length = 7 ).
+    generate_parse( token  = 'X'
+                    offset = 23
+                    length = 1 ).
 
     " Generate table with expected values after ordering
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 0
-                    iv_length   = 4
-                    iv_text_tag = '<' ).
-    generate_order( iv_token    = 'A'
-                    iv_offset   = 4
-                    iv_length   = 10
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'V'
-                    iv_offset   = 15
-                    iv_length   = 7
-                    iv_text_tag = '' ).
-    generate_order( iv_token    = 'X'
-                    iv_offset   = 22
-                    iv_length   = 2
-                    iv_text_tag = '>' ).
+    generate_order( token    = 'X'
+                    offset   = 0
+                    length   = 4
+                    text_tag = '<' ).
+    generate_order( token    = 'A'
+                    offset   = 4
+                    length   = 10
+                    text_tag = '' ).
+    generate_order( token    = 'V'
+                    offset   = 15
+                    length   = 7
+                    text_tag = '' ).
+    generate_order( token    = 'X'
+                    offset   = 22
+                    length   = 2
+                    text_tag = '>' ).
 
     " Generate table with expected values after extending
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 0
-                     iv_length   = 4
-                     iv_text_tag = '<' ).
-    generate_extend( iv_token    = 'A'
-                     iv_offset   = 4
-                     iv_length   = 10
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = '.'
-                     iv_offset   = 14
-                     iv_length   = 1
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'V'
-                     iv_offset   = 15
-                     iv_length   = 7
-                     iv_text_tag = '' ).
-    generate_extend( iv_token    = 'X'
-                     iv_offset   = 22
-                     iv_length   = 2
-                     iv_text_tag = '>' ).
+    generate_extend( token    = 'X'
+                     offset   = 0
+                     length   = 4
+                     text_tag = '<' ).
+    generate_extend( token    = 'A'
+                     offset   = 4
+                     length   = 10
+                     text_tag = '' ).
+    generate_extend( token    = '.'
+                     offset   = 14
+                     length   = 1
+                     text_tag = '' ).
+    generate_extend( token    = 'V'
+                     offset   = 15
+                     length   = 7
+                     text_tag = '' ).
+    generate_extend( token    = 'X'
+                     offset   = 22
+                     length   = 2
+                     text_tag = '>' ).
 
     do_test( lv_line ).
 

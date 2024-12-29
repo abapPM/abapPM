@@ -71,7 +71,7 @@ CLASS zcl_abappm_command_semver IMPLEMENTATION.
   METHOD satisfies.
 
     TRY.
-        DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
+        result = zcl_abappm_semver_functions=>satisfies(
           version = version
           range   = range ).
       CATCH zcx_abappm_semver_error INTO DATA(error).
