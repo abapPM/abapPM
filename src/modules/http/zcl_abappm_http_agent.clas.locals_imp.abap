@@ -2,13 +2,13 @@ CLASS lcl_http_response DEFINITION FINAL.
 
   PUBLIC SECTION.
 
-    INTERFACES ZIF_ABAPPM_HTTP_RESPONSE.
+    INTERFACES zif_abappm_http_response.
 
     CLASS-METHODS create
       IMPORTING
         http_client   TYPE REF TO if_http_client
       RETURNING
-        VALUE(result) TYPE REF TO ZIF_ABAPPM_HTTP_RESPONSE.
+        VALUE(result) TYPE REF TO zif_abappm_http_response.
 
   PRIVATE SECTION.
 
@@ -29,32 +29,32 @@ CLASS lcl_http_response IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CLOSE.
+  METHOD zif_abappm_http_response~close.
 
     http_client->close( ).
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~IS_OK.
+  METHOD zif_abappm_http_response~is_ok.
 
-    DATA(status_code) = ZIF_ABAPPM_HTTP_RESPONSE~CODE( ).
+    DATA(status_code) = zif_abappm_http_response~code( ).
     result = boolc( status_code >= 200 AND status_code < 300 ).
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~DATA.
+  METHOD zif_abappm_http_response~data.
 
     result = http_response->get_data( ).
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CDATA.
+  METHOD zif_abappm_http_response~cdata.
 
     result = http_response->get_cdata( ).
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~CODE.
+  METHOD zif_abappm_http_response~code.
 
     DATA msg TYPE string ##NEEDED.
 
@@ -65,23 +65,23 @@ CLASS lcl_http_response IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~JSON.
+  METHOD zif_abappm_http_response~json.
 
     TRY.
-        result = ZCL_ABAPPM_AJSON=>PARSE( ZIF_ABAPPM_HTTP_RESPONSE~CDATA( ) ).
-      CATCH ZCX_ABAPPM_AJSON_ERROR INTO DATA(error).
-        ZCX_ABAPPM_ERROR=>RAISE_WITH_TEXT( error ).
+        result = zcl_abappm_ajson=>parse( zif_abappm_http_response~cdata( ) ).
+      CATCH zcx_abappm_ajson_error INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~ERROR.
+  METHOD zif_abappm_http_response~error.
 
     result = http_response->get_cdata( ).
 
   ENDMETHOD.
 
-  METHOD ZIF_ABAPPM_HTTP_RESPONSE~HEADERS.
+  METHOD zif_abappm_http_response~headers.
 
     DATA headers TYPE tihttpnvp.
 

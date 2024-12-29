@@ -17,11 +17,11 @@ ENDCLASS.
 CLASS ltcl_login_manager IMPLEMENTATION.
 
   METHOD setup.
-    ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>CLEAR( ).
+    zcl_abappm_http_login_manager=>clear( ).
   ENDMETHOD.
 
   METHOD teardown.
-    ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>CLEAR( ).
+    zcl_abappm_http_login_manager=>clear( ).
   ENDMETHOD.
 
   METHOD save.
@@ -29,12 +29,12 @@ CLASS ltcl_login_manager IMPLEMENTATION.
     CONSTANTS c_host TYPE string VALUE 'https://abapgit.org/foo/bar'.
     CONSTANTS c_auth TYPE string VALUE 'foobar'.
 
-    ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>SAVE(
+    zcl_abappm_http_login_manager=>save(
       host = c_host
       auth = c_auth ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>GET( c_host )
+      act = zcl_abappm_http_login_manager=>get( c_host )
       exp = c_auth ).
 
   ENDMETHOD.
@@ -43,7 +43,7 @@ CLASS ltcl_login_manager IMPLEMENTATION.
 
     DATA auth TYPE string.
 
-    auth = ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>SET(
+    auth = zcl_abappm_http_login_manager=>set(
       host     = 'https://github.com/abapGit/abapGit.git'
       username = c_username
       password = c_password ).
@@ -62,13 +62,13 @@ CLASS ltcl_login_manager IMPLEMENTATION.
     DATA: auth1 TYPE string,
           auth2 TYPE string.
 
-    ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>SET(
+    zcl_abappm_http_login_manager=>set(
       host     = c_github1
       username = c_username
       password = c_password ).
 
-    auth1 = ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>GET( c_github1 ).
-    auth2 = ZCL_ABAPPM_HTTP_LOGIN_MANAGER=>GET( c_github2 ).
+    auth1 = zcl_abappm_http_login_manager=>get( c_github1 ).
+    auth2 = zcl_abappm_http_login_manager=>get( c_github2 ).
 
     cl_abap_unit_assert=>assert_equals(
       act = auth1

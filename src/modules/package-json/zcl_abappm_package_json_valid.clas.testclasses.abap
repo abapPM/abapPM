@@ -3,8 +3,8 @@ CLASS lcl_test DEFINITION FINAL FOR TESTING
   DURATION SHORT.
 
   PRIVATE SECTION.
-    DATA tap TYPE REF TO ZCL_ABAPPM_TAP.
-    DATA cut TYPE REF TO ZCL_ABAPPM_PACKAGE_JSON_VALID.
+    DATA tap TYPE REF TO zcl_abappm_tap.
+    DATA cut TYPE REF TO zcl_abappm_package_json_valid.
 
     METHODS:
       setup,

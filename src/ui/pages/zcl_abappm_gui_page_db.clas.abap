@@ -470,7 +470,6 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       WHEN 'keys'.
         rs_render-content = |{ iv_value }|.
       WHEN 'value'.
-        " FIXME:
         rs_render-content   = explain_key_formatted( <key> ).
         rs_render-css_class = 'data'.
       WHEN 'user'.

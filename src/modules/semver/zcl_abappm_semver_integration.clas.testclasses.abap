@@ -10,10 +10,10 @@ CLASS ltcl_semver_integration DEFINITION FOR TESTING RISK LEVEL HARMLESS
 
     METHODS:
       setup,
-      range_with_whitespace FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      range_with_0 FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      semver_version FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      comparator FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      range_with_whitespace FOR TESTING RAISING zcx_abappm_semver_error,
+      range_with_0 FOR TESTING RAISING zcx_abappm_semver_error,
+      semver_version FOR TESTING RAISING zcx_abappm_semver_error,
+      comparator FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
@@ -40,25 +40,25 @@ CLASS ltcl_semver_integration IMPLEMENTATION.
     DATA(r) = |1.2.3 { ws_large } <1.3.0|.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( r )->range( )
+      act = zcl_abappm_semver_range=>create( r )->range( )
       exp = '1.2.3 <1.3.0' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>VALID_RANGE( r )
+      act = zcl_abappm_semver_ranges=>valid_range( r )
       exp = '1.2.3 <1.3.0' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MIN_VERSION( r )->version
+      act = zcl_abappm_semver_ranges=>min_version( r )->version
       exp = '1.2.3' ).
 
     DATA(t) = VALUE string_table( ( `1.2.3` ) ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MIN_SATISFYING( versions = t range = r )
+      act = zcl_abappm_semver_ranges=>min_satisfying( versions = t range = r )
       exp = '1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MAX_SATISFYING( versions = t range = r )
+      act = zcl_abappm_semver_ranges=>max_satisfying( versions = t range = r )
       exp = '1.2.3' ).
 
   ENDMETHOD.
@@ -68,29 +68,29 @@ CLASS ltcl_semver_integration IMPLEMENTATION.
     DATA(r) = |1.2.3 { zero_large } <1.3.0|.
 
     TRY.
-        DATA(range) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( r ).
+        DATA(range) = zcl_abappm_semver_range=>create( r ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##no_handler.
+      CATCH zcx_abappm_semver_error ##no_handler.
     ENDTRY.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>VALID_RANGE( r )
+      act = zcl_abappm_semver_ranges=>valid_range( r )
       exp = '' ).
 
     TRY.
-        DATA(min) = ZCL_ABAPPM_SEMVER_RANGES=>MIN_VERSION( r ).
+        DATA(min) = zcl_abappm_semver_ranges=>min_version( r ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##no_handler.
+      CATCH zcx_abappm_semver_error ##no_handler.
     ENDTRY.
 
     DATA(t) = VALUE string_table( ( `1.2.3` ) ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MIN_SATISFYING( versions = t range = r )
+      act = zcl_abappm_semver_ranges=>min_satisfying( versions = t range = r )
       exp = '' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MAX_SATISFYING( versions = t range = r )
+      act = zcl_abappm_semver_ranges=>max_satisfying( versions = t range = r )
       exp = '' ).
 
   ENDMETHOD.
@@ -101,13 +101,13 @@ CLASS ltcl_semver_integration IMPLEMENTATION.
     DATA(too_long) = |{ ws_large }1.2.3{ ws_large }|.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER=>CREATE( v )->version
+      act = zcl_abappm_semver=>create( v )->version
       exp = '1.2.3' ).
 
     TRY.
-        DATA(t) = ZCL_ABAPPM_SEMVER=>CREATE( too_long ).
+        DATA(t) = zcl_abappm_semver=>create( too_long ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##no_handler.
+      CATCH zcx_abappm_semver_error ##no_handler.
     ENDTRY.
 
   ENDMETHOD.
@@ -117,7 +117,7 @@ CLASS ltcl_semver_integration IMPLEMENTATION.
     DATA(c) = |{ ws_large }<{ ws_large }1.2.3{ ws_large }|.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( c )->value
+      act = zcl_abappm_semver_comparator=>create( c )->value
       exp = '<1.2.3' ).
 
   ENDMETHOD.

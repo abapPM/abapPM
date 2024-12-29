@@ -414,10 +414,16 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   METHOD sort_manifest.
 
     result = manifest.
+
     SORT result-dependencies BY name.
     SORT result-dev_dependencies BY name.
     SORT result-optional_dependencies BY name.
+    SORT result-peer_dependencies BY name.
+    SORT result-bundle_dependencies.
     SORT result-engines BY name.
+    SORT result-contributors BY name.
+    SORT result-maintainers BY name.
+    SORT: result-keywords, result-man, result-os, result-cpu, result-db.
 
   ENDMETHOD.
 

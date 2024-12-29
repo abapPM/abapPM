@@ -4,7 +4,7 @@ CLASS ltcl_abapgit_syntax_abap DEFINITION FINAL FOR TESTING
 
   PRIVATE SECTION.
     DATA:
-     mo_cut TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER_ABAP.
+     mo_cut TYPE REF TO zcl_abappm_highlighter_abap.
 
     METHODS:
       setup,
@@ -36,7 +36,7 @@ CLASS ltcl_abapgit_syntax_abap IMPLEMENTATION.
 ENDCLASS.
 
 CLASS ltcl_syntax_basic_logic DEFINITION DEFERRED.
-CLASS ZCL_ABAPPM_HIGHLIGHTER_ABAP DEFINITION LOCAL FRIENDS ltcl_syntax_basic_logic.
+CLASS zcl_abappm_highlighter_abap DEFINITION LOCAL FRIENDS ltcl_syntax_basic_logic.
 
 *----------------------------------------------------------------------*
 *       CLASS ltcl_syntax_basic_logic DEFINITION
@@ -48,7 +48,7 @@ CLASS ltcl_syntax_basic_logic DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS
 
   PRIVATE SECTION.
 
-    DATA mo_syntax_highlighter TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER_ABAP.
+    DATA mo_syntax_highlighter TYPE REF TO zcl_abappm_highlighter_abap.
 
     METHODS:
       setup,
@@ -97,7 +97,7 @@ CLASS ltcl_syntax_basic_logic IMPLEMENTATION.
     " Call the method and compare results
     lv_line_act = mo_syntax_highlighter->apply_style(
       iv_line  = 'CALL FUNCTION'
-      iv_class = ZCL_ABAPPM_HIGHLIGHTER_ABAP=>C_CSS-KEYWORD ).
+      iv_class = zcl_abappm_highlighter_abap=>c_css-keyword ).
 
     cl_abap_unit_assert=>assert_equals(
       act = lv_line_act
@@ -131,7 +131,7 @@ CLASS ltcl_syntax_basic_logic IMPLEMENTATION.
 ENDCLASS.
 
 CLASS ltcl_syntax_cases DEFINITION DEFERRED.
-CLASS ZCL_ABAPPM_HIGHLIGHTER_ABAP DEFINITION LOCAL FRIENDS ltcl_syntax_cases.
+CLASS zcl_abappm_highlighter_abap DEFINITION LOCAL FRIENDS ltcl_syntax_cases.
 
 *----------------------------------------------------------------------*
 *       CLASS ltcl_syntax_cases definition
@@ -142,9 +142,9 @@ CLASS ltcl_syntax_cases DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     DATA:
-      mt_after_parse  TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH_TT,
-      mt_after_order  TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH_TT,
-      mt_after_extend TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH_TT.
+      mt_after_parse  TYPE zcl_abappm_highlighter_abap=>ty_match_tt,
+      mt_after_order  TYPE zcl_abappm_highlighter_abap=>ty_match_tt,
+      mt_after_extend TYPE zcl_abappm_highlighter_abap=>ty_match_tt.
 
     METHODS:
       do_test IMPORTING iv_line TYPE string,
@@ -176,10 +176,10 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 
   METHOD do_test.
 
-    DATA: lt_matches_act TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH_TT,
+    DATA: lt_matches_act TYPE zcl_abappm_highlighter_abap=>ty_match_tt,
           ls_match       LIKE LINE OF lt_matches_act,
           lv_offs        TYPE i,
-          lo_syntax      TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER_ABAP.
+          lo_syntax      TYPE REF TO zcl_abappm_highlighter_abap.
 
 
     CREATE OBJECT lo_syntax.
@@ -222,7 +222,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_parse.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_abap=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.
@@ -231,7 +231,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_order.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_abap=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.
@@ -241,7 +241,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_extend.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_ABAP=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_abap=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.

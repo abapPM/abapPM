@@ -18,7 +18,7 @@ CLASS ltcl_tap DEFINITION FOR TESTING RISK LEVEL HARMLESS
         xstr TYPE xstring VALUE '4265726E627264',
       END OF const.
 
-    DATA cut TYPE REF TO ZCL_ABAPPM_TAP.
+    DATA cut TYPE REF TO zcl_abappm_tap.
 
     DATA:
       i          TYPE i,

@@ -1,7 +1,7 @@
 CLASS ltcl_tar_tests DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
 
   PRIVATE SECTION.
-    DATA cut TYPE REF TO ZCL_ABAPPM_TAR.
+    DATA cut TYPE REF TO zcl_abappm_tar.
 
     " TODO:
     " So far tests cover only helper methods but it needs tests to validated the tar methods
@@ -10,21 +10,21 @@ CLASS ltcl_tar_tests DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT F
     METHODS:
       setup,
       null FOR TESTING,
-      filename FOR TESTING RAISING ZCX_ABAPPM_ERROR,
-      checksum FOR TESTING RAISING ZCX_ABAPPM_ERROR,
+      filename FOR TESTING RAISING zcx_abappm_error,
+      checksum FOR TESTING RAISING zcx_abappm_error,
       octal FOR TESTING,
       pad FOR TESTING,
-      unixtime FOR TESTING RAISING ZCX_ABAPPM_ERROR,
-      xstring FOR TESTING RAISING ZCX_ABAPPM_ERROR.
+      unixtime FOR TESTING RAISING zcx_abappm_error,
+      xstring FOR TESTING RAISING zcx_abappm_error.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_TAR DEFINITION LOCAL FRIENDS ltcl_tar_tests.
+CLASS zcl_abappm_tar DEFINITION LOCAL FRIENDS ltcl_tar_tests.
 
 CLASS ltcl_tar_tests IMPLEMENTATION.
 
   METHOD setup.
-    cut = ZCL_ABAPPM_TAR=>NEW( ).
+    cut = zcl_abappm_tar=>new( ).
   ENDMETHOD.
 
   METHOD null.
@@ -77,8 +77,8 @@ CLASS ltcl_tar_tests IMPLEMENTATION.
 
     DATA:
       filename TYPE string,
-      prefix   TYPE ZCL_ABAPPM_TAR=>TY_HEADER-PREFIX,
-      name     TYPE ZCL_ABAPPM_TAR=>TY_HEADER-NAME.
+      prefix   TYPE zcl_abappm_tar=>ty_header-prefix,
+      name     TYPE zcl_abappm_tar=>ty_header-name.
 
     cl_abap_unit_assert=>assert_equals(
       act = cut->_to_filename( prefix = 'package/modules' name = 'tar.sh' )

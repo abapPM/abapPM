@@ -2,7 +2,7 @@ CLASS ltcl_semver_re DEFINITION FOR TESTING RISK LEVEL HARMLESS
   DURATION SHORT FINAL.
 
   PRIVATE SECTION.
-    DATA mo_cut TYPE REF TO ZCL_ABAPPM_SEMVER_RE.
+    DATA mo_cut TYPE REF TO zcl_abappm_semver_re.
 
     METHODS:
       test_src FOR TESTING,
@@ -11,7 +11,7 @@ CLASS ltcl_semver_re DEFINITION FOR TESTING RISK LEVEL HARMLESS
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_SEMVER_RE DEFINITION LOCAL FRIENDS ltcl_semver_re.
+CLASS zcl_abappm_semver_re DEFINITION LOCAL FRIENDS ltcl_semver_re.
 
 CLASS ltcl_semver_re IMPLEMENTATION.
 
@@ -20,11 +20,11 @@ CLASS ltcl_semver_re IMPLEMENTATION.
 
     DATA i TYPE i.
 
-    FIELD-SYMBOLS <token> TYPE ZCL_ABAPPM_SEMVER_RE=>TY_TOKEN.
+    FIELD-SYMBOLS <token> TYPE zcl_abappm_semver_re=>ty_token.
 
     DO.
       i += 1.
-      ASSIGN COMPONENT i OF STRUCTURE ZCL_ABAPPM_SEMVER_RE=>TOKEN TO <token>.
+      ASSIGN COMPONENT i OF STRUCTURE zcl_abappm_semver_re=>token TO <token>.
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.
@@ -60,11 +60,11 @@ CLASS ltcl_semver_re IMPLEMENTATION.
     DATA i TYPE i.
     DATA regex TYPE REF TO cl_abap_regex.
 
-    FIELD-SYMBOLS <token> TYPE ZCL_ABAPPM_SEMVER_RE=>TY_TOKEN.
+    FIELD-SYMBOLS <token> TYPE zcl_abappm_semver_re=>ty_token.
 
     DO.
       i += 1.
-      ASSIGN COMPONENT i OF STRUCTURE ZCL_ABAPPM_SEMVER_RE=>TOKEN TO <token>.
+      ASSIGN COMPONENT i OF STRUCTURE zcl_abappm_semver_re=>token TO <token>.
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.
@@ -85,11 +85,11 @@ CLASS ltcl_semver_re IMPLEMENTATION.
 
     DATA i TYPE i.
 
-    FIELD-SYMBOLS <token> TYPE ZCL_ABAPPM_SEMVER_RE=>TY_TOKEN.
+    FIELD-SYMBOLS <token> TYPE zcl_abappm_semver_re=>ty_token.
 
     DO.
       i += 1.
-      ASSIGN COMPONENT i OF STRUCTURE ZCL_ABAPPM_SEMVER_RE=>TOKEN TO <token>.
+      ASSIGN COMPONENT i OF STRUCTURE zcl_abappm_semver_re=>token TO <token>.
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.

@@ -4,28 +4,28 @@ CLASS ltcl_semver_range DEFINITION FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     METHODS:
-      range_include FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      range_intersect FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      range_exclude FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      range_parse FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      range_formatted FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      empty_comparator FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      create_from_comparator FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      create_from_range FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      strict_vs_loose FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      to_string FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      range_include FOR TESTING RAISING zcx_abappm_semver_error,
+      range_intersect FOR TESTING RAISING zcx_abappm_semver_error,
+      range_exclude FOR TESTING RAISING zcx_abappm_semver_error,
+      range_parse FOR TESTING RAISING zcx_abappm_semver_error,
+      range_formatted FOR TESTING RAISING zcx_abappm_semver_error,
+      empty_comparator FOR TESTING RAISING zcx_abappm_semver_error,
+      create_from_comparator FOR TESTING RAISING zcx_abappm_semver_error,
+      create_from_range FOR TESTING RAISING zcx_abappm_semver_error,
+      strict_vs_loose FOR TESTING RAISING zcx_abappm_semver_error,
+      to_string FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_SEMVER_RANGE DEFINITION LOCAL FRIENDS ltcl_semver_range.
+CLASS zcl_abappm_semver_range DEFINITION LOCAL FRIENDS ltcl_semver_range.
 
 CLASS ltcl_semver_range IMPLEMENTATION.
 
   METHOD range_include.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_INCLUDE( ) INTO DATA(range_include).
+    LOOP AT zcl_abappm_semver_fixtures=>range_include( ) INTO DATA(range_include).
       DATA(msg) = |{ range_include-range } { range_include-version } { range_include-loose } { range_include-incpre }|.
-      DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+      DATA(r) = zcl_abappm_semver_range=>create(
         range  = range_include-range
         loose  = range_include-loose
         incpre = range_include-incpre ).
@@ -40,9 +40,9 @@ CLASS ltcl_semver_range IMPLEMENTATION.
 
   METHOD range_exclude.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_EXCLUDE( ) INTO DATA(range_exclude).
+    LOOP AT zcl_abappm_semver_fixtures=>range_exclude( ) INTO DATA(range_exclude).
       DATA(msg) = |{ range_exclude-range } { range_exclude-version } { range_exclude-loose } { range_exclude-incpre }|.
-      DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+      DATA(r) = zcl_abappm_semver_range=>create(
         range  = range_exclude-range
         loose  = range_exclude-loose
         incpre = range_exclude-incpre ).
@@ -57,10 +57,10 @@ CLASS ltcl_semver_range IMPLEMENTATION.
 
   METHOD range_intersect.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_INTERSECTION( ) INTO DATA(range_intersection).
+    LOOP AT zcl_abappm_semver_fixtures=>range_intersection( ) INTO DATA(range_intersection).
       DATA(msg) = |{ range_intersection-r0 } { range_intersection-r1 }|.
-      DATA(r0) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range_intersection-r0 ).
-      DATA(r1) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range_intersection-r1 ).
+      DATA(r0) = zcl_abappm_semver_range=>create( range_intersection-r0 ).
+      DATA(r1) = zcl_abappm_semver_range=>create( range_intersection-r1 ).
 
       cl_abap_unit_assert=>assert_equals(
         act = r0->intersects( r1 )
@@ -77,20 +77,20 @@ CLASS ltcl_semver_range IMPLEMENTATION.
 
   METHOD range_parse.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_PARSE( ) INTO DATA(range_parse).
+    LOOP AT zcl_abappm_semver_fixtures=>range_parse( ) INTO DATA(range_parse).
       DATA(msg) = |{ range_parse-range } { range_parse-loose } { range_parse-incpre }|.
 
       IF range_parse-res IS INITIAL.
         TRY.
-            DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+            DATA(r) = zcl_abappm_semver_range=>create(
               range  = range_parse-range
               loose  = range_parse-loose
               incpre = range_parse-incpre ).
             cl_abap_unit_assert=>fail( msg = msg ).
-          CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+          CATCH zcx_abappm_semver_error ##NO_HANDLER.
         ENDTRY.
       ELSE.
-        r = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+        r = zcl_abappm_semver_range=>create(
           range  = range_parse-range
           loose  = range_parse-loose
           incpre = range_parse-incpre ).
@@ -102,7 +102,7 @@ CLASS ltcl_semver_range IMPLEMENTATION.
           exp = range_parse-res
           msg = msg ).
 
-        DATA(e) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+        DATA(e) = zcl_abappm_semver_range=>create(
           range  = range_parse-res
           loose  = range_parse-loose
           incpre = range_parse-incpre ).
@@ -117,9 +117,9 @@ CLASS ltcl_semver_range IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD range_formatted.
- " formatted value is calculated lazily and cached
+    " formatted value is calculated lazily and cached
 
-    DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( '>= 1.2.3' ).
+    DATA(r) = zcl_abappm_semver_range=>create( '>= 1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = r->formatted
@@ -140,20 +140,20 @@ CLASS ltcl_semver_range IMPLEMENTATION.
   METHOD empty_comparator.
 
     TRY.
-        DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+        DATA(r) = zcl_abappm_semver_range=>create(
           range  = 'sadf||asdf'
           loose  = abap_true ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
 
   METHOD create_from_comparator.
 
-    DATA(c) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '>=1.2.3' ).
+    DATA(c) = zcl_abappm_semver_comparator=>create( '>=1.2.3' ).
 
-    DATA(r) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( c ).
+    DATA(r) = zcl_abappm_semver_range=>create( c ).
 
     cl_abap_unit_assert=>assert_equals(
       act = r->raw
@@ -163,28 +163,28 @@ CLASS ltcl_semver_range IMPLEMENTATION.
 
   METHOD create_from_range.
 
-    DATA(loose) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+    DATA(loose) = zcl_abappm_semver_range=>create(
       range  = '1.2.3'
       loose  = abap_true ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = loose loose = abap_true )->range( )
+      act = zcl_abappm_semver_range=>create( range = loose loose = abap_true )->range( )
       exp = loose->range( ) ).
 
     cl_abap_unit_assert=>assert_differs(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = loose )->options
+      act = zcl_abappm_semver_range=>create( range = loose )->options
       exp = loose->options ).
 
-    DATA(incpre) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE(
+    DATA(incpre) = zcl_abappm_semver_range=>create(
       range  = '1.2.3'
       incpre = abap_true ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = incpre incpre = abap_true )->range( )
+      act = zcl_abappm_semver_range=>create( range = incpre incpre = abap_true )->range( )
       exp = incpre->range( ) ).
 
     cl_abap_unit_assert=>assert_differs(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = incpre )->options
+      act = zcl_abappm_semver_range=>create( range = incpre )->options
       exp = incpre->options ).
 
   ENDMETHOD.
@@ -192,30 +192,30 @@ CLASS ltcl_semver_range IMPLEMENTATION.
   METHOD strict_vs_loose.
 
     TRY.
-        DATA(loose) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( '>=01.02.03' ).
+        DATA(loose) = zcl_abappm_semver_range=>create( '>=01.02.03' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = '>=01.02.03' loose = abap_true )->range( )
+      act = zcl_abappm_semver_range=>create( range = '>=01.02.03' loose = abap_true )->range( )
       exp = '>=1.2.3' ).
 
     TRY.
-        loose = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( '~1.02.03beta' ).
+        loose = zcl_abappm_semver_range=>create( '~1.02.03beta' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range = '~1.02.03beta' loose = abap_true )->range( )
+      act = zcl_abappm_semver_range=>create( range = '~1.02.03beta' loose = abap_true )->range( )
       exp = '>=1.2.3-beta <1.3.0-0' ).
 
   ENDMETHOD.
 
   METHOD to_string.
 
-    DATA(semrange) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( '>= v1.2.3' ).
+    DATA(semrange) = zcl_abappm_semver_range=>create( '>= v1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = semrange->to_string( )

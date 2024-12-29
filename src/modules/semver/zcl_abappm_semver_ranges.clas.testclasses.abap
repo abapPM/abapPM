@@ -4,17 +4,17 @@ CLASS ltcl_semver_ranges DEFINITION FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     METHODS:
-      gtr FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      intersects FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      ltr FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      max_satisfying FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      min_satisfying FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      min_version FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      outside FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      simplify FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      subset FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      to_comparators FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      valid_range FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      gtr FOR TESTING RAISING zcx_abappm_semver_error,
+      intersects FOR TESTING RAISING zcx_abappm_semver_error,
+      ltr FOR TESTING RAISING zcx_abappm_semver_error,
+      max_satisfying FOR TESTING RAISING zcx_abappm_semver_error,
+      min_satisfying FOR TESTING RAISING zcx_abappm_semver_error,
+      min_version FOR TESTING RAISING zcx_abappm_semver_error,
+      outside FOR TESTING RAISING zcx_abappm_semver_error,
+      simplify FOR TESTING RAISING zcx_abappm_semver_error,
+      subset FOR TESTING RAISING zcx_abappm_semver_error,
+      to_comparators FOR TESTING RAISING zcx_abappm_semver_error,
+      valid_range FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
@@ -23,9 +23,9 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
   METHOD gtr.
 
     " Version should be greater than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_GT_RANGE( ) INTO DATA(version_gt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_gt_range( ) INTO DATA(version_gt_range).
       DATA(msg) = |{ version_gt_range-range } { version_gt_range-version } { version_gt_range-loose }|.
-      DATA(act) = ZCL_ABAPPM_SEMVER_RANGES=>GTR(
+      DATA(act) = zcl_abappm_semver_ranges=>gtr(
         range   = version_gt_range-range
         version = version_gt_range-version
         loose   = version_gt_range-loose ).
@@ -37,10 +37,10 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     ENDLOOP.
 
     " Version should not be greater than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_NOT_GT_RANGE( ) INTO DATA(version_not_gt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_not_gt_range( ) INTO DATA(version_not_gt_range).
       msg = |{ version_not_gt_range-range } { version_not_gt_range-version } |
          && |{ version_not_gt_range-loose } { version_not_gt_range-incpre }|.
-      act = ZCL_ABAPPM_SEMVER_RANGES=>GTR(
+      act = zcl_abappm_semver_ranges=>gtr(
         range   = version_not_gt_range-range
         version = version_not_gt_range-version
         loose   = version_not_gt_range-loose
@@ -57,89 +57,89 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
   METHOD intersects.
 
     " Intersect comparators
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>COMPARATOR_INTERSECTION( ) INTO DATA(comparator_intersection).
+    LOOP AT zcl_abappm_semver_fixtures=>comparator_intersection( ) INTO DATA(comparator_intersection).
       DATA(msg) = |{ comparator_intersection-c0 } { comparator_intersection-c1 } { comparator_intersection-res }|.
 
-      DATA(comp0) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( comparator_intersection-c0 ).
-      DATA(comp1) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( comparator_intersection-c1 ).
+      DATA(comp0) = zcl_abappm_semver_comparator=>create( comparator_intersection-c0 ).
+      DATA(comp1) = zcl_abappm_semver_comparator=>create( comparator_intersection-c1 ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comp0 r2 = comp1 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comp0 r2 = comp1 )
         exp = comparator_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comp1 r2 = comp0 )
-        exp = comparator_intersection-res
-        msg = msg ).
-
-      cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comp0 r2 = comp1 loose = abap_true )
-        exp = comparator_intersection-res
-        msg = msg ).
-      cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comp1 r2 = comp0 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comp1 r2 = comp0 )
         exp = comparator_intersection-res
         msg = msg ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comparator_intersection-c0 r2 = comparator_intersection-c1 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comp0 r2 = comp1 loose = abap_true )
         exp = comparator_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comparator_intersection-c1 r2 = comparator_intersection-c0 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comp1 r2 = comp0 loose = abap_true )
         exp = comparator_intersection-res
         msg = msg ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comparator_intersection-c0 r2 = comparator_intersection-c1 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comparator_intersection-c0 r2 = comparator_intersection-c1 )
         exp = comparator_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = comparator_intersection-c1 r2 = comparator_intersection-c0 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comparator_intersection-c1 r2 = comparator_intersection-c0 )
+        exp = comparator_intersection-res
+        msg = msg ).
+
+      cl_abap_unit_assert=>assert_equals(
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comparator_intersection-c0 r2 = comparator_intersection-c1 loose = abap_true )
+        exp = comparator_intersection-res
+        msg = msg ).
+      cl_abap_unit_assert=>assert_equals(
+        act = zcl_abappm_semver_ranges=>intersects( r1 = comparator_intersection-c1 r2 = comparator_intersection-c0 loose = abap_true )
         exp = comparator_intersection-res
         msg = msg ).
     ENDLOOP.
 
     " Ranges intersect
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_INTERSECTION( ) INTO DATA(range_intersection).
+    LOOP AT zcl_abappm_semver_fixtures=>range_intersection( ) INTO DATA(range_intersection).
       msg = |{ range_intersection-r0 } { range_intersection-r1 } { range_intersection-res }|.
 
-      DATA(range0) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range_intersection-r0 ).
-      DATA(range1) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( range_intersection-r1 ).
+      DATA(range0) = zcl_abappm_semver_range=>create( range_intersection-r0 ).
+      DATA(range1) = zcl_abappm_semver_range=>create( range_intersection-r1 ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range0 r2 = range1 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range0 r2 = range1 )
         exp = range_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range1 r2 = range0 )
-        exp = range_intersection-res
-        msg = msg ).
-
-      cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range0 r2 = range1 loose = abap_true )
-        exp = range_intersection-res
-        msg = msg ).
-      cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range1 r2 = range0 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range1 r2 = range0 )
         exp = range_intersection-res
         msg = msg ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range_intersection-r0 r2 = range_intersection-r1 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range0 r2 = range1 loose = abap_true )
         exp = range_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range_intersection-r1 r2 = range_intersection-r0 )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range1 r2 = range0 loose = abap_true )
         exp = range_intersection-res
         msg = msg ).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range_intersection-r0 r2 = range_intersection-r1 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range_intersection-r0 r2 = range_intersection-r1 )
         exp = range_intersection-res
         msg = msg ).
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>INTERSECTS( r1 = range_intersection-r1 r2 = range_intersection-r0 loose = abap_true )
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range_intersection-r1 r2 = range_intersection-r0 )
+        exp = range_intersection-res
+        msg = msg ).
+
+      cl_abap_unit_assert=>assert_equals(
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range_intersection-r0 r2 = range_intersection-r1 loose = abap_true )
+        exp = range_intersection-res
+        msg = msg ).
+      cl_abap_unit_assert=>assert_equals(
+        act = zcl_abappm_semver_ranges=>intersects( r1 = range_intersection-r1 r2 = range_intersection-r0 loose = abap_true )
         exp = range_intersection-res
         msg = msg ).
     ENDLOOP.
@@ -149,9 +149,9 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
   METHOD ltr.
 
     " Version should be less than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_LT_RANGE( ) INTO DATA(version_lt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_lt_range( ) INTO DATA(version_lt_range).
       DATA(msg) = |{ version_lt_range-range } { version_lt_range-version } { version_lt_range-loose }|.
-      DATA(act) = ZCL_ABAPPM_SEMVER_RANGES=>LTR(
+      DATA(act) = zcl_abappm_semver_ranges=>ltr(
         range   = version_lt_range-range
         version = version_lt_range-version
         loose   = version_lt_range-loose ).
@@ -163,10 +163,10 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     ENDLOOP.
 
     " Version not should be less than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_NOT_LT_RANGE( ) INTO DATA(version_not_lt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_not_lt_range( ) INTO DATA(version_not_lt_range).
       msg = |{ version_not_lt_range-range } { version_not_lt_range-version } |
          && |{ version_not_lt_range-loose } { version_not_lt_range-incpre }|.
-      act = ZCL_ABAPPM_SEMVER_RANGES=>LTR(
+      act = zcl_abappm_semver_ranges=>ltr(
         range   = version_not_lt_range-range
         version = version_not_lt_range-version
         loose   = version_not_lt_range-loose
@@ -202,7 +202,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
       SPLIT test-versions AT ` ` INTO TABLE DATA(versions).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>MAX_SATISFYING( versions = versions range = test-range loose = test-loose )
+        act = zcl_abappm_semver_ranges=>max_satisfying( versions = versions range = test-range loose = test-loose )
         exp = test-res
         msg = |{ test-versions } { test-range } { test-res }| ).
     ENDLOOP.
@@ -213,7 +213,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     DATA(range) = 'some frogs and sneks-v2.5.6'.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MAX_SATISFYING( versions = versions range = range )
+      act = zcl_abappm_semver_ranges=>max_satisfying( versions = versions range = range )
       exp = ''
       msg = |{ range }| ).
 
@@ -241,7 +241,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
       SPLIT test-versions AT ` ` INTO TABLE DATA(versions).
 
       cl_abap_unit_assert=>assert_equals(
-        act = ZCL_ABAPPM_SEMVER_RANGES=>MIN_SATISFYING( versions = versions range = test-range loose = test-loose )
+        act = zcl_abappm_semver_ranges=>min_satisfying( versions = versions range = test-range loose = test-loose )
         exp = test-res
         msg = |{ test-versions } { test-range } { test-res }| ).
     ENDLOOP.
@@ -252,7 +252,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     DATA(range) = 'some frogs and sneks-v2.5.6'.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>MIN_SATISFYING( versions = versions range = range )
+      act = zcl_abappm_semver_ranges=>min_satisfying( versions = versions range = range )
       exp = ''
       msg = |{ range }| ).
 
@@ -331,7 +331,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
       ( range = '>4 <3' min = '' ) ).
 
     LOOP AT tests INTO DATA(test).
-      DATA(act) = ZCL_ABAPPM_SEMVER_RANGES=>MIN_VERSION( range = test-range loose = test-loose ).
+      DATA(act) = zcl_abappm_semver_ranges=>min_version( range = test-range loose = test-loose ).
 
       IF test-min IS INITIAL.
         cl_abap_unit_assert=>assert_not_bound(
@@ -354,9 +354,9 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
   METHOD outside.
 
     " Version should be greater than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_GT_RANGE( ) INTO DATA(version_gt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_gt_range( ) INTO DATA(version_gt_range).
       DATA(msg) = |{ version_gt_range-range } { version_gt_range-version } { version_gt_range-loose }|.
-      DATA(act) = ZCL_ABAPPM_SEMVER_RANGES=>OUTSIDE(
+      DATA(act) = zcl_abappm_semver_ranges=>outside(
         version = version_gt_range-version
         range   = version_gt_range-range
         hilo    = '>'
@@ -369,9 +369,9 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     ENDLOOP.
 
     " Version should be less than range
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_LT_RANGE( ) INTO DATA(version_lt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_lt_range( ) INTO DATA(version_lt_range).
       msg = |{ version_lt_range-range } { version_lt_range-version } { version_lt_range-loose }|.
-      act = ZCL_ABAPPM_SEMVER_RANGES=>OUTSIDE(
+      act = zcl_abappm_semver_ranges=>outside(
         version = version_lt_range-version
         range   = version_lt_range-range
         hilo    = '<'
@@ -384,10 +384,10 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     ENDLOOP.
 
     " Negative greater than test
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_NOT_GT_RANGE( ) INTO DATA(version_not_gt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_not_gt_range( ) INTO DATA(version_not_gt_range).
       msg = |{ version_not_gt_range-range } { version_not_gt_range-version } |
          && |{ version_not_gt_range-loose } { version_not_gt_range-incpre }|.
-      act = ZCL_ABAPPM_SEMVER_RANGES=>OUTSIDE(
+      act = zcl_abappm_semver_ranges=>outside(
         version = version_not_gt_range-version
         range   = version_not_gt_range-range
         hilo    = '>'
@@ -401,10 +401,10 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
     ENDLOOP.
 
     " Negative less than test
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>VERSION_NOT_LT_RANGE( ) INTO DATA(version_not_lt_range).
+    LOOP AT zcl_abappm_semver_fixtures=>version_not_lt_range( ) INTO DATA(version_not_lt_range).
       msg = |{ version_not_lt_range-range } { version_not_lt_range-version } |
          && |{ version_not_lt_range-loose } { version_not_lt_range-incpre }|.
-      act = ZCL_ABAPPM_SEMVER_RANGES=>OUTSIDE(
+      act = zcl_abappm_semver_ranges=>outside(
         version = version_not_lt_range-version
         range   = version_not_lt_range-range
         hilo    = '<'
@@ -419,12 +419,12 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
 
     " outside with bad hilo throws
     TRY.
-        act = ZCL_ABAPPM_SEMVER_RANGES=>OUTSIDE(
+        act = zcl_abappm_semver_ranges=>outside(
           version = '1.2.3'
           range   = '>1.5.0'
           hilo    = 'x' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR INTO DATA(error).
+      CATCH zcx_abappm_semver_error INTO DATA(error).
         cl_abap_unit_assert=>assert_equals(
           act = error->get_text( )
           exp = 'Must provide a hilo val of "<" or ">"' ).
@@ -466,45 +466,45 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
       ( `3.3.0` ) ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '1.x' )
       exp = '1.x' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '1.0.0 || 1.0.1 || 1.0.2 || 1.0.3 || 1.0.4' )
       exp = '<=1.0.4' ).
 
-    DATA(range) = ZCL_ABAPPM_SEMVER_RANGE=>CREATE( '1.0.0 || 1.0.1 || 1.0.2 || 1.0.3 || 1.0.4' ).
+    DATA(range) = zcl_abappm_semver_range=>create( '1.0.0 || 1.0.1 || 1.0.2 || 1.0.3 || 1.0.4' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = range )
       exp = '<=1.0.4' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '>=3.0.0 <3.1.0' )
       exp = '3.0.0' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '3.0.0 || 3.1 || 3.2 || 3.3' )
       exp = '>=3.0.0' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '1 || 2 || 3' )
       exp = '*' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_RANGES=>SIMPLIFY(
+      act = zcl_abappm_semver_ranges=>simplify(
               versions = versions
               range    = '2.1 || 2.2 || 2.3' )
       exp = '2.1.0 - 2.3.1' ).
@@ -597,7 +597,7 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
       ( range = '>x 2.x || * || <x' comps = '' ) ).
 
     LOOP AT tests INTO DATA(test).
-      DATA(comparators) = ZCL_ABAPPM_SEMVER_RANGES=>TO_COMPARATORS( test-range ).
+      DATA(comparators) = zcl_abappm_semver_ranges=>to_comparators( test-range ).
 
       CLEAR test_act.
       LOOP AT comparators ASSIGNING FIELD-SYMBOL(<comp_list>).
@@ -620,9 +620,9 @@ CLASS ltcl_semver_ranges IMPLEMENTATION.
   METHOD valid_range.
 
     " translate ranges into their canonical form
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>RANGE_PARSE( ) INTO DATA(range_parse).
+    LOOP AT zcl_abappm_semver_fixtures=>range_parse( ) INTO DATA(range_parse).
       DATA(msg) = |{ range_parse-range } { range_parse-res } { range_parse-loose } { range_parse-incpre }|.
-      DATA(act) = ZCL_ABAPPM_SEMVER_RANGES=>VALID_RANGE(
+      DATA(act) = zcl_abappm_semver_ranges=>valid_range(
         range   = range_parse-range
         loose   = range_parse-loose
         incpre  = range_parse-incpre ).

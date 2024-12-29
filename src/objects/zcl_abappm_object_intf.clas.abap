@@ -31,15 +31,13 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
 
   METHOD zif_abappm_object~import.
 
-    DATA:
-      interface_key      TYPE seoclskey,
-      interface_metadata TYPE vseointerf,
-      interface_code     TYPE seop_source_string.
+    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
 
     TRY.
         " Get old interface
-        interface_key-clsname = interface_name.
-        interface_metadata    = zif_abapgit_oo_object_fnc~get_interface_properties( interface_key ).
+        DATA(interface_key) = VALUE seoclskey( clsname = interface_name ).
+
+        DATA(interface_metadata) = zif_abapgit_oo_object_fnc~get_interface_properties( interface_key ).
 
         IF interface_metadata IS INITIAL.
           zcx_abappm_error=>raise( 'Not found' ).
@@ -56,11 +54,10 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
           CHANGING
             cg_properties = interface_metadata ).
 
+        " TODO: Make files mandatory
         IF files IS NOT INITIAL.
-          interface_code = files->get_abap( ).
+          DATA(interface_code) = files->get_abap( ).
         ENDIF.
-
-        DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
 
         interface_code = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_intfsec_name( interface_name )

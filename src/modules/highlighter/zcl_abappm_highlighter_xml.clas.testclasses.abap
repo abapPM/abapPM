@@ -4,7 +4,7 @@ CLASS ltcl_highlighter_xml DEFINITION FINAL FOR TESTING
 
   PRIVATE SECTION.
     DATA:
-      mo_cut TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER_XML.
+      mo_cut TYPE REF TO zcl_abappm_highlighter_xml.
 
     METHODS:
       setup,
@@ -132,7 +132,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 ENDCLASS.
 
 CLASS ltcl_syntax_cases DEFINITION DEFERRED.
-CLASS ZCL_ABAPPM_HIGHLIGHTER_XML DEFINITION LOCAL FRIENDS ltcl_syntax_cases.
+CLASS zcl_abappm_highlighter_xml DEFINITION LOCAL FRIENDS ltcl_syntax_cases.
 
 *----------------------------------------------------------------------*
 *       CLASS ltcl_syntax_cases definition
@@ -143,9 +143,9 @@ CLASS ltcl_syntax_cases DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     DATA:
-      mt_after_parse  TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH_TT,
-      mt_after_order  TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH_TT,
-      mt_after_extend TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH_TT.
+      mt_after_parse  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
+      mt_after_order  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
+      mt_after_extend TYPE zcl_abappm_highlighter_xml=>ty_match_tt.
 
     METHODS:
       do_test IMPORTING iv_line TYPE string,
@@ -178,10 +178,10 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 
   METHOD do_test.
 
-    DATA: lt_matches_act TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH_TT,
+    DATA: lt_matches_act TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
           ls_match       LIKE LINE OF lt_matches_act,
           lv_offs        TYPE i,
-          lo_syntax      TYPE REF TO ZCL_ABAPPM_HIGHLIGHTER_XML.
+          lo_syntax      TYPE REF TO zcl_abappm_highlighter_xml.
 
 
     CREATE OBJECT lo_syntax.
@@ -224,7 +224,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_parse.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.
@@ -233,7 +233,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_order.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.
@@ -243,7 +243,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_extend.
-    DATA ls_match TYPE ZCL_ABAPPM_HIGHLIGHTER_XML=>TY_MATCH.
+    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
 
     ls_match-token    = iv_token.
     ls_match-offset   = iv_offset.

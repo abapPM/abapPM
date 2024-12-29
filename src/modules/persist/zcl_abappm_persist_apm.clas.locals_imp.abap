@@ -6,13 +6,13 @@ CLASS lcl_persist_utils DEFINITION.
 
     CLASS-METHODS get_package_description
       IMPORTING
-        package    TYPE string
+        package       TYPE string
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS get_user_description
       IMPORTING
-        username   TYPE string
+        username      TYPE string
       RETURNING
         VALUE(result) TYPE string.
 

@@ -4,12 +4,12 @@ CLASS ltcl_semver_comparator DEFINITION FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     METHODS:
-      comparator FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      to_string FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      intersect FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      any FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      invalid FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR,
-      ignore_equal FOR TESTING RAISING ZCX_ABAPPM_SEMVER_ERROR.
+      comparator FOR TESTING RAISING zcx_abappm_semver_error,
+      to_string FOR TESTING RAISING zcx_abappm_semver_error,
+      intersect FOR TESTING RAISING zcx_abappm_semver_error,
+      any FOR TESTING RAISING zcx_abappm_semver_error,
+      invalid FOR TESTING RAISING zcx_abappm_semver_error,
+      ignore_equal FOR TESTING RAISING zcx_abappm_semver_error.
 
 ENDCLASS.
 
@@ -17,26 +17,26 @@ CLASS ltcl_semver_comparator IMPLEMENTATION.
 
   METHOD comparator.
 
-    DATA(c) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '>=1.2.3' ).
+    DATA(c) = zcl_abappm_semver_comparator=>create( '>=1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = c->test( '1.2.4' )
       exp = abap_true ).
 
-    DATA(c2) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( c ).
+    DATA(c2) = zcl_abappm_semver_comparator=>create( c ).
 
     cl_abap_unit_assert=>assert_equals(
       act = c2->test( '1.2.4' )
       exp = abap_true ).
 
-    DATA(c3) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( comp = c loose = abap_true ).
+    DATA(c3) = zcl_abappm_semver_comparator=>create( comp = c loose = abap_true ).
 
     cl_abap_unit_assert=>assert_equals(
       act = c3->test( '1.2.4' )
       exp = abap_true ).
 
     " test an invalid version, should not throw
-    DATA(c4) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( c ).
+    DATA(c4) = zcl_abappm_semver_comparator=>create( c ).
 
     cl_abap_unit_assert=>assert_equals(
       act = c4->test( 'not a version string' )
@@ -47,17 +47,17 @@ CLASS ltcl_semver_comparator IMPLEMENTATION.
   METHOD to_string.
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '>= 1.2.3' )->to_string( )
+      act = zcl_abappm_semver_comparator=>create( '>= 1.2.3' )->to_string( )
       exp = '>=1.2.3' ).
 
   ENDMETHOD.
 
   METHOD intersect.
 
-    LOOP AT ZCL_ABAPPM_SEMVER_FIXTURES=>COMPARATOR_INTERSECTION( ) INTO DATA(intersection).
+    LOOP AT zcl_abappm_semver_fixtures=>comparator_intersection( ) INTO DATA(intersection).
       DATA(msg) = |{ intersection-c0 } { intersection-c1 }|.
-      DATA(comp0) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( intersection-c0 ).
-      DATA(comp1) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( intersection-c1 ).
+      DATA(comp0) = zcl_abappm_semver_comparator=>create( intersection-c0 ).
+      DATA(comp1) = zcl_abappm_semver_comparator=>create( intersection-c1 ).
 
       cl_abap_unit_assert=>assert_equals(
         act = comp0->intersects( comp = comp1 incpre = intersection-incpre )
@@ -75,17 +75,17 @@ CLASS ltcl_semver_comparator IMPLEMENTATION.
   METHOD any.
     " ANY matches anything
 
-    DATA(c) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '' ).
+    DATA(c) = zcl_abappm_semver_comparator=>create( '' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = c->test( '1.2.3' )
       exp = abap_true
       msg = 'ANY should match anything' ).
 
-    DATA(c1) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '>=1.2.3' ).
+    DATA(c1) = zcl_abappm_semver_comparator=>create( '>=1.2.3' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = c1->test( ZCL_ABAPPM_SEMVER_COMPARATOR=>ANY_SEMVER->VERSION )
+      act = c1->test( zcl_abappm_semver_comparator=>any_semver->version )
       exp = abap_true
       msg = 'anything should match ANY' ).
 
@@ -94,10 +94,10 @@ CLASS ltcl_semver_comparator IMPLEMENTATION.
   METHOD invalid.
 
     TRY.
-        DATA(c) = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( 'foo bar baz' ).
+        DATA(c) = zcl_abappm_semver_comparator=>create( 'foo bar baz' ).
 
         cl_abap_unit_assert=>fail( msg = 'Should throw invalid comparator' ).
-      CATCH ZCX_ABAPPM_SEMVER_ERROR ##NO_HANDLER.
+      CATCH zcx_abappm_semver_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.
@@ -106,8 +106,8 @@ CLASS ltcl_semver_comparator IMPLEMENTATION.
     " equal sign is ignored
 
     cl_abap_unit_assert=>assert_equals(
-      act = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '=1.2.3' )->value
-      exp = ZCL_ABAPPM_SEMVER_COMPARATOR=>CREATE( '1.2.3' )->value ).
+      act = zcl_abappm_semver_comparator=>create( '=1.2.3' )->value
+      exp = zcl_abappm_semver_comparator=>create( '1.2.3' )->value ).
 
   ENDMETHOD.
 

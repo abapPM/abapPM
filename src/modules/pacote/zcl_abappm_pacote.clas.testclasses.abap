@@ -4,11 +4,11 @@ CLASS ltcl_pacote DEFINITION FOR TESTING RISK LEVEL HARMLESS
   PRIVATE SECTION.
 
     METHODS:
-      get_complete FOR TESTING RAISING ZCX_ABAPPM_ERROR.
+      get_complete FOR TESTING RAISING zcx_abappm_error.
 
 ENDCLASS.
 
-CLASS ZCL_ABAPPM_PACOTE DEFINITION LOCAL FRIENDS ltcl_pacote.
+CLASS zcl_abappm_pacote DEFINITION LOCAL FRIENDS ltcl_pacote.
 
 CLASS ltcl_pacote IMPLEMENTATION.
 
@@ -16,9 +16,9 @@ CLASS ltcl_pacote IMPLEMENTATION.
 
     DATA:
       json       TYPE string,
-      packument  TYPE ZIF_ABAPPM_TYPES=>TY_PACKUMENT,
-      version    TYPE ZIF_ABAPPM_TYPES=>TY_MANIFEST,
-      dependency TYPE ZIF_ABAPPM_TYPES=>TY_DEPENDENCY.
+      packument  TYPE zif_abappm_types=>ty_packument,
+      version    TYPE zif_abappm_types=>ty_manifest,
+      dependency TYPE zif_abappm_types=>ty_dependency.
 
     CLEAR version.
     version-name         = 'test'.
@@ -212,7 +212,7 @@ CLASS ltcl_pacote IMPLEMENTATION.
       && |  \}\n|
       && |\}\n|.
 
-    DATA(act) = ZCL_ABAPPM_PACOTE=>CONVERT_JSON_TO_PACKUMENT( json ).
+    DATA(act) = zcl_abappm_pacote=>convert_json_to_packument( json ).
 
     cl_abap_unit_assert=>assert_equals(
       act = act
