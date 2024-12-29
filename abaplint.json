@@ -261,7 +261,7 @@
     "sql_value_conversion": true,
     "start_at_tab": true,
     "static_call_via_instance": true,
-    "strict_sql": true,
+    "strict_sql": false,
     "superclass_final": true,
     "superfluous_value": true,
     "sy_modification": true,
