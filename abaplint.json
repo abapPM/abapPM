@@ -15,7 +15,7 @@
     "exclude": [],
     "files": "/src/**/*.*",
     "noIssues": [
-      "/src/modules/*.*",
+      "/src/modules/ajson/*.*",
       "zcl_abappm_installer*",
       "zcl_abappm_html_*",
       "zcl_abapgit_*"
@@ -294,6 +294,6 @@
     "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)",
     "globalConstants": [],
     "globalMacros": [],
-    "version": "v740sp08"
+    "version": "v750"
   }
 }

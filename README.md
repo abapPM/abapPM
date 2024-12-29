@@ -24,9 +24,9 @@ NO WARRANTIES, [MIT License](LICENSE)
 
 ## Prerequisites
 
-SAP Basis 7.40 SP 8 or higher 
+SAP Basis 7.50 or higher
 
-(A downport to 7.02 is on the roadmap)
+(A downport to lower releases is on the roadmap)
 
 ## Installation
 
