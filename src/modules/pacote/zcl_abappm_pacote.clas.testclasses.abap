@@ -3,8 +3,7 @@ CLASS ltcl_pacote DEFINITION FOR TESTING RISK LEVEL HARMLESS
 
   PRIVATE SECTION.
 
-    METHODS:
-      get_complete FOR TESTING RAISING zcx_abappm_error.
+    METHODS get_complete FOR TESTING RAISING zcx_abappm_error.
 
 ENDCLASS.
 
@@ -14,20 +13,17 @@ CLASS ltcl_pacote IMPLEMENTATION.
 
   METHOD get_complete.
 
-    DATA:
-      json       TYPE string,
-      packument  TYPE zif_abappm_types=>ty_packument,
-      version    TYPE zif_abappm_types=>ty_manifest,
-      dependency TYPE zif_abappm_types=>ty_dependency.
+    DATA packument TYPE zif_abappm_types=>ty_packument.
 
-    CLEAR version.
-    version-name         = 'test'.
-    version-version      = '1.0.0'.
-    version-author-name  = 'Marc'.
-    version-author-email = 'marc@test.com'.
+    DATA(version) = VALUE zif_abappm_types=>ty_manifest(
+      name         = 'test'
+      version      = '1.0.0'
+      author-name  = 'Marc'
+      author-email = 'marc@test.com' ).
 
-    dependency-name  = 'dep2'.
-    dependency-range = '2.0.0'.
+    DATA(dependency) = VALUE zif_abappm_types=>ty_dependency(
+      name  = 'dep2'
+      range = '2.0.0' ).
     INSERT dependency INTO TABLE version-dependencies.
     dependency-name  = 'dep3'.
     dependency-range = '>3'.
@@ -46,7 +42,7 @@ CLASS ltcl_pacote IMPLEMENTATION.
     dependency-range = '>=1'.
     INSERT dependency INTO TABLE version-engines.
 
-    json = |\{\n|
+    DATA(json) = |\{\n|
       && |  "_id": "@registrytest/package",\n|
       && |  "_rev": "5-c21daa8aefda6b83f0f0cfd7302e0f81",\n|
       && |  "author": \{\n|
@@ -147,12 +143,14 @@ CLASS ltcl_pacote IMPLEMENTATION.
       && |      \},\n|
       && |      "dist": \{\n|
       && |        "fileCount": 6,\n|
-      && |        "integrity": "sha512-Z5UFg8g3X4eT/1wl1HCVENNAvNh9z5By7z3OL7XZQnsBh1SQ1dtUu1InlT3b2DkpOOxwagDAVTX16hS25TU/rw==",\n|
+      && |        "integrity": "sha512-Z5UFg8g3X4eT/1wl1HCVENNAvNh9z5By7z3OL7XZQnsBh1SQ1dtUu1InlT3b2D|
+      && |kpOOxwagDAVTX16hS25TU/rw==",\n|
       && |        "shasum": "c689ad02174b9a45ee0f2350f74a0b503a109389",\n|
       && |        "signatures": [\n|
       && |          \{\n|
       && |            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",\n|
-      && |            "sig": "MEUCIQDGjADf3mDXMzryyGvffT0/s1IqISZC00BF8WctcYzq3gIgHCzxFPNAuwe616Fcvr4tOM2FRrP6MKfhtIpuRBI2pjg="\n|
+      && |            "sig": "MEUCIQDGjADf3mDXMzryyGvffT0/s1IqISZC00BF8WctcYzq3gIgHCzxFPNAuwe616Fcvr4|
+      && |tOM2FRrP6MKfhtIpuRBI2pjg="\n|
       && |          \}\n|
       && |        ],\n|
       && |        "tarball": "https://registry.npmjs.org/@registrytest/package/-/package-1.0.1.tgz",\n|

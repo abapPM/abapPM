@@ -7,6 +7,7 @@ INTERFACE zif_abappm_pacote PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   TYPES:
@@ -16,9 +17,8 @@ INTERFACE zif_abappm_pacote PUBLIC.
       json      TYPE string,
       packument TYPE zif_abappm_types=>ty_packument,
       instance  TYPE REF TO zif_abappm_pacote,
-    END OF ty_pacote.
-  TYPES:
-    ty_pacotes TYPE STANDARD TABLE OF ty_pacote WITH KEY key.
+    END OF ty_pacote,
+    ty_pacotes TYPE STANDARD TABLE OF ty_pacote WITH KEY key ##NEEDED.
 
   METHODS get
     RETURNING

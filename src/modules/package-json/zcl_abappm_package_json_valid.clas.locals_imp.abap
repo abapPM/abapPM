@@ -200,8 +200,7 @@ CLASS lcl_validate IMPLEMENTATION.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
         INSERT |Invalid dev dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
-      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
-      IF sy-subrc = 0.
+      IF line_exists( manifest-dependencies[ name = dependency-name ] ).
         INSERT |Dev dependency { dependency-name } already included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
