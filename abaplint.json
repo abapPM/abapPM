@@ -16,6 +16,9 @@
     "files": "/src/**/*.*",
     "noIssues": [
       "/src/modules/ajson/*.*",
+      "/src/modules/semver/*.*",
+      "/src/modules/semver-sap/*.*",
+      "/src/modules/string-map/*.*",
       "zcl_abappm_installer*",
       "zcl_abappm_html_*",
       "zcl_abapgit_*"
