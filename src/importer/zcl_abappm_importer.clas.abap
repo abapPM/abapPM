@@ -68,6 +68,13 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS save_packages
+      IMPORTING
+        !packages     TYPE zif_abappm_importer=>ty_packages
+        !dependencies TYPE zif_abappm_importer=>ty_dependencies
+      RAISING
+        zcx_abappm_error.
+
 ENDCLASS.
 
 
@@ -334,6 +341,50 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       map           = map
       is_dryrun     = is_dryrun
       is_production = is_production ).
+
+    " 7. Save packages to apm
+    save_packages(
+      packages     = packages
+      dependencies = dependencies ).
+
+  ENDMETHOD.
+
+
+  METHOD save_packages.
+
+    " Add or update dependencies
+    " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
+    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+
+      " FIXME: This dumps if ZCX_ABAPPM_ERROR or Zxx_ABAPPM_AJSON have been updated
+      DATA(package_json_service) = zcl_abappm_package_json=>factory( <package>-target_package ).
+
+      IF package_json_service->exists( ).
+        DATA(package_json) = package_json_service->load( )->get( ).
+        IF package_json-name <> <package>-name.
+          zcx_abappm_error=>raise( |Package inconsistency: Expected { <package>-name }, found { package_json-name }| ).
+        ENDIF.
+        package_json-version = <package>-version.
+      ELSE.
+        package_json = VALUE zif_abappm_types=>ty_package_json(
+          name    = <package>-name
+          version = <package>-version ).
+      ENDIF.
+
+      package_json_service->set( package_json )->save( ).
+
+    ENDLOOP.
+
+    " Remove dependencies
+    LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = zif_abappm_importer=>c_action-remove .
+
+      package_json_service = zcl_abappm_package_json=>factory( <dependency>-package ).
+
+      IF package_json_service->exists( ).
+        package_json_service->delete( ).
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

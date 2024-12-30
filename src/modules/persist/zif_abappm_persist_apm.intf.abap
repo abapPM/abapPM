@@ -58,8 +58,9 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
       global_settings TYPE ty_key VALUE '$GLOBAL$',
     END OF c_key_name,
     BEGIN OF c_key_extra,
-      package_json   TYPE ty_key VALUE 'PACKAGE_JSON',
-      package_readme TYPE ty_key VALUE 'README',
+      package_json    TYPE ty_key VALUE 'PACKAGE_JSON',
+      package_readme  TYPE ty_key VALUE 'README',
+      package_bundles TYPE ty_key VALUE 'BUNDLES',
     END OF c_key_extra.
 
   CONSTANTS:

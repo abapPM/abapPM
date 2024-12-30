@@ -70,29 +70,27 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         class_key-clsname      = new_object.
         class_metadata-clsname = new_object.
 
-        IF is_dryrun IS INITIAL.
+        " TODO: Make files mandatory
+        IF files IS INITIAL.
+          DATA(orig_code) = source( ).
+        ELSE.
+          orig_code = files->get_abap( ).
+        ENDIF.
+
+        DATA(class_code) = zcl_abappm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
+          program_source = orig_code
+          map            = map
+          is_pretty      = is_pretty ).
+
+        IF is_dryrun IS INITIAL AND class_code <> orig_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
               iv_package    = new_package
             CHANGING
               cg_properties = class_metadata ).
-        ENDIF.
 
-        " TODO: Make files mandatory
-        IF files IS INITIAL.
-          DATA(class_code) = source( ).
-        ELSE.
-          class_code = files->get_abap( ).
-        ENDIF.
-
-        class_code = zcl_abappm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
-          program_source = class_code
-          map            = map
-          is_pretty      = is_pretty ).
-
-        IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(
             iv_package = new_package
             iv_version = class_metadata-unicode
@@ -101,35 +99,53 @@ CLASS zcl_abappm_object_clas IMPLEMENTATION.
         ENDIF.
 
         " TODO: Make files mandatory
-        IF files IS NOT INITIAL.
-          DATA(local_definitions)     = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_def ).
-          DATA(local_implementations) = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_imp ).
-          DATA(local_macros)          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-macros ).
-          DATA(test_classes)          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-testclasses ).
+        IF files IS INITIAL.
+          DATA(orig_local_definitions)     = zcl_abappm_code_importer=>read(
+            cl_oo_classname_service=>get_ccdef_name( class_name ) ).
+          DATA(orig_local_implementations) = zcl_abappm_code_importer=>read(
+            cl_oo_classname_service=>get_ccimp_name( class_name ) ).
+          DATA(orig_local_macros)          = zcl_abappm_code_importer=>read(
+            cl_oo_classname_service=>get_ccmac_name( class_name ) ).
+          DATA(orig_test_classes)          = zcl_abappm_code_importer=>read(
+            cl_oo_classname_service=>get_ccau_name( class_name ) ).
+        ELSE.
+          orig_local_definitions     = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_def ).
+          orig_local_implementations = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_imp ).
+          orig_local_macros          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-macros ).
+          orig_test_classes          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-testclasses ).
         ENDIF.
 
-        local_definitions = zcl_abappm_code_importer=>import(
+        DATA(local_definitions) = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_ccdef_name( class_name )
-          program_source = local_definitions
+          program_source = orig_local_definitions
           map            = map
           is_pretty      = is_pretty ).
+        IF local_definitions = orig_local_definitions.
+          CLEAR local_definitions.
+        ENDIF.
 
-        local_implementations = zcl_abappm_code_importer=>import(
+        DATA(local_implementations) = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_ccimp_name( class_name )
-          program_source = local_implementations
+          program_source = orig_local_implementations
           map            = map
           is_pretty      = is_pretty ).
+        IF local_implementations = orig_local_implementations.
+          CLEAR local_implementations.
+        ENDIF.
 
-        local_macros = zcl_abappm_code_importer=>import(
+        DATA(local_macros) = zcl_abappm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_ccmac_name( class_name )
-          program_source = local_macros
+          program_source = orig_local_macros
           map            = map
           is_pretty      = is_pretty ).
+        IF local_macros = orig_local_macros.
+          CLEAR local_macros.
+        ENDIF.
 
         IF is_production IS INITIAL.
-          test_classes = zcl_abappm_code_importer=>import(
+          DATA(test_classes) = zcl_abappm_code_importer=>import(
             program_name   = cl_oo_classname_service=>get_ccau_name( class_name )
-            program_source = test_classes
+            program_source = orig_test_classes
             map            = map
             is_pretty      = is_pretty ).
         ENDIF.

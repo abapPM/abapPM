@@ -63,6 +63,13 @@ CLASS zcl_abappm_command_update DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS save_package
+      IMPORTING
+        !package  TYPE devclass
+        !manifest TYPE zif_abappm_types=>ty_manifest
+      RAISING
+        zcx_abappm_error.
+
 ENDCLASS.
 
 
@@ -256,7 +263,22 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
         is_production = is_production ).
     ENDIF.
 
+    " 8. Save package to apm
+    save_package(
+      package  = package
+      manifest = manifest ).
+
     MESSAGE 'Package and dependencies successfully updated' TYPE 'S'.
+
+  ENDMETHOD.
+
+
+  METHOD save_package.
+
+    DATA(package_json_service) = zcl_abappm_package_json=>factory( package ).
+    DATA(package_json) = CORRESPONDING zif_abappm_types=>ty_package_json( manifest ).
+
+    package_json_service->set( package_json )->save( ).
 
   ENDMETHOD.
 ENDCLASS.

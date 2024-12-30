@@ -236,7 +236,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         ENDLOOP.
 
         LOOP AT ajson->members( '/users' ) INTO user-name.
-          user-value = ajson->get( '/users/' && user-name ).
+          user-stars = ajson->get( '/users/' && user-name ).
           INSERT user INTO TABLE packument-users.
         ENDLOOP.
 
@@ -310,7 +310,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         LOOP AT packument-users INTO DATA(user).
           ajson->set(
             iv_path = 'users/' && user-name
-            iv_val  = user-value ).
+            iv_val  = user-stars ).
         ENDLOOP.
 
         ajson->setx( '/_attachments:{ }' ).

@@ -178,6 +178,14 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    METHODS render_dependencies_table
+      IMPORTING
+        !html                TYPE REF TO zif_abapgit_html
+        !dependencies        TYPE zif_abappm_types=>ty_dependencies
+        !bundle_dependencies TYPE string_table OPTIONAL
+      RAISING
+        zcx_abapgit_exception.
+
     METHODS render_json
       IMPORTING
         !html TYPE REF TO zif_abapgit_html
@@ -456,60 +464,42 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     IF package_json-dependencies IS NOT INITIAL.
       html->add( |<h2>Dependencies ({ lines( package_json-dependencies ) })</h2>| ).
 
-      LOOP AT package_json-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
-        none = abap_false.
-        html->add( get_package_boxed(
-          name  = <dependency>-name
-          value = <dependency>-range ) ).
-        " TODO: Display status of dependency
-        " Is it installed and if yes in which version?
-      ENDLOOP.
+      render_dependencies_table(
+        html                = html
+        dependencies        = package_json-dependencies
+        bundle_dependencies = package_json-bundle_dependencies ).
+
+      none = abap_false.
     ENDIF.
 
     IF package_json-dev_dependencies IS NOT INITIAL.
       html->add( |<h2>Dev Dependencies ({ lines( package_json-dev_dependencies ) })</h2>| ).
 
-      LOOP AT package_json-dev_dependencies ASSIGNING <dependency>.
-        none = abap_false.
-        html->add( get_package_boxed(
-          name  = <dependency>-name
-          value = <dependency>-range ) ).
-      ENDLOOP.
+      render_dependencies_table(
+        html         = html
+        dependencies = package_json-dev_dependencies ).
+
+      none = abap_false.
     ENDIF.
 
     IF package_json-peer_dependencies IS NOT INITIAL.
       html->add( |<h2>Peer Dependencies ({ lines( package_json-peer_dependencies ) })</h2>| ).
 
-      LOOP AT package_json-peer_dependencies ASSIGNING <dependency>.
-        none = abap_false.
-        html->add( get_package_boxed(
-          name  = <dependency>-name
-          value = <dependency>-range ) ).
-        " TODO: Display status of dependency
-        " Is it installed and if yes in which version?
-      ENDLOOP.
+      render_dependencies_table(
+        html         = html
+        dependencies = package_json-peer_dependencies ).
+
+      none = abap_false.
     ENDIF.
 
     IF package_json-optional_dependencies IS NOT INITIAL.
       html->add( |<h2>Optional Dependencies ({ lines( package_json-optional_dependencies ) })</h2>| ).
 
-      LOOP AT package_json-optional_dependencies ASSIGNING <dependency>.
-        none = abap_false.
-        html->add( get_package_boxed(
-          name  = <dependency>-name
-          value = <dependency>-range ) ).
-        " TODO: Display status of dependency
-        " Is it installed and if yes in which version?
-      ENDLOOP.
-    ENDIF.
+      render_dependencies_table(
+        html         = html
+        dependencies = package_json-optional_dependencies ).
 
-    IF package_json-bundle_dependencies IS NOT INITIAL.
-      html->add( |<h2>Bundle Dependencies ({ lines( package_json-bundle_dependencies ) })</h2>| ).
-
-      LOOP AT package_json-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
-        none = abap_false.
-        html->add( get_package_boxed( <bundle> ) ).
-      ENDLOOP.
+      none = abap_false.
     ENDIF.
 
     IF none = abap_true.
@@ -517,6 +507,61 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     ENDIF.
 
     html->add( '</div>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_dependencies_table.
+
+    DATA installed_package TYPE zif_abappm_package_json=>ty_package.
+
+    DATA(list) = zcl_abappm_package_json=>list( instanciate = abap_true ).
+
+    html->add( '<table width="100%">' ).
+    html->add( '<tr>' ).
+    html->add( '<th width="30%">Range</th>' ).
+    html->add( '<th width="10%">Type</th>' ).
+    html->add( '<th width="30%">Package</th>' ).
+    html->add( '<th width="15%">Version</th>' ).
+    html->add( '<th width="15%">Status</th>' ).
+    html->add( '</tr>' ).
+
+    LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
+      html->add( '<tr>' ).
+      html->td( get_package_boxed(
+        name  = <dependency>-name
+        value = <dependency>-range ) ).
+      IF line_exists( bundle_dependencies[ table_line = <dependency>-name ] ).
+        CLEAR installed_package.
+        " TODO: which package and version?
+        html->td( 'Bundled' ).
+        html->td( '' ).
+        html->td( '' ).
+      ELSEIF line_exists( list[ KEY name COMPONENTS name = <dependency>-name ] ).
+        installed_package = list[ KEY name COMPONENTS name = <dependency>-name ].
+        html->td( 'Global' ).
+        html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name( installed_package-package ) ).
+        html->td( installed_package-version ).
+      ENDIF.
+
+      TRY.
+          DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
+            version = installed_package-version
+            range   = <dependency>-range ).
+        CATCH zcx_abappm_semver_error INTO DATA(error).
+          zcx_abapgit_exception=>raise_with_text( error ).
+      ENDTRY.
+
+      IF satisfies = abap_true.
+        html->td( html->icon( 'check/success' ) ).
+      ELSE.
+        html->td( html->icon( 'bolt/warning' ) ).
+      ENDIF.
+
+      html->add( '</tr>' ).
+    ENDLOOP.
+
+    html->add( '</table>' ).
 
   ENDMETHOD.
 

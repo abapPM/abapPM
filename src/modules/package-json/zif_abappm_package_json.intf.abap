@@ -27,6 +27,8 @@ INTERFACE zif_abappm_package_json PUBLIC.
       changed_by      TYPE as4user,
       changed_at      TYPE string,
       changed_at_raw  TYPE timestampl,
+      bundle          TYPE abap_bool,
+      parent          TYPE devclass,
       favorite        TYPE abap_bool, " settings
       write_protected TYPE abap_bool, " settings
       labels          TYPE string_table, " settings

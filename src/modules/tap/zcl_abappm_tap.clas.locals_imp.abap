@@ -150,7 +150,7 @@ CLASS lcl_snapshot IMPLEMENTATION.
       save( ).
       dequeue( ).
     ELSE.
-      SELECT SINGLE progname FROM reposrc INTO snap-include WHERE progname = snap-include ##WARN_OK.
+      SELECT SINGLE progname FROM reposrc INTO @snap-include WHERE progname = @snap-include ##WARN_OK.
       IF sy-subrc = 0.
         update_include( ).
       ELSE.
@@ -188,15 +188,19 @@ CLASS lcl_snapshot IMPLEMENTATION.
         callstack = callstack.
 
     DATA(class) = callstack[ 3 ]-mainprogram(30).
-    result = replace( val = class sub = '=' with = '' occ = 0 ).
+    result = replace(
+      val  = class
+      sub  = '='
+      with = ''
+      occ  = 0 ).
   ENDMETHOD.
 
   METHOD package.
     " Return package of class which called TAP
     DATA(class) = class( ).
 
-    SELECT SINGLE devclass FROM tadir INTO result
-      WHERE pgmid = 'R3TR' AND object = 'CLAS' AND obj_name = class.
+    SELECT SINGLE devclass FROM tadir INTO @result
+      WHERE pgmid = 'R3TR' AND object = 'CLAS' AND obj_name = @class.
     IF sy-subrc <> 0.
       result = '$TMP'.
     ENDIF.
@@ -248,7 +252,7 @@ CLASS lcl_snapshot IMPLEMENTATION.
   METHOD save.
     DATA progdir TYPE progdir.
     " Saves snapshot in macro include
-    SELECT SINGLE * FROM progdir INTO progdir WHERE name = snap-include AND state = 'A'.
+    SELECT SINGLE * FROM progdir INTO @progdir WHERE name = @snap-include AND state = 'A'.
     ASSERT sy-subrc = 0. " Macro include not found
 
     INSERT REPORT snap-include FROM snap-source STATE 'A' EXTENSION TYPE 'CC' KEEPING DIRECTORY ENTRY.
@@ -326,11 +330,11 @@ CLASS lcl_snapshot IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD activate.
-    DATA objects TYPE TABLE OF dwinactiv.
+    DATA objects TYPE STANDARD TABLE OF dwinactiv WITH KEY object obj_name uname.
 
-    APPEND INITIAL LINE TO objects ASSIGNING FIELD-SYMBOL(<ls_object>).
-    <ls_object>-object   = 'PROG'.
-    <ls_object>-obj_name = snap-include.
+    APPEND INITIAL LINE TO objects ASSIGNING FIELD-SYMBOL(<object>).
+    <object>-object   = 'PROG'.
+    <object>-obj_name = snap-include.
 
     CALL FUNCTION 'RS_WORKING_OBJECTS_ACTIVATE'
       EXPORTING
@@ -343,7 +347,7 @@ CLASS lcl_snapshot IMPLEMENTATION.
         excecution_error       = 1
         cancelled              = 2
         insert_into_corr_error = 3
-        OTHERS                 = 4 ##SUBRC_OK.
+        OTHERS                 = 4.
     ASSERT sy-subrc = 0.
   ENDMETHOD.
 

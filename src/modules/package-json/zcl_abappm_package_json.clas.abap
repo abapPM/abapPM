@@ -44,6 +44,7 @@ CLASS zcl_abappm_package_json DEFINITION
       IMPORTING
         !filter       TYPE string OPTIONAL
         !instanciate  TYPE abap_bool DEFAULT abap_false
+        !is_bundle    TYPE abap_bool DEFAULT abap_undefined
       RETURNING
         VALUE(result) TYPE zif_abappm_package_json=>ty_packages.
 
@@ -411,17 +412,42 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       IF instanciate = abap_true.
         TRY.
             result_item-instance    = factory( result_item-package )->load( ).
-            result_item-name        = result_item-instance->get( )-name.
-            result_item-version     = result_item-instance->get( )-version.
-            result_item-description = result_item-instance->get( )-description.
-            result_item-type        = result_item-instance->get( )-type.
-            result_item-private     = result_item-instance->get( )-private.
+            DATA(package_json)      = result_item-instance->get( ).
+            result_item-name        = package_json-name.
+            result_item-version     = package_json-version.
+            result_item-description = package_json-description.
+            result_item-type        = package_json-type.
+            result_item-private     = package_json-private.
           CATCH zcx_abappm_error ##NO_HANDLER.
         ENDTRY.
       ENDIF.
 
       INSERT result_item INTO TABLE result.
     ENDLOOP.
+
+    " Check package hierarchy to determine which packages are bundled
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<result_item>).
+      TRY.
+          DATA(super_packages) = zcl_abapgit_factory=>get_sap_package( <result_item>-package )->list_superpackages( ).
+
+          LOOP AT super_packages ASSIGNING FIELD-SYMBOL(<super_package>) WHERE table_line <> <result_item>-package.
+            IF line_exists( result[ KEY package COMPONENTS package = <super_package> ] ).
+              <result_item>-bundle = abap_true.
+              <result_item>-parent = <super_package>.
+              EXIT.
+            ENDIF.
+          ENDLOOP.
+
+        CATCH zcx_abapgit_exception ##NO_HANDLER.
+      ENDTRY.
+    ENDLOOP.
+
+    CASE is_bundle.
+      WHEN abap_true.
+        DELETE result WHERE bundle = abap_false.
+      WHEN abap_false.
+        DELETE result WHERE bundle = abap_true.
+    ENDCASE.
 
   ENDMETHOD.
 

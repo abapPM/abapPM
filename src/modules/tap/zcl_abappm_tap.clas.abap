@@ -374,14 +374,14 @@ CLASS zcl_abappm_tap DEFINITION
 
     METHODS throws
       IMPORTING
-        data TYPE any ##NEEDED
-        msg  TYPE csequence OPTIONAL.
+        data TYPE any
+        msg  TYPE csequence OPTIONAL ##NEEDED.
 
     METHODS does_not_throw
       IMPORTING
-        data          TYPE any ##NEEDED
+        data          TYPE any
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abappm_tap.
+        VALUE(result) TYPE REF TO zcl_abappm_tap ##NEEDED.
 
     METHODS type
       IMPORTING
@@ -464,10 +464,10 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD act.
-    _subrc = sy-subrc ##NEEDED.
-    _index = sy-index ##NEEDED.
-    _tabix = sy-tabix ##NEEDED.
-    _fdpos = sy-fdpos ##NEEDED.
+    _subrc = sy-subrc.
+    _index = sy-index.
+    _tabix = sy-tabix.
+    _fdpos = sy-fdpos.
 
     IF data IS SUPPLIED.
       GET REFERENCE OF data INTO _act.
@@ -480,6 +480,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
   METHOD bailout.
     APPEND |Bail out! { esc( reason ) }| TO testdoc ##NO_TEXT.
     abort( reason ).
+    result = me.
   ENDMETHOD.
 
 
@@ -594,7 +595,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD end.
-    plan( count = testplan-counter reason = testplan-reason ).
+    result = plan( count = testplan-counter reason = testplan-reason ).
   ENDMETHOD.
 
 
@@ -648,7 +649,14 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD esc.
-    result = replace( val = replace( val = msg sub = '\' with = '\\' occ = 0 ) sub = '#' with = '\#' occ = 0 ).
+    result = replace( val = replace(
+      val  = msg
+      sub  = '\'
+      with = '\\'
+      occ  = 0 )
+        sub  = '#'
+        with = '\#'
+        occ  = 0 ).
     IF prefix IS NOT INITIAL.
       result = prefix && result.
     ENDIF.
@@ -790,7 +798,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD not_ok.
-    result = false( msg = msg ).
+    result = false( msg ).
   ENDMETHOD.
 
 
@@ -820,7 +828,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
 
 
   METHOD ok.
-    result = true( msg = msg ).
+    result = true( msg ).
   ENDMETHOD.
 
 
@@ -828,6 +836,10 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
     DATA(directive) =
       COND #( WHEN skip = abap_true THEN ` # SKIP` ELSE
       COND #( WHEN todo = abap_true THEN ` # TODO` ) ) ##NO_TEXT.
+
+    IF msg IS NOT INITIAL.
+      testpoint-description = testpoint-description && msg.
+    ENDIF.
 
     APPEND |ok { testpoint-id }{ esc( msg = testpoint-description prefix = ` - ` ) }{ directive }| TO testdoc ##NO_TEXT.
     CLEAR testpoint.
@@ -843,6 +855,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
   METHOD plan.
     APPEND |1..{ count }{ esc( msg = reason prefix = ` # ` ) }| TO testdoc.
     CLEAR testplan.
+    result = me.
   ENDMETHOD.
 
 
@@ -944,7 +957,7 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
       snapshot  = abap_false
       tolerance = options-tolerance ).
 
-    APPEND |# Subtest: { esc( msg = description ) }| TO testdoc ##NO_TEXT.
+    APPEND |# Subtest: { esc( description ) }| TO testdoc ##NO_TEXT.
 
     result = subtest-tap.
   ENDMETHOD.
@@ -1011,9 +1024,9 @@ CLASS zcl_abappm_tap IMPLEMENTATION.
         "exp_type = cl_abap_typedescr=>typekind_csequence
         exp_type = cl_abap_typedescr=>typekind_char && cl_abap_typedescr=>typekind_string.
       WHEN data_type-data.
-        "exp_type = cl_abap_typedescr=>typekind_data.
+        "exp_type = cl_abap_typedescr=>typekind_data
         exp_type = cl_abap_typedescr=>typekind_any.
-      WHEN data_type-data OR 'D' OR 'DAT' OR 'DATS' OR 'DATN'.
+      WHEN data_type-date OR 'D' OR 'DAT' OR 'DATS' OR 'DATN'.
         exp_type = cl_abap_typedescr=>typekind_date.
       WHEN data_type-decfloat.
         "exp_type = cl_abap_typedescr=>typekind_decfloat

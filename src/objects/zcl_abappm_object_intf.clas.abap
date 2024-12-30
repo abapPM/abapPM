@@ -47,27 +47,28 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
         interface_key-clsname      = new_object.
         interface_metadata-clsname = new_object.
 
-        IF is_dryrun IS INITIAL.
+        " TODO: Make files mandatory
+        IF files IS INITIAL.
+          DATA(orig_interface_code) = zcl_abappm_code_importer=>read(
+            cl_oo_classname_service=>get_intfsec_name( interface_name ) ).
+        ELSE.
+          orig_interface_code = files->get_abap( ).
+        ENDIF.
+
+        DATA(interface_code) = zcl_abappm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_intfsec_name( interface_name )
+          program_source = orig_interface_code
+          map            = map
+          is_pretty      = is_pretty ).
+
+        IF is_dryrun IS INITIAL AND interface_code <> orig_interface_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
               iv_package    = new_package
             CHANGING
               cg_properties = interface_metadata ).
-        ENDIF.
 
-        " TODO: Make files mandatory
-        IF files IS NOT INITIAL.
-          DATA(interface_code) = files->get_abap( ).
-        ENDIF.
-
-        interface_code = zcl_abappm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_intfsec_name( interface_name )
-          program_source = interface_code
-          map            = map
-          is_pretty      = is_pretty ).
-
-        IF is_dryrun IS INITIAL.
           zif_abapgit_oo_object_fnc~deserialize_source(
             iv_package = new_package
             iv_version = interface_metadata-unicode
