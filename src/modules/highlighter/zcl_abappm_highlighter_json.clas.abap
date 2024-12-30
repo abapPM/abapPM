@@ -9,24 +9,24 @@ CLASS zcl_abappm_highlighter_json DEFINITION
       " JSON... This was easy :-)
       " JSONC... With comments
       BEGIN OF c_css,
-        keyword TYPE string VALUE 'selectors',              "#EC NOTEXT
-        text    TYPE string VALUE 'text',                   "#EC NOTEXT
-        values  TYPE string VALUE 'properties',             "#EC NOTEXT
-        comment TYPE string VALUE 'comment',                "#EC NOTEXT
+        keyword TYPE string VALUE 'selectors',
+        text    TYPE string VALUE 'text',
+        values  TYPE string VALUE 'properties',
+        comment TYPE string VALUE 'comment',
       END OF c_css,
       BEGIN OF c_token,
-        keyword TYPE c VALUE 'K',                           "#EC NOTEXT
-        text    TYPE c VALUE 'T',                           "#EC NOTEXT
-        values  TYPE c VALUE 'V',                           "#EC NOTEXT
-        comment TYPE c VALUE 'C',                           "#EC NOTEXT
+        keyword TYPE c VALUE 'K',
+        text    TYPE c VALUE 'T',
+        values  TYPE c VALUE 'V',
+        comment TYPE c VALUE 'C',
       END OF c_token,
       BEGIN OF c_regex,
         " comments /* ... */ or //
-        comment TYPE string VALUE '\/\*.*\*\/|\/\*|\*\/|\/\/', "#EC NOTEXT
+        comment TYPE string VALUE '\/\*.*\*\/|\/\*|\*\/|\/\/',
         " not much here
-        keyword TYPE string VALUE 'true|false|null',        "#EC NOTEXT
+        keyword TYPE string VALUE 'true|false|null',
         " double quoted strings
-        text    TYPE string VALUE '"',                      "#EC NOTEXT
+        text    TYPE string VALUE '"',
       END OF c_regex.
 
     METHODS constructor.
@@ -78,9 +78,7 @@ CLASS zcl_abappm_highlighter_json IMPLEMENTATION.
     " Longest matches
     SORT matches BY offset length DESCENDING.
 
-    DATA(line_len)   = strlen( line ).
     DATA(prev_token) = ''.
-    DATA(prev_end)   = ''.
 
     LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
       " Delete matches after open text match

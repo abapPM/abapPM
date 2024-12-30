@@ -1,10 +1,7 @@
-CLASS ltcl_highlighter_xml DEFINITION FINAL FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+CLASS ltcl_highlighter_xml DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
-    DATA:
-      mo_cut TYPE REF TO zcl_abappm_highlighter_xml.
+    DATA cut TYPE REF TO zcl_abappm_highlighter_xml.
 
     METHODS:
       setup,
@@ -24,7 +21,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
   METHOD setup.
 
-    CREATE OBJECT mo_cut.
+    cut = NEW #( ).
 
   ENDMETHOD.
 
@@ -32,7 +29,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&gt;</span>|
-      act = mo_cut->process_line( |>| ) ).
+      act = cut->process_line( |>| ) ).
 
   ENDMETHOD.
 
@@ -40,7 +37,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;tag&gt;</span>|
-      act = mo_cut->process_line( |<tag>| ) ).
+      act = cut->process_line( |<tag>| ) ).
 
   ENDMETHOD.
 
@@ -48,7 +45,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;tag/&gt;</span>|
-      act = mo_cut->process_line( |<tag/>| ) ).
+      act = cut->process_line( |<tag/>| ) ).
 
   ENDMETHOD.
 
@@ -63,7 +60,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
          && |<span class="attr"> DOWNLOADDATE</span>=<span class="attr_val">""</span>|
          && |<span class="attr"> DOWNLOADTIME</span>=<span class="attr_val">""</span>|
          && |<span class="xml_tag">&gt;</span>|
-      act = mo_cut->process_line( |<ECTD SAPRL="751" VERSION="1.5" DOWNLOADDATE="" DOWNLOADTIME="">| ) ).
+      act = cut->process_line( |<ECTD SAPRL="751" VERSION="1.5" DOWNLOADDATE="" DOWNLOADTIME="">| ) ).
 
   ENDMETHOD.
 
@@ -74,14 +71,14 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
          && |<span class="attr_val">"751"</span>|
          && |<span class="attr"> VERSION</span>=|
          && |<span class="attr_val">"&gt;1.5"</span>|
-      act = mo_cut->process_line( | SAPRL="751" VERSION=">1.5"| ) ).
+      act = cut->process_line( | SAPRL="751" VERSION=">1.5"| ) ).
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="attr">SAPRL</span>=|
          && |<span class="attr_val">"751"</span>|
          && |<span class="attr"> VERSION</span>=|
          && |<span class="attr_val">'&gt;1.5'</span>|
-      act = mo_cut->process_line( |SAPRL="751" VERSION='>1.5'| ) ).
+      act = cut->process_line( |SAPRL="751" VERSION='>1.5'| ) ).
 
   ENDMETHOD.
 
@@ -89,7 +86,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;ECTD</span>|
-      act = mo_cut->process_line( |<ECTD| ) ).
+      act = cut->process_line( |<ECTD| ) ).
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;ECTD</span>|
@@ -97,7 +94,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
          && |<span class="attr_val">"751"</span>|
          && |<span class="attr"> VERSION</span>=|
          && |<span class="attr_val">"1.5"</span>|
-      act = mo_cut->process_line( |<ECTD SAPRL="751" VERSION="1.5"| ) ).
+      act = cut->process_line( |<ECTD SAPRL="751" VERSION="1.5"| ) ).
 
   ENDMETHOD.
 
@@ -110,7 +107,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
          && |<span class="attr"> content</span>=|
          && |<span class="attr_val">"width=device, initial=1.0, maximum=1.0"</span>|
          && |<span class="xml_tag">&gt;</span>|
-      act = mo_cut->process_line( |<meta name="viewport" content="width=device, initial=1.0, maximum=1.0">| ) ).
+      act = cut->process_line( |<meta name="viewport" content="width=device, initial=1.0, maximum=1.0">| ) ).
 
   ENDMETHOD.
 
@@ -118,34 +115,34 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="comment">&lt;!-- comment</span>|
-      act = mo_cut->process_line( |<!-- comment| ) ).
+      act = cut->process_line( |<!-- comment| ) ).
 
     " New instance (i.e. different file)
-    CREATE OBJECT mo_cut.
+    CREATE OBJECT cut.
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;tag&gt;</span>|
-      act = mo_cut->process_line( |<tag>| ) ).
+      act = cut->process_line( |<tag>| ) ).
 
   ENDMETHOD.
 
 ENDCLASS.
 
 CLASS ltcl_syntax_cases DEFINITION DEFERRED.
+
 CLASS zcl_abappm_highlighter_xml DEFINITION LOCAL FRIENDS ltcl_syntax_cases.
 
 *----------------------------------------------------------------------*
 *       CLASS ltcl_syntax_cases definition
 *----------------------------------------------------------------------*
-CLASS ltcl_syntax_cases DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS
-    DURATION SHORT.
+CLASS ltcl_syntax_cases DEFINITION FINAL FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
 
   PRIVATE SECTION.
 
     DATA:
-      mt_after_parse  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
-      mt_after_order  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
-      mt_after_extend TYPE zcl_abappm_highlighter_xml=>ty_match_tt.
+      after_parse  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
+      after_order  TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
+      after_extend TYPE zcl_abappm_highlighter_xml=>ty_match_tt.
 
     METHODS:
       do_test IMPORTING line TYPE string,
@@ -178,78 +175,69 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 
   METHOD do_test.
 
-    DATA: lt_matches_act TYPE zcl_abappm_highlighter_xml=>ty_match_tt,
-          ls_match       LIKE LINE OF lt_matches_act,
-          lv_offs        TYPE i,
-          lo_syntax      TYPE REF TO zcl_abappm_highlighter_xml.
+    DATA(syntax_highlighter) = NEW zcl_abappm_highlighter_xml( ).
+    DATA(matches_act) = syntax_highlighter->parse_line( line ).
 
+    SORT matches_act BY offset.
 
-    CREATE OBJECT lo_syntax.
-    lt_matches_act = lo_syntax->parse_line( line ).
-
-    SORT lt_matches_act BY offset.
-
-    cl_abap_unit_assert=>assert_equals( exp = mt_after_parse
-                                        act = lt_matches_act
+    cl_abap_unit_assert=>assert_equals( exp = after_parse
+                                        act = matches_act
                                         msg = | Error during parsing: { line }| ).
 
-    lo_syntax->order_matches( EXPORTING line    = line
-                       CHANGING  matches = lt_matches_act ).
+    syntax_highlighter->order_matches( EXPORTING line    = line
+                       CHANGING  matches = matches_act ).
 
-    cl_abap_unit_assert=>assert_equals( exp = mt_after_order
-                                        act = lt_matches_act
+    cl_abap_unit_assert=>assert_equals( exp = after_order
+                                        act = matches_act
                                         msg = | Error during ordering: { line }| ).
 
-    lo_syntax->extend_matches(
+    syntax_highlighter->extend_matches(
       EXPORTING
         line    = line
       CHANGING
-        matches = lt_matches_act ).
+        matches = matches_act ).
 
-    cl_abap_unit_assert=>assert_equals( exp = mt_after_extend
-                                        act = lt_matches_act
+    cl_abap_unit_assert=>assert_equals( exp = after_extend
+                                        act = matches_act
                                         msg = | Error during extending: { line }| ).
 
     " Check consistency
-    lv_offs = 0.
-    LOOP AT lt_matches_act INTO ls_match.
-      IF ls_match-offset <> lv_offs.
-        cl_abap_unit_assert=>assert_equals( exp = lv_offs
-                                            act = ls_match-offset
+    DATA(offs) = 0.
+    LOOP AT matches_act INTO DATA(match).
+      IF match-offset <> offs.
+        cl_abap_unit_assert=>assert_equals( exp = offs
+                                            act = match-offset
                                             msg = | Error during consistency check: { sy-tabix }| ).
       ENDIF.
-      lv_offs = lv_offs + ls_match-length.
+      offs = offs + match-length.
     ENDLOOP.
 
   ENDMETHOD.
 
   METHOD generate_parse.
-    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
-
-    ls_match-token    = token.
-    ls_match-offset   = offset.
-    ls_match-length   = length.
-    APPEND ls_match TO mt_after_parse.
+    DATA(match) = VALUE zcl_abappm_highlighter_xml=>ty_match(
+      token  = token
+      offset = offset
+      length = length ).
+    APPEND match TO after_parse.
   ENDMETHOD.
 
   METHOD generate_order.
-    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
-
-    ls_match-token    = token.
-    ls_match-offset   = offset.
-    ls_match-length   = length.
-    ls_match-text_tag = text_tag.
-    APPEND ls_match TO mt_after_order.
+    DATA(match) = VALUE zcl_abappm_highlighter_xml=>ty_match(
+      token    = token
+      offset   = offset
+      length   = length
+      text_tag = text_tag ).
+    APPEND match TO after_order.
   ENDMETHOD.
 
   METHOD generate_extend.
-    DATA ls_match TYPE zcl_abappm_highlighter_xml=>ty_match.
-
-    ls_match-token    = token.
-    ls_match-offset   = offset.
-    ls_match-length   = length.
-    ls_match-text_tag = text_tag.
-    APPEND ls_match TO mt_after_extend.
+    DATA(match) = VALUE zcl_abappm_highlighter_xml=>ty_match(
+      token    = token
+      offset   = offset
+      length   = length
+      text_tag = text_tag ).
+    APPEND match TO after_extend.
   ENDMETHOD.
 
 ********************************************************
@@ -257,9 +245,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
 ********************************************************
   METHOD test_xml_01.
 
-    DATA lv_line TYPE string.
-
-    lv_line = '<tag>Text</tag>'.
+    DATA(line) = `<tag>Text</tag>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -300,15 +286,13 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 6
                      text_tag = '<' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_02.
 
-    DATA lv_line TYPE string.
-
-    lv_line = '<tag/>'.
+    DATA(line) = `<tag/>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -329,15 +313,13 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 6
                      text_tag = '<' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_03.
 
-    DATA lv_line TYPE string.
-
-    lv_line = '<tag attribute="value"/>'.
+    DATA(line) = `<tag attribute="value"/>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -393,15 +375,13 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 2
                      text_tag = '>' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_04.
 
-    DATA lv_line TYPE string.
-
-    lv_line = '<?xml version="1.0"?>'.
+    DATA(line) = `<?xml version="1.0"?>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -457,15 +437,13 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 2
                      text_tag = '>' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_05.
 
-    DATA lv_line TYPE string.
-
-    lv_line = '<ns:tag ns:a1="v1" ns:a2=''v2''>"text"</ns:tag>'.
+    DATA(line) = `<ns:tag ns:a1="v1" ns:a2='v2'>"text"</ns:tag>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -568,15 +546,14 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 9
                      text_tag = '<' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_06.
-    DATA lv_line TYPE string.
 
     "unclosed tag
-    lv_line = '<ns:tag ns:a1="v1"'.
+    DATA(line) = `<ns:tag ns:a1="v1"`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -621,16 +598,16 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 4
                      text_tag = '' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_07.
+
     "invalid XML characters in a string
-    DATA lv_line TYPE string.
 
     "xml special characters in attribute
-    lv_line = '<tag attribute=" '' > "/>'.
+    DATA(line) = `<tag attribute=" ' > "/>`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -686,16 +663,16 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 2
                      text_tag = '>' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_08.
+
     "invalid XML characters in a string
-    DATA lv_line TYPE string.
 
     "attribute at beginning of line
-    lv_line = 'attribute=''>" '''.
+    DATA(line) = `attribute='>" '`.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'A'
@@ -729,15 +706,15 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 5
                      text_tag = '' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 
   METHOD test_xml_09.
-    "back quotes used for attribute values (HTML)
-    DATA lv_line TYPE string.
 
-    lv_line = '<tag attribute=`value`/>'.
+    "back quotes used for attribute values (HTML)
+
+    DATA(line) = |<tag attribute=`value`/>|.
 
     " Generate table with expected values after parsing
     generate_parse( token  = 'X'
@@ -793,7 +770,7 @@ CLASS ltcl_syntax_cases IMPLEMENTATION.
                      length   = 2
                      text_tag = '>' ).
 
-    do_test( lv_line ).
+    do_test( line ).
 
   ENDMETHOD.
 

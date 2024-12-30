@@ -205,9 +205,7 @@ CLASS zcl_abappm_highlighter_abap IMPLEMENTATION.
 
   METHOD is_keyword.
 
-    DATA(str) = to_upper( chunk ).
-    READ TABLE keywords WITH KEY table_line = str TRANSPORTING NO FIELDS.
-    result = xsdbool( sy-subrc = 0 ).
+    result = xsdbool( line_exists( keywords[ table_line = to_upper( chunk ) ] ) ).
 
   ENDMETHOD.
 

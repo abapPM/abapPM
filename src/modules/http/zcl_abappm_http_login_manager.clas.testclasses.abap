@@ -41,9 +41,7 @@ CLASS ltcl_login_manager IMPLEMENTATION.
 
   METHOD encoding.
 
-    DATA auth TYPE string.
-
-    auth = zcl_abappm_http_login_manager=>set(
+    DATA(auth) = zcl_abappm_http_login_manager=>set(
       host     = 'https://github.com/abapGit/abapGit.git'
       username = c_username
       password = c_password ).
@@ -59,16 +57,13 @@ CLASS ltcl_login_manager IMPLEMENTATION.
     CONSTANTS: c_github1 TYPE string VALUE 'https://github.com/abapGit/abapGit.git',
                c_github2 TYPE string VALUE 'https://github.com/larshp/Foobar.git'.
 
-    DATA: auth1 TYPE string,
-          auth2 TYPE string.
-
     zcl_abappm_http_login_manager=>set(
       host     = c_github1
       username = c_username
       password = c_password ).
 
-    auth1 = zcl_abappm_http_login_manager=>get( c_github1 ).
-    auth2 = zcl_abappm_http_login_manager=>get( c_github2 ).
+    DATA(auth1) = zcl_abappm_http_login_manager=>get( c_github1 ).
+    DATA(auth2) = zcl_abappm_http_login_manager=>get( c_github2 ).
 
     cl_abap_unit_assert=>assert_equals(
       act = auth1

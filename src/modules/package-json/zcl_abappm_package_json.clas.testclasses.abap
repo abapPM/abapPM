@@ -49,12 +49,11 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     SPLIT args AT ',' INTO DATA(package) DATA(name) DATA(version) DATA(private).
 
-    CREATE OBJECT cut TYPE zcl_abappm_package_json
-      EXPORTING
-        package = CONV devclass( package )
-        name    = name
-        version = version
-        private = CONV abap_bool( private ).
+    cut = NEW zcl_abappm_package_json(
+      package = CONV devclass( package )
+      name    = name
+      version = version
+      private = CONV abap_bool( private ) ).
 
   ENDMETHOD.
 
@@ -85,14 +84,12 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD test_compare.
 
-    DATA json TYPE string.
-
     cl_abap_unit_assert=>assert_equals(
       act = cut->get( )
       exp = package_json ).
 
     " Strip newlines and condense for easier comparison
-    json = condense( replace(
+    DATA(json) = condense( replace(
       val  = cut->get_json( )
       sub  = cl_abap_char_utilities=>newline
       with = ''
@@ -151,22 +148,18 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD get_complete.
 
-    DATA:
-      json         TYPE string,
-      package_json TYPE zif_abappm_types=>ty_package_json,
-      dependency   TYPE zif_abappm_types=>ty_dependency.
-
     init_test( '$TEST' ).
 
-    CLEAR package_json.
-    package_json-name         = 'test'.
-    package_json-version      = '1.0.0'.
-    package_json-author-name  = 'Marc'.
-    package_json-author-email = 'marc@test.com'.
-    package_json-private      = abap_true.
+    DATA(package_json) = VALUE zif_abappm_types=>ty_package_json(
+      name         = 'test'
+      version      = '1.0.0'
+      author-name  = 'Marc'
+      author-email = 'marc@test.com'
+      private      = abap_true ).
 
-    dependency-name  = 'dep2'.
-    dependency-range = '2.0.0'.
+    DATA(dependency) = VALUE zif_abappm_types=>ty_dependency(
+      name  = 'dep2'
+      range = '2.0.0' ).
     INSERT dependency INTO TABLE package_json-dependencies.
     dependency-name  = 'dep3'.
     dependency-range = '>3'.
@@ -187,7 +180,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     cut->set( package_json ).
 
-    json = |\{\n|
+    DATA(json) = |\{\n|
       && |  "name": "test",\n|
       && |  "version": "1.0.0",\n|
       && |  "description": "",\n|
@@ -252,13 +245,11 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD get_package.
 
-    DATA package_json TYPE zif_abappm_types=>ty_package_json.
-
     init_test( '$TEST,test,1.0.0' ).
 
-    CLEAR package_json.
-    package_json-name    = 'test'.
-    package_json-version = '1.0.0'.
+    DATA(package_json) = VALUE zif_abappm_types=>ty_package_json(
+      name    = 'test'
+      version = '1.0.0' ).
 
     test_compare(
       package_json = package_json
@@ -289,14 +280,12 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD set_package.
 
-    DATA package_json TYPE zif_abappm_types=>ty_package_json.
-
     init_test( '$TEST' ).
 
-    CLEAR package_json.
-    package_json-name    = 'test'.
-    package_json-version = '1.0.0'.
-    package_json-private = abap_true.
+    DATA(package_json) = VALUE zif_abappm_types=>ty_package_json(
+      name    = 'test'
+      version = '1.0.0'
+      private = abap_true ).
 
     cut->set( package_json ).
 
@@ -341,14 +330,9 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD dependencies_json_to_abap.
 
-    DATA:
-      json         TYPE string,
-      package_json TYPE zif_abappm_types=>ty_package_json,
-      dependency   TYPE zif_abappm_types=>ty_dependency.
-
     init_test( '$TEST' ).
 
-    json = |\{\n|
+    DATA(json) = |\{\n|
       && |  "name": "test",\n|
       && |  "version": "1.0.0",\n|
       && |  "devDependencies": \{\n|
@@ -360,12 +344,13 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     cut->set_json( json ).
 
-    CLEAR package_json.
-    package_json-name    = 'test'.
-    package_json-version = '1.0.0'.
+    DATA(package_json) = VALUE zif_abappm_types=>ty_package_json(
+      name    = 'test'
+      version = '1.0.0' ).
 
-    dependency-name  = 'dep1'.
-    dependency-range = '2.0.0'.
+    DATA(dependency) = VALUE zif_abappm_types=>ty_dependency(
+      name  = 'dep1'
+      range = '2.0.0' ).
     INSERT dependency INTO TABLE package_json-dev_dependencies.
     dependency-name  = 'dep2'.
     dependency-range = '>3'.
@@ -382,19 +367,15 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
   METHOD dependencies_abap_to_json.
 
-    DATA:
-      json         TYPE string,
-      package_json TYPE zif_abappm_types=>ty_package_json,
-      dependency   TYPE zif_abappm_types=>ty_dependency.
-
     init_test( '$TEST' ).
 
-    CLEAR package_json.
-    package_json-name    = 'test'.
-    package_json-version = '1.0.0'.
+    DATA(package_json) = VALUE zif_abappm_types=>ty_package_json(
+      name    = 'test'
+      version = '1.0.0' ).
 
-    dependency-name  = 'dep1'.
-    dependency-range = '2.0.0'.
+    DATA(dependency) = VALUE zif_abappm_types=>ty_dependency(
+      name  = 'dep1'
+      range = '2.0.0' ).
     INSERT dependency INTO TABLE package_json-dev_dependencies.
     dependency-name  = 'dep2'.
     dependency-range = '>3'.
@@ -405,7 +386,7 @@ CLASS ltcl_package_json IMPLEMENTATION.
 
     cut->set( package_json ).
 
-    json = |\{\n|
+    DATA(json) = |\{\n|
       && |  "name": "test",\n|
       && |  "version": "1.0.0",\n|
       && |  "devDependencies": \{\n|

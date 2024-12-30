@@ -4,7 +4,7 @@ CLASS ltcl_abapgit_syntax_json DEFINITION FINAL FOR TESTING
 
   PRIVATE SECTION.
     DATA:
-     mo_cut TYPE REF TO zcl_abapgit_syntax_json.
+     cut TYPE REF TO zcl_abapgit_syntax_json.
 
     METHODS:
       setup,
@@ -19,26 +19,26 @@ CLASS ltcl_abapgit_syntax_json IMPLEMENTATION.
 
   METHOD setup.
 
-    CREATE OBJECT mo_cut.
+    cut = NEW #( ).
 
   ENDMETHOD.
 
   METHOD key_value.
     cl_abap_unit_assert=>assert_equals(
-      act = mo_cut->process_line( |"key":"value"| )
+      act = cut->process_line( |"key":"value"| )
       exp = |<span class="text">"key"</span>:<span class="properties">"value"</span>| ).
   ENDMETHOD.
 
   METHOD comment_1.
     cl_abap_unit_assert=>assert_equals(
-      act = mo_cut->process_line( |"key":"value" // comment| )
+      act = cut->process_line( |"key":"value" // comment| )
       exp = |<span class="text">"key"</span>:<span class="properties">"value"</span>|
          && | <span class="comment">//</span> comment| ).
   ENDMETHOD.
 
   METHOD comment_2.
     cl_abap_unit_assert=>assert_equals(
-      act = mo_cut->process_line( |/* comment */| )
+      act = cut->process_line( |/* comment */| )
       exp = |<span class="comment">/* comment */</span>| ).
   ENDMETHOD.
 

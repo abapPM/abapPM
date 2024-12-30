@@ -68,9 +68,7 @@ CLASS lcl_validate IMPLEMENTATION.
 
   METHOD validate_persons.
 
-    DATA:
-      value  TYPE string,
-      values TYPE string_table.
+    DATA values TYPE string_table.
 
     IF zcl_abappm_package_json_valid=>is_valid_email( manifest-author-email ) = abap_false.
       INSERT |Invalid author email: { manifest-author-email }| INTO TABLE result.
@@ -112,12 +110,10 @@ CLASS lcl_validate IMPLEMENTATION.
 
   METHOD validate_arrays.
 
-    DATA:
-      value  TYPE string,
-      values TYPE string_table.
+    DATA values TYPE string_table.
 
     CLEAR values.
-    LOOP AT manifest-cpu INTO value.
+    LOOP AT manifest-cpu INTO DATA(value).
       COLLECT value INTO values.
       IF zcl_abappm_package_json_valid=>is_valid_cpu( value ) = abap_false.
         INSERT |Invalid CPU: { value }| INTO TABLE result.
@@ -153,9 +149,7 @@ CLASS lcl_validate IMPLEMENTATION.
 
   METHOD validate_dependencies.
 
-    DATA:
-      value  TYPE string,
-      values TYPE string_table.
+    DATA values TYPE string_table.
 
     CLEAR values.
     LOOP AT manifest-engines INTO DATA(dependency).
@@ -226,7 +220,7 @@ CLASS lcl_validate IMPLEMENTATION.
     ENDIF.
 
     CLEAR values.
-    LOOP AT manifest-bundle_dependencies INTO value.
+    LOOP AT manifest-bundle_dependencies INTO DATA(value).
       COLLECT value INTO values.
       IF zcl_abappm_package_json_valid=>is_valid_name( value ) = abap_false.
         INSERT |Invalid bundle dependency: { value }| INTO TABLE result.

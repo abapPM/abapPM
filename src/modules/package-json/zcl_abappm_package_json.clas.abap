@@ -197,7 +197,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
           file_count    TYPE i,
           integrity     TYPE string,
           shasum        TYPE string,
-          signatures    TYPE STANDARD TABLE OF zif_abappm_types=>ty_signature WITH DEFAULT KEY,
+          signatures    TYPE STANDARD TABLE OF zif_abappm_types=>ty_signature WITH KEY keyid,
           tarball       TYPE string,
           unpacked_size TYPE i,
         END OF dist,
@@ -206,15 +206,14 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     DATA:
       json_partial TYPE ty_package_json_partial,
-      dependency   TYPE zif_abappm_types=>ty_dependency,
-      manifest     TYPE zif_abappm_types=>ty_manifest.
+      dependency   TYPE zif_abappm_types=>ty_dependency.
 
     TRY.
         DATA(ajson) = zcl_abappm_ajson=>parse( json )->to_abap_corresponding_only( ).
 
         ajson->to_abap( IMPORTING ev_container = json_partial ).
 
-        MOVE-CORRESPONDING json_partial TO manifest.
+        DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( json_partial ).
 
         " Transpose dependencies
         LOOP AT ajson->members( '/dependencies' ) INTO dependency-name.
@@ -334,12 +333,11 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE zcl_abappm_package_json
-        EXPORTING
-          package = package
-          name    = name
-          version = version
-          private = private.
+      result = NEW zcl_abappm_package_json(
+        package = package
+        name    = name
+        version = version
+        private = private ).
 
       DATA(instance) = VALUE ty_instance(
         package  = package
@@ -352,7 +350,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD get_package_from_key.
 
-    SPLIT key AT ':' INTO DATA(prefix) result DATA(suffix).
+    SPLIT key AT ':' INTO DATA(prefix) result DATA(suffix) ##NEEDED.
     result = to_upper( result ).
 
   ENDMETHOD.
@@ -360,7 +358,8 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD get_package_key.
 
-    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ package }:{ zif_abappm_persist_apm=>c_key_extra-package_json }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ package }:|
+          && |{ zif_abappm_persist_apm=>c_key_extra-package_json }|.
 
   ENDMETHOD.
 
@@ -449,7 +448,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD zif_abappm_package_json~get.
 
-    MOVE-CORRESPONDING manifest TO result.
+    result = CORRESPONDING #( manifest ).
 
   ENDMETHOD.
 
@@ -467,7 +466,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   METHOD zif_abappm_package_json~is_valid.
 
     TRY.
-        result = boolc( zcl_abappm_package_json_valid=>check( manifest ) IS INITIAL ).
+        result = xsdbool( zcl_abappm_package_json_valid=>check( manifest ) IS INITIAL ).
       CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
@@ -495,7 +494,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD zif_abappm_package_json~set.
 
-    MOVE-CORRESPONDING package_json TO manifest.
+    manifest = CORRESPONDING #( package_json ).
     check_manifest( manifest ).
     manifest = sort_manifest( manifest ).
     result   = me.

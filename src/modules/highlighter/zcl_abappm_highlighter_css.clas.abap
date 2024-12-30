@@ -358,9 +358,7 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
 
   METHOD is_keyword.
 
-    DATA(keyword) = to_lower( chunk ).
-    READ TABLE keywords WITH TABLE KEY keyword = keyword TRANSPORTING NO FIELDS.
-    result = boolc( sy-subrc = 0 ).
+    result = xsdbool( line_exists( keywords[ keyword = to_lower( chunk ) ] ) ).
 
   ENDMETHOD.
 

@@ -22,7 +22,7 @@ CLASS zcl_abappm_http_agent DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA mo_global_headers TYPE REF TO zcl_abappm_string_map.
+    DATA headers TYPE REF TO zcl_abappm_string_map.
 
     CLASS-METHODS attach_payload
       IMPORTING
@@ -42,19 +42,22 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
 
     DATA(payload_type) = cl_abap_typedescr=>describe_by_data( payload ).
 
-    IF payload_type->type_kind = cl_abap_typedescr=>typekind_xstring.
-      request->set_data( payload ).
-    ELSEIF payload_type->type_kind = cl_abap_typedescr=>typekind_string.
-      request->set_cdata( payload ).
-    ELSE.
-      zcx_abappm_error=>raise( |Unexpected payload type { payload_type->absolute_name }| ).
-    ENDIF.
+    CASE payload_type->type_kind.
+      WHEN cl_abap_typedescr=>typekind_xstring.
+        request->set_data( payload ).
+      WHEN cl_abap_typedescr=>typekind_string.
+        request->set_cdata( payload ).
+      WHEN OTHERS.
+        zcx_abappm_error=>raise( |Unexpected payload type { payload_type->absolute_name }| ).
+    ENDCASE.
 
   ENDMETHOD.
 
 
   METHOD constructor.
-    CREATE OBJECT mo_global_headers.
+
+    headers = NEW #( ).
+
   ENDMETHOD.
 
 
@@ -67,7 +70,7 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
 
   METHOD zif_abappm_http_agent~global_headers.
 
-    result = mo_global_headers.
+    result = headers.
 
   ENDMETHOD.
 
@@ -98,7 +101,7 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
-    LOOP AT mo_global_headers->mt_entries ASSIGNING <entry>.
+    LOOP AT headers->mt_entries ASSIGNING <entry>.
       http_client->request->set_header_field(
         name  = <entry>-k
         value = <entry>-v ).

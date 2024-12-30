@@ -57,8 +57,7 @@ CLASS zcl_abappm_http_login_manager IMPLEMENTATION.
 
   METHOD append.
 
-    READ TABLE auths WITH KEY host = host TRANSPORTING NO FIELDS.
-    IF sy-subrc <> 0.
+    IF NOT line_exists( auths[ host = host ] ).
       APPEND INITIAL LINE TO auths ASSIGNING FIELD-SYMBOL(<auth>).
       <auth>-host = host.
       <auth>-auth = auth.
@@ -86,7 +85,7 @@ CLASS zcl_abappm_http_login_manager IMPLEMENTATION.
 
   METHOD save.
 
-    IF NOT auth IS INITIAL.
+    IF auth IS NOT INITIAL.
       append( host = host
               auth = auth ).
     ENDIF.
@@ -96,7 +95,7 @@ CLASS zcl_abappm_http_login_manager IMPLEMENTATION.
 
   METHOD set.
 
-    ASSERT NOT host IS INITIAL.
+    ASSERT host IS NOT INITIAL.
 
     IF username IS INITIAL OR password IS INITIAL.
       RETURN.

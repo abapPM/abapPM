@@ -38,7 +38,7 @@ CLASS lcl_http_response IMPLEMENTATION.
   METHOD zif_abappm_http_response~is_ok.
 
     DATA(status_code) = zif_abappm_http_response~code( ).
-    result = boolc( status_code >= 200 AND status_code < 300 ).
+    result = xsdbool( status_code >= 200 AND status_code < 300 ).
 
   ENDMETHOD.
 

@@ -115,8 +115,7 @@ CLASS zcl_abappm_highlighter_md IMPLEMENTATION.
 
     " Check if this is part of multi-line comment and mark it accordingly
     IF comment = abap_true.
-      READ TABLE matches WITH KEY token = c_token-comment TRANSPORTING NO FIELDS.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( matches[ token = c_token-comment ] ).
         CLEAR matches.
         APPEND INITIAL LINE TO matches ASSIGNING FIELD-SYMBOL(<match>).
         <match>-token = c_token-comment.

@@ -113,7 +113,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
   METHOD is_scoped_name.
 
-    result = boolc( is_valid_name( name ) AND name(1) = '@' AND name CS '/' ).
+    result = xsdbool( is_valid_name( name ) AND name(1) = '@' AND name CS '/' ).
 
   ENDMETHOD.
 
@@ -124,7 +124,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
     SHIFT cpu_val LEFT DELETING LEADING '!'.
 
-    result = boolc(
+    result = xsdbool(
       cpu_val IS INITIAL OR
       cpu_val = zif_abappm_types=>c_cpu-x86_64 OR
       cpu_val = zif_abappm_types=>c_cpu-power_pc OR
@@ -139,7 +139,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
     SHIFT db_val LEFT DELETING LEADING '!'.
 
-    result = boolc(
+    result = xsdbool(
       db_val IS INITIAL OR
       db_val = zif_abappm_types=>c_db-db2 OR
       db_val = zif_abappm_types=>c_db-db400 OR
@@ -164,7 +164,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
       result = abap_true.
     ELSE.
       FIND REGEX c_email_regex IN email.
-      result = boolc( sy-subrc = 0 ).
+      result = xsdbool( sy-subrc = 0 ).
     ENDIF.
 
   ENDMETHOD.
@@ -172,7 +172,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
   METHOD is_valid_engine.
 
-    result = boolc(
+    result = xsdbool(
       engine IS INITIAL OR
       engine = zif_abappm_types=>c_engine-abap OR
       engine = zif_abappm_types=>c_engine-apm ).
@@ -188,7 +188,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
           AND zif_abappm_types=>c_package_name-max_length.
 
       FIND REGEX zif_abappm_types=>c_package_name-regex IN name RESPECTING CASE.
-      result = boolc( sy-subrc =  0 ).
+      result = xsdbool( sy-subrc =  0 ).
     ELSE.
       result = abap_false.
     ENDIF.
@@ -202,7 +202,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
     SHIFT os_val LEFT DELETING LEADING '!'.
 
-    result = boolc(
+    result = xsdbool(
       os_val IS INITIAL OR
       os_val = zif_abappm_types=>c_os-aix OR
       os_val = zif_abappm_types=>c_os-hp_ux OR
@@ -217,7 +217,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
   METHOD is_valid_package_type.
 
-    result = boolc(
+    result = xsdbool(
       type IS INITIAL OR
       type = zif_abappm_types=>c_package_type-common_abap OR
       type = zif_abappm_types=>c_package_type-module ).
@@ -230,15 +230,15 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
     DATA package_type TYPE c LENGTH 1.
 
     " Limit to local, customer, namespaced, and partner packages (see type-pool TPAK)
-    CALL METHOD cl_package_helper=>check_package_name
+    cl_package_helper=>check_package_name(
       EXPORTING
         i_package_name = package
       IMPORTING
         e_package_type = package_type
       EXCEPTIONS
-        OTHERS         = 1.
+        OTHERS         = 1 ).
 
-    result = boolc( sy-subrc =  0 AND package_type CA '$ZNJ' ).
+    result = xsdbool( sy-subrc = 0 AND package_type CA '$ZNJ' ).
 
     " Workaround for missing validation of empty namespace
     IF result = abap_true AND package CP '//*'.
@@ -253,6 +253,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
     IF url IS INITIAL.
       result = abap_true.
     ELSE.
+      " TODO: Replace with ZCL_URL
       result = cl_http_utility=>is_valid_url( url ).
     ENDIF.
 

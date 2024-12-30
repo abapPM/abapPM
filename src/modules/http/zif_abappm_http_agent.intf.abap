@@ -6,6 +6,7 @@ INTERFACE zif_abappm_http_agent PUBLIC.
 * Copyright (c) 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT
 ************************************************************************
+
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
 
   CONSTANTS:

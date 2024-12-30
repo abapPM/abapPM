@@ -62,9 +62,7 @@ CLASS ltcl_tap IMPLEMENTATION.
 
   METHOD actual.
 
-    FIELD-SYMBOLS:
-      <any>     TYPE any,
-      <any_tab> TYPE ANY TABLE.
+    FIELD-SYMBOLS <any_tab> TYPE ANY TABLE.
 
     " Literals
     cl_abap_unit_assert=>assert_bound( cut->_( 123 ) ).
@@ -84,7 +82,7 @@ CLASS ltcl_tap IMPLEMENTATION.
     cl_abap_unit_assert=>assert_bound( cut->_( tab ) ).
 
     " Field Symbols
-    ASSIGN i TO <any>.
+    ASSIGN i TO FIELD-SYMBOL(<any>).
     cl_abap_unit_assert=>assert_bound( cut->_( <any> ) ).
     ASSIGN tab TO <any_tab>.
     cl_abap_unit_assert=>assert_bound( cut->_( <any_tab> ) ).
@@ -93,9 +91,7 @@ CLASS ltcl_tap IMPLEMENTATION.
 
   METHOD equals.
 
-    FIELD-SYMBOLS:
-      <any>     TYPE any,
-      <any_tab> TYPE ANY TABLE.
+    FIELD-SYMBOLS <any_tab> TYPE ANY TABLE.
 
     " Literals
     cl_abap_unit_assert=>assert_bound( cut->_( 123 )->equals( 123 ) ).
@@ -122,7 +118,7 @@ CLASS ltcl_tap IMPLEMENTATION.
     cl_abap_unit_assert=>assert_bound( cut->_( tab )->equals( tab ) ).
 
     " Field Symbols
-    ASSIGN i TO <any>.
+    ASSIGN i TO FIELD-SYMBOL(<any>).
     cl_abap_unit_assert=>assert_bound( cut->_( <any> )->equals( i ) ).
     ASSIGN tab TO <any_tab>.
     cl_abap_unit_assert=>assert_bound( cut->_( <any_tab> )->equals( tab ) ).
@@ -131,9 +127,7 @@ CLASS ltcl_tap IMPLEMENTATION.
 
   METHOD differs.
 
-    FIELD-SYMBOLS:
-      <any>     TYPE any,
-      <any_tab> TYPE ANY TABLE.
+    FIELD-SYMBOLS <any_tab> TYPE ANY TABLE.
 
     " Literals
     cl_abap_unit_assert=>assert_bound( cut->_( 123 )->differs( 12 ) ).
@@ -160,7 +154,7 @@ CLASS ltcl_tap IMPLEMENTATION.
     cl_abap_unit_assert=>assert_bound( cut->_( tab )->differs( tab_hashed ) ).
 
     " Field Symbols
-    ASSIGN i TO <any>.
+    ASSIGN i TO FIELD-SYMBOL(<any>).
     cl_abap_unit_assert=>assert_bound( cut->_( <any> )->differs( 11 ) ).
     ASSIGN tab TO <any_tab>.
     cl_abap_unit_assert=>assert_bound( cut->_( <any_tab> )->differs( tab ) ).
@@ -168,6 +162,7 @@ CLASS ltcl_tap IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD index.
+
     INSERT `1` INTO TABLE tab.
     INSERT `2` INTO TABLE tab.
     INSERT `3` INTO TABLE tab.
@@ -177,17 +172,20 @@ CLASS ltcl_tap IMPLEMENTATION.
     ENDLOOP.
 
     READ TABLE tab INTO str INDEX 2.
-    cl_abap_unit_assert=>assert_bound( cut->_( str )->eq( '2')->tabix( 2 ) ).
+    cl_abap_unit_assert=>assert_subrc( ).
+    cl_abap_unit_assert=>assert_bound( cut->_( str )->eq( '2' )->tabix( 2 ) ).
 
   ENDMETHOD.
 
 
   METHOD snap.
+
     cut->snap_begin( snap_id ).
     DO 10 TIMES.
       cut->snap_write( |{ sy-index }| ).
     ENDDO.
     cut->snap_end( snap_id ).
+
   ENDMETHOD.
 
 ENDCLASS.

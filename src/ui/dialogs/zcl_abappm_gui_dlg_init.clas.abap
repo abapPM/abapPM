@@ -143,8 +143,8 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
       iv_required    = abap_true
       iv_label       = 'Name'
       iv_hint        = 'Unique name for package'
-      iv_min         = zif_abappm_package_json_types=>c_package_name-min_length
-      iv_max         = zif_abappm_package_json_types=>c_package_name-max_length
+      iv_min         = zif_abappm_types=>c_package_name-min_length
+      iv_max         = zif_abappm_types=>c_package_name-max_length
     )->text(
       iv_name        = c_id-version
       iv_required    = abap_true
