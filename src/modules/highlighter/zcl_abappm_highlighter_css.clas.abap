@@ -376,8 +376,7 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
 
     " Check if this is part of multi-line comment and mark it accordingly
     IF comment = abap_true.
-      READ TABLE matches WITH KEY token = c_token-comment TRANSPORTING NO FIELDS.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( matches[ token = c_token-comment ] ).
         CLEAR matches.
         APPEND INITIAL LINE TO matches ASSIGNING FIELD-SYMBOL(<match>).
         <match>-token = c_token-comment.
@@ -414,19 +413,20 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
           ENDIF.
 
         WHEN c_token-comment.
-          IF match = '/*'.
-            DELETE matches WHERE offset > <match>-offset.
-            <match>-length = line_len - <match>-offset.
-            comment = abap_true.
-          ELSEIF match = '*/'.
-            DELETE matches WHERE offset < <match>-offset.
-            <match>-length = <match>-offset + 2.
-            <match>-offset = 0.
-            comment = abap_false.
-          ELSE.
-            DATA(cmmt_end) = <match>-offset + <match>-length.
-            DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
-          ENDIF.
+          CASE match.
+            WHEN '/*'.
+              DELETE matches WHERE offset > <match>-offset.
+              <match>-length = line_len - <match>-offset.
+              comment = abap_true.
+            WHEN '*/'.
+              DELETE matches WHERE offset < <match>-offset.
+              <match>-length = <match>-offset + 2.
+              <match>-offset = 0.
+              comment = abap_false.
+            WHEN OTHERS.
+              DATA(cmmt_end) = <match>-offset + <match>-length.
+              DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
+          ENDCASE.
 
         WHEN c_token-text.
           <match>-text_tag = match.
@@ -457,9 +457,9 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
 
     " Remove non-keywords
     LOOP AT result ASSIGNING FIELD-SYMBOL(<match>) WHERE token = c_token-keyword.
-      IF abap_false = is_keyword( substring( val = line
-                                             off = <match>-offset
-                                             len = <match>-length ) ).
+      IF NOT is_keyword( substring( val = line
+                                    off = <match>-offset
+                                    len = <match>-length ) ).
         CLEAR <match>-token.
       ENDIF.
     ENDLOOP.

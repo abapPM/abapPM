@@ -101,11 +101,9 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
   METHOD check.
 
     APPEND LINES OF lcl_validate=>validate_single_values( manifest ) TO result.
-
     APPEND LINES OF lcl_validate=>validate_arrays( manifest ) TO result.
-
     APPEND LINES OF lcl_validate=>validate_persons( manifest ) TO result.
-
+    APPEND LINES OF lcl_validate=>validate_engines( manifest ) TO result.
     APPEND LINES OF lcl_validate=>validate_dependencies( manifest ) TO result.
 
   ENDMETHOD.
@@ -188,7 +186,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
           AND zif_abappm_types=>c_package_name-max_length.
 
       FIND REGEX zif_abappm_types=>c_package_name-regex IN name RESPECTING CASE.
-      result = xsdbool( sy-subrc =  0 ).
+      result = xsdbool( sy-subrc = 0 ).
     ELSE.
       result = abap_false.
     ENDIF.

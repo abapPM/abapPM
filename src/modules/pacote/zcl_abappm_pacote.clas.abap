@@ -433,7 +433,18 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
   METHOD request.
 
     TRY.
-        result = get_agent( registry )->request( url ).
+        IF abbreviated IS INITIAL.
+          result = get_agent( registry )->request( url ).
+        ELSE.
+          DATA(headers) = NEW zcl_abappm_string_map( ).
+          headers->set(
+            iv_key = 'Accept'
+            iv_val = 'application/vnd.npm.install-v1+json' ).
+
+          result = get_agent( registry )->request(
+            url     = url
+            headers = headers ).
+        ENDIF.
       CATCH zcx_abapgit_exception INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.

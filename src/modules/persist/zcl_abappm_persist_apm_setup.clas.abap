@@ -236,9 +236,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
   METHOD lock_exists.
 
-    SELECT SINGLE viewname FROM dd25l INTO @DATA(viewname)
+    SELECT COUNT(*) FROM dd25l INTO @DATA(count)
       WHERE viewname = @zif_abappm_persist_apm=>c_lock.
-    result = xsdbool( sy-subrc = 0 ).
+    result = xsdbool( count > 0 ).
 
   ENDMETHOD.
 
@@ -260,7 +260,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       language   = zif_abappm_persist_apm=>c_english
       objectname = zif_abappm_persist_apm=>c_zapm
       objecttype = 'L'
-      ddtext     = 'apm').
+      ddtext     = 'apm' ).
 
     DATA(objs) = VALUE objs(
       objectname = zif_abappm_persist_apm=>c_zapm
@@ -281,10 +281,10 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       maskklen   = 2
       prim_table = abap_true ).
 
-    INSERT objh FROM objh ##SUBRC_OK.
-    INSERT objt FROM objt ##SUBRC_OK.
-    INSERT objs FROM objs ##SUBRC_OK.
-    INSERT objsl FROM objsl ##SUBRC_OK.
+    INSERT objh FROM @objh ##SUBRC_OK.
+    INSERT objt FROM @objt ##SUBRC_OK.
+    INSERT objs FROM @objs ##SUBRC_OK.
+    INSERT objsl FROM @objsl ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -301,9 +301,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_exists.
 
-    SELECT SINGLE objectname FROM objh INTO @DATA(logo)
+    SELECT COUNT(*) FROM objh INTO @DATA(count)
       WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    result = xsdbool( sy-subrc = 0 ).
+    result = xsdbool( count > 0 ).
 
   ENDMETHOD.
 
@@ -312,7 +312,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     DATA:
       subrc LIKE sy-subrc,
-      dd03p TYPE STANDARD TABLE OF dd03p WITH DEFAULT KEY.
+      dd03p TYPE STANDARD TABLE OF dd03p WITH KEY tabname fieldname position.
 
     DATA(dd02v) = VALUE dd02v(
       tabname    = zif_abappm_persist_apm=>c_tabname
@@ -468,9 +468,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
   METHOD table_exists.
 
-    SELECT SINGLE tabname FROM dd02l INTO @DATA(tabname)
+    SELECT COUNT(*) FROM dd02l INTO @DATA(count)
       WHERE tabname = @zif_abappm_persist_apm=>c_tabname.
-    result = xsdbool( sy-subrc = 0 ).
+    result = xsdbool( count > 0 ).
 
   ENDMETHOD.
 

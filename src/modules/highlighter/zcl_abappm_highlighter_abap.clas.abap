@@ -284,9 +284,9 @@ CLASS zcl_abappm_highlighter_abap IMPLEMENTATION.
     " Remove non-keywords
     LOOP AT result ASSIGNING FIELD-SYMBOL(<match>) WHERE token = c_token-keyword.
       DATA(tabix) = sy-tabix.
-      IF abap_false = is_keyword( substring( val = line
-                                             off = <match>-offset
-                                             len = <match>-length ) ).
+      IF NOT is_keyword( substring( val = line
+                                    off = <match>-offset
+                                    len = <match>-length ) ).
         DELETE result INDEX tabix.
       ENDIF.
     ENDLOOP.

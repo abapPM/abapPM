@@ -2,8 +2,6 @@ CLASS lcl_persist_utils DEFINITION.
 
   PUBLIC SECTION.
 
-    CLASS-DATA update_function TYPE funcname.
-
     CLASS-METHODS get_package_description
       IMPORTING
         package       TYPE string
@@ -19,6 +17,10 @@ CLASS lcl_persist_utils DEFINITION.
     CLASS-METHODS get_update_function
       RETURNING
         VALUE(result) TYPE funcname.
+
+  PRIVATE SECTION.
+
+    CLASS-DATA update_function TYPE funcname.
 
 ENDCLASS.
 
@@ -56,16 +58,12 @@ CLASS lcl_persist_utils IMPLEMENTATION.
     IF update_function IS INITIAL.
       update_function = 'CALL_V1_PING'.
 
-      CALL FUNCTION 'FUNCTION_EXISTS'
-        EXPORTING
-          funcname           = update_function
-        EXCEPTIONS
-          function_not_exist = 1
-          OTHERS             = 2.
-      IF sy-subrc <> 0.
-        " Fallback
-        update_function = 'BANK_OBJ_WORKL_RELEASE_LOCKS'.
-      ENDIF.
+      TRY.
+          CALL FUNCTION update_function.
+        CATCH cx_sy_dyn_call_illegal_method.
+          " Fallback
+          update_function = 'BANK_OBJ_WORKL_RELEASE_LOCKS'.
+      ENDTRY.
     ENDIF.
 
     result = update_function.

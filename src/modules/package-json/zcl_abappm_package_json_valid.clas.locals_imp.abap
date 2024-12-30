@@ -20,6 +20,12 @@ CLASS lcl_validate DEFINITION.
       RETURNING
         VALUE(result) TYPE string_table.
 
+    CLASS-METHODS validate_engines
+      IMPORTING
+        !manifest     TYPE zif_abappm_types=>ty_manifest
+      RETURNING
+        VALUE(result) TYPE string_table.
+
     CLASS-METHODS validate_dependencies
       IMPORTING
         !manifest     TYPE zif_abappm_types=>ty_manifest
@@ -147,7 +153,7 @@ CLASS lcl_validate IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD validate_dependencies.
+  METHOD validate_engines.
 
     DATA values TYPE string_table.
 
@@ -165,8 +171,14 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Duplicate engines| INTO TABLE result.
     ENDIF.
 
+  ENDMETHOD.
+
+  METHOD validate_dependencies.
+
+    DATA values TYPE string_table.
+
     CLEAR values.
-    LOOP AT manifest-dependencies INTO dependency.
+    LOOP AT manifest-dependencies INTO DATA(dependency).
       COLLECT dependency-name INTO values.
       IF zcl_abappm_package_json_valid=>is_valid_name( dependency-name ) = abap_false.
         INSERT |Invalid dependency: { dependency-name }| INTO TABLE result.
@@ -206,12 +218,10 @@ CLASS lcl_validate IMPLEMENTATION.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
         INSERT |Invalid optional dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
       ENDIF.
-      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
-      IF sy-subrc = 0.
+      IF line_exists( manifest-dependencies[ name = dependency-name ] ).
         INSERT |Optional dependency { dependency-name } already included in dependencies| INTO TABLE result.
       ENDIF.
-      READ TABLE manifest-dev_dependencies TRANSPORTING NO FIELDS WITH KEY name = dependency-name.
-      IF sy-subrc = 0.
+      IF line_exists( manifest-dev_dependencies[ name = dependency-name ] ).
         INSERT |Optional dependency { dependency-name } already included in dev dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
@@ -225,8 +235,7 @@ CLASS lcl_validate IMPLEMENTATION.
       IF zcl_abappm_package_json_valid=>is_valid_name( value ) = abap_false.
         INSERT |Invalid bundle dependency: { value }| INTO TABLE result.
       ENDIF.
-      READ TABLE manifest-dependencies TRANSPORTING NO FIELDS WITH KEY name = value.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( manifest-dependencies[ name = value ] ).
         INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.

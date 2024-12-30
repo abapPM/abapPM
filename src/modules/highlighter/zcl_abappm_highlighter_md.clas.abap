@@ -161,21 +161,22 @@ CLASS zcl_abappm_highlighter_md IMPLEMENTATION.
           ENDIF.
 
         WHEN c_token-comment.
-          IF match = '<!--'.
-            DELETE matches WHERE offset > <match>-offset.
-            DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
-            <match>-length = line_len - <match>-offset.
-            comment = abap_true.
-          ELSEIF match = '-->'.
-            DELETE matches WHERE offset < <match>-offset.
-            <match>-length = <match>-offset + 3.
-            <match>-offset = 0.
-            comment = abap_false.
-          ELSE.
-            DATA(cmmt_end) = <match>-offset + <match>-length.
-            DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
-            DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
-          ENDIF.
+          CASE match.
+            WHEN '<!--'.
+              DELETE matches WHERE offset > <match>-offset.
+              DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
+              <match>-length = line_len - <match>-offset.
+              comment = abap_true.
+            WHEN '-->'.
+              DELETE matches WHERE offset < <match>-offset.
+              <match>-length = <match>-offset + 3.
+              <match>-offset = 0.
+              comment = abap_false.
+            WHEN OTHERS.
+              DATA(cmmt_end) = <match>-offset + <match>-length.
+              DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
+              DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
+          ENDCASE.
 
         WHEN OTHERS.
           IF prev_token = c_token-xml_tag.

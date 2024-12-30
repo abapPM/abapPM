@@ -106,7 +106,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD validate_key.
 
-    SPLIT key AT ':' INTO DATA(key_type) DATA(rest).
+    SPLIT key AT ':' INTO DATA(key_type) DATA(rest) ##NEEDED.
 
     result = xsdbool( sy-subrc = 0 AND
       ( key_type = zif_abappm_persist_apm=>c_key_type-package OR
@@ -132,11 +132,11 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
     IF filter IS INITIAL.
       SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE @db_entries
         WHERE timestamp BETWEEN @from AND @to
-        ORDER BY PRIMARY KEY.
+        ORDER BY PRIMARY KEY ##SUBRC_OK.
     ELSE.
       SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE @db_entries
         WHERE timestamp BETWEEN @from AND @to AND keys LIKE @filter
-        ORDER BY PRIMARY KEY.
+        ORDER BY PRIMARY KEY ##SUBRC_OK.
     ENDIF.
 
     LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).

@@ -118,7 +118,7 @@ CLASS ltcl_highlighter_xml IMPLEMENTATION.
       act = cut->process_line( |<!-- comment| ) ).
 
     " New instance (i.e. different file)
-    CREATE OBJECT cut.
+    cut = NEW #( ).
 
     cl_abap_unit_assert=>assert_equals(
       exp = |<span class="xml_tag">&lt;tag&gt;</span>|

@@ -226,7 +226,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
           substring( val = <source> off = <token>-col + <token>-len2 ).
       ELSEIF <token>-len3 > 0.
         " Example:
-        " INSERT (zif_test=>c_tabname) FROM test.
+        " INSERT (zif_test=>c_tabname) FROM test
         <source> =
           substring( val = <source> len = <token>-col ) && <token>-str &&
           substring( val = <source> off = <token>-col + <token>-len3 + 2 ).

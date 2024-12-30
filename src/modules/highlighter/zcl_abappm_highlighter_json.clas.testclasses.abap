@@ -3,8 +3,7 @@ CLASS ltcl_abapgit_syntax_json DEFINITION FINAL FOR TESTING
   RISK LEVEL HARMLESS.
 
   PRIVATE SECTION.
-    DATA:
-     cut TYPE REF TO zcl_abapgit_syntax_json.
+    DATA cut TYPE REF TO zcl_abapgit_syntax_json.
 
     METHODS:
       setup,
