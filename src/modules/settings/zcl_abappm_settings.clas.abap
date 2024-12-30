@@ -58,8 +58,6 @@ CLASS zcl_abappm_settings DEFINITION
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY name.
 
-    CONSTANTS c_settings TYPE string VALUE 'SETTINGS'.
-
     CLASS-DATA:
       db_persist TYPE REF TO zif_abappm_persist_apm,
       instances  TYPE ty_instances.
@@ -109,7 +107,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     ENDIF.
 
     me->name = name.
-    me->key  = get_setting_key( name ).
+    key = get_setting_key( name ).
 
     TRY.
         zif_abappm_settings~load( ).
@@ -307,7 +305,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
       zcx_abappm_error=>raise( 'Invalid settings' ).
     ENDIF.
 
-    MOVE-CORRESPONDING settings TO me->settings.
+    me->settings = CORRESPONDING #( settings ).
     result = me.
 
   ENDMETHOD.
@@ -332,7 +330,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
           zcx_abappm_error=>raise( 'Invalid settings' ).
         ENDIF.
 
-        MOVE-CORRESPONDING settings TO me->settings.
+        me->settings = CORRESPONDING #( settings ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.

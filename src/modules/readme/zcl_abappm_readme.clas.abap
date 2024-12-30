@@ -82,9 +82,9 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
   METHOD constructor.
 
-*    IF zcl_readme_valid=>is_valid_sap_package( package ) = abap_false.
-*      zcx_error=>raise( |Invalid package: { package }| ).
-*    ENDIF.
+*    IF zcl_readme_valid=>is_valid_sap_package( package ) = abap_false
+*      zcx_error=>raise( |Invalid package: { package }| )
+*    ENDIF
 
     me->package     = package.
     readme-key      = get_package_key( package ).
@@ -105,10 +105,9 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <instance>-instance.
     ELSE.
-      CREATE OBJECT result TYPE zcl_abappm_readme
-        EXPORTING
-          package  = package
-          markdown = markdown.
+      result = NEW zcl_abappm_readme(
+        package  = package
+        markdown = markdown ).
 
       DATA(instance) = VALUE ty_instance(
         package  = package
@@ -122,7 +121,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
   METHOD get_package_from_key.
 
-    SPLIT key AT ':' INTO DATA(prefix) result DATA(suffix).
+    SPLIT key AT ':' INTO DATA(prefix) result DATA(suffix) ##NEEDED.
     result = to_upper( result ).
 
   ENDMETHOD.
@@ -130,7 +129,8 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
 
   METHOD get_package_key.
 
-    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ package }:{ zif_abappm_persist_apm=>c_key_extra-package_readme }|.
+    result = |{ zif_abappm_persist_apm=>c_key_type-package }:{ package }:|
+          && |{ zif_abappm_persist_apm=>c_key_extra-package_readme }|.
 
   ENDMETHOD.
 

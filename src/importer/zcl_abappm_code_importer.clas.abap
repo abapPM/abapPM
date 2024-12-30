@@ -68,11 +68,9 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       IF result IS NOT INITIAL AND result(1) = ''''.
         " ('zcl_test')=>method
         SPLIT result+1 AT '''' INTO result rest.
-      ELSE.
-        " (var)=>method
-        result = ''.
+        RETURN.
       ENDIF.
-      RETURN.
+      " (zcl_test=>const)->method, (zcl_test=>const)
     ENDIF.
 
     IF result CS '~'.
@@ -117,16 +115,16 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       IF result IS NOT INITIAL AND result(1) = ''''.
         " zcl_test->('zif_test~method')
         SPLIT result+1 AT '''' INTO result rest.
-      ELSE.
-        " zcl_test->(var)
-        result = ''.
-        RETURN.
       ENDIF.
+      " zcl_test->(zif_test=>const)
     ENDIF.
 
     IF result CS '~'.
       " zif_test~method
       SPLIT result AT '~' INTO result rest.
+    ELSEIF result CS '=>'.
+      " zif_test=>const
+      SPLIT result AT '=' INTO result rest.
     ENDIF.
 
   ENDMETHOD.

@@ -50,7 +50,7 @@ INTERFACE zif_abappm_types PUBLIC.
       file_count    TYPE i,
       integrity     TYPE string,
       shasum        TYPE string,
-      signatures    TYPE STANDARD TABLE OF ty_signature WITH DEFAULT KEY,
+      signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
       tarball       TYPE string,
       unpacked_size TYPE i,
     END OF ty_dist.
@@ -86,12 +86,12 @@ INTERFACE zif_abappm_types PUBLIC.
         type TYPE string,
         url  TYPE ty_uri,
       END OF funding,
-      dependencies          TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      dev_dependencies      TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      optional_dependencies TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      peer_dependencies     TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      dependencies          TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      dev_dependencies      TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      optional_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      peer_dependencies     TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
       bundle_dependencies   TYPE string_table,
-      engines               TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      engines               TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
       os                    TYPE string_table,
       cpu                   TYPE string_table,
       db                    TYPE string_table,
@@ -101,16 +101,15 @@ INTERFACE zif_abappm_types PUBLIC.
 
   " *** MANIFEST ***
 
+  " Full manifest (fetched with "accept: application/json" in HTTP headers)
+  TYPES BEGIN OF ty_manifest.
+  INCLUDE TYPE ty_package_json.
   TYPES:
-    " Full manifest (fetched with "accept: application/json" in HTTP headers)
-    BEGIN OF ty_manifest.
-      INCLUDE TYPE ty_package_json.
-  TYPES:
-      dist           TYPE ty_dist,
-      deprecated     TYPE abap_bool,
-      __id           TYPE string, " external: _id
-      __abap_version TYPE string, " external: _abapVersion
-      __apm_version  TYPE string, " external: _apmVersion
+    dist           TYPE ty_dist,
+    deprecated     TYPE abap_bool,
+    __id           TYPE string, " external: _id
+    __abap_version TYPE string, " external: _abapVersion
+    __apm_version  TYPE string, " external: _apmVersion
     END OF ty_manifest.
 
   TYPES:
@@ -119,18 +118,18 @@ INTERFACE zif_abappm_types PUBLIC.
     BEGIN OF ty_manifest_abbreviated,
       name                  TYPE string,
       version               TYPE string,
-      dependencies          TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      dev_dependencies      TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      optional_dependencies TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
-      peer_dependencies     TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      dependencies          TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      dev_dependencies      TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      optional_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+      peer_dependencies     TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
       bundle_dependencies   TYPE string_table,
-      engines               TYPE STANDARD TABLE OF ty_dependency WITH DEFAULT KEY,
+      engines               TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
       os                    TYPE string_table,
       cpu                   TYPE string_table,
       db                    TYPE string_table,
       dist                  TYPE ty_dist,
       deprecated            TYPE abap_bool,
-    END OF ty_manifest_abbreviated.
+    END OF ty_manifest_abbreviated ##NEEDED.
 
   " *** PACKUMENT ***
 

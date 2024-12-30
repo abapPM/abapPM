@@ -116,7 +116,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~delete.
 
-    DELETE FROM (zif_persist_apm=>c_tabname) WHERE keys = key.
+    DELETE FROM (zif_abappm_persist_apm=>c_tabname) WHERE keys = key.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Error deleting { key }| ).
     ENDIF.
@@ -131,11 +131,11 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
       db_entry   LIKE LINE OF result.
 
     IF filter IS INITIAL.
-      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE db_entries
+      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE db_entries
         WHERE timestamp BETWEEN from AND to
         ORDER BY PRIMARY KEY.
     ELSE.
-      SELECT * FROM (zif_persist_apm=>c_tabname) INTO TABLE db_entries
+      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE db_entries
         WHERE timestamp BETWEEN from AND to AND keys LIKE filter
         ORDER BY PRIMARY KEY.
     ENDIF.
@@ -155,7 +155,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~load.
 
-    SELECT SINGLE * FROM (zif_persist_apm=>c_tabname) INTO result WHERE keys = key.
+    SELECT SINGLE * FROM (zif_abappm_persist_apm=>c_tabname) INTO result WHERE keys = key.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Error loading { key }| ).
     ENDIF.
@@ -202,9 +202,9 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     GET TIME STAMP FIELD db_entry-timestamp.
 
-    UPDATE (zif_persist_apm=>c_tabname) FROM db_entry.
+    UPDATE (zif_abappm_persist_apm=>c_tabname) FROM db_entry.
     IF sy-subrc <> 0.
-      INSERT (zif_persist_apm=>c_tabname) FROM db_entry.
+      INSERT (zif_abappm_persist_apm=>c_tabname) FROM db_entry.
       IF sy-subrc <> 0.
         zcx_abappm_error=>raise( |Error saving { key }| ).
       ENDIF.

@@ -42,8 +42,12 @@ CLASS ltcl_code_importer IMPLEMENTATION.
       exp = 'ZCL_TEST' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = zcl_abappm_code_importer=>get_class_name_from_token( |(ZVAR)=>METHOD| )
-      exp = '' ).
+      act = zcl_abappm_code_importer=>get_class_name_from_token( |(ZCL_TEST=>CONST)->METHOD| )
+      exp = 'ZCL_TEST' ).
+
+    cl_abap_unit_assert=>assert_equals(
+      act = zcl_abappm_code_importer=>get_class_name_from_token( |(ZCL_TEST=>CONST)| )
+      exp = 'ZCL_TEST' ).
 
   ENDMETHOD.
 
@@ -66,8 +70,12 @@ CLASS ltcl_code_importer IMPLEMENTATION.
       exp = 'ZIF_TEST' ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = zcl_abappm_code_importer=>get_interface_name_from_token( |ZCL_TEST->(ZVAR)| )
-      exp = '' ).
+      act = zcl_abappm_code_importer=>get_interface_name_from_token( |ZCL_TEST->(ZIF_TEST=>CONST)| )
+      exp = 'ZIF_TEST' ).
+
+    cl_abap_unit_assert=>assert_equals(
+      act = zcl_abappm_code_importer=>get_interface_name_from_token( |ZCL_TEST=>(ZIF_TEST~CONST)| )
+      exp = 'ZIF_TEST' ).
 
   ENDMETHOD.
 
