@@ -220,7 +220,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
           substring( val = <source> len = <token>-col ) && <token>-str &&
           substring( val = <source> off = <token>-col + <token>-len1 ).
       ELSEIF <token>-len2 > 0.
-        " Don't have a test case so not sure if this is correct
+        " We don't have a test case so not sure if this is correct :shrug:
         <source> =
           substring( val = <source> len = <token>-col ) && <token>-str &&
           substring( val = <source> off = <token>-col + <token>-len2 ).

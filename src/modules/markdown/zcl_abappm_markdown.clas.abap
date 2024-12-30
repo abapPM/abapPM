@@ -21,10 +21,14 @@ CLASS zcl_abappm_markdown DEFINITION
 * - Support for strikethrough, subscript, superscript, highlight
 * - Support for task list ([ ] or [x] task)
 * - Fix a few regular expressions
+* - Support for GitHub alerts
+* - Fix for escaped | in tables
+* - CSS
 ************************************************************************
+
   PUBLIC SECTION.
 
-    CONSTANTS version TYPE string VALUE '1.3.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '1.4.0' ##NEEDED.
 
     CLASS-METHODS styles
       RETURNING
@@ -216,12 +220,12 @@ CLASS zcl_abappm_markdown DEFINITION
     DATA special_characters TYPE REF TO lcl_string_array.
     DATA strong_regex TYPE REF TO lcl_hashmap.
     DATA em_regex TYPE REF TO lcl_hashmap.
-    DATA regex_html_attribute TYPE string VALUE '[a-zA-Z_:][\w:.-]*(?:\s*=\s*(?:[^"''=<>`\s]+|"[^"]*"|''[^'']*''))?' ##NO_TEXT.
+    DATA regex_html_attribute TYPE string
+      VALUE '[a-zA-Z_:][\w:.-]*(?:\s*=\s*(?:[^"''=<>`\s]+|"[^"]*"|''[^'']*''))?' ##NO_TEXT.
     DATA void_elements TYPE REF TO lcl_string_array.
     DATA text_level_elements TYPE REF TO lcl_string_array.
     DATA safe_links_whitelist TYPE REF TO lcl_string_array.
-    DATA:
-      methods TYPE STANDARD TABLE OF string.
+    DATA methods TYPE STANDARD TABLE OF string.
 
     CLASS-METHODS htmlspecialchars
       IMPORTING
@@ -368,6 +372,12 @@ CLASS zcl_abappm_markdown DEFINITION
       IMPORTING
         !line          TYPE ty_line
         !block         TYPE ty_block OPTIONAL
+      RETURNING
+        VALUE(r_block) TYPE ty_block.
+
+    METHODS block_quote_complete
+      IMPORTING
+        !block         TYPE ty_block
       RETURNING
         VALUE(r_block) TYPE ty_block.
 
@@ -995,34 +1005,29 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
   METHOD block_quote.
     DATA lv_m1 TYPE string.
+    FIELD-SYMBOLS <attribute> LIKE LINE OF r_block-element-attributes.
 
     FIND REGEX '^>[ ]?(.*)' IN line-text SUBMATCHES lv_m1.
     IF sy-subrc = 0.
-      " >>> apm
-      IF line-text CS '[!NOTE]'.
-        DATA(color) = `blue`.
-      ELSEIF line-text CS '[!TIP]'.
-        color = `green`.
-      ELSEIF line-text CS '[!IMPORTANT]'.
-        color = `purple`.
-      ELSEIF line-text CS '[!WARNING]'.
-        color = `yellow`.
-      ELSEIF line-text CS '[!CAUTION]'.
-        color = `red`.
-      ENDIF.
-
-      IF color IS NOT INITIAL.
-        APPEND INITIAL LINE TO r_block-element-attributes ASSIGNING FIELD-SYMBOL(<attribute>).
-        <attribute>-name  = 'class'.
-        <attribute>-value = 'border-' && color.
-      ENDIF.
-      " <<< apm
       SHIFT lv_m1 LEFT DELETING LEADING space.
       r_block-element-name = 'blockquote'.
       r_block-element-handler = '_lines'.
+      " >>> apm
+      IF lcl_alerts=>get( lv_m1 ) IS NOT INITIAL.
+        APPEND INITIAL LINE TO r_block-element-attributes ASSIGNING <attribute>.
+        <attribute>-name  = 'class'.
+        <attribute>-value = lcl_alerts=>get( lv_m1 )-class.
+        lv_m1 = lcl_alerts=>get( lv_m1 )-tag.
+      ENDIF.
+      " <<< apm
       APPEND lv_m1 TO r_block-element-lines.
     ENDIF.
   ENDMETHOD.                    "block_Quote
+
+
+  METHOD block_quote_complete.
+    r_block = block.
+  ENDMETHOD.
 
 
   METHOD block_quote_continue.
@@ -1032,6 +1037,12 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       r_block = block.
       FIND REGEX '^>[ ]?(.*)' IN line-text SUBMATCHES lv_m1.
       IF sy-subrc = 0.
+        " >>> apm
+        IF lcl_alerts=>get( lv_m1 ) IS NOT INITIAL.
+          CLEAR r_block.
+          RETURN.
+        ENDIF.
+        " <<< apm
         SHIFT lv_m1 LEFT DELETING LEADING space.
         IF r_block-interrupted IS NOT INITIAL.
           APPEND INITIAL LINE TO r_block-element-lines.
@@ -1140,9 +1151,22 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         str  = lv_divider
         mask = '|' ).
 
+      " >>> apm
+      " Replace escaped \|
+      lv_divider = replace(
+        val  = lv_divider
+        sub  = '\|'
+        with = '%bar%'
+        occ  = 0 ).
+      " <<< apm
       SPLIT lv_divider AT '|' INTO TABLE lt_divider_cells.
       LOOP AT lt_divider_cells ASSIGNING <divider_cell>.
         <divider_cell> = trim( <divider_cell> ).
+        <divider_cell> = replace(
+         val  = <divider_cell>
+         sub  = '%bar%'
+         with = '|'
+         occ  = 0 ). " apm
         CHECK <divider_cell> IS NOT INITIAL.
         APPEND INITIAL LINE TO r_block-alignments ASSIGNING <alignment>.
 
@@ -1160,17 +1184,30 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         ENDIF.
       ENDLOOP. "lt_divider_cells
 
-      "# ~
+      " ~
 
       lv_header = trim( r_block-element-text-text ).
       lv_header = trim(
         str  = lv_header
         mask = '|' ).
 
+      " >>> apm
+      " Replace escaped \|
+      lv_header = replace(
+        val  = lv_header
+        sub  = '\|'
+        with = '%bar%'
+        occ  = 0 ).
+      " <<< apm
       SPLIT lv_header AT '|' INTO TABLE lt_header_cells.
       LOOP AT lt_header_cells ASSIGNING <header_cell>.
         lv_index = sy-tabix.
         <header_cell> = trim( <header_cell> ).
+        <header_cell> = replace(
+         val  = <header_cell>
+         sub  = '%bar%'
+         with = '|'
+         occ  = 0 ). " apm
 
         APPEND INITIAL LINE TO lt_header_elements ASSIGNING <header_element>.
         <header_element>-name = 'th'.
@@ -1187,7 +1224,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
       ENDLOOP.
 
-      "# ~
+      " ~
 
       r_block-identified = abap_true.
       r_block-element-name = 'table'.
@@ -1240,12 +1277,27 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       <text2>-name = 'tr'.
       <text2>-handler = 'elements'.
 
-      FIND ALL OCCURRENCES OF REGEX '(?:(\\[|])|[^|`]|`[^`]+`|`)+'
-        IN lv_row RESULTS lt_matches.
+      " >>> apm
+      " Replace escaped \|
+      lv_row = replace(
+        val  = lv_row
+        sub  = '\|'
+        with = '%bar%'
+        occ  = 0 ).
+      " REGEX '(?:(\\[|])|[^|`]|`[^`]+`|`)+' is too greedy
+      FIND ALL OCCURRENCES OF REGEX '(?:(\\[|])|[^|])+'
+        IN lv_row RESULTS lt_matches ##SUBRC_OK.
+      " <<< apm
       LOOP AT lt_matches ASSIGNING <match>.
         lv_index = sy-tabix.
         lv_cell = lv_row+<match>-offset(<match>-length).
         lv_cell = trim( lv_cell ).
+
+        lv_cell = replace(
+          val  = lv_cell
+          sub  = '%bar%'
+          with = '|'
+          occ  = 0 ). " apm
 
         APPEND INITIAL LINE TO <text2>-texts ASSIGNING <text3>.
         <text3>-name = 'td'.
@@ -1293,9 +1345,9 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     CREATE OBJECT config-path_util.
     "<<< apm
 
-    "#
-    "# Lines
-    "#
+    "
+    " Lines
+    "
     CREATE OBJECT block_types
       EXPORTING
         value_type = 'lcl_string_array'.
@@ -1355,9 +1407,9 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     CREATE OBJECT unmarked_block_types.
     unmarked_block_types->append( 'Code' ).
 
-    "#
-    "# Inline Elements
-    "#
+    "
+    " Inline Elements
+    "
     CREATE OBJECT inline_types
       EXPORTING
         value_type = 'lcl_string_array'.
@@ -1396,9 +1448,9 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     "<<< apm
     lo_sa ?= inline_types->new( '\' ).
     lo_sa->append( 'EscapeSequence' ).
-    "#
-    "# Read-Only
-    "#
+    "
+    " Read-Only
+    "
     CREATE OBJECT special_characters.
 
     lo_sa = special_characters.
@@ -1896,7 +1948,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
 
   METHOD inline_link.
-    CONSTANTS c_regex_template TYPE string VALUE '\[((?:[^\]\[]|(?R))*)\]'.
+    CONSTANTS lc_regex_template TYPE string VALUE '\[((?:[^\]\[]|(?R))*)\]'.
 
     DATA:
       lv_len        TYPE i,
@@ -1918,9 +1970,9 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     lv_remainder = excerpt-text.
 
-    lv_regex = |({ c_regex_template })|.
+    lv_regex = |({ lc_regex_template })|.
     DO 5 TIMES. "// regex recursion
-      REPLACE '(?R)' IN lv_regex WITH c_regex_template.
+      REPLACE '(?R)' IN lv_regex WITH lc_regex_template.
     ENDDO.
     REPLACE '(?R)' IN lv_regex WITH '$'.
 
@@ -2009,9 +2061,8 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     IF sy-subrc <> 0.
       FIND REGEX '(^<!---?[^>-](?:-?[^-])*-->)' IN excerpt-text SUBMATCHES lv_m0.
       IF sy-subrc <> 0.
-        lv_regex
-         = '(^<\w*(?:[ ]*' && regex_html_attribute && ')*[ ]*\/?>)'.
-        FIND REGEX lv_regex IN excerpt-text SUBMATCHES lv_m0.
+        lv_regex = '(^<\w*(?:[ ]*' && regex_html_attribute && ')*[ ]*\/?>)'.
+        FIND REGEX lv_regex IN excerpt-text SUBMATCHES lv_m0 ##SUBRC_OK.
       ENDIF.
     ENDIF.
 
@@ -2132,7 +2183,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     READ TABLE lines TRANSPORTING NO FIELDS WITH KEY table_line = ''.
     IF sy-subrc <> 0 AND strlen( lv_trimmed_markup ) >= 3 AND lv_trimmed_markup(3) = '<p>'.
       markup = lv_trimmed_markup+3.
-      FIND '</p>' IN markup MATCH OFFSET lv_fdpos.
+      FIND '</p>' IN markup MATCH OFFSET lv_fdpos ##SUBRC_OK.
       lv_pos_to = lv_fdpos + 4.
       CONCATENATE markup(lv_fdpos) markup+lv_pos_to INTO markup.
     ENDIF.
@@ -2164,8 +2215,8 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     FIELD-SYMBOLS <inline_type> LIKE LINE OF lo_inline_types_sa->data.
 
-    "# lv_text contains the unexamined text
-    "# ls_excerpt-text is based on the first occurrence of a marker
+    " lv_text contains the unexamined text
+    " ls_excerpt-text is based on the first occurrence of a marker
     lv_text = element-text.
 
     WHILE lv_text IS NOT INITIAL.
@@ -2175,7 +2226,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       ls_excerpt-text = lv_text+sy-fdpos.
       lv_marker = ls_excerpt-text(1).
 
-      FIND lv_marker IN lv_text MATCH OFFSET lv_marker_position.
+      FIND lv_marker IN lv_text MATCH OFFSET lv_marker_position ##SUBRC_OK.
 
       ls_excerpt-context = lv_text.
 
@@ -2190,29 +2241,29 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
           RECEIVING
             r_inline = ls_inline.
 
-        "# makes sure that the inline belongs to "our" marker
+        " makes sure that the inline belongs to "our" marker
         CHECK ls_inline IS NOT INITIAL.
         CHECK ls_inline-position <= lv_marker_position.
 
-        "# sets a default inline position
+        " sets a default inline position
         IF ls_inline-position IS INITIAL.
           ls_inline-position = lv_marker_position.
         ELSE.
           ls_inline-position = ls_inline-position - 1.
         ENDIF.
 
-        "# the text that comes before the inline
+        " the text that comes before the inline
         IF ls_inline-position <= strlen( lv_text ).
           lv_unmarked_text = lv_text(ls_inline-position).
         ELSE.
           lv_unmarked_text = lv_text.
         ENDIF.
 
-        "# compile the unmarked text
+        " compile the unmarked text
         lv_markup_part = unmarked_text( lv_unmarked_text ).
         CONCATENATE markup lv_markup_part INTO markup.
 
-        "# compile the inline
+        " compile the inline
         IF ls_inline-markup IS NOT INITIAL.
           CONCATENATE markup ls_inline-markup INTO markup.
         ELSE.
@@ -2220,7 +2271,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
           CONCATENATE markup lv_markup_part INTO markup.
         ENDIF.
 
-        "# remove the examined text
+        " remove the examined text
         lv_pos = ls_inline-position + ls_inline-extent.
         IF lv_pos <= strlen( lv_text ).
           lv_text = lv_text+lv_pos.
@@ -2233,7 +2284,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       ENDLOOP. "inline_types->data
       CHECK lv_continue_loop IS INITIAL.
 
-      "# the marker does not belong to an inline
+      " the marker does not belong to an inline
       lv_marker_position = lv_marker_position + 1.
       IF lv_marker_position <= strlen( lv_text ).
         lv_unmarked_text = lv_text(lv_marker_position).
@@ -2437,13 +2488,13 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     ENDCASE.
 
     LOOP AT r_element-attributes ASSIGNING <attribute>.
-      "# filter out badly parsed attribute
+      " filter out badly parsed attribute
       FIND REGEX lc_good_attribute IN <attribute>-name.
       IF sy-subrc <> 0.
         DELETE TABLE r_element-attributes FROM <attribute>.
         CONTINUE.
       ENDIF.
-      "# dump onevent attribute
+      " dump onevent attribute
       IF string_at_start(
         haystack = <attribute>-name
         needle   = 'on' ) = abap_true.
@@ -2549,15 +2600,15 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       && |\{ background-color: #eee; border-left: 3px solid #303d36; border-radius: 6px;\n|
       && |  margin: 0 0 16px; padding: 1px 1em; \}\n|
       " GitHub Alerts
-      && |.markdown blockquote.border-blue\n|
+      && |.markdown blockquote.alert-note\n|
       && |\{ border-left: 3px solid #4493f8; \}\n|
-      && |.markdown blockquote.border-green\n|
+      && |.markdown blockquote.alert-tip\n|
       && |\{ border-left: 3px solid #3fb950; \}\n|
-      && |.markdown blockquote.border-purple\n|
+      && |.markdown blockquote.alert-important\n|
       && |\{ border-left: 3px solid #ab7df8; \}\n|
-      && |.markdown blockquote.border-yellow\n|
+      && |.markdown blockquote.alert-warning\n|
       && |\{ border-left: 3px solid #d29922; \}\n|
-      && |.markdown blockquote.border-red\n|
+      && |.markdown blockquote.alert-caution\n|
       && |\{ border-left: 3px solid #f85149; \}\n|
       " Code blocks
       && |.markdown pre\n|
@@ -2573,7 +2624,23 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       && |  border-width: 0; box-sizing: border-box; display: inline; margin: 0;\n|
       && |  overflow: visible; word-break: normal; overflow-wrap: normal;\n|
       && |  padding: 0; white-space: pre;\n|
-      && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|.
+      && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|
+      && |kbd \{\n|
+      && |  border: 1px solid rgba(61, 68, 77, .7);\n|
+      && |  border-radius: 6px;\n|
+      && |  box-shadow: inset 0 -1px 0 var(--borderColor-neutral-muted, var(--color-neutral-muted));\n|
+      && |  display: inline-block;\n|
+      && |  font-family: Consolas, Courier, monospace;\n|
+      && |  font-kerning: auto;\n|
+      && |  font-optical-sizing: auto;\n|
+      && |  font-size: 11px;\n|
+      && |  font-size-adjust: none;\n|
+      && |  font-variant: normal;\n|
+      && |  font-variant-emoji: normal;\n|
+      && |  font-weight: 400;\n|
+      && |  line-height: 10px;\n|
+      && |  padding: 4px;\n|
+      && |  vertical-align: middle;\}\n|.
 
   ENDMETHOD.
 
@@ -2618,68 +2685,60 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     " Parses the markdown text and returns the markup
 
     DATA lt_lines TYPE TABLE OF string.
+    DATA ls_alert TYPE lcl_alerts=>ty_alert.
+    DATA lv_alert_html TYPE string.
 
-    "# make sure no definitions are set
+    " make sure no definitions are set
     CREATE OBJECT definition_data
       EXPORTING
         value_type = 'lcl_hashmap:lcl_hashmap'.
 
-    "# standardize line breaks
+    " standardize line breaks
     REPLACE ALL OCCURRENCES OF REGEX '\r?\n' IN text WITH %_newline.
 
-    "# remove surrounding line breaks
+    " remove surrounding line breaks
     text = trim(
       str  = text
       mask = '\n' ).
 
-    "# split text into lines
+    " split text into lines
     SPLIT text AT %_newline INTO TABLE lt_lines.
 
-    "# iterate through lines to identify blocks
+    " iterate through lines to identify blocks
     markup = _lines( lt_lines ).
 
-    "# trim line breaks
+    " trim line breaks
     markup = trim(
       str  = markup
       mask = '\n' ).
 
-    ">>> apm
+    " >>> apm
     DO 5 TIMES.
       CASE sy-index.
         WHEN 1.
-          DATA(sub)   = `[!NOTE]`.
-          DATA(color) = `#4493F8`.
-          DATA(icon)  = lcl_icons=>note( ).
-          DATA(descr) = `Note`.
+          ls_alert = lcl_alerts=>get( '[!NOTE]' ).
         WHEN 2.
-          sub   = `[!TIP]`.
-          color = `#3FB950`.
-          icon  = lcl_icons=>tip( ).
-          descr = `Tip`.
+          ls_alert = lcl_alerts=>get( '[!TIP]' ).
         WHEN 3.
-          sub   = `[!IMPORTANT]`.
-          color = `#AB7DF8`.
-          icon  = lcl_icons=>important( ).
-          descr = `Important`.
+          ls_alert = lcl_alerts=>get( '[!IMPORTANT]' ).
         WHEN 4.
-          sub   = `[!WARNING]`.
-          color = `#D29922`.
-          icon  = lcl_icons=>warning( ).
-          descr = `Warning`.
+          ls_alert = lcl_alerts=>get( '[!WARNING]' ).
         WHEN 5.
-          sub   = `[!CAUTION]`.
-          color = `#F85149`.
-          icon  = lcl_icons=>caution( ).
-          descr = `Caution`.
+          ls_alert = lcl_alerts=>get( '[!CAUTION]' ).
       ENDCASE.
+
+      lv_alert_html = |<span style="color:{ ls_alert-color };display:flex;align-items:center;">|
+        && |{ ls_alert-icon }&nbsp;&nbsp;|
+        && |<strong>{ ls_alert-text }</strong></span></p><p>|.
 
       markup = replace(
         val  = markup
-        sub  = sub
-        with = |<p style="color:{ color };display:flex;align-items:center;">{ icon }&nbsp;&nbsp;<strong>{ descr }</strong></p>|
+        sub  = ls_alert-tag
+        with = lv_alert_html
         occ  = 0 ).
     ENDDO.
-    "<<< apm
+    " <<< apm
+
   ENDMETHOD.                    "text
 
 
@@ -2766,7 +2825,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     r_source = source.
 
-    FIND ALL OCCURRENCES OF REGEX 'href\s*=\s*"([^"]*)"' IN r_source RESULTS lt_matches.
+    FIND ALL OCCURRENCES OF REGEX 'href\s*=\s*"([^"]*)"' IN r_source RESULTS lt_matches ##SUBRC_OK.
 
     SORT lt_matches DESCENDING BY line DESCENDING offset.
 
@@ -2781,7 +2840,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     CLEAR lt_matches.
 
-    FIND ALL OCCURRENCES OF REGEX 'src\s*=\s*"([^"]*)"' IN r_source RESULTS lt_matches.
+    FIND ALL OCCURRENCES OF REGEX 'src\s*=\s*"([^"]*)"' IN r_source RESULTS lt_matches ##SUBRC_OK.
 
     SORT lt_matches DESCENDING BY line DESCENDING offset.
 
@@ -2858,7 +2917,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
       ENDIF.
 
       CLEAR lv_spaces.
-      FIND REGEX '^(\s+)' IN lv_line SUBMATCHES lv_spaces.
+      FIND REGEX '^(\s+)' IN lv_line SUBMATCHES lv_spaces ##SUBRC_OK.
       lv_indent = strlen( lv_spaces ).
       IF lv_indent > 0.
         lv_text = lv_line+lv_indent.
@@ -2866,14 +2925,14 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         lv_text = lv_line.
       ENDIF.
 
-      "# ~
+      " ~
 
       CLEAR ls_line.
       ls_line-body = lv_line.
       ls_line-indent = lv_indent.
       ls_line-text = lv_text.
 
-      "# ~
+      " ~
 
       IF ls_current_block-continuable IS NOT INITIAL.
         CLEAR ls_block.
@@ -2903,11 +2962,11 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         CLEAR ls_current_block-continuable.
       ENDIF. "ls_current_block-continuable is not initial.
 
-      "# ~
+      " ~
 
       lv_marker = lv_text(1).
 
-      "# ~
+      " ~
 
       CREATE OBJECT lo_block_types.
       lo_block_types->copy( unmarked_block_types ).
@@ -2919,8 +2978,8 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         lo_block_types->append_array( lo_sa ).
       ENDIF.
 
-      "#
-      "# ~
+      "
+      " ~
 
       LOOP AT lo_block_types->data ASSIGNING <block_type_name>.
         CLEAR ls_block.
@@ -2959,7 +3018,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-      "# ~
+      " ~
 
       IF ls_current_block IS NOT INITIAL AND
          ls_current_block-type IS INITIAL AND
@@ -2976,7 +3035,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
 
     ENDLOOP. "lines
 
-    "# ~
+    " ~
 
     IF ls_current_block-continuable IS NOT INITIAL.
       CONCATENATE 'block_' ls_current_block-type '_complete' INTO lv_method_name.
@@ -2994,7 +3053,7 @@ CLASS zcl_abappm_markdown IMPLEMENTATION.
     APPEND ls_current_block TO lt_blocks.
     DELETE lt_blocks INDEX 1.
 
-    "# ~
+    " ~
 
     LOOP AT lt_blocks ASSIGNING <block>.
       CHECK <block>-hidden IS INITIAL.

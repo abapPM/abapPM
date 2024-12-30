@@ -92,24 +92,42 @@ CLASS lcl_hashmap DEFINITION FINAL.
           subsequent_hashmap_value_type TYPE string.
 ENDCLASS.
 
-
 "!
-"! GitHub Icons
+"! GitHub Alerts
 "!
-CLASS lcl_icons DEFINITION FINAL.
+CLASS lcl_alerts DEFINITION FINAL.
   PUBLIC SECTION.
+    TYPES:
+      BEGIN OF ty_alert,
+        tag   TYPE string,
+        class TYPE string,
+        color TYPE string,
+        icon  TYPE string,
+        text  TYPE string,
+      END OF ty_alert.
+
+    CLASS-METHODS get
+      IMPORTING
+        line          TYPE string
+      RETURNING
+        VALUE(result) TYPE ty_alert.
+
     CLASS-METHODS note
       RETURNING
         VALUE(result) TYPE string.
+
     CLASS-METHODS tip
       RETURNING
         VALUE(result) TYPE string.
+
     CLASS-METHODS important
       RETURNING
         VALUE(result) TYPE string.
+
     CLASS-METHODS warning
       RETURNING
         VALUE(result) TYPE string.
+
     CLASS-METHODS caution
       RETURNING
         VALUE(result) TYPE string.

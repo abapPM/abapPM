@@ -143,7 +143,41 @@ ENDCLASS.
 
 
 *!
-CLASS lcl_icons IMPLEMENTATION.
+CLASS lcl_alerts IMPLEMENTATION.
+  METHOD get.
+    IF line CS '[!NOTE]'.
+      result-tag   = '[!NOTE!]'.
+      result-class = 'alert-note'.
+      result-color = '#4493F8'.
+      result-icon  = note( ).
+      result-text  = 'Note'.
+    ELSEIF line CS '[!TIP]'.
+      result-tag   = '[!TIP!]'.
+      result-class = 'alert-tip'.
+      result-color = '#3FB950'.
+      result-icon  = tip( ).
+      result-text  = 'Tip'.
+    ELSEIF line CS '[!IMPORTANT]'.
+      result-tag   = '[!IMPORTANT!]'.
+      result-class = 'alert-important'.
+      result-color = '#AB7DF8'.
+      result-icon  = important( ).
+      result-text  = 'Important'.
+    ELSEIF line CS '[!WARNING]'.
+      result-tag   = '[!WARNING!]'.
+      result-class = 'alert-warning'.
+      result-color = '#D29922'.
+      result-icon  = warning( ).
+      result-text  = 'Warning'.
+    ELSEIF line CS '[!CAUTION]'.
+      result-tag   = '[!CAUTION!]'.
+      result-class = 'alert-caution'.
+      result-color = '#F85149'.
+      result-icon  = caution( ).
+      result-text  = 'Caution'.
+    ENDIF.
+  ENDMETHOD.
+
   METHOD note.
     result = '<svg class="info" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">'
       && '<path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75'
@@ -151,6 +185,7 @@ CLASS lcl_icons IMPLEMENTATION.
       && ' 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" stroke="#4493F8">'
       && '</path></svg>'.
   ENDMETHOD.
+
   METHOD tip.
     result = '<svg class="light-bulb" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">'
       && '<path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.'
@@ -162,6 +197,7 @@ CLASS lcl_icons IMPLEMENTATION.
       && '5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z" stroke="#3FB950">'
       && '</path></svg>'.
   ENDMETHOD.
+
   METHOD important.
     result = '<svg class="report" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">'
       && '<path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2'
@@ -171,6 +207,7 @@ CLASS lcl_icons IMPLEMENTATION.
       && ' 0 1 2 0Z" stroke="#AB7DF8">'
       && '</path></svg>'.
   ENDMETHOD.
+
   METHOD warning.
     result = '<svg class="alert" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">'
       && '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75'
@@ -179,6 +216,7 @@ CLASS lcl_icons IMPLEMENTATION.
       && ' 2 0Z" stroke="#D29922">'
       && '</path></svg>'.
   ENDMETHOD.
+
   METHOD caution.
     result = '<svg class="stop" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">'
       && '<path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749'

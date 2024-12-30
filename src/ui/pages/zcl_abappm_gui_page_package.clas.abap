@@ -521,9 +521,9 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     html->add( '<tr>' ).
     html->add( '<th width="30%">Range</th>' ).
     html->add( '<th width="10%">Type</th>' ).
-    html->add( '<th width="30%">Package</th>' ).
-    html->add( '<th width="15%">Version</th>' ).
-    html->add( '<th width="15%">Status</th>' ).
+    html->add( '<th width="40%">Package</th>' ).
+    html->add( '<th width="10%">Version</th>' ).
+    html->add( '<th width="10%">Status</th>' ).
     html->add( '</tr>' ).
 
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
@@ -531,15 +531,22 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
       html->td( get_package_boxed(
         name  = <dependency>-name
         value = <dependency>-range ) ).
+
+      CLEAR installed_package.
       IF line_exists( bundle_dependencies[ table_line = <dependency>-name ] ).
-        CLEAR installed_package.
-        " TODO: which package and version?
+        IF line_exists( list[ name = <dependency>-name parent = package bundle = abap_true ] ) ##PRIMKEY[NAME].
+          installed_package = list[ name = <dependency>-name parent = package bundle = abap_true ] ##PRIMKEY[NAME].
+        ENDIF.
         html->td( 'Bundled' ).
-        html->td( '' ).
-        html->td( '' ).
       ELSEIF line_exists( list[ KEY name COMPONENTS name = <dependency>-name ] ).
         installed_package = list[ KEY name COMPONENTS name = <dependency>-name ].
         html->td( 'Global' ).
+      ENDIF.
+
+      IF installed_package IS INITIAL.
+        html->td( '' ).
+        html->td( '' ).
+      ELSE.
         html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name( installed_package-package ) ).
         html->td( installed_package-version ).
       ENDIF.

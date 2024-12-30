@@ -6,6 +6,7 @@ IMPORT '*' TO 'ajson/z$1_abappm$2'                   FROM 'ajson'.
 IMPORT '*' TO 'error/z$1_abappm$2'                   FROM 'error'.
 IMPORT '*' TO 'highlighter/z$1_abappm$2'             FROM 'syntax-highlighter'.
 IMPORT '*' TO 'http/z$1_abappm$2'                    FROM 'http'.
+IMPORT '*' TO 'markdown/z$1_abappm$2'                FROM 'markdown'.
 IMPORT '*' TO 'package-json/z$1_abappm$2'            FROM 'apm-package-json'.
 IMPORT '*' TO 'pacote/z$1_abappm$2'                  FROM 'apm-pacote'.
 IMPORT '*' TO 'persist/z$1_abappm$2'                 FROM 'apm-persist'.

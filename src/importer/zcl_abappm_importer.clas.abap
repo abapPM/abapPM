@@ -343,9 +343,9 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       is_production = is_production ).
 
     " 7. Save packages to apm
-*    save_packages(
-*      packages     = packages
-*      dependencies = dependencies ).
+    save_packages(
+      packages     = packages
+      dependencies = dependencies ).
 
   ENDMETHOD.
 
@@ -356,8 +356,8 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
 
-      " FIXME: This dumps if ZCX_ABAPPM_ERROR or Zxx_ABAPPM_AJSON have been updated
-      DATA(package_json_service) = zcl_abappm_package_json=>factory( <package>-target_package ).
+      " FIXME
+      DATA(package_json_service) = zcl_package_json=>factory( <package>-target_package ).
 
       IF package_json_service->exists( ).
         DATA(package_json) = package_json_service->load( )->get( ).
@@ -376,9 +376,10 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     ENDLOOP.
 
     " Remove dependencies
-    LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = zif_abappm_importer=>c_action-remove .
+    LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = zif_abappm_importer=>c_action-remove.
 
-      package_json_service = zcl_abappm_package_json=>factory( <dependency>-package ).
+      " FIXME
+      package_json_service = zcl_package_json=>factory( <dependency>-package ).
 
       IF package_json_service->exists( ).
         package_json_service->delete( ).
