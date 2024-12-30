@@ -34,7 +34,13 @@ CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CLASS-METHODS get_object_name_from_token
+    CLASS-METHODS get_class_name_from_token
+      IMPORTING
+        !token        TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS get_interface_name_from_token
       IMPORTING
         !token        TYPE string
       RETURNING
@@ -53,27 +59,25 @@ ENDCLASS.
 CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
 
-  METHOD get_object_name_from_abapdoc.
+  METHOD get_class_name_from_token.
 
     result = token.
 
-    " Example:
-    " "! @raising zcx_test_error | Exception
-    FIND REGEX '"! @raising (.*) \|' IN token SUBMATCHES result.
-    IF sy-subrc = 0.
-      result = to_upper( result ).
+    IF result IS NOT INITIAL AND result(1) = '('.
+      SPLIT result+1 AT ')' INTO result DATA(rest).
+      IF result IS NOT INITIAL AND result(1) = ''''.
+        " ('zcl_test')=>method
+        SPLIT result+1 AT '''' INTO result rest.
+      ELSE.
+        " (var)=>method
+        result = ''.
+      ENDIF.
+      RETURN.
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD get_object_name_from_token.
-
-    result = token.
 
     IF result CS '~'.
       " zif_test~method
-      SPLIT result AT '~' INTO result DATA(rest).
+      SPLIT result AT '~' INTO result rest.
     ENDIF.
     IF result CS '('.
       " zcl_test( )
@@ -85,7 +89,58 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       SPLIT result AT '=' INTO result rest.
     ELSEIF result CS '->'.
       " zcl_test->method
+      SPLIT result AT '->' INTO result rest.
+    ENDIF.
+
+    " @zcl_test=>constant
+    IF result(1) = '@'.
+      result = result+1.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_interface_name_from_token.
+
+    result = token.
+
+    IF result CS '=>'.
+      " zcl_test=>zif_test~method
+      SPLIT result AT '>' INTO DATA(rest) result.
+    ELSEIF result CS '->'.
+      " zcl_test->zif_test~method
       SPLIT result AT '>' INTO rest result.
+    ENDIF.
+
+    IF result IS NOT INITIAL AND result(1) = '('.
+      SPLIT result+1 AT ')' INTO result rest.
+      IF result IS NOT INITIAL AND result(1) = ''''.
+        " zcl_test->('zif_test~method')
+        SPLIT result+1 AT '''' INTO result rest.
+      ELSE.
+        " zcl_test->(var)
+        result = ''.
+        RETURN.
+      ENDIF.
+    ENDIF.
+
+    IF result CS '~'.
+      " zif_test~method
+      SPLIT result AT '~' INTO result rest.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_object_name_from_abapdoc.
+
+    result = token.
+
+    " Example:
+    " "! @raising zcx_test_error | Exception
+    FIND REGEX '"! @raising (.*) \|' IN token SUBMATCHES result.
+    IF sy-subrc = 0.
+      result = to_upper( result ).
     ENDIF.
 
   ENDMETHOD.
@@ -130,7 +185,17 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       ELSE.
         " Other statements
         READ TABLE map ASSIGNING <map>
-          WITH TABLE KEY old_object = get_object_name_from_token( <token>-str ).
+          WITH TABLE KEY old_object = get_class_name_from_token( <token>-str ).
+        IF sy-subrc = 0.
+          <token>-str = replace(
+            val  = <token>-str
+            sub  = <map>-old_object
+            with = <map>-new_object
+            case = abap_false ).
+          INSERT <token> INTO TABLE tokens_checked.
+        ENDIF.
+        READ TABLE map ASSIGNING <map>
+          WITH TABLE KEY old_object = get_interface_name_from_token( <token>-str ).
         IF sy-subrc = 0.
           <token>-str = replace(
             val  = <token>-str

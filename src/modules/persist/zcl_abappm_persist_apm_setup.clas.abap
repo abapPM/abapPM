@@ -238,8 +238,8 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD lock_exists.
 
     SELECT SINGLE viewname FROM dd25l INTO @DATA(viewname)
-      WHERE viewname = @zif_persist_apm=>c_lock.
-    result = boolc( sy-subrc = 0 ).
+      WHERE viewname = @zif_abappm_persist_apm=>c_lock.
+    result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.
 
@@ -305,8 +305,8 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD logo_exists.
 
     SELECT SINGLE objectname FROM objh INTO @DATA(logo)
-      WHERE objectname = @zif_persist_apm=>c_zapm AND objecttype = 'L'.
-    result = boolc( sy-subrc = 0 ).
+      WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.
 
@@ -473,8 +473,8 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD table_exists.
 
     SELECT SINGLE tabname FROM dd02l INTO @DATA(tabname)
-      WHERE tabname = @zif_persist_apm=>c_tabname.
-    result = boolc( sy-subrc = 0 ).
+      WHERE tabname = @zif_abappm_persist_apm=>c_tabname.
+    result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.
 
