@@ -215,9 +215,22 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       READ TABLE code ASSIGNING FIELD-SYMBOL(<source>) INDEX <token>-row.
       ASSERT sy-subrc = 0.
 
-      <source> =
-        substring( val = <source> len = <token>-col ) && <token>-str &&
-        substring( val = <source> off = <token>-col + <token>-len1 ).
+      IF <token>-len1 > 0.
+        <source> =
+          substring( val = <source> len = <token>-col ) && <token>-str &&
+          substring( val = <source> off = <token>-col + <token>-len1 ).
+      ELSEIF <token>-len2 > 0.
+        " Don't have a test case so not sure if this is correct
+        <source> =
+          substring( val = <source> len = <token>-col ) && <token>-str &&
+          substring( val = <source> off = <token>-col + <token>-len2 ).
+      ELSEIF <token>-len3 > 0.
+        " Example:
+        " INSERT (zif_test=>c_tabname) FROM test.
+        <source> =
+          substring( val = <source> len = <token>-col ) && <token>-str &&
+          substring( val = <source> off = <token>-col + <token>-len3 + 2 ).
+      ENDIF.
 
       IF strlen( <source> ) > 255.
         zcx_abappm_error=>raise( |Line length overflow in { program_name }, Line { <token>-row }| ).

@@ -54,17 +54,18 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
         result-key_type    = 'Package'.
         result-description = lcl_persist_utils=>get_package_description( name ).
 
-        IF extra = zif_abappm_persist_apm=>c_key_extra-package_json.
-          result-extra        = 'Package JSON'.
-          result-content_type = zif_abappm_persist_apm=>c_content_type-json.
-        ELSEIF extra = zif_abappm_persist_apm=>c_key_extra-package_readme.
-          result-extra        = 'Readme'.
-          result-content_type = zif_abappm_persist_apm=>c_content_type-markdown.
-        ELSE.
-          " Should not happen. Open issue
-          result-extra        = 'Unknown key extra'.
-          result-content_type = zif_abappm_persist_apm=>c_content_type-text.
-        ENDIF.
+        CASE extra.
+          WHEN zif_abappm_persist_apm=>c_key_extra-package_json.
+            result-extra        = 'Package JSON'.
+            result-content_type = zif_abappm_persist_apm=>c_content_type-json.
+          WHEN zif_abappm_persist_apm=>c_key_extra-package_readme.
+            result-extra        = 'Readme'.
+            result-content_type = zif_abappm_persist_apm=>c_content_type-markdown.
+          WHEN OTHERS.
+            " Should not happen. Open issue
+            result-extra        = 'Unknown key extra'.
+            result-content_type = zif_abappm_persist_apm=>c_content_type-text.
+        ENDCASE.
 
       WHEN zif_abappm_persist_apm=>c_key_type-settings.
         IF name = zif_abappm_persist_apm=>c_key_name-global_settings.
@@ -88,7 +89,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
   METHOD get_instance.
 
     IF db_instance IS INITIAL.
-      CREATE OBJECT db_instance TYPE zcl_abappm_persist_apm.
+      db_instance = NEW zcl_abappm_persist_apm( ).
     ENDIF.
 
     result = db_instance.
@@ -107,7 +108,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     SPLIT key AT ':' INTO DATA(key_type) DATA(rest).
 
-    result = boolc( sy-subrc = 0 AND
+    result = xsdbool( sy-subrc = 0 AND
       ( key_type = zif_abappm_persist_apm=>c_key_type-package OR
         key_type = zif_abappm_persist_apm=>c_key_type-settings ) ).
 
@@ -116,7 +117,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~delete.
 
-    DELETE FROM (zif_abappm_persist_apm=>c_tabname) WHERE keys = key.
+    DELETE FROM (zif_abappm_persist_apm=>c_tabname) WHERE keys = @key.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Error deleting { key }| ).
     ENDIF.
@@ -126,26 +127,24 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~list.
 
-    DATA:
-      db_entries TYPE STANDARD TABLE OF zif_abappm_persist_apm=>ty_zabappm WITH DEFAULT KEY,
-      db_entry   LIKE LINE OF result.
+    DATA db_entries TYPE STANDARD TABLE OF zif_abappm_persist_apm=>ty_zabappm WITH KEY keys.
 
     IF filter IS INITIAL.
-      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE db_entries
-        WHERE timestamp BETWEEN from AND to
+      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE @db_entries
+        WHERE timestamp BETWEEN @from AND @to
         ORDER BY PRIMARY KEY.
     ELSE.
-      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE db_entries
-        WHERE timestamp BETWEEN from AND to AND keys LIKE filter
+      SELECT * FROM (zif_abappm_persist_apm=>c_tabname) INTO TABLE @db_entries
+        WHERE timestamp BETWEEN @from AND @to AND keys LIKE @filter
         ORDER BY PRIMARY KEY.
     ENDIF.
 
     LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
-      CLEAR db_entry.
-      db_entry-keys      = <data>-keys.
-      db_entry-value     = <data>-value.
-      db_entry-user      = <data>-luser.
-      db_entry-timestamp = <data>-timestamp.
+      DATA(db_entry) = VALUE zif_abappm_persist_apm=>ty_list_item(
+        keys      = <data>-keys
+        value     = <data>-value
+        user      = <data>-luser
+        timestamp = <data>-timestamp ).
       SPLIT <data>-keys AT ':' INTO db_entry-key_type db_entry-key_name db_entry-key_extra.
       INSERT db_entry INTO TABLE result.
     ENDLOOP.
@@ -155,7 +154,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
   METHOD zif_abappm_persist_apm~load.
 
-    SELECT SINGLE * FROM (zif_abappm_persist_apm=>c_tabname) INTO result WHERE keys = key.
+    SELECT SINGLE * FROM (zif_abappm_persist_apm=>c_tabname) INTO @result WHERE keys = @key.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Error loading { key }| ).
     ENDIF.
@@ -202,9 +201,9 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     GET TIME STAMP FIELD db_entry-timestamp.
 
-    UPDATE (zif_abappm_persist_apm=>c_tabname) FROM db_entry.
+    UPDATE (zif_abappm_persist_apm=>c_tabname) FROM @db_entry.
     IF sy-subrc <> 0.
-      INSERT (zif_abappm_persist_apm=>c_tabname) FROM db_entry.
+      INSERT (zif_abappm_persist_apm=>c_tabname) FROM @db_entry.
       IF sy-subrc <> 0.
         zcx_abappm_error=>raise( |Error saving { key }| ).
       ENDIF.

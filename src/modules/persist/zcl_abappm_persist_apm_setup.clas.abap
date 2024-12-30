@@ -152,16 +152,15 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD lock_create.
 
     DATA:
-      obj_name TYPE tadir-obj_name,
-      dd25v    TYPE dd25v,
-      dd26e    TYPE STANDARD TABLE OF dd26e WITH DEFAULT KEY,
-      dd27p    TYPE STANDARD TABLE OF dd27p WITH DEFAULT KEY.
+      dd26e TYPE STANDARD TABLE OF dd26e WITH KEY ddlanguage viewname tabname tabpos,
+      dd27p TYPE STANDARD TABLE OF dd27p WITH KEY viewname objpos ddlanguage viewfield tabname fieldname.
 
-    dd25v-viewname   = zif_abappm_persist_apm=>c_lock.
-    dd25v-aggtype    = 'E'.
-    dd25v-roottab    = zif_abappm_persist_apm=>c_tabname.
-    dd25v-ddlanguage = zif_abappm_persist_apm=>c_english.
-    dd25v-ddtext     = 'apm - Persistence'.
+    DATA(dd25v) = VALUE dd25v(
+      viewname   = zif_abappm_persist_apm=>c_lock
+      aggtype    = 'E'
+      roottab    = zif_abappm_persist_apm=>c_tabname
+      ddlanguage = zif_abappm_persist_apm=>c_english
+      ddtext     = 'apm - Persistence' ).
 
     APPEND INITIAL LINE TO dd26e ASSIGNING FIELD-SYMBOL(<dd26e>).
     <dd26e>-viewname   = zif_abappm_persist_apm=>c_lock.
@@ -196,7 +195,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
-    obj_name = zif_abappm_persist_apm=>c_lock.
+    DATA(obj_name) = CONV sobj_name( zif_abappm_persist_apm=>c_lock ).
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -246,58 +245,56 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_create.
 
-    DATA:
-      objh  TYPE objh,
-      objt  TYPE objt,
-      objs  TYPE objs,
-      objsl TYPE objsl.
+    DATA(objh) = VALUE objh(
+      objectname = zif_abappm_persist_apm=>c_zapm
+      objecttype = 'L'
+      objcateg   = 'APPL'
+      checkid    = 'L'
+      objnamelen = '30'
+      objtransp  = '2'
+      luser      = sy-uname
+      ldate      = sy-datum
+      objcharset = '1' ).
 
-    objh-objectname = zif_abappm_persist_apm=>c_zapm.
-    objh-objecttype = 'L'.
-    objh-objcateg   = 'APPL'.
-    objh-checkid    = 'L'.
-    objh-objnamelen = '30'.
-    objh-objtransp  = '2'.
-    objh-luser      = sy-uname.
-    objh-ldate      = sy-datum.
-    objh-objcharset = '1'.
+    DATA(objt) = VALUE objt(
+      language   = zif_abappm_persist_apm=>c_english
+      objectname = zif_abappm_persist_apm=>c_zapm
+      objecttype = 'L'
+      ddtext     = 'apm').
 
-    objt-language   = zif_abappm_persist_apm=>c_english.
-    objt-objectname = zif_abappm_persist_apm=>c_zapm.
-    objt-objecttype = 'L'.
-    objt-ddtext     = 'apm'.
+    DATA(objs) = VALUE objs(
+      objectname = zif_abappm_persist_apm=>c_zapm
+      objecttype = 'L'
+      tabname    = zif_abappm_persist_apm=>c_tabname
+      ddic       = abap_true
+      prim_table = abap_true ).
 
-    objs-objectname = zif_abappm_persist_apm=>c_zapm.
-    objs-objecttype = 'L'.
-    objs-tabname    = zif_abappm_persist_apm=>c_tabname.
-    objs-ddic       = abap_true.
-    objs-prim_table = abap_true.
+    DATA(objsl) = VALUE objsl(
+      objectname = zif_abappm_persist_apm=>c_zapm
+      objecttype = 'L'
+      trwcount   = '01'
+      tpgmid     = 'R3TR'
+      tobject    = 'TABU'
+      tobj_name  = zif_abappm_persist_apm=>c_tabname
+      tobjkey    = '/&/*'
+      masknlen   = 7
+      maskklen   = 2
+      prim_table = abap_true ).
 
-    objsl-objectname = zif_abappm_persist_apm=>c_zapm.
-    objsl-objecttype = 'L'.
-    objsl-trwcount   = '01'.
-    objsl-tpgmid     = 'R3TR'.
-    objsl-tobject    = 'TABU'.
-    objsl-tobj_name  = zif_abappm_persist_apm=>c_tabname.
-    objsl-tobjkey    = '/&/*'.
-    objsl-masknlen   = 7.
-    objsl-maskklen   = 2.
-    objsl-prim_table = abap_true.
-
-    INSERT objh FROM objh.
-    INSERT objt FROM objt.
-    INSERT objs FROM objs.
-    INSERT objsl FROM objsl.
+    INSERT objh FROM objh ##SUBRC_OK.
+    INSERT objt FROM objt ##SUBRC_OK.
+    INSERT objs FROM objs ##SUBRC_OK.
+    INSERT objsl FROM objsl ##SUBRC_OK.
 
   ENDMETHOD.
 
 
   METHOD logo_delete.
 
-    DELETE FROM objh WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objt WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objs WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
-    DELETE FROM objsl WHERE objectname = zif_abappm_persist_apm=>c_zapm AND objecttype = 'L'.
+    DELETE FROM objh WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
+    DELETE FROM objt WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
+    DELETE FROM objs WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
+    DELETE FROM objsl WHERE objectname = @zif_abappm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -314,25 +311,24 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
   METHOD table_create.
 
     DATA:
-      subrc    LIKE sy-subrc,
-      obj_name TYPE tadir-obj_name,
-      dd02v    TYPE dd02v,
-      dd09l    TYPE dd09l,
-      dd03p    TYPE STANDARD TABLE OF dd03p WITH DEFAULT KEY.
+      subrc LIKE sy-subrc,
+      dd03p TYPE STANDARD TABLE OF dd03p WITH DEFAULT KEY.
 
-    dd02v-tabname    = zif_abappm_persist_apm=>c_tabname.
-    dd02v-ddlanguage = zif_abappm_persist_apm=>c_english.
-    dd02v-tabclass   = 'TRANSP'.
-    dd02v-ddtext     = 'apm - Persistence'.
-    dd02v-contflag   = 'A'.
-    dd02v-exclass    = '1'.
+    DATA(dd02v) = VALUE dd02v(
+      tabname    = zif_abappm_persist_apm=>c_tabname
+      ddlanguage = zif_abappm_persist_apm=>c_english
+      tabclass   = 'TRANSP'
+      ddtext     = 'apm - Persistence'
+      contflag   = 'A'
+      exclass    = '1' ).
 
-    dd09l-tabname   = zif_abappm_persist_apm=>c_tabname.
-    dd09l-as4local  = 'A'.
-    dd09l-tabkat    = '1'.
-    dd09l-tabart    = 'APPL0'.
-    dd09l-bufallow  = 'X'.
-    dd09l-pufferung = 'P'.
+    DATA(dd09l) = VALUE dd09l(
+      tabname   = zif_abappm_persist_apm=>c_tabname
+      as4local  = 'A'
+      tabkat    = '1'
+      tabart    = 'APPL0'
+      bufallow  = 'X'
+      pufferung = 'P' ).
 
     APPEND INITIAL LINE TO dd03p ASSIGNING FIELD-SYMBOL(<dd03p>).
     <dd03p>-tabname    = zif_abappm_persist_apm=>c_tabname.
@@ -392,7 +388,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       zcx_abappm_error=>raise_t100( ).
     ENDIF.
 
-    obj_name = zif_abappm_persist_apm=>c_tabname.
+    DATA(obj_name) = CONV sobj_name( zif_abappm_persist_apm=>c_tabname ).
 
     CALL FUNCTION 'TR_TADIR_INTERFACE'
       EXPORTING
@@ -437,9 +433,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
 
     DATA(no_ask) = abap_true.
 
-    SELECT SINGLE tabname tabclass sqltab FROM dd02l
-      INTO CORRESPONDING FIELDS OF dd02l
-      WHERE tabname = zif_abappm_persist_apm=>c_tabname AND as4local = 'A' AND as4vers = '0000'.
+    SELECT SINGLE tabname, tabclass, sqltab FROM dd02l
+      INTO CORRESPONDING FIELDS OF @dd02l
+      WHERE tabname = @zif_abappm_persist_apm=>c_tabname AND as4local = 'A' AND as4vers = '0000'.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( |Table { zif_abappm_persist_apm=>c_tabname } not found| ).
     ENDIF.

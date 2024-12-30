@@ -25,8 +25,8 @@ ENDCLASS.
 CLASS lcl_persist_utils IMPLEMENTATION.
 
   METHOD get_package_description.
-    SELECT SINGLE ctext FROM tdevct INTO result
-      WHERE devclass = package AND spras = sy-langu ##SUBRC_OK.
+    SELECT SINGLE ctext FROM tdevct INTO @result
+      WHERE devclass = @package AND spras = @sy-langu ##SUBRC_OK.
   ENDMETHOD.
 
   METHOD get_user_description.

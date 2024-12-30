@@ -38,6 +38,10 @@ CLASS ltcl_code_importer IMPLEMENTATION.
       exp = 'ZCL_TEST' ).
 
     cl_abap_unit_assert=>assert_equals(
+      act = zcl_abappm_code_importer=>get_class_name_from_token( |@ZCL_TEST=>TY_TEST(| )
+      exp = 'ZCL_TEST' ).
+
+    cl_abap_unit_assert=>assert_equals(
       act = zcl_abappm_code_importer=>get_class_name_from_token( |('ZCL_TEST')=>METHOD| )
       exp = 'ZCL_TEST' ).
 

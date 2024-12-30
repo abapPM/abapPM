@@ -47,12 +47,14 @@ CLASS zcl_abappm_object_intf IMPLEMENTATION.
         interface_key-clsname      = new_object.
         interface_metadata-clsname = new_object.
 
-        zif_abapgit_oo_object_fnc~create(
-          EXPORTING
-            iv_check      = abap_false
-            iv_package    = new_package
-          CHANGING
-            cg_properties = interface_metadata ).
+        IF is_dryrun IS INITIAL.
+          zif_abapgit_oo_object_fnc~create(
+            EXPORTING
+              iv_check      = abap_false
+              iv_package    = new_package
+            CHANGING
+              cg_properties = interface_metadata ).
+        ENDIF.
 
         " TODO: Make files mandatory
         IF files IS NOT INITIAL.
