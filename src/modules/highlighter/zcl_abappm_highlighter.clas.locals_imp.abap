@@ -1,56 +1,61 @@
 CLASS lcl_out DEFINITION.
+
   PUBLIC SECTION.
+
     CLASS-METHODS convert
       IMPORTING
-        !iv_string        TYPE string
+        !string       TYPE string
       RETURNING
-        VALUE(rv_xstring) TYPE xstring
+        VALUE(result) TYPE xstring
       RAISING
         zcx_abapgit_exception.
+
   PRIVATE SECTION.
-    CLASS-DATA go_conv_new TYPE REF TO object.
-    CLASS-DATA go_conv_old TYPE REF TO object.
+
+    CLASS-DATA conv_new TYPE REF TO object.
+    CLASS-DATA conv_old TYPE REF TO object.
+
 ENDCLASS.
 
 CLASS lcl_out IMPLEMENTATION.
-  METHOD convert.
-    DATA lx_error TYPE REF TO cx_root.
-    DATA lv_class TYPE string.
 
-    IF go_conv_new IS INITIAL AND go_conv_old IS INITIAL.
+  METHOD convert.
+
+    IF conv_new IS INITIAL AND conv_old IS INITIAL.
       TRY.
           CALL METHOD ('CL_ABAP_CONV_CODEPAGE')=>create_out
             RECEIVING
-              instance = go_conv_new.
+              instance = conv_new.
         CATCH cx_sy_dyn_call_illegal_class.
-          lv_class = 'CL_ABAP_CONV_OUT_CE'.
-          CALL METHOD (lv_class)=>create
+          DATA(class) = 'CL_ABAP_CONV_OUT_CE'.
+          CALL METHOD (class)=>create
             EXPORTING
               encoding = 'UTF-8'
             RECEIVING
-              conv     = go_conv_old.
+              conv     = conv_old.
       ENDTRY.
     ENDIF.
 
     TRY.
-        IF go_conv_new IS NOT INITIAL.
-          CALL METHOD go_conv_new->('IF_ABAP_CONV_OUT~CONVERT')
+        IF conv_new IS NOT INITIAL.
+          CALL METHOD conv_new->('IF_ABAP_CONV_OUT~CONVERT')
             EXPORTING
-              source = iv_string
+              source = string
             RECEIVING
-              result = rv_xstring.
+              result = result.
         ELSE.
-          CALL METHOD go_conv_old->('CONVERT')
+          CALL METHOD conv_old->('CONVERT')
             EXPORTING
-              data   = iv_string
+              data   = string
             IMPORTING
-              buffer = rv_xstring.
+              buffer = result.
         ENDIF.
       CATCH cx_parameter_invalid_range
             cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
-            cx_parameter_invalid_type INTO lx_error.
-        zcx_abapgit_exception=>raise_with_text( lx_error ).
+            cx_parameter_invalid_type INTO DATA(error).
+        zcx_abapgit_exception=>raise_with_text( error ).
     ENDTRY.
   ENDMETHOD.
+
 ENDCLASS.
