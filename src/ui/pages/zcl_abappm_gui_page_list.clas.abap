@@ -332,12 +332,14 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
 
   METHOD create.
+
     DATA(component) = NEW zcl_abappm_gui_page_list( only_favorites ).
 
     result = zcl_abappm_gui_page_hoc=>create(
       page_title         = 'Package List'
       page_menu_provider = component
       child_component    = component ).
+
   ENDMETHOD.
 
 
@@ -389,16 +391,22 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
 
   METHOD load_package_list.
-    packages = zcl_abappm_package_json=>list( instanciate = abap_true ).
+
+    packages = zcl_abappm_package_json=>list(
+      instanciate = abap_true
+      is_bundle   = abap_false ).
+
   ENDMETHOD.
 
 
   METHOD load_settings.
+
     TRY.
         settings = zcl_abappm_settings=>factory( )->get( ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " Settings don't exist (yet)
     ENDTRY.
+
   ENDMETHOD.
 
 
@@ -430,6 +438,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
 
   METHOD render_action_toolbar.
+
     " FUTURE
     html->add( '' ).
 

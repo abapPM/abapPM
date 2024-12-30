@@ -2,7 +2,7 @@ CLASS ltcl_tests_semver_sap DEFINITION FOR TESTING RISK LEVEL HARMLESS
   DURATION SHORT FINAL.
 
   PRIVATE SECTION.
-    DATA tap TYPE REF TO zcl_abappm_tap.
+    DATA tap TYPE REF TO zcl_tap.
     DATA cut TYPE REF TO zcl_abappm_semver_sap.
 
     METHODS:

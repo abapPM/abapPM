@@ -14,6 +14,5 @@ IMPORT '*' TO 'semver/z$1_abappm$2'                  FROM 'semver'.
 IMPORT '*' TO 'semver-sap/z$1_abappm$2'              FROM 'semver-sap'.
 IMPORT '*' TO 'settings/z$1_abappm$2'                FROM 'apm-settings'.
 IMPORT 'z(..)_abap(.*)' TO 'string-map/z$1_abappm$2' FROM 'string-map'.
-IMPORT '*' TO 'tap/z$1_abappm$2'                     FROM 'tap'.
 IMPORT '*' TO 'tar/z$1_abappm$2'                     FROM 'tar'.
 IMPORT '*' TO 'types/z$1_abappm$2'                   FROM 'apm-types'.

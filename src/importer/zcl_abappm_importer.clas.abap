@@ -343,9 +343,9 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       is_production = is_production ).
 
     " 7. Save packages to apm
-    save_packages(
-      packages     = packages
-      dependencies = dependencies ).
+*    save_packages(
+*      packages     = packages
+*      dependencies = dependencies ).
 
   ENDMETHOD.
 

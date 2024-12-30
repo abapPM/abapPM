@@ -1,1 +1,0 @@
-CLASS lcl_snapshot DEFINITION DEFERRED.

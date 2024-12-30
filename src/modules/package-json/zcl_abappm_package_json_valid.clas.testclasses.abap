@@ -3,7 +3,7 @@ CLASS ltcl_package_json_valid DEFINITION FINAL FOR TESTING
   DURATION SHORT.
 
   PRIVATE SECTION.
-    DATA tap TYPE REF TO zcl_abappm_tap.
+    DATA tap TYPE REF TO zcl_tap.
 
     METHODS:
       setup,
