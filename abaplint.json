@@ -16,6 +16,9 @@
     "files": "/src/**/*.*",
     "noIssues": [
       "/src/modules/ajson/*.*",
+      "/src/modules/markdown/*.*",
+      "/src/modules/tap/*.*",
+      "/src/modules/tar/*.*",
       "/src/modules/semver/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
@@ -73,7 +76,22 @@
     "contains_tab": true,
     "cyclic_oo": true,
     "cyclomatic_complexity": true,
-    "dangerous_statement": true,
+    "dangerous_statement": {
+      "exclude": ["zcl_abappm_persist_apm.clas"],
+      "execSQL": true,
+      "kernelCall": true,
+      "systemCall": true,
+      "insertReport": true,
+      "generateDynpro": true,
+      "generateReport": true,
+      "generateSubroutine": true,
+      "deleteReport": true,
+      "deleteTextpool": true,
+      "insertTextpool": true,
+      "deleteDynpro": true,
+      "exportDynpro": true,
+      "dynamicSQL": true
+    },
     "db_operation_in_loop": false,
     "definitions_top": true,
     "description_empty": true,
@@ -130,7 +148,9 @@
       "ignoreGlobalInterface": false
     },
     "inline_data_old_versions": true,
-    "intf_referencing_clas": true,
+    "intf_referencing_clas": {
+      "allow": ["zcl_abappm_string_map"]
+    },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
     "keyword_case": true,
@@ -160,8 +180,8 @@
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
-      "ownTables": "^[ZABAPPM|CLMCUS]|SOTR_.*",
-      "reportDynamic": true
+      "ownTables": "^[ZABAPPM|CLMCUS]|SOTR_.*|OBJ*",
+      "reportDynamic": false
     },
     "msag_consistency": true,
     "names_no_dash": true,
@@ -250,7 +270,12 @@
     "remove_descriptions": true,
     "rfc_error_handling": true,
     "select_add_order_by": false,
-    "select_performance": true,
+    "select_performance": {
+      "exclude": ["zcl_abappm_persist_apm"],
+      "endSelect": true,
+      "selectStar": true,
+      "starOkayIfFewColumns": 10
+    },
     "select_single_full_key": true,
     "selection_screen_naming": true,
     "sequential_blank": true,
