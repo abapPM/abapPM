@@ -79,7 +79,7 @@ CLASS zcl_abappm_highlighter_abap IMPLEMENTATION.
 
   METHOD init_keywords.
 
-    DATA(keyword_data) =
+    DATA(list) =
      '&&|?TO|ABAP-SOURCE|ABBREVIATED|ABS|ABSTRACT|ACCEPT|ACCEPTING' &&
       '|ACCORDING|ACOS|ACTIVATION|ACTUAL|ADD|ADD-CORRESPONDING|ADJACENT|AFTER|ALIAS' &&
       '|ALIASES|ALIGN|ALL|ALLOCATE|ALPHA|ANALYSIS|ANALYZER|AND|ANY|APPEND|APPENDAGE' &&
@@ -192,7 +192,7 @@ CLASS zcl_abappm_highlighter_abap IMPLEMENTATION.
       '|TO_LOWER|TO_MIXED|TO_UPPER|UTCLONG_ADD|UTCLONG_CURRENT|UTCLONG_DIFF|XSDBOOL'.
 
 
-    SPLIT keyword_data AT '|' INTO TABLE DATA(keyword_list).
+    SPLIT list AT '|' INTO TABLE DATA(keyword_list).
 
     " remove duplicates to avoid dumps when converting to a hash table
     SORT keyword_list BY table_line ASCENDING.
@@ -205,30 +205,24 @@ CLASS zcl_abappm_highlighter_abap IMPLEMENTATION.
 
   METHOD is_keyword.
 
-    DATA str TYPE string.
-
-    str = to_upper( chunk ).
+    DATA(str) = to_upper( chunk ).
     READ TABLE keywords WITH KEY table_line = str TRANSPORTING NO FIELDS.
-    result = boolc( sy-subrc = 0 ).
+    result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.
 
 
   METHOD order_matches.
 
-    DATA:
-      index      TYPE sy-tabix,
-      line_len   TYPE i,
-      prev_token TYPE c.
-
     FIELD-SYMBOLS <prev_match> TYPE ty_match.
 
     SORT matches BY offset.
 
-    line_len = strlen( line ).
+    DATA(line_len)   = strlen( line ).
+    DATA(prev_token) = ''.
 
     LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
-      index = sy-tabix.
+      DATA(index) = sy-tabix.
 
       " Delete matches after open text match
       IF prev_token = c_token-text AND <match>-token <> c_token-text.

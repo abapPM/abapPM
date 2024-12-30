@@ -32,7 +32,7 @@ CLASS zcl_abappm_highlighter DEFINITION
         length   TYPE i,      " Length of the string that should be formatted
         text_tag TYPE string, " Type of text tag
       END OF ty_match,
-      ty_match_tt TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY,
+      ty_match_tt TYPE STANDARD TABLE OF ty_match WITH KEY token offset length,
       BEGIN OF ty_rule,
         regex             TYPE REF TO cl_abap_regex,
         token             TYPE c LENGTH 1,
@@ -42,7 +42,7 @@ CLASS zcl_abappm_highlighter DEFINITION
 
     CONSTANTS c_token_none TYPE c VALUE '.'.
 
-    DATA rules TYPE STANDARD TABLE OF ty_rule.
+    DATA rules TYPE STANDARD TABLE OF ty_rule WITH KEY regex token style.
     DATA hidden_chars TYPE abap_bool.
 
     METHODS add_rule
@@ -80,7 +80,7 @@ CLASS zcl_abappm_highlighter DEFINITION
     METHODS apply_style
       IMPORTING
         !line         TYPE string
-        !class        TYPE string
+        !class        TYPE string OPTIONAL
       RETURNING
         VALUE(result) TYPE string.
 
@@ -111,7 +111,7 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
       style         = style
       relevant_submatch = submatch ).
 
-    IF NOT regex IS INITIAL.
+    IF regex IS NOT INITIAL.
       rule-regex = NEW #(
         pattern     = regex
         ignore_case = abap_true ).
@@ -174,19 +174,20 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
 
   METHOD format_line.
 
-    DATA rule LIKE LINE OF rules.
-
     TRY.
         LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
           DATA(chunk) = substring( val = line
                                 off = <match>-offset
                                 len = <match>-length ).
 
-          CLEAR rule. " Failed read equals no style
-          READ TABLE rules INTO rule WITH KEY token = <match>-token.
-
-          chunk = apply_style( line  = chunk
-                               class = rule-style ).
+          " Failed read equals no style
+          READ TABLE rules INTO DATA(rule) WITH KEY token = <match>-token.
+          IF sy-subrc = 0.
+            chunk = apply_style( line  = chunk
+                                 class = rule-style ).
+          ELSE.
+            chunk = apply_style( chunk ).
+          ENDIF.
 
           result = result && chunk.
         ENDLOOP.
@@ -203,7 +204,7 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
     "/^\s+$/
     DATA(whitespace) = ` ` && cl_abap_char_utilities=>horizontal_tab && cl_abap_char_utilities=>cr_lf.
 
-    rv_result = boolc( string CO whitespace ).
+    rv_result = xsdbool( string CO whitespace ).
 
   ENDMETHOD.
 
@@ -275,7 +276,7 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
 
   METHOD show_hidden_chars.
 
-    DATA bom TYPE x LENGTH 3.
+    TYPES ty_bom TYPE x LENGTH 3.
 
     result = line.
 
@@ -288,7 +289,7 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
 
       IF strlen( result ) BETWEEN 1 AND 2.
         TRY.
-            bom = lcl_out=>convert( result ).
+            DATA(bom) = CONV ty_bom( lcl_out=>convert( result ) ).
           CATCH zcx_abapgit_exception ##NO_HANDLER.
         ENDTRY.
         IF bom(2) = cl_abap_char_utilities=>byte_order_mark_big.
