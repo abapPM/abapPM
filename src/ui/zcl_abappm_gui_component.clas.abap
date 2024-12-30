@@ -35,6 +35,7 @@ CLASS zcl_abappm_gui_component DEFINITION
     METHODS register_handlers
       RAISING
         zcx_abapgit_exception.
+
   PRIVATE SECTION.
 
     DATA gui_service TYPE REF TO zif_abapgit_gui_services.
@@ -50,6 +51,7 @@ CLASS zcl_abappm_gui_component DEFINITION
         hotkey_provider TYPE REF TO zif_abapgit_gui_hotkeys OPTIONAL
       RAISING
         zcx_abapgit_exception.
+
 ENDCLASS.
 
 
@@ -58,17 +60,21 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
 
   METHOD gui_services.
+
     IF gui_service IS NOT BOUND.
       gui_service = zcl_abappm_gui_factory=>get_gui_services( ). " apm
     ENDIF.
     result = gui_service.
+
   ENDMETHOD.
 
 
   METHOD register_deferred_script.
+
     gui_services( )->get_html_parts( )->add_part(
       iv_collection = c_html_parts-scripts
       ii_part       = part ).
+
   ENDMETHOD.
 
 
@@ -90,8 +96,10 @@ CLASS zcl_abappm_gui_component IMPLEMENTATION.
 
 
   METHOD register_handlers.
+
     register_event_handler( ).
     register_hotkeys( ).
+
   ENDMETHOD.
 
 

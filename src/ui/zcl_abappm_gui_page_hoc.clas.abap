@@ -36,7 +36,7 @@ CLASS zcl_abappm_gui_page_hoc DEFINITION
     METHODS constructor
       IMPORTING
         !child_component TYPE REF TO zif_abapgit_gui_renderable
-        !page_control    TYPE zcl_abapgit_gui_page=>ty_control
+        !page_controller TYPE zcl_abapgit_gui_page=>ty_control
       RAISING
         zcx_abapgit_exception.
 
@@ -72,18 +72,18 @@ CLASS zcl_abappm_gui_page_hoc IMPLEMENTATION.
     super->constructor( ).
 
     me->child_component = child_component.
-    me->page_control    = page_control.
+    page_control        = page_controller.
 
-    IF me->page_control-show_as_modal = abap_false.
-      me->page_control-show_as_modal = detect_modal( ).
+    IF page_control-show_as_modal = abap_false.
+      page_control-show_as_modal = detect_modal( ).
     ENDIF.
 
-    IF me->page_control-page_menu_provider IS NOT BOUND.
-      me->page_control-page_menu_provider = detect_menu_provider( ).
+    IF page_control-page_menu_provider IS NOT BOUND.
+      page_control-page_menu_provider = detect_menu_provider( ).
     ENDIF.
 
-    IF me->page_control-page_title_provider IS NOT BOUND.
-      me->page_control-page_title_provider = detect_title_provider( ).
+    IF page_control-page_title_provider IS NOT BOUND.
+      page_control-page_title_provider = detect_title_provider( ).
     ENDIF.
 
   ENDMETHOD.
@@ -117,7 +117,7 @@ CLASS zcl_abappm_gui_page_hoc IMPLEMENTATION.
 
     result = NEW zcl_abappm_gui_page_hoc(
       child_component = child_component
-      page_control    = page_control ).
+      page_controller = page_control ).
 
   ENDMETHOD.
 

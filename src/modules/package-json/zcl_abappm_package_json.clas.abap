@@ -67,6 +67,14 @@ CLASS zcl_abappm_package_json DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS convert_json_to_manifest_abbr
+      IMPORTING
+        !json         TYPE string
+      RETURNING
+        VALUE(result) TYPE zif_abappm_types=>ty_manifest_abbreviated
+      RAISING
+        zcx_abappm_error.
+
     CLASS-METHODS convert_manifest_to_json
       IMPORTING
         !manifest        TYPE zif_abappm_types=>ty_manifest
@@ -259,6 +267,14 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD convert_json_to_manifest_abbr.
+
+    DATA(manifest) = convert_json_to_manifest( json ).
+    result = CORRESPONDING #( manifest ).
+
+  ENDMETHOD.
+
+
   METHOD convert_manifest_to_json.
 
     TRY.
@@ -414,15 +430,21 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     result = manifest.
 
-    SORT result-dependencies BY name.
-    SORT result-dev_dependencies BY name.
-    SORT result-optional_dependencies BY name.
-    SORT result-peer_dependencies BY name.
-    SORT result-bundle_dependencies.
-    SORT result-engines BY name.
-    SORT result-contributors BY name.
-    SORT result-maintainers BY name.
-    SORT: result-keywords, result-man, result-os, result-cpu, result-db.
+    " Keeping things in order avoid unnecessary diffs
+    SORT:
+      result-dependencies BY name,
+      result-dev_dependencies BY name,
+      result-optional_dependencies BY name,
+      result-peer_dependencies BY name,
+      result-bundle_dependencies,
+      result-engines BY name,
+      result-contributors BY name,
+      result-maintainers BY name,
+      result-keywords,
+      result-man,
+      result-os,
+      result-cpu,
+      result-db.
 
   ENDMETHOD.
 

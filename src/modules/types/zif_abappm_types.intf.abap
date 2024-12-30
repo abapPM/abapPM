@@ -129,7 +129,7 @@ INTERFACE zif_abappm_types PUBLIC.
       db                    TYPE string_table,
       dist                  TYPE ty_dist,
       deprecated            TYPE abap_bool,
-    END OF ty_manifest_abbreviated ##NEEDED.
+    END OF ty_manifest_abbreviated.
 
   " *** PACKUMENT ***
 
