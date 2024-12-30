@@ -17,7 +17,6 @@
     "noIssues": [
       "/src/modules/ajson/*.*",
       "/src/modules/markdown/*.*",
-      "/src/modules/tap/*.*",
       "/src/modules/tar/*.*",
       "/src/modules/semver/*.*",
       "/src/modules/semver-sap/*.*",
@@ -77,7 +76,7 @@
     "cyclic_oo": true,
     "cyclomatic_complexity": true,
     "dangerous_statement": {
-      "exclude": ["zcl_abappm_persist_apm.clas"],
+      "exclude": ["zcl_abappm_persist_apm", "zcl_abappm_tap"],
       "execSQL": true,
       "kernelCall": true,
       "systemCall": true,
@@ -176,7 +175,9 @@
       "ignoreTestClasses": false,
       "checkForms": true
     },
-    "method_overwrites_builtin": true,
+    "method_overwrites_builtin": {
+      "exclude": ["zcl_abappm_tap"]
+    },
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
@@ -292,7 +293,9 @@
     "strict_sql": false,
     "superclass_final": true,
     "superfluous_value": true,
-    "sy_modification": true,
+    "sy_modification": {
+      "exclude": ["zcl_abappm_tap"]
+    },
     "tabl_enhancement_category": true,
     "tables_declared_locally": true,
     "try_without_catch": true,
