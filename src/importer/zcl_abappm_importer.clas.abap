@@ -356,8 +356,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
 
-      " FIXME
-      DATA(package_json_service) = zcl_package_json=>factory( <package>-target_package ).
+      DATA(package_json_service) = zcl_abappm_package_json=>factory( <package>-target_package ).
 
       IF package_json_service->exists( ).
         DATA(package_json) = package_json_service->load( )->get( ).
@@ -378,8 +377,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     " Remove dependencies
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = zif_abappm_importer=>c_action-remove.
 
-      " FIXME
-      package_json_service = zcl_package_json=>factory( <dependency>-package ).
+      package_json_service = zcl_abappm_package_json=>factory( <dependency>-package ).
 
       IF package_json_service->exists( ).
         package_json_service->delete( ).

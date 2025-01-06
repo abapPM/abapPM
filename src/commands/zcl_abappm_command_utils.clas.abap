@@ -54,11 +54,44 @@ CLASS zcl_abappm_command_utils DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    CLASS-METHODS check_integrity
+      IMPORTING
+        !tarball TYPE xstring
+        !dist    TYPE zif_abappm_types=>ty_dist
+      RAISING
+        zcx_abappm_error.
+
 ENDCLASS.
 
 
 
 CLASS zcl_abappm_command_utils IMPLEMENTATION.
+
+
+  METHOD check_integrity.
+
+    DATA key TYPE xstring.
+    DATA shasum TYPE string.
+
+    " TODO: Is this correct? or convert tarball to base64 first?
+    TRY.
+        cl_abap_hmac=>calculate_hmac_for_raw(
+          EXPORTING
+            if_algorithm  = 'SHA512'
+            if_key        = key
+            if_data       = tarball
+          IMPORTING
+            ef_hmacstring = shasum ).
+      CATCH cx_abap_message_digest INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
+
+    IF to_lower( shasum ) <> to_lower( dist-shasum ).
+      zcx_abappm_error=>raise( 'Checksum error for tarball' ).
+    ENDIF.
+
+  ENDMETHOD.
 
 
   METHOD get_manifest_from_registry.
@@ -100,6 +133,10 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
       registry = registry
       name     = manifest-name
       tarball  = manifest-dist-tarball ).
+
+    check_integrity(
+      tarball = tarball
+      dist    = manifest-dist ).
 
     " TODO: Currently hardcoded to local packages (no transport)
     " FUTURE: Allow other folder logic than prefix
