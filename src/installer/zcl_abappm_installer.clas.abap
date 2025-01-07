@@ -3,8 +3,15 @@ CLASS zcl_abappm_installer DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " TODO: This installer is a copy from Marc Bernard Tools
-  " Several of the features are not relevant for apm and can be removed
+************************************************************************
+* apm Installer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: This installer is a copy from Marc Bernard Tools
+* Some of the features are not relevant for apm and can be removed
+************************************************************************
   PUBLIC SECTION.
 
     CONSTANTS:
@@ -151,11 +158,11 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _deserialize_objects
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS _deserialize_data
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS _log_start.
 
@@ -191,7 +198,7 @@ CLASS zcl_abappm_installer DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_data_config
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS _check_uninstalled
       IMPORTING
@@ -204,6 +211,7 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _uninstall_sots
       IMPORTING
         !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+
 ENDCLASS.
 
 
@@ -248,7 +256,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _deserialize_data( ).
 
-      CATCH zcx_abapgit_exception INTO DATA(error).
+      CATCH cx_root INTO DATA(error).
         _transport_reset( ).
 
         log->add_exception( error ).
@@ -261,8 +269,8 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _final_message( 'Installation' ).
 
-      CATCH zcx_abapgit_exception INTO error.
-        ASSERT 1 = 2.
+      CATCH cx_root INTO error.
+        log->add_exception( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -297,14 +305,15 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
             _uninstall_sots( tadir ).
 
-            zcl_abapinst_objects=>delete(
+            " Bridge to abapGit
+            zcl_abappm_installer_objects=>delete(
               it_tadir     = tadir
               iv_transport = install_data-transport
               ii_log       = log ).
           ENDIF.
         ENDDO.
 
-      CATCH zcx_abapgit_exception INTO DATA(error).
+      CATCH cx_root INTO DATA(error).
         _transport_reset( ).
 
         log->add_exception( error ).
@@ -319,8 +328,8 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _final_message( 'Uninstall' ).
 
-      CATCH zcx_abapgit_exception INTO error ##NEEDED.
-        ASSERT 1 = 2.
+      CATCH cx_root INTO error.
+        log->add_exception( error ).
     ENDTRY.
 
   ENDMETHOD.
@@ -432,50 +441,58 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     DATA:
       support   TYPE REF TO lcl_abapgit_data_supporter,
       inject    TYPE REF TO zcl_abapgit_data_injector,
-      config    TYPE REF TO zif_abapgit_data_config,
-      deser     TYPE REF TO zif_abapgit_data_deserializer,
       checks    TYPE zif_abapgit_definitions=>ty_deserialize_checks,
       overwrite TYPE LINE OF zif_abapgit_definitions=>ty_deserialize_checks-overwrite,
       result    TYPE LINE OF zif_abapgit_data_deserializer=>ty_results,
       results   TYPE zif_abapgit_data_deserializer=>ty_results.
 
-    CREATE OBJECT support.
-    " FIXME:
-    "    CREATE OBJECT inject
-    "    inject->set_supporter( lo_support )
+    " Bridge to abapGit
+    TRY.
+        support = NEW #( ).
+        " FIXME:
+        "    CREATE OBJECT inject
+        "    inject->set_supporter( lo_support )
 
-    config = _find_remote_data_config( ).
+        DATA(config) = _find_remote_data_config( ).
 
-    deser = zcl_abapgit_data_factory=>get_deserializer( ).
+        DATA(deser) = zcl_abapgit_data_factory=>get_deserializer( ).
 
-    results = deser->deserialize(
-      ii_config = config
-      it_files  = remote_files ).
+        results = deser->deserialize(
+          ii_config = config
+          it_files  = remote_files ).
 
-    LOOP AT results INTO result.
-      CLEAR overwrite.
-      overwrite-obj_type = result-type.
-      overwrite-obj_name = result-name.
-      overwrite-decision = zif_abapgit_definitions=>c_yes.
-      COLLECT overwrite INTO checks-overwrite.
-    ENDLOOP.
+        LOOP AT results INTO result.
+          CLEAR overwrite.
+          overwrite-obj_type = result-type.
+          overwrite-obj_name = result-name.
+          overwrite-decision = zif_abapgit_definitions=>c_yes.
+          COLLECT overwrite INTO checks-overwrite.
+        ENDLOOP.
 
-    deser->actualize(
-      is_checks = checks
-      it_result = results ).
+        deser->actualize(
+          is_checks = checks
+          it_result = results ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
 
   ENDMETHOD.
 
 
   METHOD _deserialize_objects.
 
-    zcl_abapinst_objects=>deserialize(
-      iv_package   = install_data-pack
-      iv_language  = install_data-installed_langu
-      iv_transport = install_data-transport
-      it_remote    = remote_files
-      io_dot       = dot_abapgit
-      ii_log       = log ).
+    " Bridge to abapGit
+    TRY.
+        zcl_abappm_installer_objects=>deserialize(
+          iv_package   = install_data-pack
+          iv_language  = install_data-installed_langu
+          iv_transport = install_data-transport
+          it_remote    = remote_files
+          io_dot       = dot_abapgit
+          ii_log       = log ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -565,13 +582,17 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_data_config.
 
-    CREATE OBJECT result TYPE zcl_abapgit_data_config.
+    TRY.
+        CREATE OBJECT result TYPE zcl_abapgit_data_config.
 
-    READ TABLE remote_files ASSIGNING FIELD-SYMBOL(<remote>)
-      WITH KEY path = zif_abapgit_data_config=>c_default_path ##PRIMKEY[FILE_PATH].
-    IF sy-subrc = 0.
-      result->from_json( remote_files ).
-    ENDIF.
+        READ TABLE remote_files ASSIGNING FIELD-SYMBOL(<remote>)
+          WITH KEY path = zif_abapgit_data_config=>c_default_path ##PRIMKEY[FILE_PATH].
+        IF sy-subrc = 0.
+          result->from_json( remote_files ).
+        ENDIF.
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -661,7 +682,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     IF lines( remote_files ) > 0.
       TRY.
-          zcl_abapinst_objects=>deserialize(
+          zcl_abappm_installer_objects=>deserialize(
             iv_package   = install_data-pack
             iv_language  = install_data-installed_langu
             iv_transport = install_data-transport

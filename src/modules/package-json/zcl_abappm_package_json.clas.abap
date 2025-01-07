@@ -278,6 +278,8 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD convert_manifest_to_json.
 
+    DATA skip_paths TYPE string_table.
+
     TRY.
         DATA(ajson) = zcl_abappm_ajson=>new(
           )->keep_item_order(
@@ -325,14 +327,27 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
         IF is_complete = abap_false.
           ajson = ajson->filter( lcl_ajson_filters=>create_empty_filter( ) ).
           IF manifest-private = abap_false.
-            ajson = ajson->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = '/private' ) ).
+            INSERT `/private` INTO TABLE skip_paths.
+          ENDIF.
+          IF manifest-deprecated = abap_false.
+            INSERT `/deprecated` INTO TABLE skip_paths.
           ENDIF.
         ENDIF.
 
         IF is_package_json = abap_true.
           " Remove the manifest fields that are not in package.json
-          ajson = ajson->filter( zcl_abappm_ajson_filter_lib=>create_path_filter(
-            iv_skip_paths = '/dist,/deprecated,/_id,/_abapVersion,/_apmVersion' ) ).
+          INSERT `/deprecated` INTO TABLE skip_paths.
+          INSERT `/dist` INTO TABLE skip_paths.
+          INSERT `/_id` INTO TABLE skip_paths.
+          INSERT `/_abapVersion` INTO TABLE skip_paths.
+          INSERT `/_apmVersion` INTO TABLE skip_paths.
+        ENDIF.
+
+        IF skip_paths IS NOT INITIAL.
+          DATA(skip_path) = concat_lines_of(
+            table = skip_paths
+            sep   = ',' ).
+          ajson = ajson->filter( zcl_abappm_ajson_filter_lib=>create_path_filter( iv_skip_paths = skip_path ) ).
         ENDIF.
 
         result = ajson->stringify( 2 ).

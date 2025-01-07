@@ -3,7 +3,14 @@ CLASS zcl_abappm_command_utils DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+* apm Command Utilities
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS get_packument_from_registry
@@ -52,15 +59,24 @@ CLASS zcl_abappm_command_utils DEFINITION
       RAISING
         zcx_abappm_error.
 
-  PROTECTED SECTION.
-  PRIVATE SECTION.
-
     CLASS-METHODS check_integrity
       IMPORTING
         !tarball TYPE xstring
         !dist    TYPE zif_abappm_types=>ty_dist
       RAISING
         zcx_abappm_error.
+
+    CLASS-METHODS get_integrity
+      IMPORTING
+        !tarball      TYPE xstring
+      RETURNING
+        VALUE(result) TYPE zif_abappm_types=>ty_dist
+      RAISING
+        zcx_abappm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
 
 ENDCLASS.
 
@@ -71,25 +87,36 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
   METHOD check_integrity.
 
-    DATA key TYPE xstring.
-    DATA shasum TYPE string.
-
-    " TODO: Is this correct? or convert tarball to base64 first?
     TRY.
-        cl_abap_hmac=>calculate_hmac_for_raw(
-          EXPORTING
-            if_algorithm  = 'SHA512'
-            if_key        = key
-            if_data       = tarball
-          IMPORTING
-            ef_hmacstring = shasum ).
-      CATCH cx_abap_message_digest INTO DATA(error).
+        DATA(shasum) = zcl_abapgit_hash=>sha1_raw( tarball ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
-    IF to_lower( shasum ) <> to_lower( dist-shasum ).
-      zcx_abappm_error=>raise( 'Checksum error for tarball' ).
+    IF shasum <> dist-shasum.
+      zcx_abappm_error=>raise( 'Checksum error for tarball (sha1)' ).
     ENDIF.
+
+    " TODO: check dist-integrity (sha512)
+    " https://www.npmjs.com/package/ssri
+
+  ENDMETHOD.
+
+
+  METHOD get_integrity.
+
+    TRY.
+        DATA(shasum) = zcl_abapgit_hash=>sha1_raw( tarball ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
+
+   " TODO: determine integrity (sha512)
+    " https://www.npmjs.com/package/ssri
+
+    result = VALUE #(
+      shasum        = shasum
+      integrity     = '' ).
 
   ENDMETHOD.
 

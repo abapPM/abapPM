@@ -69,6 +69,8 @@ CLASS zcl_abappm_pacote DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CONSTANTS c_abbreviated_json TYPE string VALUE 'application/vnd.npm.install-v1+json'.
+
     TYPES:
       BEGIN OF ty_instance,
         name     TYPE string,
@@ -371,22 +373,21 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
     IF abbreviated = abap_true.
       result->global_headers( )->set(
-        iv_key = 'Accept'
-        iv_val = 'application/vnd.npm.install-v1+json' ).
+        iv_key = zif_abappm_http_agent=>c_header-accept
+        iv_val = c_abbreviated_json ).
     ELSE.
       result->global_headers( )->set(
-        iv_key = 'Accept'
-        iv_val = 'application/json' ).
+        iv_key = zif_abappm_http_agent=>c_header-accept
+        iv_val = zif_abappm_http_agent=>c_content_type-json ).
     ENDIF.
 
-    " Login manager requires git-like URL so we add some dummy repo
-    DATA(login_url) = url && '/apm/apm.git'.
+    DATA(host) = zcl_abappm_url=>parse( url )->components-host.
 
     " Get auth token from URL
-    IF zcl_abappm_http_login_manager=>get( login_url ) IS NOT INITIAL.
+    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
       result->global_headers( )->set(
-        iv_key = 'Authorization'
-        iv_val = zcl_abappm_http_login_manager=>get( login_url ) ).
+        iv_key = zif_abappm_http_agent=>c_header-authorization
+        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
     ENDIF.
 
   ENDMETHOD.
@@ -424,22 +425,18 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
   METHOD request.
 
-    TRY.
-        IF abbreviated IS INITIAL.
-          result = get_agent( registry )->request( url ).
-        ELSE.
-          DATA(headers) = NEW zcl_abappm_string_map( ).
-          headers->set(
-            iv_key = 'Accept'
-            iv_val = 'application/vnd.npm.install-v1+json' ).
+    IF abbreviated IS INITIAL.
+      result = get_agent( registry )->request( url ).
+    ELSE.
+      DATA(headers) = NEW zcl_abappm_string_map( ).
+      headers->set(
+        iv_key = 'Accept'
+        iv_val = 'application/vnd.npm.install-v1+json' ).
 
-          result = get_agent( registry )->request(
-            url     = url
-            headers = headers ).
-        ENDIF.
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
+      result = get_agent( registry )->request(
+        url     = url
+        headers = headers ).
+    ENDIF.
 
   ENDMETHOD.
 

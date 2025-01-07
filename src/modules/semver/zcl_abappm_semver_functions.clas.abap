@@ -19,7 +19,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS cmp
       IMPORTING
@@ -31,7 +31,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS coerce
       IMPORTING
@@ -42,7 +42,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_semver
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS compare
       IMPORTING
@@ -53,7 +53,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS compare_build
       IMPORTING
@@ -64,7 +64,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS compare_loose
       IMPORTING
@@ -74,7 +74,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS diff
       IMPORTING
@@ -83,7 +83,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS eq
       IMPORTING
@@ -94,7 +94,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS gt
       IMPORTING
@@ -105,7 +105,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS gte
       IMPORTING
@@ -116,7 +116,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS inc
       IMPORTING
@@ -138,7 +138,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS lte
       IMPORTING
@@ -149,7 +149,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS major
       IMPORTING
@@ -158,7 +158,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS minor
       IMPORTING
@@ -167,7 +167,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS neq
       IMPORTING
@@ -178,7 +178,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS parse
       IMPORTING
@@ -189,7 +189,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_semver
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS patch
       IMPORTING
@@ -198,7 +198,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS prerelease
       IMPORTING
@@ -208,7 +208,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS rcompare
       IMPORTING
@@ -219,7 +219,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE i
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS rsort
       IMPORTING
@@ -229,7 +229,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS sort
       IMPORTING
@@ -239,7 +239,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS satisfies
       IMPORTING
@@ -250,7 +250,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS valid
       IMPORTING
@@ -270,7 +270,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -303,19 +303,43 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       WHEN '!=='.
         result = xsdbool( NOT equality( a = a b = b ) ).
       WHEN '' OR '=' OR '=='.
-        result = eq( a = a b = b loose = loose incpre = incpre ).
+        result = eq(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN '!=' OR '<>'.
-        result = neq( a = a b = b loose = loose incpre = incpre ).
+        result = neq(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN '>'.
-        result = gt( a = a b = b loose = loose incpre = incpre ).
+        result = gt(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN '>='.
-        result = gte( a = a b = b loose = loose incpre = incpre ).
+        result = gte(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN '<'.
-        result = lt( a = a b = b loose = loose incpre = incpre ).
+        result = lt(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN '<='.
-        result = lte( a = a b = b loose = loose incpre = incpre ).
+        result = lte(
+          a      = a
+          b      = b
+          loose  = loose
+          incpre = incpre ).
       WHEN OTHERS.
-        zcx_abappm_semver_error=>raise( |Invalid operator: { op }| ).
+        zcx_abappm_error=>raise( |Invalid operator: { op }| ).
     ENDCASE.
 
   ENDMETHOD.
@@ -335,7 +359,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         endpos     TYPE i,
       END OF ty_match.
 
-    DATA matches TYPE STANDARD TABLE OF ty_match.
+    DATA matches TYPE STANDARD TABLE OF ty_match WITH KEY major minor patch prerelease build.
 
     " cl_abap_matcher has a problem with '1.2.3.4.5.6' so we use FIND REGEX
 
@@ -380,8 +404,8 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         <match>-offset = offset.
         <match>-length = strlen( match ).
         <match>-endpos = <match>-offset + <match>-length.
-        FIND REGEX '^\d' IN version+offset(*) MATCH OFFSET DATA(next_offset).
-        offset += next_offset + 1.
+        FIND REGEX '^\d' IN version+offset(*) MATCH OFFSET DATA(next_offset) ##SUBRC_OK.
+        offset = offset + next_offset + 1.
         IF offset >= strlen( version ).
           EXIT.
         ENDIF.
@@ -389,7 +413,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       SORT matches BY endpos DESCENDING length DESCENDING.
       READ TABLE matches ASSIGNING <match> INDEX 1.
       IF sy-subrc <> 0.
-        EXIT.
+        RETURN.
       ENDIF.
       major      = <match>-major.
       minor      = <match>-minor.
@@ -451,7 +475,11 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD compare_loose.
-    result = compare( a = a b = b loose = abap_true incpre = incpre ).
+    result = compare(
+      a      = a
+      b      = b
+      loose  = abap_true
+      incpre = incpre ).
   ENDMETHOD.
 
 
@@ -529,7 +557,11 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD eq.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) = 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) = 0 ).
   ENDMETHOD.
 
 
@@ -543,19 +575,27 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       semver_b ?= b.
       result = xsdbool( semver_a->version = semver_b->version ).
     ELSE.
-      zcx_abappm_semver_error=>raise( |Invalid parameter type| ).
+      zcx_abappm_error=>raise( |Invalid parameter type| ).
     ENDIF.
 
   ENDMETHOD.
 
 
   METHOD gt.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) > 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) > 0 ).
   ENDMETHOD.
 
 
   METHOD gte.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) >= 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) >= 0 ).
   ENDMETHOD.
 
 
@@ -577,7 +617,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         CHECK result IS BOUND.
 
         result->inc( release = release identifier = identifier identifier_base = identifier_base ).
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         CLEAR result.
     ENDTRY.
 
@@ -585,12 +625,20 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD lt.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) < 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) < 0 ).
   ENDMETHOD.
 
 
   METHOD lte.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) <= 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) <= 0 ).
   ENDMETHOD.
 
 
@@ -617,7 +665,11 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD neq.
-    result = xsdbool( compare( a = a b = b loose = loose incpre = incpre ) <> 0 ).
+    result = xsdbool( compare(
+      a      = a
+      b      = b
+      loose  = loose
+      incpre = incpre ) <> 0 ).
   ENDMETHOD.
 
 
@@ -632,7 +684,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
     TRY.
         result = zcl_abappm_semver=>create( version = version loose = loose incpre = incpre ).
-      CATCH zcx_abappm_semver_error INTO DATA(error).
+      CATCH zcx_abappm_error INTO DATA(error).
         IF throw_errors = abap_false.
           RETURN.
         ENDIF.
@@ -666,7 +718,11 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
 
   METHOD rcompare.
-    result = compare( a = b b = a loose = loose incpre = incpre ).
+    result = compare(
+      a      = b
+      b      = a
+      loose  = loose
+      incpre = incpre ).
   ENDMETHOD.
 
 
@@ -675,17 +731,22 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
     result = list.
 
     DATA(i) = 1.
-    WHILE i < lines( result ).
+    WHILE lines( result ) > i.
       DATA(j) = 1.
-      WHILE j <= lines( result ) - i.
-        IF compare_build( b = result[ j ] a = result[ j + 1 ] loose = loose incpre = incpre ) > 0.
-          DATA(temp)      = result[ j ].
-          result[ j ]     = result[ j + 1 ].
+      WHILE lines( result ) - i >= j.
+        IF compare_build(
+          b      = result[ j ]
+          a      = result[ j + 1 ]
+          loose  = loose
+          incpre = incpre ) > 0.
+
+          DATA(temp) = result[ j ].
+          result[ j ] = result[ j + 1 ].
           result[ j + 1 ] = temp.
         ENDIF.
-        j += 1.
+        j = j + 1.
       ENDWHILE.
-      i += 1.
+      i = i + 1.
     ENDWHILE.
 
   ENDMETHOD.
@@ -699,7 +760,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         IF semrange IS BOUND.
           result = semrange->test( version ).
         ENDIF.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
 
@@ -711,17 +772,22 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
     result = list.
 
     DATA(i) = 1.
-    WHILE i < lines( result ).
+    WHILE lines( result ) > i.
       DATA(j) = 1.
-      WHILE j <= lines( result ) - i.
-        IF compare_build( a = result[ j ] b = result[ j + 1 ] loose = loose incpre = incpre ) > 0.
-          DATA(temp)      = result[ j ].
-          result[ j ]     = result[ j + 1 ].
+      WHILE lines( result ) - i >= j.
+        IF compare_build(
+          a      = result[ j ]
+          b      = result[ j + 1 ]
+          loose  = loose
+          incpre = incpre ) > 0.
+
+          DATA(temp) = result[ j ].
+          result[ j ] = result[ j + 1 ].
           result[ j + 1 ] = temp.
         ENDIF.
-        j += 1.
+        j = j + 1.
       ENDWHILE.
-      i += 1.
+      i = i + 1.
     ENDWHILE.
 
   ENDMETHOD.
@@ -735,7 +801,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         CHECK semver IS BOUND.
 
         result = semver->version.
-      CATCH zcx_abappm_semver_error ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
   ENDMETHOD.

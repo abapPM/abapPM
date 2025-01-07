@@ -3,6 +3,12 @@ CLASS zcl_abappm_roadmap DEFINITION
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* apm Roadmap Placeholders
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS not_implemented

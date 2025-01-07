@@ -1,7 +1,7 @@
 INTERFACE zif_abappm_gui_router PUBLIC.
 
 ************************************************************************
-* apm Router
+* apm GUI Router
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT

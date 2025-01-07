@@ -1,5 +1,11 @@
 INTERFACE zif_abappm_object PUBLIC.
 
+************************************************************************
+* apm Import Interface for Objects
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   TYPES ty_item TYPE zif_abappm_importer=>ty_item.
 
   METHODS import

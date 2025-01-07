@@ -1,8 +1,14 @@
 CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* apm Importer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: replace logging with ABAP Logger (wait for v2 of it)
+************************************************************************
   PUBLIC SECTION.
-
-    " TODO: replace logging with ABAP Logger (wait for v2 of it)
 
     CLASS-METHODS run
       IMPORTING
@@ -60,6 +66,13 @@ CLASS zcl_abappm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS create_packages
+      IMPORTING
+        !packages  TYPE zif_abappm_importer=>ty_packages
+        !is_dryrun TYPE abap_bool DEFAULT abap_true
+      RAISING
+        zcx_abappm_error.
+
     CLASS-METHODS import_objects
       IMPORTING
         !map           TYPE zif_abappm_importer=>ty_map
@@ -80,6 +93,37 @@ ENDCLASS.
 
 
 CLASS zcl_abappm_importer IMPLEMENTATION.
+
+
+  METHOD create_packages.
+
+    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+
+      TRY.
+          DATA(source) = zcl_abapgit_factory=>get_sap_package( <package>-source_package ).
+          DATA(target) = zcl_abapgit_factory=>get_sap_package( <package>-target_package ).
+
+          IF NOT target->exists( ).
+            DATA(package) = VALUE zif_abapgit_sap_package=>ty_create(
+              parentcl = <package>-parent_package
+              devclass = <package>-target_package
+              ctext    = source->read_description( )
+              as4user  = sy-uname ).
+
+            IF <package>-target_package(1) = '$'.
+              package-dlvunit = 'LOCAL'.
+            ENDIF.
+            IF is_dryrun = abap_false.
+              target->create( package ).
+            ENDIF.
+          ENDIF.
+        CATCH zcx_abapgit_exception INTO DATA(error).
+          zcx_abappm_error=>raise_with_text( error ).
+      ENDTRY.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 
 
   METHOD get_map.
@@ -135,7 +179,8 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           name           = <rule>-name
           version        = <rule>-version
           source_package = <package_json>-package
-          target_package = <rule>-target_package ).
+          target_package = <rule>-target_package
+          parent_package = <rule>-parent_package ).
 
         CASE <rule>-version.
           WHEN 'latest'.
@@ -153,14 +198,14 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
         IF is_logging = abap_true.
           FORMAT COLOR COL_POSITIVE.
-          WRITE: AT /5 package-name, AT 30 package-version,
+          WRITE: AT / package-name, AT 30 package-version,
             AT 40 package-source_package, AT 72 package-target_package, AT c_width space.
         ENDIF.
 
       ELSE.
         IF is_logging = abap_true.
           FORMAT COLOR COL_NEGATIVE.
-          WRITE: AT /5 <rule>-name, 'not found in global namespace', AT c_width space.
+          WRITE: AT / <rule>-name, 'not found in global namespace', AT c_width space.
         ENDIF.
       ENDIF.
     ENDLOOP.
@@ -228,12 +273,18 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
         IF found = abap_true.
           INSERT <program> INTO TABLE result.
+        ELSEIF is_logging = abap_true.
+          FORMAT COLOR COL_NORMAL.
+          WRITE: AT /10 'No IMPORT statements found', AT c_width space.
+          FORMAT COLOR OFF.
         ENDIF.
       ENDLOOP. " programs
     ENDLOOP. " packages
 
     IF result IS INITIAL AND is_logging = abap_true.
-      WRITE AT /5 'No includes with IMPORT statements found' COLOR COL_TOTAL.
+      FORMAT COLOR COL_TOTAL.
+      WRITE: / 'No includes with IMPORT statements found', AT c_width space.
+      FORMAT COLOR OFF.
     ELSE.
       SKIP.
     ENDIF.
@@ -258,8 +309,8 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
       WRITE: / 'Importing:', AT c_width space.
-      SKIP.
       FORMAT COLOR OFF.
+      SKIP.
     ENDIF.
 
     LOOP AT map INTO DATA(mapping).
@@ -280,34 +331,67 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
       ASSERT new_object IS NOT INITIAL AND new_object <> mapping-old_object.
 
-      " TODO: make this dynamic like in abapGit
-      " TODO: pass FILES
-      CASE mapping-object_type.
-        WHEN 'CLAS'.
-          DATA(class_handler) = NEW zcl_abappm_object_clas( item ).
+      " Some modules are used by apm and don't support self-update -> skip them
+      IF mapping-target_package CP '$ABAPPM*' AND
+        ( mapping-old_object = 'ZCX_ERROR' OR
+          mapping-old_object CP 'Z++_AJSON*' OR
+          mapping-old_object CP 'Z++_PACKAGE_JSON*' ).
 
-          class_handler->zif_abappm_object~import(
-            new_package   = new_package
-            new_object    = new_object
-            map           = map
-            is_dryrun     = is_dryrun
-            is_production = is_production ).
+        IF is_logging = abap_true.
+          WRITE: 'Skipped' COLOR COL_TOTAL.
+        ENDIF.
+        CONTINUE.
+      ENDIF.
 
-        WHEN 'INTF'.
-          DATA(interface_handler) = NEW zcl_abappm_object_intf( item ).
+      TRY.
+          " TODO: make this dynamic like in abapGit
+          " TODO: pass FILES
+          CASE mapping-object_type.
+            WHEN 'CLAS'.
+              DATA(class_handler) = NEW zcl_abappm_object_clas( item ).
 
-          interface_handler->zif_abappm_object~import(
-            new_package   = new_package
-            new_object    = new_object
-            map           = map
-            is_dryrun     = is_dryrun
-            is_production = is_production ).
+              class_handler->zif_abappm_object~import(
+                new_package   = new_package
+                new_object    = new_object
+                map           = map
+                is_dryrun     = is_dryrun
+                is_production = is_production ).
 
-        WHEN OTHERS.
-          zcx_abappm_error=>raise( |Unsupported object type { mapping-object_type }| ).
-      ENDCASE.
+            WHEN 'INTF'.
+              DATA(interface_handler) = NEW zcl_abappm_object_intf( item ).
+
+              interface_handler->zif_abappm_object~import(
+                new_package   = new_package
+                new_object    = new_object
+                map           = map
+                is_dryrun     = is_dryrun
+                is_production = is_production ).
+
+            WHEN OTHERS.
+              zcx_abappm_error=>raise( |Unsupported object type { mapping-object_type }| ).
+          ENDCASE.
+
+          IF is_logging = abap_true.
+            IF is_dryrun = abap_true.
+              WRITE: 'Dry run' COLOR COL_TOTAL.
+            ELSE.
+              WRITE: 'Success' COLOR COL_POSITIVE.
+            ENDIF.
+          ENDIF.
+
+        CATCH cx_root INTO DATA(error).
+          IF is_logging = abap_true.
+            DATA(msg) = error->get_text( ).
+            WRITE: msg COLOR COL_NEGATIVE.
+          ENDIF.
+      ENDTRY.
 
     ENDLOOP.
+
+    IF is_logging = abap_true.
+      FORMAT COLOR OFF.
+      SKIP.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -336,13 +420,18 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
       object_types = object_types
       object_names = object_names ).
 
-    " 6. Import the tarballs using the mapping
+    " 6. Create packages (if necessary)
+    create_packages(
+      packages  = packages
+      is_dryrun = is_dryrun ).
+
+    " 7. Import the tarballs using the mapping
     import_objects(
       map           = map
       is_dryrun     = is_dryrun
       is_production = is_production ).
 
-    " 7. Save packages to apm
+    " 8. Save packages to apm
     save_packages(
       packages     = packages
       dependencies = dependencies ).

@@ -1,5 +1,11 @@
 CLASS zcl_abappm_file_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* apm Files for Importer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abappm_file_importer.

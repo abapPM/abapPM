@@ -18,7 +18,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         res    TYPE abap_bool,
         incpre TYPE abap_bool,
       END OF ty_comparator_intersection,
-      ty_comparator_intersections TYPE STANDARD TABLE OF ty_comparator_intersection WITH DEFAULT KEY.
+      ty_comparator_intersections TYPE STANDARD TABLE OF ty_comparator_intersection WITH KEY c0 c1 res incpre.
 
     CLASS-METHODS comparator_intersection
       RETURNING
@@ -30,7 +30,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         v1    TYPE string,
         loose TYPE abap_bool,
       END OF ty_comparison,
-      ty_comparisons TYPE STANDARD TABLE OF ty_comparison WITH DEFAULT KEY.
+      ty_comparisons TYPE STANDARD TABLE OF ty_comparison WITH KEY v0 v1 loose.
 
     CLASS-METHODS comparisons
       RETURNING
@@ -42,7 +42,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         v1    TYPE string,
         loose TYPE abap_bool,
       END OF ty_equality,
-      ty_equalitys TYPE STANDARD TABLE OF ty_equality WITH DEFAULT KEY.
+      ty_equalitys TYPE STANDARD TABLE OF ty_equality WITH KEY v0 v1 loose.
 
     CLASS-METHODS equality
       RETURNING
@@ -58,7 +58,8 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         identifier      TYPE string,
         identifier_base TYPE string,
       END OF ty_increment,
-      ty_increments TYPE STANDARD TABLE OF ty_increment WITH DEFAULT KEY.
+      ty_increments TYPE STANDARD TABLE OF ty_increment
+        WITH KEY version release res loose incpre identifier identifier_base.
 
     CLASS-METHODS increments
       RETURNING
@@ -70,7 +71,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         reason TYPE string,
         loose  TYPE abap_bool,
       END OF ty_invalid_version,
-      ty_invalid_versions TYPE STANDARD TABLE OF ty_invalid_version WITH DEFAULT KEY.
+      ty_invalid_versions TYPE STANDARD TABLE OF ty_invalid_version WITH KEY value reason loose.
 
     CLASS-METHODS invalid_versions
       RETURNING
@@ -83,7 +84,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         loose   TYPE abap_bool,
         incpre  TYPE abap_bool,
       END OF ty_range,
-      ty_ranges TYPE STANDARD TABLE OF ty_range WITH DEFAULT KEY.
+      ty_ranges TYPE STANDARD TABLE OF ty_range WITH KEY range version loose incpre.
 
     CLASS-METHODS range_exclude
       RETURNING
@@ -112,7 +113,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         loose  TYPE abap_bool,
         incpre TYPE abap_bool,
       END OF ty_range_parse,
-      ty_range_parses TYPE STANDARD TABLE OF ty_range_parse WITH DEFAULT KEY.
+      ty_range_parses TYPE STANDARD TABLE OF ty_range_parse WITH KEY range res loose incpre.
 
     CLASS-METHODS range_parse
       RETURNING
@@ -125,7 +126,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         loose   TYPE abap_bool,
         incpre  TYPE abap_bool,
       END OF ty_version_range,
-      ty_version_ranges TYPE STANDARD TABLE OF ty_version_range WITH DEFAULT KEY.
+      ty_version_ranges TYPE STANDARD TABLE OF ty_version_range WITH KEY range version loose incpre.
 
     CLASS-METHODS version_gt_range
       RETURNING
@@ -142,6 +143,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
     CLASS-METHODS version_not_lt_range
       RETURNING
         VALUE(result) TYPE ty_version_ranges.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -329,7 +331,7 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( version = '1.2.3-1' release = 'premajor' res = '2.0.0-0' )
       ( version = '1.2.0-1' release = 'minor' res = '1.2.0' )
       ( version = '1.0.0-1' release = 'major' res = '1.0.0' )
-
+      " identifier
       ( version = '1.2.3' release = 'major' res = '2.0.0' identifier = 'dev' )
       ( version = '1.2.3' release = 'minor' res = '1.3.0' identifier = 'dev' )
       ( version = '1.2.3' release = 'patch' res = '1.2.4' identifier = 'dev' )
@@ -372,12 +374,11 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( version = '1.2.0-1' release = 'minor' res = '1.2.0' identifier = 'dev' )
       ( version = '1.0.0-1' release = 'major' res = '1.0.0' identifier = 'dev' )
       ( version = '1.2.3-dev.bar' release = 'prerelease' res = '1.2.3-dev.0' identifier = 'dev' )
-
+      " prerelease
       ( version = '1.2.3-0' release = 'prerelease' res = '1.2.3-1.0' identifier = '1' )
       ( version = '1.2.3-1.0' release = 'prerelease' res = '1.2.3-1.1' identifier = '1' )
       ( version = '1.2.3-1.1' release = 'prerelease' res = '1.2.3-1.2' identifier = '1' )
       ( version = '1.2.3-1.1' release = 'prerelease' res = '1.2.3-2.0' identifier = '2' )
-
       ( version = '1.2.0-1' release = 'prerelease' res = '1.2.0-alpha.0' identifier = 'alpha' identifier_base = '0' )
       ( version = '1.2.1' release = 'prerelease' res = '1.2.2-alpha.0' identifier = 'alpha' identifier_base = '0' )
       ( version = '0.2.0' release = 'prerelease' res = '0.2.1-alpha.0' identifier = 'alpha' identifier_base = '0' )
@@ -395,7 +396,6 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( version = '1.2.0' release = 'preminor' res = '1.3.0-dev.1' identifier = 'dev' identifier_base = '1' )
       ( version = '1.2.3-1' release = 'preminor' res = '1.3.0-dev.0' identifier = 'dev' )
       ( version = '1.2.0' release = 'prerelease' res = '1.2.1-1' identifier = '' identifier_base = '1' )
-
       ( version = '1.2.0-1' release = 'prerelease' res = '1.2.0-alpha' identifier = 'alpha' identifier_base = 'false' )
       ( version = '1.2.1' release = 'prerelease' res = '1.2.2-alpha' identifier = 'alpha' identifier_base = 'false' )
       ( version = '1.2.2' release = 'prerelease' res = '1.2.3-alpha' identifier = 'alpha' identifier_base = 'false' )
@@ -516,23 +516,22 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( range = '^1.2.3' version = '1.2.2' )
       ( range = '^1.2' version = '1.1.9' )
       ( range = '*' version = 'v1.2.3-foo' loose = abap_true )
-
       " invalid versions never satisfy, but shouldn't throw
       ( range = '*' version = 'not a version' )
       ( range = '>=2' version = 'glorp' )
       ( range = '>=2' version = '' )
-
+      " incpre
       ( range = '2.x' version = '3.0.0-pre.0' incpre = abap_true )
       ( range = '^1.0.0' version = '1.0.0-rc1' incpre = abap_true )
       ( range = '^1.0.0' version = '2.0.0-rc1' incpre = abap_true )
       ( range = '^1.2.3-rc2' version = '2.0.0' incpre = abap_true )
       ( range = '^1.0.0' version = '2.0.0-rc1' )
-
+      " from to
       ( range = '1 - 2' version = '3.0.0-pre' incpre = abap_true )
       ( range = '1 - 2' version = '2.0.0-pre' )
       ( range = '1 - 2' version = '1.0.0-pre' )
       ( range = '1.0 - 2' version = '1.0.0-pre' )
-
+      " prerelease
       ( range = '1.1.x' version = '1.0.0-a' )
       ( range = '1.1.x' version = '1.1.0-a' )
       ( range = '1.1.x' version = '1.2.0-a' )
@@ -543,12 +542,10 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( range = '1.x' version = '1.2.0-a' )
       ( range = '1.x' version = '0.0.0-a' incpre = abap_true )
       ( range = '1.x' version = '2.0.0-a' incpre = abap_true )
-
       ( range = '>=1.0.0 <1.1.0' version = '1.1.0' )
       ( range = '>=1.0.0 <1.1.0' version = '1.1.0' incpre = abap_true )
       ( range = '>=1.0.0 <1.1.0' version = '1.1.0-pre' )
       ( range = '>=1.0.0 <1.1.0-pre' version = '1.1.0-pre' )
-
       ( range = '== 1.0.0 || foo' version = '2.0.0' loose = abap_true ) ).
 
   ENDMETHOD.
@@ -677,11 +674,9 @@ CLASS zcl_abappm_semver_fixtures IMPLEMENTATION.
       ( range = '1 - 2' version = '2.0.0-pre' incpre = abap_true )
       ( range = '1 - 2' version = '1.0.0-pre' incpre = abap_true )
       ( range = '1.0 - 2' version = '1.0.0-pre' incpre = abap_true )
-
       ( range = '=0.7.x' version = '0.7.0-asdf' incpre = abap_true )
       ( range = '>=0.7.x' version = '0.7.0-asdf' incpre = abap_true )
       ( range = '<=0.7.x' version = '0.7.0-asdf' incpre = abap_true )
-
       ( range = '>=1.0.0 <=1.1.0' version = '1.1.0-pre' incpre = abap_true ) ).
 
   ENDMETHOD.

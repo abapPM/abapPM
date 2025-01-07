@@ -5,7 +5,7 @@ CLASS zcl_abappm_html_form DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* apm GUI Page HOC
+* apm GUI HTML Form
 *
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT

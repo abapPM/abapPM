@@ -3,7 +3,14 @@ CLASS zcl_abappm_command_uninstall DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+* apm Uninstall Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS run

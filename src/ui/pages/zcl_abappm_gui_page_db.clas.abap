@@ -46,9 +46,26 @@ CLASS zcl_abappm_gui_page_db DEFINITION
       c_css_url      TYPE string VALUE 'css/page_db.css',
       c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
 
+    TYPES:
+      BEGIN OF ty_list_item,
+        key_type  TYPE string,
+        key_name  TYPE string,
+        key_extra TYPE string,
+        show_key  TYPE string,
+        keys      TYPE zif_abappm_persist_apm=>ty_key,
+        value     TYPE zif_abappm_persist_apm=>ty_value,
+        user      TYPE as4user,
+        timestamp TYPE timestampl,
+      END OF ty_list_item,
+      ty_list TYPE SORTED TABLE OF ty_list_item WITH UNIQUE KEY key_type key_name key_extra.
+
     CLASS-DATA db_persist TYPE REF TO zif_abappm_persist_apm.
 
     DATA db_entries TYPE zif_abappm_persist_apm=>ty_list.
+
+    DATA list TYPE ty_list.
+
+    METHODS prepare_list.
 
     METHODS register_stylesheet
       RAISING
@@ -328,6 +345,38 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD prepare_list.
+
+    DATA:
+      list_entry  TYPE ty_list_item,
+      sorted_list TYPE ty_list.
+
+    CLEAR list.
+
+    " Different field order for AT processing
+    LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
+      MOVE-CORRESPONDING <data> TO list_entry.
+      INSERT list_entry INTO TABLE sorted_list.
+    ENDLOOP.
+
+    DATA(icon) = zcl_abapgit_html=>icon( 'folder' ).
+
+    LOOP AT sorted_list INTO list_entry.
+      AT NEW key_type.
+        list_entry-show_key = |{ icon } { list_entry-key_type }|.
+        INSERT list_entry INTO TABLE list.
+      ENDAT.
+      AT NEW key_name.
+        list_entry-show_key = |&nbsp;&nbsp;&nbsp;{ icon } { list_entry-key_name }|.
+        INSERT list_entry INTO TABLE list.
+      ENDAT.
+      list_entry-show_key = |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ to_lower( list_entry-key_extra ) }|.
+      INSERT list_entry INTO TABLE list.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD register_stylesheet.
 
     DATA(buffer) = NEW zcl_abapgit_string_buffer( ).
@@ -369,7 +418,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     html->add( zcl_abapgit_html_table=>create( me
       )->define_column(
-        iv_column_id    = 'keys'
+        iv_column_id    = 'show_key'
         iv_column_title = 'Key'
       )->define_column(
         iv_column_id    = 'value'
@@ -383,7 +432,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       )->define_column(
         iv_column_id    = 'cmd'
         iv_column_title = 'Commands'
-      )->render( db_entries ) ).
+      )->render( list ) ).
 
   ENDMETHOD.
 
@@ -442,6 +491,8 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     db_entries = db_persist->list( ).
 
+    prepare_list( ).
+
     DATA(html) = zcl_abapgit_html=>create( ).
 
     html->add( '<div class="db-list">' ).
@@ -465,33 +516,57 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO FIELD-SYMBOL(<key>).
     ASSERT sy-subrc = 0.
+    ASSIGN COMPONENT 'KEY_TYPE' OF STRUCTURE is_row TO FIELD-SYMBOL(<key_type>).
+    ASSERT sy-subrc = 0.
+    ASSIGN COMPONENT 'KEY_NAME' OF STRUCTURE is_row TO FIELD-SYMBOL(<key_name>).
+    ASSERT sy-subrc = 0.
+    ASSIGN COMPONENT 'KEY_EXTRA' OF STRUCTURE is_row TO FIELD-SYMBOL(<key_extra>).
+    ASSERT sy-subrc = 0.
 
     CASE iv_column_id.
-      WHEN 'keys'.
+      WHEN 'show_key'.
         rs_render-content = |{ iv_value }|.
       WHEN 'value'.
-        rs_render-content   = explain_key_formatted( <key> ).
+        IF <key_name> IS INITIAL AND <key_extra> IS INITIAL.
+          rs_render-content =
+            '<strong><i>' &&
+            zcl_abappm_persist_apm=>explain_key( <key_type> )-key_type &&
+            '</i></strong>'.
+        ELSEIF <key_extra> IS INITIAL.
+          rs_render-content =
+            '<strong>' &&
+            zcl_abappm_persist_apm=>explain_key( |{ <key_type> }:{ <key_name> }| )-description &&
+            '</strong>'.
+        ELSE.
+          rs_render-content = zcl_abappm_persist_apm=>explain_key( <key> )-extra.
+        ENDIF.
         rs_render-css_class = 'data'.
       WHEN 'user'.
-        DATA(user)          = CONV syuname( iv_value ).
-        rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_user_name( user )->render( ).
+        IF <key_extra> IS NOT INITIAL.
+          DATA(user)          = CONV syuname( iv_value ).
+          rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_user_name( user )->render( ).
+        ENDIF.
       WHEN 'timestamp'.
-        DATA(timestamp)     = CONV timestampl( iv_value ).
-        rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_timestamp( timestamp ).
-        rs_render-css_class = 'data'.
+        IF <key_extra> IS NOT INITIAL.
+          DATA(timestamp)     = CONV timestampl( iv_value ).
+          rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_timestamp( timestamp ).
+          rs_render-css_class = 'data'.
+        ENDIF.
       WHEN 'cmd'.
-        DATA(action)  = |key={ cl_http_utility=>escape_url( |{ <key> }| ) }|.
-        DATA(toolbar) = zcl_abapgit_html_toolbar=>create(
-          )->add(
-            iv_txt = 'Display'
-            iv_act = |{ c_action-db_display }?{ action }|
-          )->add(
-            iv_txt = 'Edit'
-            iv_act = |{ c_action-db_edit }?{ action }|
-          )->add(
-            iv_txt = 'Delete'
-            iv_act = |{ c_action-delete }?{ action }| ).
-        rs_render-html = toolbar->render( ).
+        IF <key_extra> IS NOT INITIAL.
+          DATA(action)  = |key={ cl_http_utility=>escape_url( |{ <key> }| ) }|.
+          DATA(toolbar) = zcl_abapgit_html_toolbar=>create(
+            )->add(
+              iv_txt = 'Display'
+              iv_act = |{ c_action-db_display }?{ action }|
+            )->add(
+              iv_txt = 'Edit'
+              iv_act = |{ c_action-db_edit }?{ action }|
+            )->add(
+              iv_txt = 'Delete'
+              iv_act = |{ c_action-delete }?{ action }| ).
+          rs_render-html = toolbar->render( ).
+        ENDIF.
     ENDCASE.
 
   ENDMETHOD.

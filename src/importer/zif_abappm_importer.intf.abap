@@ -1,5 +1,12 @@
 INTERFACE zif_abappm_importer PUBLIC.
 
+************************************************************************
+* apm Importer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+
   " Examples for class and interface regex matching
   " YCL_TEST -> $1 = CL, $2 = TEST
   " ZIF_TEST -> $1 = IF, $2 = TEST
@@ -36,7 +43,8 @@ INTERFACE zif_abappm_importer PUBLIC.
     BEGIN OF ty_rule,
       old_object     TYPE string,
       new_object     TYPE string,
-      target_package TYPE string,
+      target_package TYPE devclass,
+      parent_package TYPE devclass,
       name           TYPE string,
       version        TYPE string,
     END OF ty_rule,
@@ -48,6 +56,7 @@ INTERFACE zif_abappm_importer PUBLIC.
       version        TYPE string,
       source_package TYPE devclass,
       target_package TYPE devclass,
+      parent_package TYPE devclass,
     END OF ty_package,
     ty_packages TYPE STANDARD TABLE OF ty_package WITH KEY name.
 

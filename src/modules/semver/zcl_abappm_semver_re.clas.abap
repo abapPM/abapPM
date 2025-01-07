@@ -29,8 +29,7 @@ CLASS zcl_abappm_semver_re DEFINITION
       comparator_trim_replace TYPE string VALUE '$1$2$3',
       version_trim_replace    TYPE string VALUE '$1$2'. " added for POSIX
 
-    CLASS-METHODS:
-      class_constructor.
+    CLASS-METHODS class_constructor.
 
     CLASS-DATA:
       BEGIN OF token,
@@ -407,7 +406,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
         token TYPE string,
         max   TYPE i,
       END OF ty_regex_replacement,
-      ty_regex_replacements TYPE STANDARD TABLE OF ty_regex_replacement WITH DEFAULT KEY.
+      ty_regex_replacements TYPE STANDARD TABLE OF ty_regex_replacement WITH KEY token max.
 
     " Replace some greedy regex tokens to prevent regex dos issues. These regex are
     " used internally via the safeRe object since all inputs in this library get

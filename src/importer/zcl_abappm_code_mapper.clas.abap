@@ -1,8 +1,14 @@
 CLASS zcl_abappm_code_mapper DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* apm Code Mapper
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: replace logging with ABAP Logger (wait for v2 of it)
+************************************************************************
   PUBLIC SECTION.
-
-    " TODO: replace logging with ABAP Logger (wait for v2 of it)
 
     CLASS-METHODS get
       IMPORTING
@@ -95,10 +101,11 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
       FORMAT COLOR COL_NORMAL.
       WRITE: / 'Mapping:', AT c_width space.
       SKIP.
-      FORMAT COLOR OFF.
+      FORMAT COLOR COL_POSITIVE.
       LOOP AT result ASSIGNING FIELD-SYMBOL(<map>).
-        WRITE: / <map>-source_package, <map>-target_package, <map>-old_object, <map>-new_object.
+        WRITE: / <map>-source_package, <map>-target_package, <map>-old_object, <map>-new_object, AT c_width space.
       ENDLOOP.
+      FORMAT COLOR OFF.
       SKIP.
     ENDIF.
 

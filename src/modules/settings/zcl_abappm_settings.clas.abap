@@ -140,14 +140,21 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD get_default.
 
     " Default values for settings
-    result-registry = zif_abappm_settings=>c_registry.
+    " TODO: Change to production registry
+    result-registry = zif_abappm_settings=>c_playground.
+
+    result-list_settings-order_by = 'PACKAGE'.
 
   ENDMETHOD.
 
 
   METHOD get_setting_key.
 
-    result = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ name }|.
+    IF name = zif_abappm_settings=>c_global.
+      result = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ zif_abappm_settings=>c_global }:ALL|.
+    ELSE.
+      result = |{ zif_abappm_persist_apm=>c_key_type-settings }:{ zif_abappm_settings=>c_user }:{ name }|.
+    ENDIF.
 
   ENDMETHOD.
 

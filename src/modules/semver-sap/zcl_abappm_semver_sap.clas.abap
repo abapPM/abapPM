@@ -9,6 +9,10 @@ CLASS zcl_abappm_semver_sap DEFINITION
 * Copyright (c) apm.to <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* Note: Since SAP does not use semantic versioning, this class
+* implements a bi-directional mapping covering as many cases as possible
+************************************************************************
+
   PUBLIC SECTION.
 
     CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
@@ -61,7 +65,7 @@ CLASS zcl_abappm_semver_sap IMPLEMENTATION.
 
     DATA cvers TYPE cvers.
 
-    SELECT SINGLE * FROM cvers INTO cvers WHERE component = component.
+    SELECT SINGLE * FROM cvers INTO @cvers WHERE component = @component.
     IF sy-subrc <> 0.
       RAISE EXCEPTION TYPE cx_abap_invalid_value
         EXPORTING
@@ -79,6 +83,7 @@ CLASS zcl_abappm_semver_sap IMPLEMENTATION.
     FIND REGEX '^(\d)(\d\d)\s*$' IN release SUBMATCHES DATA(ma) DATA(mi).
     IF sy-subrc <> 0.
       " 75E > 7.50.50x
+      " FIXME? Maybe this should be 7.50.x as well?
       FIND REGEX '^(\d)(\d)([A-Z])\s*$' IN release SUBMATCHES ma mi DATA(pa).
       IF sy-subrc = 0.
         mi = mi * 10.
@@ -155,11 +160,9 @@ CLASS zcl_abappm_semver_sap IMPLEMENTATION.
 
   METHOD semver_to_sap_release_sp.
 
-    DATA sp TYPE i.
-
     release = semver_to_sap_release( version ).
 
-    FIND REGEX '^(\d+)\.(\d+)\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa).
+    FIND REGEX '^(\d+)\.(\d+)\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa) ##NEEDED.
     IF sy-subrc = 0 AND pa > 100.
       pa = substring( val = pa off = strlen( pa ) - 2 ).
     ENDIF.

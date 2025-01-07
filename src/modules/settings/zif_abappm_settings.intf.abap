@@ -50,8 +50,10 @@ INTERFACE zif_abappm_settings PUBLIC.
   TYPES ty_name TYPE uname.
 
   CONSTANTS:
-    c_registry TYPE string VALUE 'https://registry.abappm.com',
-    c_global   TYPE ty_name VALUE zif_abappm_persist_apm=>c_key_name-global_settings.
+    c_registry   TYPE string VALUE 'https://registry.abappm.com',
+    c_playground TYPE string VALUE 'https://playground.abappm.com',
+    c_global     TYPE ty_name VALUE zif_abappm_persist_apm=>c_key_name-global_settings,
+    c_user       TYPE ty_name VALUE zif_abappm_persist_apm=>c_key_name-user_settings.
 
   METHODS get
     RETURNING

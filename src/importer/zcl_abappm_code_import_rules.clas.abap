@@ -1,8 +1,15 @@
 CLASS zcl_abappm_code_import_rules DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* apm Code Import Rules
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: replace logging with ABAP Logger (wait for v2 of it)
+************************************************************************
   PUBLIC SECTION.
 
-    " TODO: replace logging with ABAP Logger (wait for v2 of it)
 
     CLASS-METHODS get
       IMPORTING
@@ -133,6 +140,7 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
                   " Install into a sub package of where the IMPORT was found
                   " Note: new_package is the folder name, which is mapped to
                   " an ABAP package based on prefix folder rules
+                  rule-parent_package = program-package.
                   rule-target_package = |{ program-package }_{ rule-target_package }|.
                   " FUTURE: support full and mixed folder modes
                 ELSE.
@@ -180,7 +188,7 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
       SKIP.
       LOOP AT result ASSIGNING FIELD-SYMBOL(<rule>).
         FORMAT COLOR COL_POSITIVE.
-        WRITE: /5 <rule>-old_object,
+        WRITE: / <rule>-old_object,
           AT 37 <rule>-target_package, AT 69 <rule>-new_object,
           AT 94 <rule>-name, AT 120 <rule>-version, AT c_width space.
       ENDLOOP.

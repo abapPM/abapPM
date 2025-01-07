@@ -1,6 +1,12 @@
 CLASS zcl_abappm_object_intf DEFINITION PUBLIC FINAL CREATE PUBLIC
   INHERITING FROM zcl_abapgit_oo_interface.
 
+************************************************************************
+* apm INTF Importer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES zif_abappm_object.

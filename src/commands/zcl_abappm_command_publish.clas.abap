@@ -3,7 +3,14 @@ CLASS zcl_abappm_command_publish DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+* apm Publish Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -53,12 +60,12 @@ CLASS zcl_abappm_command_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS get_tarball
+    CLASS-METHODS get_tar
       IMPORTING
         !package      TYPE devclass
         !package_json TYPE zif_abappm_types=>ty_package_json
       RETURNING
-        VALUE(result) TYPE xstring
+        VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
         zcx_abappm_error.
 
@@ -71,12 +78,12 @@ CLASS zcl_abappm_command_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS attach_package
+    CLASS-METHODS attach_tarball
       IMPORTING
-        !version    TYPE string
-        !tarball    TYPE xstring
+        !version   TYPE string
+        !tar       TYPE REF TO zcl_abappm_tar
       CHANGING
-        !cs_publish TYPE zif_abappm_types=>ty_packument
+        !packument TYPE zif_abappm_types=>ty_packument
       RAISING
         zcx_abappm_error.
 
@@ -94,6 +101,7 @@ CLASS zcl_abappm_command_publish DEFINITION
         VALUE(result) TYPE string
       RAISING
         zcx_abappm_error.
+
 ENDCLASS.
 
 
@@ -101,15 +109,25 @@ ENDCLASS.
 CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
 
-  METHOD attach_package.
+  METHOD attach_tarball.
+
+    DATA(tarball) = tar->gzip( tar->save( ) ).
+
+    DATA(dist) = zcl_abappm_command_utils=>get_integrity( tarball ).
+
+    dist-file_count    = tar->file_count( ).
+    dist-unpacked_size = tar->unpacked_size( ).
+    dist-tarball       = |{ packument-name }-{ version }.tgz|.
+
+    packument-versions[ key = version ]-version-dist = dist.
 
     DATA(attachment) = VALUE zif_abappm_types=>ty_attachment(
-      key                  = |{ cs_publish-name }-{ version }.tgz|
-      tarball-content_type = 'application/octet-stream'
+      key                  = dist-tarball
+      tarball-content_type = zif_abappm_http_agent=>c_content_type-bin
       tarball-data         = cl_http_utility=>encode_x_base64( tarball )
       tarball-length       = xstrlen( tarball ) ).
 
-    INSERT attachment INTO TABLE cs_publish-__attachments.
+    INSERT attachment INTO TABLE packument-__attachments.
 
   ENDMETHOD.
 
@@ -179,35 +197,29 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD get_agent.
 
-    TRY.
-        result = zcl_abappm_http_agent=>create( ).
+    result = zcl_abappm_http_agent=>create( ).
 
-        " TODO: Do we need this for a PUT request?
-        result->global_headers( )->set(
-          iv_key = 'accept'
-          iv_val = 'application/json' ).
+    " TODO: Do we need this for a PUT request?
+    result->global_headers( )->set(
+      iv_key = zif_abappm_http_agent=>c_header-accept
+      iv_val = zif_abappm_http_agent=>c_content_type-json ).
 
-        result->global_headers( )->set(
-          iv_key = 'content-type'
-          iv_val = 'application/json' ).
+    result->global_headers( )->set(
+      iv_key = zif_abappm_http_agent=>c_header-content_type
+      iv_val = zif_abappm_http_agent=>c_content_type-json ).
 
-        result->global_headers( )->set(
-          iv_key = 'user-agent'
-          iv_val = |apm/{ zif_abappm_version=>c_version } abap/{ get_abap_version( ) }| ).
+    result->global_headers( )->set(
+      iv_key = zif_abappm_http_agent=>c_header-user_agent
+      iv_val = |apm/{ zif_abappm_version=>c_version } abap/{ get_abap_version( ) }| ).
 
-        " Login manager requires git-like url so we add some dummy repo
-        DATA(git_url) = iv_url && '/apm/apm.git'.
+    DATA(host) = zcl_abappm_url=>parse( iv_url )->components-host.
 
-        " Get auth token
-        IF zcl_abappm_http_login_manager=>get( git_url ) IS NOT INITIAL.
-          result->global_headers( )->set(
-            iv_key = 'authorization'
-            iv_val = zcl_abappm_http_login_manager=>get( git_url ) ).
-        ENDIF.
-
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
+    " Get/set auth token
+    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
+      result->global_headers( )->set(
+        iv_key = zif_abappm_http_agent=>c_header-authorization
+        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -220,7 +232,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_tarball.
+  METHOD get_tar.
 
     " TODO: Move this and all called methods to local part of class
     CONSTANTS c_null TYPE xstring VALUE ''.
@@ -292,12 +304,14 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
-    result = tar->gzip( tar->save( ) ).
+    result = tar.
 
   ENDMETHOD.
 
 
   METHOD init_package.
+
+    CONSTANTS c_latest TYPE string VALUE 'latest'.
 
     IF packument IS INITIAL.
       result      = CORRESPONDING #( package_json ).
@@ -307,12 +321,12 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ENDIF.
 
     " Update dist-tag
-    " TODO: Allow publishing with other tag
+    " TODO: Allow publishing with other tags
     DATA(dist_tag) = VALUE zif_abappm_types=>ty_generic(
-      key   = 'latest'
+      key   = c_latest
       value = package_json-version ).
 
-    DELETE result-dist_tags WHERE key = 'latest'.
+    DELETE result-dist_tags WHERE key = c_latest.
     INSERT dist_tag INTO TABLE result-dist_tags.
 
     " Add new version
@@ -334,7 +348,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(response) = get_agent( registry )->request(
       url     = |{ registry }/{ packument-name }|
-      method  = 'PUT'
+      method  = zif_abappm_http_agent=>c_method-put
       payload = json ).
 
     IF response->is_ok( ) = abap_false.
@@ -381,17 +395,17 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       package_json = package_json ).
 
     " 6. Get tarball
-    DATA(tarball) = get_tarball(
+    DATA(tar) = get_tar(
       package      = package
       package_json = package_json ).
 
     " 7. Attach tarball to packument
-    attach_package(
+    attach_tarball(
       EXPORTING
-        version = package_json-version
-        tarball = tarball
+        version   = package_json-version
+        tar       = tar
       CHANGING
-        cs_publish = packument_publish ).
+        packument = packument_publish ).
 
     " 8. Publish package to registry
     DATA(message) = publish_package(

@@ -1,5 +1,11 @@
 CLASS zcl_abappm_code_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* apm Code Importer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS scan

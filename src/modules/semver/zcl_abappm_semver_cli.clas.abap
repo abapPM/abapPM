@@ -17,7 +17,7 @@ CLASS zcl_abappm_semver_cli DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
 
@@ -29,7 +29,7 @@ CLASS zcl_abappm_semver_cli DEFINITION
       RETURNING
         VALUE(result) TYPE string_table
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
   PRIVATE SECTION.
 
@@ -122,7 +122,11 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(arg) = replace( val = args sub = '=' with = ` ` occ = 0 ).
+    DATA(arg) = replace(
+      val  = args
+      sub  = '='
+      with = ` `
+      occ  = 0 ).
 
     SPLIT arg AT ` ` INTO TABLE argv.
 
@@ -142,27 +146,27 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
         WHEN '-p' OR '--include-prerelease'.
           incpre = abap_true.
         WHEN '-v' OR '--version'.
-          idx += 1.
+          idx = idx + 1.
           val = VALUE #( argv[ idx ] OPTIONAL ).
           INSERT val INTO TABLE versions.
         WHEN '-i' OR '--inc' OR '--increment'.
           val = VALUE #( argv[ idx + 1 ] OPTIONAL ).
           CASE val.
             WHEN 'major' OR 'minor' OR 'patch' OR 'prerelease' OR 'premajor' OR 'preminor' OR 'prepatch'.
-              idx += 1.
+              idx = idx + 1.
               inc = VALUE #( argv[ idx ] OPTIONAL ).
             WHEN OTHERS.
               inc = 'patch'.
           ENDCASE.
         WHEN '--preid'.
-          idx += 1.
+          idx = idx + 1.
           identifier = VALUE #( argv[ idx ] OPTIONAL ).
         WHEN '-r' OR '--range'.
-          idx += 1.
+          idx = idx + 1.
           val = VALUE #( argv[ idx ] OPTIONAL ).
           INSERT val INTO TABLE ranges.
         WHEN '-n'.
-          idx += 1.
+          idx = idx + 1.
           TRY.
               identifier_base = VALUE #( argv[ idx ] OPTIONAL ).
             CATCH cx_root.
@@ -180,7 +184,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
           INSERT a INTO TABLE versions.
       ENDCASE.
 
-      idx += 1.
+      idx = idx + 1.
     ENDDO.
 
     DELETE versions WHERE table_line IS INITIAL.
@@ -204,17 +208,22 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
     ENDLOOP.
 
     IF versions IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'No valid versions found' ).
+      zcx_abappm_error=>raise( 'No valid versions found' ).
     ENDIF.
 
     IF inc IS NOT INITIAL AND ( lines( versions ) > 1 OR lines( ranges ) > 0 ).
-      zcx_abappm_semver_error=>raise( '--inc can only be used on a single version with no range' ).
+      zcx_abappm_error=>raise( '--inc can only be used on a single version with no range' ).
     ENDIF.
 
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range>).
       LOOP AT versions ASSIGNING <version>.
 
-        IF NOT zcl_abappm_semver_functions=>satisfies( version = <version> range = <range> loose = loose incpre = incpre ).
+        IF NOT zcl_abappm_semver_functions=>satisfies(
+          version = <version>
+          range   = <range>
+          loose   = loose
+          incpre  = incpre ).
+
           DELETE versions.
         ENDIF.
 
@@ -222,7 +231,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
     ENDLOOP.
 
     IF versions IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'No valid versions found' ).
+      zcx_abappm_error=>raise( 'No valid versions found' ).
     ENDIF.
 
     result = success( ).

@@ -56,6 +56,7 @@ INTERFACE zif_abappm_persist_apm PUBLIC.
     END OF c_key_type,
     BEGIN OF c_key_name,
       global_settings TYPE ty_key VALUE '$GLOBAL$',
+      user_settings   TYPE ty_key VALUE '$USER$',
     END OF c_key_name,
     BEGIN OF c_key_extra,
       package_json    TYPE ty_key VALUE 'PACKAGE_JSON',

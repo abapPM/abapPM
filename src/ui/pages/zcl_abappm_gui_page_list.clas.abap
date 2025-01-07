@@ -320,7 +320,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     super->constructor( ).
 
     load_package_list( ).
-
     load_settings( ).
 
     " Overwrite setting
@@ -537,7 +536,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_registry.
 
-    IF settings-registry CS 'registry.abappm.com'.
+    IF settings-registry = zif_abappm_settings=>c_registry.
       DATA(fav_class) = 'transport-box'. " green
     ELSE.
       fav_class = 'user-box'. " blue
@@ -893,6 +892,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     label_colors = zcl_abapgit_repo_labels=>split_colors_into_map( settings-gui_settings-label_colors ).
 
     load_package_list( ).
+    load_settings( ).
 
     DATA(html) = zcl_abapgit_html=>create( ).
 

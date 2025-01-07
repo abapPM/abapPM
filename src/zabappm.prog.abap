@@ -5,8 +5,8 @@ REPORT zabappm LINE-SIZE 100.
 ********************************************************************************
 * The MIT License (MIT)
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>  [ where noted in code ]
-* Copyright 2014 abapGit Contributors
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2014 abapGit Contributors [ where noted in code ]
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@ REPORT zabappm LINE-SIZE 100.
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 ********************************************************************************
+
+* TODO: Check this list; some might not be necessary
 
 * @@require devc $abapgit_data
 * @@require devc $abapgit_objects
@@ -105,8 +107,6 @@ REPORT zabappm LINE-SIZE 100.
 * @@require clas zcl_abapgit_url
 * @@require clas zcl_abapgit_version
 * @@require intf zif_abapgit_version
-
-* @@require clas zcl_tar
 
 SELECTION-SCREEN BEGIN OF SCREEN 1001.
 * dummy for triggering screen on Java SAP GUI

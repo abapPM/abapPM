@@ -25,7 +25,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS intersects
       IMPORTING
@@ -36,7 +36,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS ltr
       IMPORTING
@@ -47,7 +47,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS max_satisfying
       IMPORTING
@@ -58,7 +58,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS min_satisfying
       IMPORTING
@@ -69,7 +69,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS min_version
       IMPORTING
@@ -79,7 +79,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_semver
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS outside
       IMPORTING
@@ -91,7 +91,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS simplify
       IMPORTING
@@ -102,7 +102,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS subset
       IMPORTING
@@ -113,7 +113,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error ##NEEDED.
 
     CLASS-METHODS to_comparators
       IMPORTING
@@ -123,7 +123,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE ty_comp_lists
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS valid_range
       IMPORTING
@@ -133,7 +133,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -146,7 +146,12 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
 
   METHOD gtr.
-    result = outside( version = version range = range hilo = '>' loose = loose incpre = incpre ).
+    result = outside(
+      version = version
+      range   = range
+      hilo    = '>'
+      loose   = loose
+      incpre  = incpre ).
   ENDMETHOD.
 
 
@@ -162,7 +167,12 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
 
   METHOD ltr.
-    result = outside( version = version range = range hilo = '<' loose = loose incpre = incpre ).
+    result = outside(
+      version = version
+      range   = range
+      hilo    = '<'
+      loose   = loose
+      incpre  = incpre ).
   ENDMETHOD.
 
 
@@ -174,7 +184,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
     TRY.
         DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = ''.
         RETURN.
     ENDTRY.
@@ -203,7 +213,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
     TRY.
         DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = ''.
         RETURN.
     ENDTRY.
@@ -264,7 +274,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
               setmin = compver.
             ENDIF.
 
-          WHEN '' OR  '>='.
+          WHEN '' OR '>='.
             IF setmin IS INITIAL OR zcl_abappm_semver_functions=>gt( a = compver b = setmin ).
               setmin = compver.
             ENDIF.
@@ -273,7 +283,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
             " Ignore maximum versions
 
           WHEN OTHERS.
-            zcx_abappm_semver_error=>raise( |Unexpected operation: { <comparator>->operator }| ).
+            zcx_abappm_error=>raise( |Unexpected operation: { <comparator>->operator }| ).
         ENDCASE.
       ENDLOOP.
 
@@ -295,21 +305,19 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
   METHOD outside.
 
     DATA:
-      comp  TYPE string,
-      ecomp TYPE string,
-      high  TYPE REF TO zcl_abappm_semver_comparator,
-      low   TYPE REF TO zcl_abappm_semver_comparator.
+      high TYPE REF TO zcl_abappm_semver_comparator,
+      low  TYPE REF TO zcl_abappm_semver_comparator.
 
     DATA(semver) = zcl_abappm_semver=>create( version = version loose = loose incpre = incpre ).
 
     DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
 
     IF hilo NA '<>'.
-      zcx_abappm_semver_error=>raise( 'Must provide a hilo val of "<" or ">"' ).
+      zcx_abappm_error=>raise( 'Must provide a hilo val of "<" or ">"' ).
     ENDIF.
 
-    comp = hilo.
-    ecomp = comp && '='.
+    DATA(comp)  = hilo.
+    DATA(ecomp) = comp && '='.
 
     " If it satisfies the range it is not outside
     IF zcl_abappm_semver_functions=>satisfies( version = semver range = semrange loose = loose incpre = incpre ).
@@ -336,15 +344,35 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
         CASE hilo.
           WHEN '>'.
-            IF zcl_abappm_semver_functions=>gt( a = <comparator>->semver b = high->semver loose = loose incpre = incpre ).
+            IF zcl_abappm_semver_functions=>gt(
+              a      = <comparator>->semver
+              b      = high->semver
+              loose  = loose
+              incpre = incpre ).
+
               high = <comparator>.
-            ELSEIF zcl_abappm_semver_functions=>lt( a = <comparator>->semver b = low->semver loose = loose incpre = incpre ).
+            ELSEIF zcl_abappm_semver_functions=>lt(
+              a      = <comparator>->semver
+              b      = low->semver
+              loose  = loose
+              incpre = incpre ).
+
               low = <comparator>.
             ENDIF.
           WHEN '<'.
-            IF zcl_abappm_semver_functions=>lt( a = <comparator>->semver b = high->semver loose = loose incpre = incpre ).
+            IF zcl_abappm_semver_functions=>lt(
+              a      = <comparator>->semver
+              b      = high->semver
+              loose  = loose
+              incpre = incpre ).
+
               high = <comparator>.
-            ELSEIF zcl_abappm_semver_functions=>gt( a = <comparator>->semver b = low->semver loose = loose incpre = incpre ).
+            ELSEIF zcl_abappm_semver_functions=>gt(
+              a      = <comparator>->semver
+              b      = low->semver
+              loose  = loose
+              incpre = incpre ).
+
               low = <comparator>.
             ENDIF.
         ENDCASE.
@@ -360,7 +388,9 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
       " is less than it then it isn't higher than the range
       CASE hilo.
         WHEN '>'.
-          IF ( low->operator IS INITIAL OR low->operator = comp ) AND zcl_abappm_semver_functions=>lte( a = semver b =  low->semver ).
+          IF ( low->operator IS INITIAL OR low->operator = comp ) AND
+            zcl_abappm_semver_functions=>lte( a = semver b =  low->semver ).
+
             result = abap_false.
             RETURN.
           ELSEIF low->operator = ecomp AND zcl_abappm_semver_functions=>lt( a = semver b = low->semver ).
@@ -368,7 +398,9 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
             RETURN.
           ENDIF.
         WHEN '<'.
-          IF ( low->operator IS INITIAL OR low->operator = comp ) AND zcl_abappm_semver_functions=>gte( a = semver b =  low->semver ).
+          IF ( low->operator IS INITIAL OR low->operator = comp ) AND
+            zcl_abappm_semver_functions=>gte( a = semver b =  low->semver ).
+
             result = abap_false.
             RETURN.
           ELSEIF low->operator = ecomp AND zcl_abappm_semver_functions=>gt( a = semver b = low->semver ).
@@ -394,15 +426,14 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
         min TYPE string,
         max TYPE string,
       END OF ty_min_max,
-      ty_set TYPE STANDARD TABLE OF ty_min_max WITH DEFAULT KEY.
+      ty_set TYPE STANDARD TABLE OF ty_min_max WITH KEY min max.
 
     DATA minmax TYPE ty_min_max.
     DATA set TYPE ty_set.
     DATA ranges TYPE string_table.
-    DATA original TYPE string.
 
     IF versions IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'Empty version list' ).
+      zcx_abappm_error=>raise( 'Empty version list' ).
     ENDIF.
 
     DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
@@ -413,7 +444,12 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     DATA(v) = zcl_abappm_semver_functions=>sort( list = versions loose = loose incpre = incpre ).
 
     LOOP AT v ASSIGNING FIELD-SYMBOL(<version>).
-      IF zcl_abappm_semver_functions=>satisfies( version = <version> range = semrange loose = loose incpre = incpre ).
+      IF zcl_abappm_semver_functions=>satisfies(
+        version = <version>
+        range   = semrange
+        loose   = loose
+        incpre  = incpre ).
+
         prev = <version>.
         IF first IS INITIAL.
           first = <version>.
@@ -436,11 +472,11 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     LOOP AT set ASSIGNING FIELD-SYMBOL(<set>).
       IF <set>-min = <set>-max.
         INSERT <set>-min INTO TABLE ranges.
-      ELSEIF <set>-max IS INITIAL AND <set>-min = v[ 1 ].
+      ELSEIF <set>-max IS INITIAL AND  v[ 1 ] = <set>-min.
         INSERT |*| INTO TABLE ranges.
       ELSEIF <set>-max IS INITIAL.
         INSERT |>={ <set>-min }| INTO TABLE ranges.
-      ELSEIF <set>-min = v[ 1 ].
+      ELSEIF  v[ 1 ] = <set>-min.
         INSERT |<={ <set>-max }| INTO TABLE ranges.
       ELSE.
         INSERT |{ <set>-min } - { <set>-max }| INTO TABLE ranges.
@@ -452,7 +488,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     DATA(kind) = cl_abap_typedescr=>describe_by_data( range )->type_kind.
 
     IF kind = cl_abap_typedescr=>typekind_char OR kind = cl_abap_typedescr=>typekind_string.
-      original = range.
+      DATA(original) = CONV string( range ).
     ELSE.
       original = semrange->to_string( ).
     ENDIF.
@@ -504,7 +540,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     " - Else return true
 
     " https://github.com/npm/node-semver/blob/main/ranges/subset.js
-    zcx_abappm_semver_error=>raise( 'TODO' ).
+    zcx_abappm_error=>raise( 'TODO' ).
 
   ENDMETHOD.
 
@@ -539,7 +575,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
         ELSE.
           result = '*'.
         ENDIF.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = ''.
     ENDTRY.
 

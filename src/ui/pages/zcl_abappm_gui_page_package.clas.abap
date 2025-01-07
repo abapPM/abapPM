@@ -555,7 +555,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
             version = installed_package-version
             range   = <dependency>-range ).
-        CATCH zcx_abappm_semver_error INTO DATA(error).
+        CATCH zcx_abappm_error INTO DATA(error).
           zcx_abapgit_exception=>raise_with_text( error ).
       ENDTRY.
 
@@ -777,6 +777,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_event_handler~on_event.
 
+    " TODO: Add "copy to clipboard" and "download to file"
+    " see zcl_fileview_abapgit_ext_ui
     CASE ii_event->mv_action.
       WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
 
@@ -855,6 +857,9 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     register_handlers( ).
 
     DATA(html) = zcl_abapgit_html=>create( ).
+
+    markdown-data = get_markdown( ).
+    package_json  = get_package_json( ).
 
     render_styles( html ).
     render_top( html ).

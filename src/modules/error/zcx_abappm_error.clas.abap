@@ -17,7 +17,12 @@ CLASS zcx_abappm_error DEFINITION
       if_t100_dyn_msg,
       if_t100_message.
 
-    CLASS-DATA null TYPE string.
+    "! Black Hole
+    "! Can be used for MESSAGE ... INTO null
+    CLASS-DATA null TYPE string ##NEEDED.
+
+    DATA longtext TYPE string READ-ONLY.
+    DATA callstack TYPE abap_callstack READ-ONLY.
 
     METHODS constructor
       IMPORTING
@@ -26,16 +31,19 @@ CLASS zcx_abappm_error DEFINITION
         !msgv1    TYPE symsgv OPTIONAL
         !msgv2    TYPE symsgv OPTIONAL
         !msgv3    TYPE symsgv OPTIONAL
-        !msgv4    TYPE symsgv OPTIONAL.
+        !msgv4    TYPE symsgv OPTIONAL
+        !longtext TYPE csequence OPTIONAL.
 
     "! Raise exception with text
     "! @parameter text | Text
     "! @parameter previous | Previous exception
+    "! @parameter longtext | Longtext
     "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise
       IMPORTING
         !text     TYPE clike
         !previous TYPE REF TO cx_root OPTIONAL
+        !longtext TYPE csequence OPTIONAL
       RAISING
         zcx_abappm_error.
 
@@ -50,6 +58,7 @@ CLASS zcx_abappm_error DEFINITION
     "! @parameter msgv3 | Message variable 3
     "! @parameter msgv4 | Message variable 4
     "! @parameter previous | Previous exception
+    "! @parameter longtext | Longtext
     "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise_t100
       IMPORTING
@@ -60,28 +69,34 @@ CLASS zcx_abappm_error DEFINITION
         msgv3     TYPE symsgv DEFAULT sy-msgv3
         msgv4     TYPE symsgv DEFAULT sy-msgv4
         !previous TYPE REF TO cx_root OPTIONAL
+        !longtext TYPE csequence OPTIONAL
       RAISING
         zcx_abappm_error.
 
     "! Raise with text from previous exception
     "! @parameter previous | Previous exception
+    "! @parameter longtext | Longtext
     "! @raising zcx_abappm_error | Exception
     CLASS-METHODS raise_with_text
       IMPORTING
         !previous TYPE REF TO cx_root
+        !longtext TYPE csequence OPTIONAL
       RAISING
         zcx_abappm_error.
+
+    METHODS get_source_position REDEFINITION.
+    METHODS if_message~get_longtext REDEFINITION.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CONSTANTS c_generic_error_msg TYPE string VALUE `An error occured`.
 
-    CLASS-METHODS split_text_to_symsg
-      IMPORTING
-        !text         TYPE string
+    METHODS save_callstack.
+
+    METHODS get_t100_longtext
       RETURNING
-        VALUE(result) TYPE symsg.
+        VALUE(result) TYPE tline_tab.
 
 ENDCLASS.
 
@@ -107,36 +122,118 @@ CLASS zcx_abappm_error IMPLEMENTATION.
       if_t100_message~t100key = textid.
     ENDIF.
 
+    me->longtext = longtext.
+
+    save_callstack( ).
+
+  ENDMETHOD.
+
+
+  METHOD get_source_position.
+
+    READ TABLE callstack ASSIGNING FIELD-SYMBOL(<callstack>) INDEX 1.
+    IF sy-subrc = 0.
+      program_name = <callstack>-mainprogram.
+      include_name = <callstack>-include.
+      source_line  = <callstack>-line.
+    ELSE.
+      super->get_source_position(
+        IMPORTING
+          program_name = program_name
+          include_name = include_name
+          source_line  = source_line ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_t100_longtext.
+
+    DATA(docu_key) = CONV doku_obj( if_t100_message~t100key-msgid && if_t100_message~t100key-msgno ).
+
+    CALL FUNCTION 'DOCU_GET'
+      EXPORTING
+        id     = 'NA'
+        langu  = sy-langu
+        object = docu_key
+        typ    = 'E'
+      TABLES
+        line   = result
+      EXCEPTIONS
+        OTHERS = 1.
+
+    IF sy-subrc = 0.
+      ASSIGN me->(if_t100_message~t100key-attr1) TO FIELD-SYMBOL(<msgv>).
+      IF sy-subrc = 0.
+        REPLACE ALL OCCURRENCES OF '&V1&' IN TABLE result WITH <msgv>.
+      ENDIF.
+      ASSIGN me->(if_t100_message~t100key-attr2) TO <msgv>.
+      IF sy-subrc = 0.
+        REPLACE ALL OCCURRENCES OF '&V2&' IN TABLE result WITH <msgv>.
+      ENDIF.
+      ASSIGN me->(if_t100_message~t100key-attr3) TO <msgv>.
+      IF sy-subrc = 0.
+        REPLACE ALL OCCURRENCES OF '&V3&' IN TABLE result WITH <msgv>.
+      ENDIF.
+      ASSIGN me->(if_t100_message~t100key-attr4) TO <msgv>.
+      IF sy-subrc = 0.
+        REPLACE ALL OCCURRENCES OF '&V4&' IN TABLE result WITH <msgv>.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD if_message~get_longtext.
+
+    IF longtext IS NOT INITIAL.
+
+      result = longtext.
+
+      IF preserve_newlines = abap_false.
+        result = lcl_error_longtext=>remove_newlines( result ).
+      ENDIF.
+
+    ELSEIF if_t100_message~t100key IS NOT INITIAL.
+
+      result = lcl_error_longtext=>to_string( get_t100_longtext( ) ).
+
+      IF preserve_newlines = abap_false.
+        result = lcl_error_longtext=>remove_newlines( result ).
+      ENDIF.
+
+    ELSE.
+      result = super->get_longtext( preserve_newlines ).
+    ENDIF.
+
   ENDMETHOD.
 
 
   METHOD raise.
 
     IF text IS INITIAL.
-      DATA(msg) = split_text_to_symsg( c_generic_error_msg ).
+      cl_message_helper=>set_msg_vars_for_clike( c_generic_error_msg ).
     ELSE.
-      msg = split_text_to_symsg( text ).
+      cl_message_helper=>set_msg_vars_for_clike( text ).
     ENDIF.
 
-    " Set syst variables using generic error message
-    MESSAGE e001(00) WITH msg-msgv1 msg-msgv2 msg-msgv3 msg-msgv4 INTO null.
-
-    raise_t100( previous = previous ).
+    raise_t100(
+      previous = previous
+      longtext = longtext ).
 
   ENDMETHOD.
 
 
   METHOD raise_t100.
 
-    DATA t100_key TYPE scx_t100key.
-
     IF msgid IS NOT INITIAL.
-      t100_key-msgid = msgid.
-      t100_key-msgno = msgno.
-      t100_key-attr1 = 'IF_T100_DYN_MSG~MSGV1'.
-      t100_key-attr2 = 'IF_T100_DYN_MSG~MSGV2'.
-      t100_key-attr3 = 'IF_T100_DYN_MSG~MSGV3'.
-      t100_key-attr4 = 'IF_T100_DYN_MSG~MSGV4'.
+      DATA(t100_key) = VALUE scx_t100key(
+        msgid = msgid
+        msgno = msgno
+        attr1 = 'IF_T100_DYN_MSG~MSGV1'
+        attr2 = 'IF_T100_DYN_MSG~MSGV2'
+        attr3 = 'IF_T100_DYN_MSG~MSGV3'
+        attr4 = 'IF_T100_DYN_MSG~MSGV4' ).
     ENDIF.
 
     RAISE EXCEPTION TYPE zcx_abappm_error
@@ -146,7 +243,8 @@ CLASS zcx_abappm_error IMPLEMENTATION.
         msgv2    = msgv2
         msgv3    = msgv3
         msgv4    = msgv4
-        previous = previous.
+        previous = previous
+        longtext = longtext.
 
   ENDMETHOD.
 
@@ -155,59 +253,40 @@ CLASS zcx_abappm_error IMPLEMENTATION.
 
     raise(
       text     = previous->get_text( )
-      previous = previous ).
+      previous = previous
+      longtext = longtext ).
 
   ENDMETHOD.
 
 
-  METHOD split_text_to_symsg.
+  METHOD save_callstack.
 
-    CONSTANTS:
-      c_length_of_msgv           TYPE i VALUE 50,
-      c_max_length_of_text       TYPE i VALUE 200,
-      c_offset_of_last_character TYPE i VALUE 49.
+    CALL FUNCTION 'SYSTEM_CALLSTACK'
+      IMPORTING
+        callstack = callstack.
 
-    TYPES:
-      ty_msgv TYPE c LENGTH c_length_of_msgv,
-      ty_text TYPE c LENGTH c_max_length_of_text.
+    DATA(main_pattern) = cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) && '*'.
 
-    DATA:
-      msg_var TYPE ty_msgv,
-      rest    TYPE ty_text.
+    " Remember that the first lines are from this exception class and are
+    " removed so that highest level in the callstack is the position where
+    " the exception is raised.
+    "
+    " For a merged report it's hard to do that, because the exception
+    " isn't visible in the callstack. Therefore we have to check the events.
+    LOOP AT callstack ASSIGNING FIELD-SYMBOL(<callstack>).
 
-    " Note: Texts longer than 200 characters truncated
-    DATA(msg_text) = CONV ty_text( text ).
+      IF <callstack>-mainprogram CP main_pattern " full
+        OR <callstack>-blockname = `SAVE_CALLSTACK` " merged
+        OR <callstack>-blockname = `CONSTRUCTOR` " merged
+        OR <callstack>-blockname CP `RAISE*`. "merged
 
-    DO 4 TIMES.
-      DATA(index) = sy-index.
+        DELETE TABLE callstack FROM <callstack>.
 
-      CALL FUNCTION 'TEXT_SPLIT'
-        EXPORTING
-          length = c_length_of_msgv
-          text   = msg_text
-        IMPORTING
-          line   = msg_var
-          rest   = rest.
-
-      IF msg_var+c_offset_of_last_character(1) = space OR msg_text+c_length_of_msgv(1) = space.
-        " keep the space at the beginning of the rest
-        " because otherwise it's lost
-        rest = | { rest }|.
+      ELSE.
+        EXIT.
       ENDIF.
 
-      msg_text = rest.
-
-      CASE index.
-        WHEN 1.
-          result-msgv1 = msg_var.
-        WHEN 2.
-          result-msgv2 = msg_var.
-        WHEN 3.
-          result-msgv3 = msg_var.
-        WHEN 4.
-          result-msgv4 = msg_var.
-      ENDCASE.
-    ENDDO.
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

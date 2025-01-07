@@ -51,7 +51,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     CASE key_type.
       WHEN zif_abappm_persist_apm=>c_key_type-package.
-        result-key_type    = 'Package'.
+        result-key_type    = 'Packages'.
         result-description = lcl_persist_utils=>get_package_description( name ).
 
         CASE extra.
@@ -68,19 +68,20 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
         ENDCASE.
 
       WHEN zif_abappm_persist_apm=>c_key_type-settings.
+        result-key_type    = 'Settings'.
         IF name = zif_abappm_persist_apm=>c_key_name-global_settings.
-          result-key_type    = 'Global Settings'.
-          result-description = 'For All Users'.
+          result-description = 'Global Settings'.
+          result-extra       = 'For all users'.
         ELSE.
-          result-key_type    = 'Personal Settings'.
-          result-description = lcl_persist_utils=>get_user_description( name ).
+          result-description = 'Personal Settings'.
+          result-extra       = |User: { lcl_persist_utils=>get_user_description( extra ) }|.
         ENDIF.
         result-content_type = zif_abappm_persist_apm=>c_content_type-json.
 
       WHEN OTHERS.
+        " Should not happen. Open issue
         result-key_type     = 'Unknown type of key'.
         result-content_type = zif_abappm_persist_apm=>c_content_type-text.
-
     ENDCASE.
 
   ENDMETHOD.

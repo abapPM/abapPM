@@ -18,36 +18,47 @@ INTERFACE zif_abappm_types PUBLIC.
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
   TYPES:
+    "! Email
     ty_email TYPE string,
+    "! URI
     ty_uri   TYPE string,
+    "! Person
     BEGIN OF ty_person,
       name   TYPE string,
       url    TYPE ty_uri,
       email  TYPE ty_email,
       avatar TYPE ty_uri,
     END OF ty_person,
+    "! List of Persons
     ty_persons TYPE STANDARD TABLE OF ty_person WITH KEY name url email,
+    "! Dependency with semver range
     BEGIN OF ty_dependency,
       name  TYPE string,
       range TYPE string,
     END OF ty_dependency,
+    "! List of Dependencies
     ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+    "! Generic key value pair
     BEGIN OF ty_generic,
       key   TYPE string,
       value TYPE string,
     END OF ty_generic,
+    "! Timestamp
     BEGIN OF ty_time,
       key       TYPE string,
       timestamp TYPE timestamp,
     END OF ty_time,
+    "! Signature
     BEGIN OF ty_signature,
       keyid TYPE string,
       sig   TYPE string,
     END OF ty_signature,
+    "! User Rating
     BEGIN OF ty_user,
       name  TYPE string,
       stars TYPE i,
     END OF ty_user,
+    "! Dist Details
     BEGIN OF ty_dist,
       file_count    TYPE i,
       integrity     TYPE string,
@@ -60,8 +71,8 @@ INTERFACE zif_abappm_types PUBLIC.
   " *** PACKAGE.ABAP.JSON ***
 
   TYPES:
-    " Full manifest (fetched with "accept: application/json" in HTTP headers)
-    " This type mirrors the package.abap.json schema
+    "! Full manifest (fetched with "accept: application/json" in HTTP headers)
+    "! This type mirrors the package.abap.json schema
     BEGIN OF ty_package_json,
       name                  TYPE string,
       version               TYPE string,
@@ -103,7 +114,7 @@ INTERFACE zif_abappm_types PUBLIC.
 
   " *** MANIFEST ***
 
-  " Full manifest (fetched with "accept: application/json" in HTTP headers)
+  "! Full manifest (fetched with "accept: application/json" in HTTP headers)
   TYPES BEGIN OF ty_manifest.
   INCLUDE TYPE ty_package_json.
   TYPES:
@@ -115,8 +126,8 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF ty_manifest.
 
   TYPES:
-    " Abbreviated manifest
-    " (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
+    "! Abbreviated manifest
+    "! (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
     BEGIN OF ty_manifest_abbreviated,
       name                  TYPE string,
       version               TYPE string,
@@ -136,12 +147,14 @@ INTERFACE zif_abappm_types PUBLIC.
   " *** PACKUMENT ***
 
   TYPES:
+    "! Version Manifest
     BEGIN OF ty_version,
       key     TYPE string,
       version TYPE ty_manifest,
     END OF ty_version.
 
   TYPES:
+    "! Tarball Attachment
     BEGIN OF ty_attachment,
       key TYPE string,
       BEGIN OF tarball,
@@ -152,8 +165,8 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF ty_attachment.
 
   TYPES:
-    " Full packument (as fetched from registry)
-    " Some fields are hoisted from latest version to root
+    "! Full packument (as fetched from registry)
+    "! Some fields are hoisted from latest version to root
     BEGIN OF ty_packument,
       name          TYPE string,
       description   TYPE string,
@@ -184,7 +197,7 @@ INTERFACE zif_abappm_types PUBLIC.
 
 
   CONSTANTS:
-    " Package name specs
+    "! Package Name Specs
     BEGIN OF c_package_name,
       min_length TYPE i VALUE 3,
       max_length TYPE i VALUE 214,
@@ -192,7 +205,7 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF c_package_name.
 
   CONSTANTS:
-    " Package manifest
+    "! Package Manifest File
     BEGIN OF c_package_json_file,
       obj_name  TYPE c LENGTH 7 VALUE 'package',
       sep1      TYPE c LENGTH 1 VALUE '.',
@@ -202,21 +215,21 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF c_package_json_file.
 
   CONSTANTS:
-    " Package types
+    "! Package Types
     BEGIN OF c_package_type,
       common_abap TYPE string VALUE 'commonabap',
       module      TYPE string VALUE 'module',
     END OF c_package_type.
 
   CONSTANTS:
-    " Supported engines
+    "! Supported Engines
     BEGIN OF c_engine,
       abap TYPE string VALUE 'abap',
       apm  TYPE string VALUE 'apm',
     END OF c_engine.
 
   CONSTANTS:
-    " Most common licenses (https://spdx.org/licenses/)
+    "! Most Common Licenses (https://spdx.org/licenses/)
     BEGIN OF c_license,
       agpl_3_0_only     TYPE string VALUE 'AGPL-3.0-only',
       apache_2_0        TYPE string VALUE 'Apache-2.0',
@@ -243,7 +256,7 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF c_license.
 
   CONSTANTS:
-    " Operating system platforms
+    "! Operating System Platforms
     BEGIN OF c_os,
       aix        TYPE string VALUE 'aix',
       hp_ux      TYPE string VALUE 'hp-ux',
@@ -255,7 +268,7 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF c_os.
 
   CONSTANTS:
-    " Hardware platforms
+    "! Hardware Platforms
     BEGIN OF c_cpu,
       x86_64   TYPE string VALUE 'x86-64',
       power_pc TYPE string VALUE 'power-pc',
@@ -263,7 +276,7 @@ INTERFACE zif_abappm_types PUBLIC.
     END OF c_cpu.
 
   CONSTANTS:
-    " Database platforms
+    "! Database Platforms
     BEGIN OF c_db,
       db2      TYPE string VALUE 'db2',
       db400    TYPE string VALUE 'db400',

@@ -3,7 +3,14 @@ CLASS zcl_abappm_command_update DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+* apm Update Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -145,7 +152,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
       INSERT <version>-key INTO TABLE versions.
     ENDLOOP.
 
-    result = zcl_abappm_command_semver=>max_satisfying(
+    result = zcl_abappm_semver_ranges=>max_satisfying(
       versions = versions
       range    = range ).
 
@@ -168,7 +175,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
   METHOD is_newer.
 
     " Is the next version greater than the installed version?
-    result = zcl_abappm_command_semver=>gt(
+    result = zcl_abappm_semver_functions=>gt(
       a = version_next
       b = version_installed ).
 

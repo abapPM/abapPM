@@ -1,6 +1,13 @@
 INTERFACE zif_abappm_installer_def PUBLIC.
 
-  " TODO: apm doesn't need all of this...
+************************************************************************
+* apm Installer Definitions
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: apm doesn't need all of this...
+************************************************************************
 
   CONSTANTS:
     c_tabname         TYPE tabname VALUE 'ZABAPINST' ##NO_TEXT,

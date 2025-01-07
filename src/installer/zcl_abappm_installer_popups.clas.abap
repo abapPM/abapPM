@@ -3,6 +3,16 @@ CLASS zcl_abappm_installer_popups DEFINITION
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* apm Installer Popups
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* TODO: This installer is a copy from Marc Bernard Tools
+* Some of the features are not relevant for apm and can be removed
+************************************************************************
+
   PUBLIC SECTION.
 
     TYPES:
@@ -25,15 +35,6 @@ CLASS zcl_abappm_installer_popups DEFINITION
       END OF ty_popup_position.
 
     CONSTANTS c_defaucolumn TYPE lvc_fname VALUE `DEFAUCOLUMN` ##NO_TEXT.
-
-    METHODS popup_to_enter_packaging
-      IMPORTING
-        !name         TYPE csequence OPTIONAL
-        !version      TYPE csequence OPTIONAL
-      RETURNING
-        VALUE(result) TYPE zif_abappm_installer_dot=>ty_packaging
-      RAISING
-        zcx_abappm_error.
 
     METHODS popup_to_confirm
       IMPORTING
@@ -168,68 +169,6 @@ CLASS zcl_abappm_installer_popups IMPLEMENTATION.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( 'Error from POPUP_TO_CONFIRM' ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD popup_to_enter_packaging.
-
-    TYPES:
-      BEGIN OF ty_free_sel_field,
-        name             TYPE fieldname,
-        only_parameter   TYPE abap_bool,
-        param_obligatory TYPE abap_bool,
-        value            TYPE string,
-        value_range      TYPE rsds_selopt_t,
-        ddic_tabname     TYPE tabname,
-        ddic_fieldname   TYPE fieldname,
-        text             TYPE rsseltext,
-      END OF ty_free_sel_field,
-      ty_free_sel_field_tab TYPE STANDARD TABLE OF ty_free_sel_field WITH DEFAULT KEY.
-
-    DATA fields TYPE ty_free_sel_field_tab.
-
-    APPEND INITIAL LINE TO fields ASSIGNING FIELD-SYMBOL(<field>).
-    <field>-name             = 'NAME'.
-    <field>-text             = 'Name'.
-    <field>-only_parameter   = abap_true.
-    <field>-ddic_tabname     = 'E071'.
-    <field>-ddic_fieldname   = 'OBJ_NAME'.
-    <field>-param_obligatory = abap_true.
-    <field>-value            = name.
-
-    APPEND INITIAL LINE TO fields ASSIGNING <field>.
-    <field>-name             = 'VERSION'.
-    <field>-text             = 'Version'.
-    <field>-only_parameter   = abap_true.
-    <field>-ddic_tabname     = 'TTREV'.
-    <field>-ddic_fieldname   = 'VERSION'.
-    <field>-param_obligatory = abap_true.
-    <field>-value            = version.
-
-    TRY.
-        DATA(dialog) = NEW lcl_abapgit_free_sel_dialog(
-          title      = |apm|
-          frame_text = |Packaging Details| ).
-
-        dialog->set_fields( CHANGING field_table = fields ).
-        dialog->show( ).
-
-        LOOP AT fields ASSIGNING <field>.
-          CASE <field>-name.
-            WHEN 'NAME'.
-              result-name = <field>-value.
-            WHEN 'VERSION'.
-              result-version     = <field>-value.
-              result-sem_version = zcl_abapgit_version=>conv_str_to_version( result-version ).
-          ENDCASE.
-        ENDLOOP.
-
-      CATCH zcx_abapgit_cancel.
-        RETURN.
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
 
   ENDMETHOD.
 

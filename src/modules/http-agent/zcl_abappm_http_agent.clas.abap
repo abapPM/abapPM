@@ -22,7 +22,7 @@ CLASS zcl_abappm_http_agent DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA headers TYPE REF TO zcl_abappm_string_map.
+    DATA global_headers TYPE REF TO zcl_abappm_string_map.
 
     CLASS-METHODS attach_payload
       IMPORTING
@@ -56,7 +56,7 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
 
   METHOD constructor.
 
-    headers = NEW #( ).
+    global_headers = NEW #( ).
 
   ENDMETHOD.
 
@@ -70,7 +70,7 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
 
   METHOD zif_abappm_http_agent~global_headers.
 
-    result = headers.
+    result = global_headers.
 
   ENDMETHOD.
 
@@ -101,7 +101,7 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
-    LOOP AT headers->mt_entries ASSIGNING <entry>.
+    LOOP AT global_headers->mt_entries ASSIGNING <entry>.
       http_client->request->set_header_field(
         name  = <entry>-k
         value = <entry>-v ).
@@ -115,9 +115,9 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
-    IF method = zif_abappm_http_agent=>c_methods-post
-      OR method = zif_abappm_http_agent=>c_methods-put
-      OR method = zif_abappm_http_agent=>c_methods-patch.
+    IF method = zif_abappm_http_agent=>c_method-post
+      OR method = zif_abappm_http_agent=>c_method-put
+      OR method = zif_abappm_http_agent=>c_method-patch.
       attach_payload(
         request = http_client->request
         payload = payload ).

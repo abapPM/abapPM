@@ -3,7 +3,14 @@ CLASS zcl_abappm_command_install DEFINITION
   FINAL
   CREATE PUBLIC.
 
-  " Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+* apm Install Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -112,7 +119,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
       WITH KEY name COMPONENTS name = dependency-name.
     IF sy-subrc = 0.
-      DATA(satisfies) = zcl_abappm_command_semver=>satisfies(
+      DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
         version = <package>-version
         range   = dependency-range ).
 
@@ -192,7 +199,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
   METHOD check_semver.
 
-    DATA(satisfies) = zcl_abappm_command_semver=>satisfies(
+    DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
       version = version
       range   = range ).
 

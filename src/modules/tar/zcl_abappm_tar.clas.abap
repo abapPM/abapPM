@@ -87,6 +87,20 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
+    "! Number of files in archive
+    METHODS file_count
+      RETURNING
+        VALUE(result) TYPE i
+      RAISING
+        zcx_abappm_error.
+
+    "! Total size of unpackage files in bytes
+    METHODS unpacked_size
+      RETURNING
+        VALUE(result) TYPE i
+      RAISING
+        zcx_abappm_error.
+
     "! Append file to archive
     METHODS append
       IMPORTING
@@ -282,8 +296,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       item TYPE ty_tar_item.
 
     " List
-    file-name    = name.
-    file-size    = xstrlen( content ).
+    file-name = name.
+    file-size = xstrlen( content ).
     IF date IS INITIAL.
       file-date = sy-datum.
     ELSE.
@@ -365,6 +379,15 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     ENDIF.
 
     result = me.
+
+  ENDMETHOD.
+
+
+  METHOD file_count.
+
+    LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = c_typeflag-file.
+      result += 1.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -583,6 +606,15 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         length = length - c_blocksize.
       ENDDO.
 
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD unpacked_size.
+
+    LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = c_typeflag-file.
+      result += <file>-size.
     ENDLOOP.
 
   ENDMETHOD.

@@ -11,7 +11,7 @@ CLASS zcl_abappm_semver_comparator DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CLASS-DATA any_semver TYPE REF TO zcl_abappm_semver.
+    CLASS-DATA any_semver TYPE REF TO zcl_abappm_semver READ-ONLY.
 
     DATA:
       operator TYPE string READ-ONLY,
@@ -26,7 +26,7 @@ CLASS zcl_abappm_semver_comparator DEFINITION
         loose  TYPE abap_bool DEFAULT abap_false
         incpre TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     CLASS-METHODS create
       IMPORTING
@@ -36,13 +36,13 @@ CLASS zcl_abappm_semver_comparator DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_semver_comparator
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     METHODS parse
       IMPORTING
         comp TYPE string
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
     METHODS to_string
       RETURNING
@@ -62,7 +62,7 @@ CLASS zcl_abappm_semver_comparator DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool
       RAISING
-        zcx_abappm_semver_error.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -80,7 +80,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
 
     TRY.
         any_semver = zcl_abappm_semver=>create( '9999.9999.9999' ).
-      CATCH zcx_abappm_semver_error ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
 
     " any_semver must be valid
@@ -124,7 +124,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
       result = NEW zcl_abappm_semver_comparator( comp = |{ comp }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_semver_error=>raise( 'Invalid parameter type' ).
+      zcx_abappm_error=>raise( 'Invalid parameter type' ).
     ENDIF.
 
   ENDMETHOD.
@@ -133,95 +133,96 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
   METHOD intersects.
 
     IF comp IS INITIAL.
-      zcx_abappm_semver_error=>raise( 'A comparator is required' ).
+      zcx_abappm_error=>raise( 'A comparator is required' ).
     ENDIF.
 
-    DATA(semcomp) = zcl_abappm_semver_comparator=>create( comp ).
+    DATA(semcomp) = create( comp ).
 
     CHECK semcomp IS BOUND.
 
-    IF operator = ''.
-      IF value = ''.
-        result = abap_true.
-      ELSE.
-        DATA(semrange) = zcl_abappm_semver_range=>create( range = semcomp->value loose = loose incpre = incpre ).
+    CASE ''.
+      WHEN operator.
+        IF value = ''.
+          result = abap_true.
+        ELSE.
+          DATA(semrange) = zcl_abappm_semver_range=>create( range = semcomp->value loose = loose incpre = incpre ).
 
-        CHECK semrange IS BOUND.
+          CHECK semrange IS BOUND.
 
-        result = semrange->test( value ).
-      ENDIF.
-    ELSEIF semcomp->operator = ''.
-      IF semcomp->value = ''.
-        result = abap_true.
-      ELSE.
-        semrange = zcl_abappm_semver_range=>create( range = value loose = loose incpre = incpre ).
+          result = semrange->test( value ).
+        ENDIF.
+      WHEN semcomp->operator.
+        IF semcomp->value = ''.
+          result = abap_true.
+        ELSE.
+          semrange = zcl_abappm_semver_range=>create( range = value loose = loose incpre = incpre ).
 
-        CHECK semrange IS BOUND.
+          CHECK semrange IS BOUND.
 
-        result = semrange->test( semcomp->semver ).
-      ENDIF.
-    ELSE.
-      " Special cases where nothing can possibly be lower
-      IF incpre = abap_true AND value = '<0.0.0-0' OR semcomp->value = '<0.0.0-0'.
+          result = semrange->test( semcomp->semver ).
+        ENDIF.
+      WHEN OTHERS.
+        " Special cases where nothing can possibly be lower
+        IF incpre = abap_true AND value = '<0.0.0-0' OR semcomp->value = '<0.0.0-0'.
+          result = abap_false.
+          RETURN.
+        ENDIF.
+        IF incpre = abap_false AND value CP '<0.0.0*' OR semcomp->value CP '<0.0.0*'.
+          result = abap_false.
+          RETURN.
+        ENDIF.
+
+        " Same direction increasing (> or >=)
+        IF operator CP '>*' AND semcomp->operator CP '>*'.
+          result = abap_true.
+          RETURN.
+        ENDIF.
+        " Same direction decreasing (< or <=)
+        IF operator CP '<*' AND semcomp->operator CP '<*'.
+          result = abap_true.
+          RETURN.
+        ENDIF.
+
+        " same SemVer and both sides are inclusive (<= or >=)
+        IF semver->version = semcomp->semver->version AND operator CA '=' AND semcomp->operator CA '='.
+          result = abap_true.
+          RETURN.
+        ENDIF.
+
+        " opposite directions less than
+        IF zcl_abappm_semver_functions=>cmp(
+          a      = semver->version
+          op     = '<'
+          b      = semcomp->semver->version
+          loose  = loose
+          incpre = incpre ) AND operator CP '>*' AND semcomp->operator CP '<*'.
+          result = abap_true.
+          RETURN.
+        ENDIF.
+        " opposite directions greater than
+        IF zcl_abappm_semver_functions=>cmp(
+          a      = semver->version
+          op     = '>'
+          b      = semcomp->semver->version
+          loose  = loose
+          incpre = incpre ) AND operator CP '<*' AND semcomp->operator CP '>*'.
+          result = abap_true.
+          RETURN.
+        ENDIF.
         result = abap_false.
-        RETURN.
-      ENDIF.
-      IF incpre = abap_false AND value CP '<0.0.0*' OR semcomp->value CP '<0.0.0*'.
-        result = abap_false.
-        RETURN.
-      ENDIF.
-
-      " Same direction increasing (> or >=)
-      IF operator CP '>*' AND semcomp->operator CP '>*'.
-        result = abap_true.
-        RETURN.
-      ENDIF.
-      " Same direction decreasing (< or <=)
-      IF operator CP '<*' AND semcomp->operator CP '<*'.
-        result = abap_true.
-        RETURN.
-      ENDIF.
-
-      " same SemVer and both sides are inclusive (<= or >=)
-      IF semver->version = semcomp->semver->version AND operator CA '=' AND semcomp->operator CA '='.
-        result = abap_true.
-        RETURN.
-      ENDIF.
-
-      " opposite directions less than
-      IF zcl_abappm_semver_functions=>cmp(
-        a      = semver->version
-        op     = '<'
-        b      = semcomp->semver->version
-        loose  = loose
-        incpre = incpre ) AND operator CP '>*' AND semcomp->operator CP '<*'.
-        result = abap_true.
-        RETURN.
-      ENDIF.
-      " opposite directions greater than
-      IF zcl_abappm_semver_functions=>cmp(
-        a      = semver->version
-        op     = '>'
-        b      = semcomp->semver->version
-        loose  = loose
-        incpre = incpre ) AND operator CP '<*' AND semcomp->operator CP '>*'.
-        result = abap_true.
-        RETURN.
-      ENDIF.
-      result = abap_false.
 
 
 *      DATA(same_direction_increasing) = xsdbool(
 *      ( operator = '>=' OR operator = '>' ) AND
-*      ( semcomp->operator = '>=' OR semcomp->operator = '>' ) ).
+*      ( semcomp->operator = '>=' OR semcomp->operator = '>' ) )
 *      DATA(same_direction_decreasing) = xsdbool(
 *      ( operator = '<=' OR operator = '<' ) AND
-*      ( semcomp->operator = '<=' OR semcomp->operator = '<' ) ).
+*      ( semcomp->operator = '<=' OR semcomp->operator = '<' ) )
 *      DATA(same_semver) = xsdbool(
-*      semver->version = semcomp->semver->version ).
+*      semver->version = semcomp->semver->version )
 *      DATA(different_directions_inclusive) = xsdbool(
 *      ( operator = '>=' OR operator = '<=' ) AND
-*      ( semcomp->operator = '>=' OR semcomp->operator = '<=' ) ).
+*      ( semcomp->operator = '>=' OR semcomp->operator = '<=' ) )
 *      DATA(opposite_directions_less) = xsdbool(
 *      zcl_semver_functions=>cmp(
 *      a     = semver->version
@@ -229,7 +230,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
 *      b     = semcomp->semver->version
 *      loose = loose ) AND
 *      ( operator = '>=' OR operator = '>' ) AND
-*      ( semcomp->operator = '<=' OR semcomp->operator = '<' ) ).
+*      ( semcomp->operator = '<=' OR semcomp->operator = '<' ) )
 *      DATA(opposite_directions_greater) = xsdbool(
 *      zcl_semver_functions=>cmp(
 *      a     = semver->version
@@ -237,15 +238,15 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
 *      b     = semcomp->semver->version
 *      loose = loose ) AND
 *      ( operator = '<=' OR operator = '<' ) AND
-*      ( semcomp->operator = '>=' OR semcomp->operator = '>' ) ).
+*      ( semcomp->operator = '>=' OR semcomp->operator = '>' ) )
 *
 *      result = xsdbool(
 *      same_direction_increasing = abap_true OR
 *      same_direction_decreasing = abap_true OR
 *      ( same_semver = abap_true AND different_directions_inclusive = abap_true ) OR
 *      opposite_directions_less = abap_true OR
-*      opposite_directions_greater = abap_true ).
-    ENDIF.
+*      opposite_directions_greater = abap_true )
+    ENDCASE.
 
   ENDMETHOD.
 
@@ -267,7 +268,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
         DATA(m) = r->create_matcher( text = comp ).
 
         IF NOT m->match( ).
-          zcx_abappm_semver_error=>raise( |Invalid comparator: { comp }| ).
+          zcx_abappm_error=>raise( |Invalid comparator: { comp }| ).
         ENDIF.
 
         operator = m->get_submatch( 1 ).
@@ -280,11 +281,14 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
         IF m->get_submatch( 2 ) IS INITIAL.
           semver = any_semver.
         ELSE.
-          semver = zcl_abappm_semver=>create( version = m->get_submatch( 2 ) loose = options-loose incpre = options-incpre ).
+          semver = zcl_abappm_semver=>create(
+            version = m->get_submatch( 2 )
+            loose   = options-loose
+            incpre  = options-incpre ).
         ENDIF.
 
       CATCH cx_sy_matcher.
-        zcx_abappm_semver_error=>raise( |Error evaluating regex for { comp }| ).
+        zcx_abappm_error=>raise( |Error evaluating regex for { comp }| ).
     ENDTRY.
 
   ENDMETHOD.
@@ -305,7 +309,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
             loose = options-loose ).
         ENDIF.
 
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
 

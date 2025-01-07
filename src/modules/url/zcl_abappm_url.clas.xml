@@ -3,10 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCX_ABAPPM_SEMVER_ERROR</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_URL</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Semantic Version - Error</DESCRIPT>
-    <CATEGORY>40</CATEGORY>
+    <DESCRIPT>URL</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

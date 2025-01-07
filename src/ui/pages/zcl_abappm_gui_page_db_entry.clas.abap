@@ -1,5 +1,8 @@
-CLASS zcl_abappm_gui_page_db_entry DEFINITION PUBLIC FINAL CREATE PUBLIC
-  INHERITING FROM zcl_abappm_gui_component.
+CLASS zcl_abappm_gui_page_db_entry DEFINITION
+  PUBLIC
+  INHERITING FROM zcl_abappm_gui_component
+  FINAL
+  CREATE PUBLIC.
 
 ************************************************************************
 * apm GUI Database Entry

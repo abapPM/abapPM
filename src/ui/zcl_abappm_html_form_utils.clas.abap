@@ -4,7 +4,7 @@ CLASS zcl_abappm_html_form_utils DEFINITION
   CREATE PUBLIC.
 
 ************************************************************************
-* apm GUI Page HOC
+* apm GUI HTML Form Utilities
 *
 * Copyright 2014 abapGit Contributors
 * SPDX-License-Identifier: MIT

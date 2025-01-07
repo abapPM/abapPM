@@ -248,12 +248,14 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
 
   METHOD is_valid_url.
 
-    IF url IS INITIAL.
-      result = abap_true.
-    ELSE.
-      " TODO: Replace with ZCL_URL
-      result = cl_http_utility=>is_valid_url( url ).
-    ENDIF.
+    TRY.
+        IF url IS NOT INITIAL.
+          zcl_abappm_url=>parse( url ).
+        ENDIF.
+        result = abap_true.
+      CATCH zcx_abappm_error.
+        result = abap_false.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -264,7 +266,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
     TRY.
         zcl_abappm_semver=>create( version ).
         result = abap_true.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
 
@@ -277,7 +279,7 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
     TRY.
         zcl_abappm_semver_range=>create( range ).
         result = abap_true.
-      CATCH zcx_abappm_semver_error.
+      CATCH zcx_abappm_error.
         result = abap_false.
     ENDTRY.
 
