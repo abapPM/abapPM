@@ -97,13 +97,7 @@ CLASS zcl_abappm_gui_page_db DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    CLASS-METHODS explain_key_formatted
-      IMPORTING
-        !key          TYPE zif_abappm_persist_apm=>ty_key
-      RETURNING
-        VALUE(result) TYPE string.
-
-    CLASS-METHODS explain_key_plain
+    CLASS-METHODS explain_key
       IMPORTING
         !key          TYPE zif_abappm_persist_apm=>ty_key
       RETURNING
@@ -163,7 +157,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         name    = filename
         content = zcl_abapgit_convert=>string_to_xstring_utf8( <data>-value ) ).
 
-      INSERT explain_key_plain( <data>-keys ) INTO TABLE table_of_contents.
+      INSERT explain_key( <data>-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
     zip->add(
@@ -319,24 +313,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD explain_key_formatted.
-
-    DATA(explained) = zcl_abappm_persist_apm=>explain_key( key ).
-
-    IF explained-key_type IS NOT INITIAL.
-      explained-key_type = |{ explained-key_type }: |.
-    ENDIF.
-
-    IF explained-extra IS NOT INITIAL.
-      explained-extra = | ({ explained-extra })|.
-    ENDIF.
-
-    result = |{ explained-key_type }<br/><strong>{ explained-description }</strong><br/>{ explained-extra }|.
-
-  ENDMETHOD.
-
-
-  METHOD explain_key_plain.
+  METHOD explain_key.
 
     DATA(explained) = zcl_abappm_persist_apm=>explain_key( key ).
 

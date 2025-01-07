@@ -198,14 +198,14 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
         IF is_logging = abap_true.
           FORMAT COLOR COL_POSITIVE.
-          WRITE: AT / package-name, AT 30 package-version,
+          WRITE: / package-name, AT 30 package-version,
             AT 40 package-source_package, AT 72 package-target_package, AT c_width space.
         ENDIF.
 
       ELSE.
         IF is_logging = abap_true.
           FORMAT COLOR COL_NEGATIVE.
-          WRITE: AT / <rule>-name, 'not found in global namespace', AT c_width space.
+          WRITE: / <rule>-name, 'not found in global namespace', AT c_width space.
         ENDIF.
       ENDIF.
     ENDLOOP.
@@ -338,7 +338,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           mapping-old_object CP 'Z++_PACKAGE_JSON*' ).
 
         IF is_logging = abap_true.
-          WRITE: 'Skipped' COLOR COL_TOTAL.
+          WRITE 'Skipped' COLOR COL_TOTAL.
         ENDIF.
         CONTINUE.
       ENDIF.
@@ -373,16 +373,16 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
           IF is_logging = abap_true.
             IF is_dryrun = abap_true.
-              WRITE: 'Dry run' COLOR COL_TOTAL.
+              WRITE 'Dry run' COLOR COL_TOTAL.
             ELSE.
-              WRITE: 'Success' COLOR COL_POSITIVE.
+              WRITE 'Success' COLOR COL_POSITIVE.
             ENDIF.
           ENDIF.
 
         CATCH cx_root INTO DATA(error).
           IF is_logging = abap_true.
             DATA(msg) = error->get_text( ).
-            WRITE: msg COLOR COL_NEGATIVE.
+            WRITE msg COLOR COL_NEGATIVE.
           ENDIF.
       ENDTRY.
 

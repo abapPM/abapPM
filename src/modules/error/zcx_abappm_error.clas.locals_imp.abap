@@ -46,23 +46,18 @@ CLASS lcl_error_longtext IMPLEMENTATION.
     CONSTANTS c_format_section TYPE string VALUE 'U1'.
 
     DATA:
-      stream       TYPE TABLE OF tdline,
-      stream_lines TYPE TABLE OF string,
-      itf          TYPE tline_tab,
-      has_content  TYPE abap_bool,
-      tabix_from   TYPE syst-tabix,
-      tabix_to     TYPE syst-tabix.
+      stream       TYPE STANDARD TABLE OF tdline WITH KEY table_line,
+      stream_lines TYPE string_table,
+      itf          TYPE tline_tab.
 
     itf = lines.
 
     " We replace the U1 format because that preserves the section header of longtexts
     LOOP AT itf ASSIGNING FIELD-SYMBOL(<section>) WHERE tdformat = c_format_section.
 
-      CLEAR:
-        has_content,
-        tabix_to.
-
-      tabix_from = sy-tabix.
+      DATA(has_content) = VALUE abap_bool( ).
+      DATA(tabix_from)  = sy-tabix.
+      DATA(tabix_to)    = 0.
 
       LOOP AT itf ASSIGNING FIELD-SYMBOL(<section_item>) FROM sy-tabix + 1.
 
@@ -109,7 +104,7 @@ CLASS lcl_error_longtext IMPLEMENTATION.
     IF tabix_to BETWEEN tabix_from AND lines( itf ).
       DELETE itf FROM tabix_from TO tabix_to.
     ELSE.
-      DELETE itf FROM tabix_from.
+      DELETE itf INDEX tabix_from.
     ENDIF.
 
   ENDMETHOD.

@@ -173,20 +173,18 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
   METHOD parse.
 
-    DATA: components TYPE ty_url_components,
-          remaining  TYPE string,
-          authority  TYPE string,
-          delimiter  TYPE i.
+    DATA components TYPE ty_url_components.
 
     IF url IS INITIAL.
       zcx_abappm_error=>raise( 'No URL' ).
     ENDIF.
 
     " Remove leading/trailing spaces
-    remaining = condense( url ).
+    DATA(remaining) = condense( url ).
+    DATA(authority) = ``.
 
     " Parse scheme
-    delimiter = find( val = remaining sub = ':' ).
+    DATA(delimiter) = find( val = remaining sub = ':' ).
     IF delimiter < 0.
       zcx_abappm_error=>raise( 'Invalid URL: no scheme found' ).
     ENDIF.
@@ -197,7 +195,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     components-is_special = is_special_scheme( components-scheme ).
 
     " Remove scheme and ':' from remaining string
-    delimiter += 1.
+    delimiter = delimiter + 1.
     remaining = remaining+delimiter.
 
     " Check if URL has authority (starts with '//')
@@ -239,7 +237,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       fragment_pos = find( val = remaining sub = '#' ).
       IF fragment_pos >= 0.
         components-query = remaining(fragment_pos).
-        fragment_pos += 1.
+        fragment_pos = fragment_pos + 1.
         components-fragment = remaining+fragment_pos.
       ELSE.
         components-query = remaining.
@@ -247,18 +245,18 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     ELSEIF fragment_pos = 0.
       " URL starts with #
       components-path = ''.
-      fragment_pos += 1.
+      fragment_pos = fragment_pos + 1.
       components-fragment = remaining+1.
     ELSE.
       " Normal case - extract path
       IF query_pos > 0 AND ( fragment_pos < 0 OR query_pos < fragment_pos ).
         " Path ends with ?
         components-path = remaining(query_pos).
-        query_pos += 1.
+        query_pos = query_pos + 1.
         IF fragment_pos > query_pos.
           DATA(query_len) = fragment_pos - query_pos.
           components-query = remaining+query_pos(query_len).
-          fragment_pos += 1.
+          fragment_pos = fragment_pos + 1.
           components-fragment = remaining+fragment_pos.
         ELSE.
           components-query = remaining+query_pos.
@@ -266,7 +264,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       ELSEIF fragment_pos > 0.
         " Path ends with #
         components-path = remaining(fragment_pos).
-        fragment_pos += 1.
+        fragment_pos = fragment_pos + 1.
         components-fragment = remaining+fragment_pos.
       ELSE.
         " Only path
@@ -285,24 +283,19 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
   METHOD parse_authority.
 
-    DATA:
-      temp        TYPE string,
-      delimiter   TYPE i,
-      credentials TYPE string.
-
-    temp = authority.
+    DATA(temp) = authority.
 
     " Parse username and password
-    delimiter = find( val = temp sub = '@' ).
+    DATA(delimiter) = find( val = temp sub = '@' ).
     IF delimiter >= 0.
-      credentials = temp(delimiter).
-      delimiter += 1.
+      DATA(credentials) = temp(delimiter).
+      delimiter = delimiter + 1.
       temp = temp+delimiter.
 
       delimiter = find( val = credentials sub = ':' ).
       IF delimiter >= 0.
         username = percent_decode( |{ credentials(delimiter) }| ).
-        delimiter += 1.
+        delimiter = delimiter + 1.
         password = percent_decode( |{ credentials+delimiter }| ).
       ELSE.
         username = percent_decode( credentials ).
@@ -324,9 +317,9 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       host = temp+1(host_len).
 
       " Check if there's a port after the IPv6 address
-      delimiter += 1.
+      delimiter = delimiter + 1.
       IF delimiter < strlen( temp ) AND temp+delimiter(1) = ':'.
-        delimiter += 1.
+        delimiter = delimiter + 1.
         port = temp+delimiter.
       ENDIF.
     ELSE.
@@ -334,7 +327,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       delimiter = find( val = temp sub = ':' ).
       IF delimiter >= 0.
         host = temp(delimiter).
-        delimiter += 1.
+        delimiter = delimiter + 1.
         port = temp+delimiter.
       ELSE.
         host = temp.
@@ -457,13 +450,8 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
   METHOD validate_ipv6_address.
 
-    DATA:
-      parts TYPE TABLE OF string,
-      part  TYPE string,
-      count TYPE i.
-
     " Split by colons
-    SPLIT address AT ':' INTO TABLE parts.
+    SPLIT address AT ':' INTO TABLE DATA(parts).
 
     " Basic validation of IPv6 format
     IF lines( parts ) > 8.
@@ -471,10 +459,11 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     ENDIF.
 
     " Check each part
-    LOOP AT parts INTO part.
+    DATA(count) = 0.
+    LOOP AT parts INTO DATA(part).
       " Empty part is allowed for :: notation, but only once
       IF part IS INITIAL.
-        ADD 1 TO count.
+        count = count + 1.
         IF count > 1.
           zcx_abappm_error=>raise( 'Invalid IPv6 address: multiple empty segments' ).
         ENDIF.
