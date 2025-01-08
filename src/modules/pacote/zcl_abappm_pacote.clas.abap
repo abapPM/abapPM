@@ -381,13 +381,13 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         iv_val = zif_abappm_http_agent=>c_content_type-json ).
     ENDIF.
 
-    DATA(host) = zcl_abappm_url=>parse( url )->components-host.
+    DATA(urlc) = zcl_abappm_url=>parse( url )->components.
 
-    " Get auth token from URL
-    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
+    " Get/set auth token
+    IF zcl_abappm_http_login_manager=>get( urlc-host ) IS NOT INITIAL.
       result->global_headers( )->set(
         iv_key = zif_abappm_http_agent=>c_header-authorization
-        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
+        iv_val = zcl_abappm_http_login_manager=>get( urlc-host ) ).
     ENDIF.
 
   ENDMETHOD.

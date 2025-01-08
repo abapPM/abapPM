@@ -324,15 +324,13 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD prepare_list.
 
-    DATA:
-      list_entry  TYPE ty_list_item,
-      sorted_list TYPE ty_list.
+    DATA sorted_list TYPE ty_list.
 
     CLEAR list.
 
     " Different field order for AT processing
     LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
-      MOVE-CORRESPONDING <data> TO list_entry.
+      DATA(list_entry) = CORRESPONDING ty_list_item( <data> ).
       INSERT list_entry INTO TABLE sorted_list.
     ENDLOOP.
 

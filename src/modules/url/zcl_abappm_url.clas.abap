@@ -1,5 +1,14 @@
 CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
+************************************************************************
+* URL Object
+*
+* Implementation of WHATWG-URL standard
+* https://url.spec.whatwg.org/
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
@@ -228,49 +237,50 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     DATA(fragment_pos) = find( val = remaining sub = '#' ).
 
     " Set path first
-    IF query_pos = 0.
-      " URL starts with ?
-      components-path = ''.
-      remaining = remaining+1.
+    CASE 0.
+      WHEN query_pos.
+        " URL starts with ?
+        components-path = ''.
+        remaining = remaining+1.
 
-      " Find fragment after query
-      fragment_pos = find( val = remaining sub = '#' ).
-      IF fragment_pos >= 0.
-        components-query = remaining(fragment_pos).
-        fragment_pos = fragment_pos + 1.
-        components-fragment = remaining+fragment_pos.
-      ELSE.
-        components-query = remaining.
-      ENDIF.
-    ELSEIF fragment_pos = 0.
-      " URL starts with #
-      components-path = ''.
-      fragment_pos = fragment_pos + 1.
-      components-fragment = remaining+1.
-    ELSE.
-      " Normal case - extract path
-      IF query_pos > 0 AND ( fragment_pos < 0 OR query_pos < fragment_pos ).
-        " Path ends with ?
-        components-path = remaining(query_pos).
-        query_pos = query_pos + 1.
-        IF fragment_pos > query_pos.
-          DATA(query_len) = fragment_pos - query_pos.
-          components-query = remaining+query_pos(query_len).
+        " Find fragment after query
+        fragment_pos = find( val = remaining sub = '#' ).
+        IF fragment_pos >= 0.
+          components-query = remaining(fragment_pos).
           fragment_pos = fragment_pos + 1.
           components-fragment = remaining+fragment_pos.
         ELSE.
-          components-query = remaining+query_pos.
+          components-query = remaining.
         ENDIF.
-      ELSEIF fragment_pos > 0.
-        " Path ends with #
-        components-path = remaining(fragment_pos).
+      WHEN fragment_pos.
+        " URL starts with #
+        components-path = ''.
         fragment_pos = fragment_pos + 1.
-        components-fragment = remaining+fragment_pos.
-      ELSE.
-        " Only path
-        components-path = remaining.
-      ENDIF.
-    ENDIF.
+        components-fragment = remaining+1.
+      WHEN OTHERS.
+        " Normal case - extract path
+        IF query_pos > 0 AND ( fragment_pos < 0 OR query_pos < fragment_pos ).
+          " Path ends with ?
+          components-path = remaining(query_pos).
+          query_pos = query_pos + 1.
+          IF fragment_pos > query_pos.
+            DATA(query_len) = fragment_pos - query_pos.
+            components-query = remaining+query_pos(query_len).
+            fragment_pos = fragment_pos + 1.
+            components-fragment = remaining+fragment_pos.
+          ELSE.
+            components-query = remaining+query_pos.
+          ENDIF.
+        ELSEIF fragment_pos > 0.
+          " Path ends with #
+          components-path = remaining(fragment_pos).
+          fragment_pos = fragment_pos + 1.
+          components-fragment = remaining+fragment_pos.
+        ELSE.
+          " Only path
+          components-path = remaining.
+        ENDIF.
+    ENDCASE.
 
     components-path     = percent_decode( normalize_path( components-path ) ).
     components-query    = percent_decode( components-query ).
@@ -318,7 +328,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
       " Check if there's a port after the IPv6 address
       delimiter = delimiter + 1.
-      IF delimiter < strlen( temp ) AND temp+delimiter(1) = ':'.
+      IF strlen( temp ) > delimiter AND temp+delimiter(1) = ':'.
         delimiter = delimiter + 1.
         port = temp+delimiter.
       ENDIF.
@@ -381,7 +391,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
         DATA(idx2) = idx + 1.
         result = |{ result(idx) }+{ result+idx2(*) }|.
       ENDIF.
-      idx += 1.
+      idx = idx + 1.
     ENDDO.
 
   ENDMETHOD.

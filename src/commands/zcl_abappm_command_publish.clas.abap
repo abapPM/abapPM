@@ -212,13 +212,13 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       iv_key = zif_abappm_http_agent=>c_header-user_agent
       iv_val = |apm/{ zif_abappm_version=>c_version } abap/{ get_abap_version( ) }| ).
 
-    DATA(host) = zcl_abappm_url=>parse( iv_url )->components-host.
+    DATA(urlc) = zcl_abappm_url=>parse( iv_url )->components.
 
     " Get/set auth token
-    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
+    IF zcl_abappm_http_login_manager=>get( urlc-host ) IS NOT INITIAL.
       result->global_headers( )->set(
         iv_key = zif_abappm_http_agent=>c_header-authorization
-        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
+        iv_val = zcl_abappm_http_login_manager=>get( urlc-host ) ).
     ENDIF.
 
   ENDMETHOD.
