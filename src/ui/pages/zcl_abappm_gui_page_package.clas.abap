@@ -676,7 +676,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     " Output with Emoji
     html->add( '<div class="html">' ).
-    html->add( zcl_abappm_markdown_emoji=>create( )->format_emoji( markdown_text ) ).
+    html->add( zcl_abappm_emoji=>create( )->format_emoji( markdown_text ) ).
     html->add( '</div>' ).
 
   ENDMETHOD.
@@ -739,7 +739,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
     " Emoji Styles
     DATA(emoji_styles) = concat_lines_of(
-      table = zcl_abappm_markdown_emoji=>create( )->get_emoji_css( )
+      table = zcl_abappm_emoji=>create( )->get_emoji_css( )
       sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).

@@ -25,6 +25,8 @@ CLASS zcl_abappm_markdown DEFINITION
 * - Fix for escaped | in tables
 * - CSS
 ************************************************************************
+* TODO: Add "copy-to-clipboard" for code blocks
+************************************************************************
 
   PUBLIC SECTION.
 
@@ -144,12 +146,8 @@ CLASS zcl_abappm_markdown DEFINITION
         texts      TYPE ty_t_element4,
         lines      TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
       END OF ty_element5.
-*    TYPES:
-*      ty_t_element5 TYPE STANDARD TABLE OF ty_element5 WITH DEFAULT KEY
 
     TYPES ty_element TYPE ty_element5.
-*    TYPES:
-*      ty_t_element TYPE STANDARD TABLE OF ty_element WITH DEFAULT KEY
 
     TYPES:
       BEGIN OF ty_block,
