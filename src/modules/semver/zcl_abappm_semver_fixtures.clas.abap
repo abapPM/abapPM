@@ -100,7 +100,7 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
         r1  TYPE string,
         res TYPE abap_bool,
       END OF ty_range_intersection,
-      ty_range_intersections TYPE STANDARD TABLE OF ty_range_intersection WITH DEFAULT KEY.
+      ty_range_intersections TYPE STANDARD TABLE OF ty_range_intersection WITH KEY r0 r1 res.
 
     CLASS-METHODS range_intersection
       RETURNING
@@ -143,7 +143,6 @@ CLASS zcl_abappm_semver_fixtures DEFINITION
     CLASS-METHODS version_not_lt_range
       RETURNING
         VALUE(result) TYPE ty_version_ranges.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.

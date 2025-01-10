@@ -9,6 +9,9 @@ CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* TODO: Add support for International Domain Names for Application
+* (punycode)
+************************************************************************
   PUBLIC SECTION.
 
     CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
@@ -71,6 +74,7 @@ CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
     CLASS-METHODS parse_authority
       IMPORTING
         authority TYPE string
+        scheme    TYPE string
       EXPORTING
         username  TYPE string
         password  TYPE string
@@ -98,6 +102,12 @@ CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
         VALUE(result) TYPE string.
 
     CLASS-METHODS validate_ipv6_address
+      IMPORTING
+        address TYPE string
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS validate_ipv4_address
       IMPORTING
         address TYPE string
       RAISING
@@ -221,10 +231,18 @@ CLASS zcl_abappm_url IMPLEMENTATION.
         remaining = remaining+delimiter.
       ENDIF.
 
+      " Split off fragment
+      delimiter = find( val = authority sub = '#' ).
+      IF delimiter >= 0.
+        authority = authority(delimiter).
+        remaining = authority+delimiter.
+      ENDIF.
+
       " Parse authority section
       parse_authority(
         EXPORTING
           authority = authority
+          scheme    = components-scheme
         IMPORTING
           username  = components-username
           password  = components-password
@@ -351,11 +369,27 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       IF NOT matches( val = port regex = '^\d+$' ).
         zcx_abappm_error=>raise( 'Invalid port number' ).
       ENDIF.
+      IF port NOT BETWEEN 0 AND 65535.
+        zcx_abappm_error=>raise( 'Port number out of range' ).
+      ENDIF.
     ENDIF.
 
-    " Validate IPv6 address if present
-    IF host IS NOT INITIAL AND temp(1) = '['.
+    " Validate host
+    IF is_special_scheme( scheme ).
+      IF host IS INITIAL.
+        zcx_abappm_error=>raise( 'Missing host' ).
+      ENDIF.
+    ELSE.
+      IF host CA | \n\t\r#/:<>?@[\\]^\||.
+        zcx_abappm_error=>raise( 'Host contain invalid code point' ).
+      ENDIF.
+    ENDIF.
+
+    " Validate IPv4 or IPv6 address if present
+    IF temp(1) = '['.
       validate_ipv6_address( host ).
+    ELSEIF host CO '0123456789. '.
+      validate_ipv4_address( host ).
     ENDIF.
 
   ENDMETHOD.
@@ -458,14 +492,60 @@ CLASS zcl_abappm_url IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD validate_ipv4_address.
+
+    IF address(1) = '.'.
+      zcx_abappm_error=>raise( 'Invalid IPv4 address: initial segment is empty' ).
+    ENDIF.
+
+    DATA(len) = strlen( address ) - 1.
+    IF len >= 0 AND address+len(1) = '.'.
+      zcx_abappm_error=>raise( 'Invalid IPv4 address: last segment is empty' ).
+    ENDIF.
+
+    " Split by period
+    SPLIT address AT '.' INTO TABLE DATA(parts).
+
+    " Basic validation of IPv4 format
+    IF lines( parts ) <> 4.
+      zcx_abappm_error=>raise( 'Invalid IPv4 address: not four segments' ).
+    ENDIF.
+
+    " Check each part
+    LOOP AT parts INTO DATA(part).
+      IF NOT matches( val = part regex = '^\d+$' ).
+        zcx_abappm_error=>raise( 'Invalid IPv4 address: non-numeric segment' ).
+      ENDIF.
+      IF part NOT BETWEEN 0 AND 255.
+        zcx_abappm_error=>raise( 'Invalid IPv4 address: segment exceeds 255' ).
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD validate_ipv6_address.
+
+    IF address(1) = ':'.
+      zcx_abappm_error=>raise( 'Invalid IPv6 address: initial piece is empty' ).
+    ENDIF.
+
+    DATA(len) = strlen( address ) - 1.
+    IF len >= 0 AND address+len(1) = ':'.
+      zcx_abappm_error=>raise( 'Invalid IPv6 address: last piece is empty' ).
+    ENDIF.
 
     " Split by colons
     SPLIT address AT ':' INTO TABLE DATA(parts).
 
     " Basic validation of IPv6 format
     IF lines( parts ) > 8.
-      zcx_abappm_error=>raise( 'Invalid IPv6 address: too many segments' ).
+      zcx_abappm_error=>raise( 'Invalid IPv6 address: too many pieces' ).
+    ENDIF.
+
+    " Uncompressed addresses must have 8 parts
+    IF address NS '::' AND lines( parts ) <> 8.
+      zcx_abappm_error=>raise( 'Invalid IPv6 address: too few pieces' ).
     ENDIF.
 
     " Check each part
@@ -475,14 +555,14 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       IF part IS INITIAL.
         count = count + 1.
         IF count > 1.
-          zcx_abappm_error=>raise( 'Invalid IPv6 address: multiple empty segments' ).
+          zcx_abappm_error=>raise( 'Invalid IPv6 address: multiple empty pieces' ).
         ENDIF.
         CONTINUE.
       ENDIF.
 
       " Validate hexadecimal format and length
       IF NOT matches( val = part regex = '^[0-9A-Fa-f]{1,4}$' ).
-        zcx_abappm_error=>raise( 'Invalid IPv6 address: invalid hexadecimal segment' ).
+        zcx_abappm_error=>raise( 'Invalid IPv6 address: invalid hexadecimal piece' ).
       ENDIF.
     ENDLOOP.
 

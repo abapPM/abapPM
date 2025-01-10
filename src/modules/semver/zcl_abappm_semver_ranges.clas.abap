@@ -134,7 +134,6 @@ CLASS zcl_abappm_semver_ranges DEFINITION
         VALUE(result) TYPE string
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -281,6 +280,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
 
           WHEN '<' OR '<='.
             " Ignore maximum versions
+            ASSERT 0 = 0.
 
           WHEN OTHERS.
             zcx_abappm_error=>raise( |Unexpected operation: { <comparator>->operator }| ).
@@ -320,7 +320,12 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     DATA(ecomp) = comp && '='.
 
     " If it satisfies the range it is not outside
-    IF zcl_abappm_semver_functions=>satisfies( version = semver range = semrange loose = loose incpre = incpre ).
+    IF zcl_abappm_semver_functions=>satisfies(
+      version = semver
+      range   = semrange
+      loose   = loose
+      incpre  = incpre ).
+
       result = abap_false.
       RETURN.
     ENDIF.
@@ -389,7 +394,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
       CASE hilo.
         WHEN '>'.
           IF ( low->operator IS INITIAL OR low->operator = comp ) AND
-            zcl_abappm_semver_functions=>lte( a = semver b =  low->semver ).
+            zcl_abappm_semver_functions=>lte( a = semver b = low->semver ).
 
             result = abap_false.
             RETURN.
@@ -399,7 +404,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
           ENDIF.
         WHEN '<'.
           IF ( low->operator IS INITIAL OR low->operator = comp ) AND
-            zcl_abappm_semver_functions=>gte( a = semver b =  low->semver ).
+            zcl_abappm_semver_functions=>gte( a = semver b = low->semver ).
 
             result = abap_false.
             RETURN.
@@ -472,11 +477,11 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     LOOP AT set ASSIGNING FIELD-SYMBOL(<set>).
       IF <set>-min = <set>-max.
         INSERT <set>-min INTO TABLE ranges.
-      ELSEIF <set>-max IS INITIAL AND  v[ 1 ] = <set>-min.
+      ELSEIF <set>-max IS INITIAL AND v[ 1 ] = <set>-min.
         INSERT |*| INTO TABLE ranges.
       ELSEIF <set>-max IS INITIAL.
         INSERT |>={ <set>-min }| INTO TABLE ranges.
-      ELSEIF  v[ 1 ] = <set>-min.
+      ELSEIF v[ 1 ] = <set>-min.
         INSERT |<={ <set>-max }| INTO TABLE ranges.
       ELSE.
         INSERT |{ <set>-min } - { <set>-max }| INTO TABLE ranges.

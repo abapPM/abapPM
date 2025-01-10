@@ -406,7 +406,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         <match>-endpos = <match>-offset + <match>-length.
         FIND REGEX '^\d' IN version+offset(*) MATCH OFFSET DATA(next_offset) ##SUBRC_OK.
         offset = offset + next_offset + 1.
-        IF offset >= strlen( version ).
+        IF strlen( version ) <= offset.
           EXIT.
         ENDIF.
       ENDDO.

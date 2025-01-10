@@ -883,11 +883,10 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
                 IF xmi = abap_true.
                   ma = str( ma + 1 ).
                   mi = `0`.
-                  pa = `0`.
                 ELSE.
                   mi = str( mi + 1 ).
-                  pa = `0`.
                 ENDIF.
+                pa = `0`.
               WHEN '<='.
                 " <=0.7.x is actually <0.8.0, since any 0.7.x should.
                 " pass.  Similarly, <=7.x is actually <8.0.0, etc.
