@@ -5,19 +5,34 @@ CLASS zcl_abappm_tar DEFINITION
 ************************************************************************
 * Tar
 *
-* Tar UStar Format
-* Based on https://en.wikipedia.org/wiki/Tar_(computing)
+* Tar UStar and Pax Formats
+*
+* Based on
+* https://en.wikipedia.org/wiki/Tar_(computing)
 * https://en.wikipedia.org/wiki/Gzip
+* https://en.wikipedia.org/wiki/Pax_(command)
+* https://pubs.opengroup.org/onlinepubs/009695399/utilities/pax.html
+*
+* Note: Supports reading 7-zip tar files with long links but does not
+* support writing such files.
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* Limitation: Block size is hardcoded to 512 bytes
+************************************************************************
+
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '2.0.0' ##NEEDED.
 
     TYPES:
       ty_typeflag TYPE c LENGTH 1,
+      BEGIN OF ty_keyword,
+        keyword TYPE string,
+        value   TYPE string,
+      END OF ty_keyword,
+      ty_keywords TYPE STANDARD TABLE OF ty_keyword WITH KEY keyword,
       BEGIN OF ty_file,
         name     TYPE string,
         date     TYPE d,
@@ -27,8 +42,9 @@ CLASS zcl_abappm_tar DEFINITION
         size     TYPE i,
         typeflag TYPE ty_typeflag,
         content  TYPE xstring,
+        keywords TYPE ty_keywords,
       END OF ty_file,
-      ty_files TYPE STANDARD TABLE OF ty_file WITH KEY name.
+      ty_tar_files TYPE STANDARD TABLE OF ty_file WITH KEY name.
 
     CONSTANTS:
       BEGIN OF c_typeflag,
@@ -40,6 +56,9 @@ CLASS zcl_abappm_tar DEFINITION
         directory         TYPE ty_typeflag VALUE '5',
         fifo              TYPE ty_typeflag VALUE '6',
         contiguous_file   TYPE ty_typeflag VALUE '7',
+        long_link         TYPE ty_typeflag VALUE 'L', " 7-zip
+        global_header     TYPE ty_typeflag VALUE 'g', " pax
+        extended_header   TYPE ty_typeflag VALUE 'x', " pax
       END OF c_typeflag.
 
     CLASS-METHODS class_constructor.
@@ -83,7 +102,7 @@ CLASS zcl_abappm_tar DEFINITION
     "! List the table of contents of an archive (no data)
     METHODS list
       RETURNING
-        VALUE(result) TYPE ty_files
+        VALUE(result) TYPE ty_tar_files
       RAISING
         zcx_abappm_error.
 
@@ -110,6 +129,7 @@ CLASS zcl_abappm_tar DEFINITION
         !time         TYPE t OPTIONAL
         !mode         TYPE i OPTIONAL
         !typeflag     TYPE c OPTIONAL
+        !keywords     TYPE ty_keywords OPTIONAL " pax
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
@@ -146,24 +166,25 @@ CLASS zcl_abappm_tar DEFINITION
   PRIVATE SECTION.
 
     TYPES:
+      "! Ustar header record (512 bytes)
       BEGIN OF ty_header,
-        name     TYPE c LENGTH 100,
-        mode     TYPE c LENGTH 8,
-        uid      TYPE c LENGTH 8,
-        gid      TYPE c LENGTH 8,
-        size     TYPE c LENGTH 12,
-        mtime    TYPE c LENGTH 12,
-        chksum   TYPE c LENGTH 8,
-        typeflag TYPE c LENGTH 1,
-        linkname TYPE c LENGTH 100,
-        magic    TYPE c LENGTH 6,
-        version  TYPE c LENGTH 2,
-        uname    TYPE c LENGTH 32,
-        gname    TYPE c LENGTH 32,
-        devmajor TYPE c LENGTH 8,
-        devminor TYPE c LENGTH 8,
-        prefix   TYPE c LENGTH 155,
-        padding  TYPE c LENGTH 12,
+        name     TYPE c LENGTH 100, " Offset 0
+        mode     TYPE c LENGTH 8,   " 100
+        uid      TYPE c LENGTH 8,   " 108
+        gid      TYPE c LENGTH 8,   " 116
+        size     TYPE c LENGTH 12,  " 124
+        mtime    TYPE c LENGTH 12,  " 136
+        chksum   TYPE c LENGTH 8,   " 148
+        typeflag TYPE c LENGTH 1,   " 156
+        linkname TYPE c LENGTH 100, " 157
+        magic    TYPE c LENGTH 6,   " 257
+        version  TYPE c LENGTH 2,   " 263
+        uname    TYPE c LENGTH 32,  " 265
+        gname    TYPE c LENGTH 32,  " 297
+        devmajor TYPE c LENGTH 8,   " 329
+        devminor TYPE c LENGTH 8,   " 337
+        prefix   TYPE c LENGTH 155, " 345
+        padding  TYPE c LENGTH 12,  " 500
       END OF ty_header.
 
     TYPES:
@@ -171,7 +192,7 @@ CLASS zcl_abappm_tar DEFINITION
         name    TYPE string,
         content TYPE xstring,
       END OF ty_tar_item,
-      ty_tar_list TYPE HASHED TABLE OF ty_tar_item WITH UNIQUE KEY name.
+      ty_tar_data TYPE HASHED TABLE OF ty_tar_item WITH UNIQUE KEY name.
 
     CONSTANTS:
       c_blocksize     TYPE i VALUE 512,
@@ -188,43 +209,43 @@ CLASS zcl_abappm_tar DEFINITION
 
     DATA:
       force_ustar TYPE abap_bool,
-      tar_files   TYPE ty_files,
-      tar_list    TYPE ty_tar_list.
+      tar_files   TYPE ty_tar_files,
+      tar_data    TYPE ty_tar_data.
 
-    METHODS _append_nulls
+    CLASS-METHODS _append_nulls
       CHANGING
         !data TYPE simple.
 
-    METHODS _remove_nulls
+    CLASS-METHODS _remove_nulls
       CHANGING
         !data TYPE simple.
 
-    METHODS _pad
+    CLASS-METHODS _pad
       IMPORTING
         !number       TYPE numeric
         !length       TYPE i
       RETURNING
         VALUE(result) TYPE string.
 
-    METHODS _unpad
+    CLASS-METHODS _unpad
       IMPORTING
         !data         TYPE csequence
       RETURNING
         VALUE(result) TYPE i.
 
-    METHODS _from_octal
+    CLASS-METHODS _from_octal
       IMPORTING
         !octal        TYPE string
       RETURNING
         VALUE(result) TYPE i.
 
-    METHODS _to_octal
+    CLASS-METHODS _to_octal
       IMPORTING
         !number       TYPE numeric
       RETURNING
         VALUE(result) TYPE string.
 
-    METHODS _from_xstring
+    CLASS-METHODS _from_xstring
       IMPORTING
         !data         TYPE xstring
       RETURNING
@@ -232,7 +253,7 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    METHODS _to_xstring
+    CLASS-METHODS _to_xstring
       IMPORTING
         !data         TYPE simple
       RETURNING
@@ -240,7 +261,7 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    METHODS _from_filename
+    CLASS-METHODS _from_filename
       IMPORTING
         !filename TYPE string
       EXPORTING
@@ -249,14 +270,14 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    METHODS _to_filename
+    CLASS-METHODS _to_filename
       IMPORTING
         !prefix       TYPE ty_header-prefix
         !name         TYPE ty_header-name
       RETURNING
         VALUE(result) TYPE string.
 
-    METHODS _from_unixtime
+    CLASS-METHODS _from_unixtime
       IMPORTING
         !unixtime TYPE i
       EXPORTING
@@ -265,7 +286,7 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    METHODS _to_unixtime
+    CLASS-METHODS _to_unixtime
       IMPORTING
         !date         TYPE d
         !time         TYPE t
@@ -274,14 +295,13 @@ CLASS zcl_abappm_tar DEFINITION
       RAISING
         zcx_abappm_error.
 
-    METHODS _checksum
+    CLASS-METHODS _checksum
       IMPORTING
-        VALUE(data)   TYPE any
+        !data         TYPE any
       RETURNING
         VALUE(result) TYPE i
       RAISING
         zcx_abappm_error.
-
 ENDCLASS.
 
 
@@ -294,6 +314,11 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     DATA:
       file TYPE ty_file,
       item TYPE ty_tar_item.
+
+    " TODO: Support long filenames (pax)
+    IF strlen( name ) > 100.
+      zcx_abappm_error=>raise( |Filename longer than 100 characters: { name }| ).
+    ENDIF.
 
     " List
     file-name = name.
@@ -319,6 +344,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       file-typeflag = typeflag.
     ENDIF.
     file-unixtime = _to_unixtime( date = file-date time = file-time ).
+    file-keywords = keywords.
 
     INSERT file INTO TABLE tar_files.
     IF sy-subrc <> 0.
@@ -328,7 +354,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     " Data
     item-name    = name.
     item-content = content.
-    INSERT item INTO TABLE tar_list.
+    INSERT item INTO TABLE tar_data.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( 'Error adding file (data)' ).
     ENDIF.
@@ -373,7 +399,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       zcx_abappm_error=>raise( 'Error deleting file (list)' ).
     ENDIF.
 
-    DELETE tar_list WHERE name = name.
+    DELETE tar_data WHERE name = name.
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( 'Error deleting file (data)' ).
     ENDIF.
@@ -386,7 +412,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD file_count.
 
     LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = c_typeflag-file.
-      result += 1.
+      result = result + 1.
     ENDLOOP.
 
   ENDMETHOD.
@@ -394,7 +420,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD get.
 
-    READ TABLE tar_list ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = name.
+    READ TABLE tar_data ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = name.
     IF sy-subrc = 0.
       result = <item>-content.
     ELSE.
@@ -436,13 +462,16 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD load.
 
     DATA:
-      header TYPE ty_header,
-      file   TYPE ty_file,
-      item   TYPE ty_tar_item,
-      block  TYPE xstring,
-      count  TYPE i,
-      length TYPE i,
-      offset TYPE i.
+      header   TYPE ty_header,
+      global   TYPE ty_keywords,
+      extended TYPE ty_keywords,
+      longlink TYPE string,
+      file     TYPE ty_file,
+      item     TYPE ty_tar_item,
+      block    TYPE xstring,
+      count    TYPE i,
+      length   TYPE i,
+      offset   TYPE i.
 
     DATA(size) = xstrlen( tar ).
 
@@ -468,6 +497,24 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       IF header IS INITIAL.
         CONTINUE.
       ENDIF.
+
+      " Get extended header for keywords and filename
+      CASE header-typeflag.
+        WHEN c_typeflag-global_header.
+          global = lcl_pax=>decode_keywords( block ).
+          CONTINUE.
+        WHEN c_typeflag-extended_header.
+          extended = lcl_pax=>decode_keywords( block ).
+          CONTINUE.
+        WHEN c_typeflag-long_link.
+          " Two blocks
+          DATA(next_block) = tar+offset(c_blocksize).
+          longlink = lcl_7zip=>decode_longlink(
+            block_1 = block
+            block_2 = next_block ).
+          offset = offset + c_blocksize.
+          CONTINUE.
+      ENDCASE.
 
       IF force_ustar = abap_true.
         IF header-magic <> c_ustar_magic.
@@ -496,7 +543,27 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         file-typeflag = header-typeflag.
       ENDIF.
 
+      file-keywords = lcl_pax=>merge_keywords(
+        global   = global
+        extended = extended ).
+
+      " Long filename
+      IF longlink IS NOT INITIAL.
+        " 7-zip
+        file-name = longlink.
+        CLEAR longlink.
+      ELSE.
+        " Pax
+        READ TABLE file-keywords ASSIGNING FIELD-SYMBOL(<keyword>)
+          WITH TABLE KEY keyword = 'path'.
+        IF sy-subrc = 0.
+          file-name = <keyword>-value.
+        ENDIF.
+      ENDIF.
+
       INSERT file INTO TABLE tar_files.
+
+      CLEAR extended.
 
       " Data blocks
       CLEAR item.
@@ -516,7 +583,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         length = length - c_blocksize.
       ENDDO.
 
-      INSERT item INTO TABLE tar_list.
+      INSERT item INTO TABLE tar_data.
     ENDDO.
 
     result = me.
@@ -526,9 +593,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD new.
 
-    CREATE OBJECT result
-      EXPORTING
-        force_ustar = force_ustar.
+    result = NEW #( force_ustar ).
 
   ENDMETHOD.
 
@@ -536,13 +601,14 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD save.
 
     DATA:
-      header TYPE ty_header,
-      block  TYPE x LENGTH c_blocksize,
-      count  TYPE i,
-      length TYPE i,
-      offset TYPE i.
+      header   TYPE ty_header,
+      extended TYPE ty_keywords,
+      block    TYPE x LENGTH c_blocksize,
+      count    TYPE i,
+      length   TYPE i,
+      offset   TYPE i.
 
-    " TODO: Support other types
+    " TODO?: Support other types
     LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>)
       WHERE typeflag = c_typeflag-file OR typeflag = c_typeflag-directory.
 
@@ -550,6 +616,13 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         zcx_abappm_error=>raise( 'Error saving file (name)' ).
       ELSEIF <file>-name CA '\'.
         zcx_abappm_error=>raise( 'Error saving file (path)' ).
+      ENDIF.
+
+      " Add extended header block for pax keywords
+      IF <file>-keywords IS NOT INITIAL.
+        DATA(pax) = abap_true.
+        result = result && lcl_pax=>encode_keywords( <file>-keywords ).
+        CONTINUE.
       ENDIF.
 
       " Header block
@@ -582,11 +655,11 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       header-chksum = `        `. " 8 spaces
       header-chksum = _pad( number = _checksum( header ) length = 7 ) && null.
 
-      block = _to_xstring( header ).
-      result   = result && block.
+      block  = _to_xstring( header ).
+      result = result && block.
 
       " Data blocks
-      READ TABLE tar_list ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
+      READ TABLE tar_data ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
       IF sy-subrc <> 0.
         zcx_abappm_error=>raise( 'Error saving file (data)' ).
       ENDIF.
@@ -601,12 +674,17 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         ELSE.
           block = <item>-content+offset(length).
         ENDIF.
-        result    = result && block.
+        result = result && block.
         offset = offset + c_blocksize.
         length = length - c_blocksize.
       ENDDO.
 
     ENDLOOP.
+
+    IF pax = abap_true.
+      " Add two null blocks
+      result = result && block && block.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -614,7 +692,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
   METHOD unpacked_size.
 
     LOOP AT tar_files ASSIGNING FIELD-SYMBOL(<file>) WHERE typeflag = c_typeflag-file.
-      result += <file>-size.
+      result = result + <file>-size.
     ENDLOOP.
 
   ENDMETHOD.
@@ -643,7 +721,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     DO xstrlen( xstring ) TIMES.
       DATA(x) = xstring+i(1).
       result = result + x.
-      i += 1.
+      i = i + 1.
     ENDDO.
 
   ENDMETHOD.
@@ -684,7 +762,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     DO strlen( octal ) TIMES.
       result = result * 8 + octal+offset(1).
-      offset += 1.
+      offset = offset + 1.
     ENDDO.
 
   ENDMETHOD.
@@ -765,7 +843,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     DATA(temp_number) = CONV i( number ).
 
     WHILE temp_number > 0.
-      result = |{ temp_number MOD 8 }{ result }|.
+      result      = |{ temp_number MOD 8 }{ result }|.
       temp_number = temp_number DIV 8.
     ENDWHILE.
 
