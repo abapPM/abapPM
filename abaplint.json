@@ -17,7 +17,6 @@
     "noIssues": [
       "/src/modules/ajson/*.*",
       "/src/modules/markdown/*.*",
-      "/src/modules/tar/*.*",
       "/src/modules/semver/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
@@ -157,7 +156,9 @@
       "count": 3
     },
     "line_break_style": true,
-    "line_length": true,
+    "line_length": {
+      "exclude": ["zcl_abappm_emoji.clas.macros"]
+    },
     "line_only_punc": true,
     "local_class_naming": true,
     "local_testclass_consistency": true,
