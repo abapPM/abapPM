@@ -443,7 +443,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'main' ).
+    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-database-utility' ).
 
     toolbar->add(
       iv_txt = 'Backup'

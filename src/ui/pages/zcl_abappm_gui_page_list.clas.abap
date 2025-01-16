@@ -853,7 +853,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     CONSTANTS c_dummy_key TYPE string VALUE `?key=#`.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'toolbar-main' ).
+    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-package-list' ).
 
     toolbar->add(
       iv_txt = zcl_abapgit_html=>icon( 'file' ) && ' Init'

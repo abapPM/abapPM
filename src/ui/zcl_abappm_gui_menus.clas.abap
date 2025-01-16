@@ -41,7 +41,8 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
 
 
   METHOD advanced.
-    result = zcl_abapgit_html_toolbar=>create( 'toolbar-advanced' ).
+
+    result = zcl_abapgit_html_toolbar=>create( 'apm-toolbar-advanced' ).
 
     result->add(
       iv_txt = 'Database Utility'
@@ -55,19 +56,23 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
         iv_txt = 'Open IE DevTools'
         iv_act = zif_abapgit_definitions=>c_action-ie_devtools ).
     ENDIF.
+
   ENDMETHOD.
 
 
   METHOD back.
-    result = zcl_abapgit_html_toolbar=>create( 'toolbar-back' ).
+
+    result = zcl_abapgit_html_toolbar=>create( 'apm-toolbar-back' ).
 
     result->add(
       iv_txt = 'Back'
       iv_act = zif_abapgit_definitions=>c_action-go_back ).
+
   ENDMETHOD.
 
 
   METHOD experimental.
+
     TRY.
         IF zcl_abappm_settings=>factory( )->get( )-experimental_features IS NOT INITIAL. "apm
           menu->add(
@@ -76,11 +81,13 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
         ENDIF.
       CATCH zcx_abappm_error ##NO_HANDLER.
     ENDTRY.
+
   ENDMETHOD.
 
 
   METHOD help.
-    result = zcl_abapgit_html_toolbar=>create( 'toolbar-help' ).
+
+    result = zcl_abapgit_html_toolbar=>create( 'apm-toolbar-help' ).
 
     result->add(
       iv_txt = 'Registry'
@@ -98,11 +105,13 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     )->add(
       iv_txt = 'Hotkeys'
       iv_act = zif_abappm_gui_router=>c_action-show_hotkeys ).
+
   ENDMETHOD.
 
 
   METHOD settings.
-    result = zcl_abapgit_html_toolbar=>create( 'toolbar-settings' ).
+
+    result = zcl_abapgit_html_toolbar=>create( 'apm-toolbar-settings' ).
 
     result->add(
       iv_txt = 'Global'
@@ -110,5 +119,6 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     )->add(
       iv_txt = 'Personal'
       iv_act = zif_abappm_gui_router=>c_action-go_settings_personal ).
+
   ENDMETHOD.
 ENDCLASS.

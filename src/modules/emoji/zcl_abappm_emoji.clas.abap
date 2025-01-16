@@ -285,7 +285,9 @@ CLASS zcl_abappm_emoji IMPLEMENTATION.
       FIND REGEX '"(.*)": "(.*)"' IN <line>+3 SUBMATCHES emoji-name emoji-img.
       IF sy-subrc = 0.
         FIND REGEX '/(.*)\.png' IN emoji-img SUBMATCHES DATA(unicode).
-        IF sy-subrc = 0.
+        IF sy-subrc = 0 AND unicode NA '-'.
+          " TODO convert to UTF16LE (or system codepage?)
+
           emoji-code = ''.
         ENDIF.
         INSERT emoji INTO TABLE emojis.

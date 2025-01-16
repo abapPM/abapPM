@@ -117,6 +117,12 @@ CLASS zcl_abappm_package_json DEFINITION
       RETURNING
         VALUE(result) TYPE zif_abappm_types=>ty_manifest.
 
+    CLASS-METHODS replace_slash
+      IMPORTING
+        !value        TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
@@ -226,28 +232,28 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
         " Transpose dependencies
         LOOP AT ajson->members( '/dependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/dependencies/' && dependency-name ).
+          dependency-range = ajson->get( '/dependencies/' && replace_slash( dependency-name ) ).
           INSERT dependency INTO TABLE manifest-dependencies.
         ENDLOOP.
         LOOP AT ajson->members( '/devDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/devDependencies/' && dependency-name ).
+          dependency-range = ajson->get( '/devDependencies/' && replace_slash( dependency-name ) ).
           INSERT dependency INTO TABLE manifest-dev_dependencies.
         ENDLOOP.
         LOOP AT ajson->members( '/optionalDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/optionalDependencies/' && dependency-name ).
+          dependency-range = ajson->get( '/optionalDependencies/' && replace_slash( dependency-name ) ).
           INSERT dependency INTO TABLE manifest-optional_dependencies.
         ENDLOOP.
         LOOP AT ajson->members( '/peerDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/peerDependencies/' && dependency-name ).
+          dependency-range = ajson->get( '/peerDependencies/' && replace_slash( dependency-name ) ).
           INSERT dependency INTO TABLE manifest-peer_dependencies.
         ENDLOOP.
         LOOP AT ajson->members( '/bundleDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/bundleDependencies/' && dependency-name ).
+          dependency-range = ajson->get( '/bundleDependencies/' && replace_slash( dependency-name ) ).
           " store just the range, which is the name of the bundle dependency
           INSERT dependency-range INTO TABLE manifest-bundle_dependencies.
         ENDLOOP.
         LOOP AT ajson->members( '/engines' ) INTO dependency-name.
-          dependency-range = ajson->get( '/engines/' && dependency-name ).
+          dependency-range = ajson->get( '/engines/' && replace_slash( dependency-name ) ).
           INSERT dependency INTO TABLE manifest-engines.
         ENDLOOP.
 
@@ -292,35 +298,35 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
         ajson->setx( '/dependencies:{ }' ).
         LOOP AT manifest-dependencies INTO DATA(dependency).
           ajson->set(
-            iv_path = '/dependencies/' && dependency-name
+            iv_path = '/dependencies/' && replace_slash( dependency-name )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/devDependencies:{ }' ).
         LOOP AT manifest-dev_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/devDependencies/' && dependency-name
+            iv_path = '/devDependencies/' && replace_slash( dependency-name )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/optionalDependencies:{ }' ).
         LOOP AT manifest-optional_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/optionalDependencies/' && dependency-name
+            iv_path = '/optionalDependencies/' && replace_slash( dependency-name )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( 'peerDependencies:{ }' ).
         LOOP AT manifest-peer_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/peerDependencies/' && dependency-name
+            iv_path = '/peerDependencies/' && replace_slash( dependency-name )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/engines:{ }' ).
         LOOP AT manifest-engines INTO dependency.
           ajson->set(
-            iv_path = '/engines/' && dependency-name
+            iv_path = '/engines/' && replace_slash( dependency-name )
             iv_val  = dependency-range ).
         ENDLOOP.
 
@@ -463,6 +469,17 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       WHEN abap_false.
         DELETE result WHERE bundle = abap_true.
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD replace_slash.
+
+    result = replace(
+      val  = value
+      sub  = '/'
+      with = cl_abap_char_utilities=>horizontal_tab
+      occ  = 0 ).
 
   ENDMETHOD.
 

@@ -216,6 +216,11 @@ CLASS lcl_utils IMPLEMENTATION.
 
     rv_path_name-path = normalize_path( substring( val = iv_path len = lv_offs ) ).
     rv_path_name-name = substring( val = iv_path off = lv_offs len = lv_len - lv_offs - lv_trim_slash ).
+    rv_path_name-name = replace(
+      val  = rv_path_name-name
+      sub  = cl_abap_char_utilities=>horizontal_tab
+      with = '/'
+      occ  = 0 ).
 
   ENDMETHOD.
 
@@ -466,8 +471,12 @@ CLASS lcl_json_parser IMPLEMENTATION.
 
           GET REFERENCE OF <item> INTO lr_stack_top.
           INSERT lr_stack_top INTO mt_stack INDEX 1.
-          " add path component
-          mv_stack_path = mv_stack_path && <item>-name && '/'.
+          " add path component (avoid issues with names containing slashes)
+          mv_stack_path = mv_stack_path && replace(
+            val  = <item>-name
+            sub  = '/'
+            with = cl_abap_char_utilities=>horizontal_tab )
+            && '/'.
 
         WHEN if_sxml_node=>co_nt_element_close.
           DATA lo_close TYPE REF TO if_sxml_close_element.

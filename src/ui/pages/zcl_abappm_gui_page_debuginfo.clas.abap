@@ -14,6 +14,7 @@ CLASS zcl_abappm_gui_page_debuginfo DEFINITION
 
     INTERFACES:
       zif_abapgit_gui_event_handler,
+      zif_abapgit_gui_menu_provider,
       zif_abapgit_gui_renderable.
 
     CLASS-METHODS create
@@ -31,10 +32,6 @@ CLASS zcl_abappm_gui_page_debuginfo DEFINITION
       END OF c_action.
 
     DATA html_for_download TYPE string.
-
-    CLASS-METHODS build_toolbar
-      RETURNING
-        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar.
 
     METHODS render_debug_info
       IMPORTING
@@ -55,29 +52,15 @@ ENDCLASS.
 CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
 
 
-  METHOD build_toolbar.
-
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'toolbar-debug' ).
-
-    toolbar->add(
-      iv_txt = 'Save'
-      iv_act = c_action-save ).
-    toolbar->add(
-      iv_txt = 'Back'
-      iv_act = zif_abapgit_definitions=>c_action-go_back ).
-
-    result = toolbar.
-
-  ENDMETHOD.
-
-
   METHOD create.
+
     DATA(component) = NEW zcl_abappm_gui_page_debuginfo( ).
 
     result = zcl_abappm_gui_page_hoc=>create(
-      page_title      = 'Debug Info'
-      page_menu       = build_toolbar( )
-      child_component = component ).
+      page_title         = 'Debug Info'
+      page_menu_provider = component
+      child_component    = component ).
+
   ENDMETHOD.
 
 
@@ -171,6 +154,22 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
       WHEN OTHERS.
         ASSERT 1 = 1.
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD zif_abapgit_gui_menu_provider~get_menu.
+
+    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-debug-info' ).
+
+    toolbar->add(
+      iv_txt = 'Save'
+      iv_act = c_action-save ).
+    toolbar->add(
+      iv_txt = 'Back'
+      iv_act = zif_abapgit_definitions=>c_action-go_back ).
+
+    ro_toolbar = toolbar.
 
   ENDMETHOD.
 

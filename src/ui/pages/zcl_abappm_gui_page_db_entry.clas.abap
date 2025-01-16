@@ -299,7 +299,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'main' ).
+    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-database-entry' ).
 
     IF edit_mode = abap_true.
       toolbar->add(

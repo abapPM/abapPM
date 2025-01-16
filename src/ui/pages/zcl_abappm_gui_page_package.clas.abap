@@ -371,7 +371,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     CASE view.
       WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
 
-        DATA(readme_menu) = zcl_abapgit_html_toolbar=>create( 'readme' )->add(
+        DATA(readme_menu) = zcl_abapgit_html_toolbar=>create( 'apm-package-readme' )->add(
           iv_txt = 'Rendered'
           iv_chk = boolc( view = c_action-view_readme OR view IS INITIAL )
           iv_act = c_action-view_readme
@@ -384,7 +384,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           iv_chk = boolc( view = c_action-view_readme_raw )
           iv_act = c_action-view_readme_raw ).
 
-        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+        result = zcl_abapgit_html_toolbar=>create( 'apm-package-readme-actions' )->add(
           iv_txt = 'View'
           io_sub = readme_menu
         )->add(
@@ -393,7 +393,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_dependencies.
 
-        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+        result = zcl_abapgit_html_toolbar=>create( 'apm-package-dependencies-actions' )->add(
           iv_txt = 'Add'
           iv_act = |{ c_action-add_dependency }?key={ package }|
         )->add(
@@ -405,7 +405,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_json.
 
-        result = zcl_abapgit_html_toolbar=>create( 'toolbar' )->add(
+        result = zcl_abapgit_html_toolbar=>create( 'apm-package-manifest-actions' )->add(
           iv_txt = 'Edit'
           iv_act = |{ c_action-edit_json }?key={ package }| ).
 
@@ -836,7 +836,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD zif_abapgit_gui_menu_provider~get_menu.
 
-    ro_toolbar = zcl_abapgit_html_toolbar=>create( 'main' )->add(
+    ro_toolbar = zcl_abapgit_html_toolbar=>create( 'apm-package-view' )->add(
       iv_txt = 'Readme'
       iv_act = c_action-view_readme
     )->add(
