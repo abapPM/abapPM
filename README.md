@@ -57,4 +57,4 @@ Made with ❤️ in Canada
 
 Copyright 2024 apm.to Inc. <https://apm.to>
 
-Follow [@marcf.be](https://bsky.app/profile/marcf.be) on Bluesky
+Follow [@marcf.be](https://bsky.app/profile/marcf.be) on Bluesky or [@marcfbe](https://linkedin.com/in/marcfbe) on LinkedIn
