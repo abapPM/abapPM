@@ -32,7 +32,9 @@ A good bug report should not leave others needing to chase you up for more infor
 
 ### Compatibility
 
-apm is targeted for SAP Basis 7.40 and higher, so the code should only contain expressions and statements that work on 7.40. abaplint will automatically check every pull request for language syntax that is not available on these releases.
+apm is targeted for SAP Basis 7.50 and higher, so the code should only contain expressions and statements that work on 7.50. abaplint will automatically check every pull request for language syntax that is not available on these releases.
+
+Lower releases might be supported using an automated downport.
 
 ### Linting
 
@@ -44,7 +46,7 @@ Use pretty printer, keywords upper case + indentation.
 
 ### Prefixing
 
-Variables are prefixed using the standard setting in [abapOpenChecks](http://docs.abapopenchecks.org/checks/69/) naming conventions.
+apm does not use prefixing (hungarian notation) of variable names.
 
 ### Internationalization (I18N)
 
@@ -54,4 +56,4 @@ Currently, apm supports only the English language. Neither objects nor text lite
 
 Most of our code is distributed under the terms of the [license](LICENSE), and when you contribute code that you wrote to our repositories, you agree that you are contributing under those same terms. In addition, by submitting your contributions you are indicating that you have the right to submit those contributions under those terms.
 
-If you wish to contribute code or documentation *authored by others, or use the terms of any other license, please indicate that clearly in your pull request so that the project team can discuss the situation with you.
+If you wish to contribute code or documentation *authored by others* or use the terms of any other license, please indicate that clearly in your pull request so that the project team can discuss the situation with you.
