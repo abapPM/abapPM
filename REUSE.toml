@@ -1,26 +1,26 @@
 version = 1
 
 [[annotations]]
-path = ["*"]
+path = "*"
 SPDX-FileCopyrightText = "2024 apm.to Inc. <https://apm.to>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["src/*abapgit*"]
+path = ["src/*abapgit*",  "src/modules/highlighter/*"]
 SPDX-FileCopyrightText = "2014 abapGit Contributors <http://abapgit.org>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["src/modules/ajson/*", "scripts/*ajson*"]
+path = "src/modules/ajson/*"
 SPDX-FileCopyrightText = "2020 Alexander Tsybulsky <https://github.com/sbcgua/ajson>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["src/modules/stringmap/*", "scripts/*stringmap*"]
+path = "src/modules/string-map/*"
 SPDX-FileCopyrightText = "2020 Alexander Tsybulsky <https://github.com/sbcgua/abap-string-map>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["src/modules/logger/*", "scripts/*logger*"]
+path = "src/modules/logger/*"
 SPDX-FileCopyrightText = "2017 Eric Peterson <https://github.com/ABAP-Logger/ABAP-Logger>"
 SPDX-License-Identifier = "MIT"
