@@ -51,6 +51,15 @@ Recommended SAP Package: `$ABAPPM`
 > Unlike other projects, a build process is required to create the standalone version.
 > Currently, this process is not automated or documented!
 
+## Attribution
+
+This project uses the following open source projects:
+
+- [abapGit](https://github.com/abapGit/abapGit), [MIT](https://github.com/abapGit/abapGit/blob/main/LICENSE)
+- [Ajson](https://github.com/sbcgua/ajson), [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
+- [ABAP String Map](https://github.com/sbcgua/abap-string-map), [MIT](https://github.com/sbcgua/abap-string-map/blob/main/LICENSE)
+- [ABAP Logger](https://github.com/ABAP-Logger/ABAP-Logger), [MIT](https://github.com/ABAP-Logger/ABAP-Logger/blob/main/LICENSE)
+
 ## About
 
 Made with ❤️ in Canada
