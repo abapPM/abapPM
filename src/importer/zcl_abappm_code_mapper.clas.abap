@@ -97,7 +97,7 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    IF is_logging = abap_true.
+    IF is_logging = abap_true AND result IS NOT INITIAL.
       FORMAT COLOR COL_NORMAL.
       WRITE: / 'Mapping:', AT c_width space.
       SKIP.
@@ -128,7 +128,7 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
     " Filter objects (for testing)
     DELETE result WHERE NOT ( object IN object_types AND obj_name IN object_names ).
 
-    IF is_logging = abap_true.
+    IF is_logging = abap_true AND result IS NOT INITIAL.
       FORMAT COLOR COL_NORMAL.
       WRITE: / 'Objects:' COLOR COL_NORMAL, AT c_width space.
       SKIP.
