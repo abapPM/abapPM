@@ -6,6 +6,9 @@ name: REUSE Compliance Check
 
 on: [push, pull_request, workflow_dispatch]
 
+permissions:
+  contents: read
+
 jobs:
   Reuse-Compliance-Check:
     runs-on: ubuntu-latest
