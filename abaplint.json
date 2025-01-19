@@ -17,7 +17,6 @@
     "noIssues": [
       "/src/modules/ajson/*.*",
       "/src/modules/markdown/*.*",
-      "/src/modules/semver/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
       "zcl_abappm_installer*",
@@ -187,7 +186,9 @@
     },
     "msag_consistency": true,
     "names_no_dash": true,
-    "nesting": true,
+    "nesting": {
+      "exclude": ["zcl_abappm_semver"]
+    },
     "newline_between_methods": true,
     "no_aliases": true,
     "no_chained_assignment": true,
