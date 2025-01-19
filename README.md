@@ -53,12 +53,12 @@ Recommended SAP Package: `$ABAPPM`
 
 ## Attribution
 
-This project uses the following open source projects:
+This project uses the following open source projects. Please support these great projects!
 
-- [abapGit](https://github.com/abapGit/abapGit), [MIT](https://github.com/abapGit/abapGit/blob/main/LICENSE)
-- [Ajson](https://github.com/sbcgua/ajson), [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
-- [ABAP String Map](https://github.com/sbcgua/abap-string-map), [MIT](https://github.com/sbcgua/abap-string-map/blob/main/LICENSE)
-- [ABAP Logger](https://github.com/ABAP-Logger/ABAP-Logger), [MIT](https://github.com/ABAP-Logger/ABAP-Logger/blob/main/LICENSE)
+- [abapGit](https://github.com/abapGit/abapGit), abapGit Community, [MIT](https://github.com/abapGit/abapGit/blob/main/LICENSE)
+- [AJSON](https://github.com/sbcgua/ajson), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
+- [ABAP String Map](https://github.com/sbcgua/abap-string-map), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/abap-string-map/blob/main/LICENSE)
+- [ABAP Logger](https://github.com/ABAP-Logger/ABAP-Logger), Eric Peterson, [MIT](https://github.com/ABAP-Logger/ABAP-Logger/blob/main/LICENSE)
 
 ## About
 
