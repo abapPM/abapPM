@@ -19,9 +19,7 @@
       "/src/modules/markdown/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
-      "zcl_abappm_installer*",
-      "zcl_abappm_html_*",
-      "zcl_abapgit_*"
+      "zcl_abappm_html_*"
     ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
