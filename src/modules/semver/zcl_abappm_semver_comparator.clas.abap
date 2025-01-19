@@ -67,7 +67,7 @@ CLASS zcl_abappm_semver_comparator DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA options TYPE zif_abappm_semver_options=>ty_options.
+    DATA options TYPE zif_semver_options=>ty_options.
 
 ENDCLASS.
 

@@ -20,17 +20,6 @@ CLASS zcl_abappm_semver_cli DEFINITION
         zcx_abappm_error.
 
   PROTECTED SECTION.
-
-    CLASS-METHODS help
-      RETURNING
-        VALUE(result) TYPE string_table.
-
-    CLASS-METHODS success
-      RETURNING
-        VALUE(result) TYPE string_table
-      RAISING
-        zcx_abappm_error.
-
   PRIVATE SECTION.
 
     CLASS-DATA:
@@ -40,11 +29,30 @@ CLASS zcl_abappm_semver_cli DEFINITION
       inc             TYPE string,
       identifier      TYPE string,
       identifier_base TYPE string,
+      help            TYPE abap_bool,
       loose           TYPE abap_bool,
       incpre          TYPE abap_bool,
       coerce          TYPE abap_bool,
       rtl             TYPE abap_bool,
       reverse         TYPE abap_bool.
+
+    CLASS-METHODS _argv
+      IMPORTING
+        args TYPE string.
+
+    CLASS-METHODS _versions
+      RAISING
+        zcx_abappm_error.
+
+    CLASS-METHODS _help
+      RETURNING
+        VALUE(result) TYPE string_table.
+
+    CLASS-METHODS _success
+      RETURNING
+        VALUE(result) TYPE string_table
+      RAISING
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -53,72 +61,29 @@ ENDCLASS.
 CLASS zcl_abappm_semver_cli IMPLEMENTATION.
 
 
-  METHOD help.
+  METHOD main.
 
-    result = VALUE #(
-      ( |SemVer { zif_abappm_semver_constants=>version }| )
-      ( `` )
-      ( `ABAP implementation of the https://semver.org/ specification` )
-      ( `Original JavaScript Copyright Isaac Z. Schlueter` )
-      ( `ABAP port by Marc F. Bernard` )
-      ( `` )
-      ( `Usage: semver [options] <version> [<version> [...]]` )
-      ( `` )
-      ( `Prints valid versions sorted by SemVer precedence` )
-      ( `` )
-      ( `Options:` )
-      ( `` )
-      ( `-r --range <range>` )
-      ( `        Print versions that match the specified range.` )
-      ( `` )
-      ( `-i --increment [<level>]` )
-      ( `        Increment a version by the specified level.  Level can` )
-      ( `        be one of: major, minor, patch, premajor, preminor,` )
-      ( `        prepatch, or prerelease.  Default level is 'patch'.` )
-      ( `        Only one version may be specified.` )
-      ( `` )
-      ( `--preid <identifier>` )
-      ( `        Identifier to be used to prefix premajor, preminor,` )
-      ( `        prepatch or prerelease version increments.` )
-      ( `` )
-      ( `-l --loose` )
-      ( `        Interpret versions and ranges loosely` )
-      ( `` )
-      ( `-n <base>` )
-      ( `        Base number to be used for the prerelease identifier.` )
-      ( `        Can be either 0 or 1, or false to omit the number altogether.` )
-      ( `        Defaults to 0.` )
-      ( `` )
-      ( `-p --include-prerelease` )
-      ( `        Always include prerelease versions in range matching` )
-      ( `` )
-      ( `-c --coerce` )
-      ( `        Coerce a string into SemVer if possible` )
-      ( `        (does not imply --loose)` )
-      ( `` )
-      ( `--rtl` )
-      ( `        Coerce version strings right to left` )
-      ( `` )
-      ( `--ltr` )
-      ( `        Coerce version strings left to right (default)` )
-      ( `` )
-      ( `Program exits successfully if any valid version satisfies` )
-      ( `all supplied ranges, and prints all satisfying versions.` )
-      ( `If no satisfying versions are found, then exits failure.` )
-      ( `Versions are printed in ascending order, so supplying` )
-      ( `multiple versions to the utility will just sort them.` ) ).
+    _argv( args ).
+
+    IF help = abap_true.
+      result = _help( ).
+    ELSE.
+      _versions( ).
+
+      result = _success( ).
+    ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD main.
+  METHOD _argv.
 
     CLEAR:
       argv, versions, ranges, inc, identifier, identifier_base,
-      loose, incpre, coerce, rtl, reverse.
+      help, loose, incpre, coerce, rtl, reverse.
 
     IF args IS INITIAL.
-      result = help( ).
+      help = abap_true.
       RETURN.
     ENDIF.
 
@@ -178,14 +143,109 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
         WHEN '--ltr'.
           rtl = abap_false.
         WHEN '-h' OR '--help' OR '-?'.
-          result = help( ).
-          RETURN.
+          help = abap_true.
         WHEN OTHERS.
           INSERT a INTO TABLE versions.
       ENDCASE.
 
       idx = idx + 1.
     ENDDO.
+
+  ENDMETHOD.
+
+
+  METHOD _help.
+
+    result = VALUE #(
+      ( |SemVer { zif_semver_constants=>version }| )
+      ( `` )
+      ( `ABAP implementation of the https://semver.org/ specification` )
+      ( `Original JavaScript Copyright Isaac Z. Schlueter` )
+      ( `ABAP port by Marc F. Bernard` )
+      ( `` )
+      ( `Usage: semver [options] <version> [<version> [...]]` )
+      ( `` )
+      ( `Prints valid versions sorted by SemVer precedence` )
+      ( `` )
+      ( `Options:` )
+      ( `` )
+      ( `-r --range <range>` )
+      ( `        Print versions that match the specified range.` )
+      ( `` )
+      ( `-i --increment [<level>]` )
+      ( `        Increment a version by the specified level.  Level can` )
+      ( `        be one of: major, minor, patch, premajor, preminor,` )
+      ( `        prepatch, or prerelease.  Default level is 'patch'.` )
+      ( `        Only one version may be specified.` )
+      ( `` )
+      ( `--preid <identifier>` )
+      ( `        Identifier to be used to prefix premajor, preminor,` )
+      ( `        prepatch or prerelease version increments.` )
+      ( `` )
+      ( `-l --loose` )
+      ( `        Interpret versions and ranges loosely` )
+      ( `` )
+      ( `-n <base>` )
+      ( `        Base number to be used for the prerelease identifier.` )
+      ( `        Can be either 0 or 1, or false to omit the number altogether.` )
+      ( `        Defaults to 0.` )
+      ( `` )
+      ( `-p --include-prerelease` )
+      ( `        Always include prerelease versions in range matching` )
+      ( `` )
+      ( `-c --coerce` )
+      ( `        Coerce a string into SemVer if possible` )
+      ( `        (does not imply --loose)` )
+      ( `` )
+      ( `--rtl` )
+      ( `        Coerce version strings right to left` )
+      ( `` )
+      ( `--ltr` )
+      ( `        Coerce version strings left to right (default)` )
+      ( `` )
+      ( `Program exits successfully if any valid version satisfies` )
+      ( `all supplied ranges, and prints all satisfying versions.` )
+      ( `If no satisfying versions are found, then exits failure.` )
+      ( `Versions are printed in ascending order, so supplying` )
+      ( `multiple versions to the utility will just sort them.` ) ).
+
+  ENDMETHOD.
+
+
+  METHOD _success.
+
+    IF reverse = abap_true.
+      versions = zcl_abappm_semver_functions=>rsort( versions ).
+    ELSE.
+      versions = zcl_abappm_semver_functions=>sort( versions ).
+    ENDIF.
+
+    LOOP AT versions ASSIGNING FIELD-SYMBOL(<version>).
+      <version> = zcl_abappm_semver_functions=>clean( version = <version> loose = loose incpre = incpre ).
+    ENDLOOP.
+
+    IF inc IS NOT INITIAL.
+      LOOP AT versions ASSIGNING <version>.
+        DATA(semver) = zcl_abappm_semver_functions=>inc(
+          version         = <version>
+          release         = inc
+          identifier      = identifier
+          identifier_base = identifier_base
+          loose           = loose
+          incpre          = incpre ).
+
+        IF semver IS BOUND.
+          <version> = semver->version.
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
+
+    INSERT LINES OF versions INTO TABLE result.
+
+  ENDMETHOD.
+
+
+  METHOD _versions.
 
     DELETE versions WHERE table_line IS INITIAL.
 
@@ -233,41 +293,6 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
     IF versions IS INITIAL.
       zcx_abappm_error=>raise( 'No valid versions found' ).
     ENDIF.
-
-    result = success( ).
-
-  ENDMETHOD.
-
-
-  METHOD success.
-
-    IF reverse = abap_true.
-      versions = zcl_abappm_semver_functions=>rsort( versions ).
-    ELSE.
-      versions = zcl_abappm_semver_functions=>sort( versions ).
-    ENDIF.
-
-    LOOP AT versions ASSIGNING FIELD-SYMBOL(<version>).
-      <version> = zcl_abappm_semver_functions=>clean( version = <version> loose = loose incpre = incpre ).
-    ENDLOOP.
-
-    IF inc IS NOT INITIAL.
-      LOOP AT versions ASSIGNING <version>.
-        DATA(semver) = zcl_abappm_semver_functions=>inc(
-          version         = <version>
-          release         = inc
-          identifier      = identifier
-          identifier_base = identifier_base
-          loose           = loose
-          incpre          = incpre ).
-
-        IF semver IS BOUND.
-          <version> = semver->version.
-        ENDIF.
-      ENDLOOP.
-    ENDIF.
-
-    INSERT LINES OF versions INTO TABLE result.
 
   ENDMETHOD.
 ENDCLASS.

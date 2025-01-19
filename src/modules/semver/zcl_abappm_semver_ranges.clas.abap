@@ -14,7 +14,7 @@ CLASS zcl_abappm_semver_ranges DEFINITION
     TYPES:
       ty_hilo       TYPE c LENGTH 1,
       ty_comp_list  TYPE string_table,
-      ty_comp_lists TYPE STANDARD TABLE OF string_table WITH DEFAULT KEY.
+      ty_comp_lists TYPE STANDARD TABLE OF string_table WITH EMPTY KEY.
 
     CLASS-METHODS gtr
       IMPORTING

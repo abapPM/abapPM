@@ -13,7 +13,7 @@ CLASS zcl_abappm_semver_range DEFINITION
 
     TYPES:
       ty_comparators TYPE STANDARD TABLE OF REF TO zcl_abappm_semver_comparator WITH KEY table_line,
-      ty_set         TYPE STANDARD TABLE OF ty_comparators WITH DEFAULT KEY.
+      ty_set         TYPE STANDARD TABLE OF ty_comparators WITH EMPTY KEY.
 
     DATA set TYPE ty_set READ-ONLY.
 
@@ -72,7 +72,6 @@ CLASS zcl_abappm_semver_range DEFINITION
         VALUE(result) TYPE abap_bool
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -90,7 +89,7 @@ CLASS zcl_abappm_semver_range DEFINITION
     DATA:
       raw       TYPE string,
       formatted TYPE string,
-      options   TYPE zif_abappm_semver_options=>ty_options.
+      options   TYPE zif_semver_options=>ty_options.
 
     CLASS-METHODS is_any
       IMPORTING
@@ -148,7 +147,7 @@ CLASS zcl_abappm_semver_range DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abappm_error.
+        zcx_abappm_error ##NEEDED.
 
     CLASS-METHODS replace_carets
       IMPORTING
@@ -196,7 +195,7 @@ CLASS zcl_abappm_semver_range DEFINITION
         !loose        TYPE abap_bool
         !incpre       TYPE abap_bool
       RETURNING
-        VALUE(result) TYPE string.
+        VALUE(result) TYPE string ##NEEDED.
 
     CLASS-METHODS replace_gte0
       IMPORTING
@@ -204,7 +203,7 @@ CLASS zcl_abappm_semver_range DEFINITION
         !loose        TYPE abap_bool
         !incpre       TYPE abap_bool
       RETURNING
-        VALUE(result) TYPE string.
+        VALUE(result) TYPE string ##NEEDED.
 
     CLASS-METHODS replace_hyphen
       IMPORTING
@@ -232,7 +231,6 @@ CLASS zcl_abappm_semver_range DEFINITION
         !value        TYPE i
       RETURNING
         VALUE(result) TYPE string.
-
 ENDCLASS.
 
 

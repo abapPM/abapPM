@@ -85,16 +85,15 @@ CLASS zcl_abappm_semver_re DEFINITION
 
     CLASS-METHODS create_token
       IMPORTING
-        name      TYPE string
-        value     TYPE string
-        is_global TYPE abap_bool DEFAULT abap_false.
+        name   TYPE string
+        value  TYPE string
+        global TYPE abap_bool DEFAULT abap_false.
 
     CLASS-METHODS make_safe_regex
       IMPORTING
         value         TYPE string
       RETURNING
         VALUE(result) TYPE string.
-
 ENDCLASS.
 
 
@@ -117,7 +116,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
     create_token(
       name  = 'VTRIM'
       value = |([v=]+)\\s+(\\d)|
-      is_global = abap_true ).
+      global = abap_true ).
 
     " ## Numeric Identifier
     " A single `0`, or a non-zero digit followed by zero or more digits.
@@ -269,9 +268,9 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
 
     create_token(
       name  = 'COERCEPLAIN'
-      value = |(^\|[^\\d])(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\})| &&
-              |(?:\\.(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\}))?| &&
-              |(?:\\.(\\d\{1,{ zif_abappm_semver_constants=>max_safe_component_length }\}))?| ).
+      value = |(^\|[^\\d])(\\d\{1,{ zif_semver_constants=>max_safe_component_length }\})| &&
+              |(?:\\.(\\d\{1,{ zif_semver_constants=>max_safe_component_length }\}))?| &&
+              |(?:\\.(\\d\{1,{ zif_semver_constants=>max_safe_component_length }\}))?| ).
     create_token(
       name  = 'COERCE'
       value = |{ token-coerceplain-src }(?:$\|[^\\d])| ).
@@ -284,11 +283,11 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
     create_token(
       name  = 'COERCERTL'
       value = token-coerce-src
-      is_global = abap_true ).
+      global = abap_true ).
     create_token(
       name  = 'COERCERTLFULL'
       value = token-coercefull-src
-      is_global = abap_true ).
+      global = abap_true ).
 
     " Tilde ranges.
     " Meaning is "reasonably at or greater than"
@@ -300,7 +299,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
     create_token(
       name  = 'TILDETRIM'
       value = |(\\s*){ token-lonetilde-src }\\s+|
-      is_global = abap_true ).
+      global = abap_true ).
 
     create_token(
       name  = 'TILDE'
@@ -319,7 +318,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
     create_token(
       name  = 'CARETTRIM'
       value = |(\\s*){ token-lonecaret-src }\\s+|
-      is_global = abap_true ).
+      global = abap_true ).
 
     create_token(
       name  = 'CARET'
@@ -344,7 +343,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
       name  = 'COMPARATORTRIM'
       value = |(\\s*){ token-gtlt-src }\\s*({ token-looseplain-src }\|| &&
               |{ token-xrangeplain-src })|
-      is_global = abap_true ).
+      global = abap_true ).
 
     " Something like `1.2.3 - 1.2.4`
     " Note that these all use the loose form, because they'll be
@@ -394,7 +393,7 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
     <token>-regex      = NEW cl_abap_regex( pattern = value ).
     <token>-safe_src   = make_safe_regex( value ).
     <token>-safe_regex = NEW cl_abap_regex( pattern = make_safe_regex( value ) ).
-    <token>-occ        = COND #( WHEN is_global = abap_true THEN 0 ELSE 1 ).
+    <token>-occ        = COND #( WHEN global = abap_true THEN 0 ELSE 1 ).
 
   ENDMETHOD.
 
@@ -417,8 +416,8 @@ CLASS zcl_abappm_semver_re IMPLEMENTATION.
 
     DATA(safe_regex_replacements) = VALUE ty_regex_replacements(
       ( token = `\s`               max = 1 )
-      ( token = `\d`               max = zif_abappm_semver_constants=>max_length )
-      ( token = letter_dash_number max = zif_abappm_semver_constants=>max_safe_build_length ) ).
+      ( token = `\d`               max = zif_semver_constants=>max_length )
+      ( token = letter_dash_number max = zif_semver_constants=>max_safe_build_length ) ).
 
     result = value.
 
