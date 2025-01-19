@@ -157,7 +157,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
   METHOD _help.
 
     result = VALUE #(
-      ( |SemVer { zif_semver_constants=>version }| )
+      ( |SemVer { zif_abappm_semver_constants=>version }| )
       ( `` )
       ( `ABAP implementation of the https://semver.org/ specification` )
       ( `Original JavaScript Copyright Isaac Z. Schlueter` )

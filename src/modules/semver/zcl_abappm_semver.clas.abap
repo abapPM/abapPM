@@ -92,7 +92,7 @@ CLASS zcl_abappm_semver DEFINITION
 
     DATA:
       raw     TYPE string,
-      options TYPE zif_semver_options=>ty_options.
+      options TYPE zif_abappm_semver_options=>ty_options.
 
 ENDCLASS.
 
@@ -203,8 +203,8 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF strlen( version ) > zif_semver_constants=>max_length.
-      zcx_abappm_error=>raise( |Version is longer than { zif_semver_constants=>max_length } characters| ).
+    IF strlen( version ) > zif_abappm_semver_constants=>max_length.
+      zcx_abappm_error=>raise( |Version is longer than { zif_abappm_semver_constants=>max_length } characters| ).
     ENDIF.
 
     options-loose  = loose.
@@ -229,19 +229,19 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         DATA(minor_num) = CONV decfloat34( m->get_submatch( 2 ) ).
         DATA(patch_num) = CONV decfloat34( m->get_submatch( 3 ) ).
 
-        IF major_num BETWEEN 0 AND zif_semver_constants=>max_safe_integer.
+        IF major_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           major = major_num.
         ELSE.
           zcx_abappm_error=>raise( |Invalid major version: { major_num }| ).
         ENDIF.
 
-        IF minor_num BETWEEN 0 AND zif_semver_constants=>max_safe_integer.
+        IF minor_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           minor = minor_num.
         ELSE.
           zcx_abappm_error=>raise( |Invalid minor version: { minor_num }| ).
         ENDIF.
 
-        IF patch_num BETWEEN 0 AND zif_semver_constants=>max_safe_integer.
+        IF patch_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           patch = patch_num.
         ELSE.
           zcx_abappm_error=>raise( |Invalid patch version: { patch_num }| ).

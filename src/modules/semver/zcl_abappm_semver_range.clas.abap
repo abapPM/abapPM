@@ -89,7 +89,7 @@ CLASS zcl_abappm_semver_range DEFINITION
     DATA:
       raw       TYPE string,
       formatted TYPE string,
-      options   TYPE zif_semver_options=>ty_options.
+      options   TYPE zif_abappm_semver_options=>ty_options.
 
     CLASS-METHODS is_any
       IMPORTING
