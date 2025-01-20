@@ -62,7 +62,7 @@ This project uses the following open source projects. Please support these great
 
 ## About
 
-Made with ❤️ in Canada
+Made with ❤ in Canada
 
 Copyright 2024 apm.to Inc. <https://apm.to>
 
