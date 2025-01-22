@@ -1,9 +1,9 @@
-********************************************************************************
+************************************************************************
 * ABAP Emoji
 *
-* Copyright 2022 Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
-********************************************************************************
+************************************************************************
 
 * Twemoji prodived by Twitter (Emoji 14.0)
 * https://github.com/twitter/twemoji

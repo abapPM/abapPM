@@ -90,6 +90,10 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       RAISING
         zcx_abapgit_exception.
 
+    METHODS render_styles
+      IMPORTING
+        !html TYPE REF TO zif_abapgit_html.
+
     METHODS render_table_header
       IMPORTING
         !html TYPE REF TO zif_abapgit_html.
@@ -554,6 +558,31 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_styles.
+
+    DATA emoji_styles TYPE string_table.
+
+    " Emoji Styles
+    INSERT `.emoji {` INTO TABLE emoji_styles.
+    INSERT `  display: inline-block;` INTO TABLE emoji_styles.
+    INSERT `  min-width: 1ch;` INTO TABLE emoji_styles.
+    INSERT `  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";` INTO TABLE emoji_styles.
+    INSERT `  font-size: 1em;` INTO TABLE emoji_styles.
+    INSERT `  font-style: normal !important;` INTO TABLE emoji_styles.
+    INSERT `  font-weight: 400;` INTO TABLE emoji_styles.
+    INSERT `  height: 16px;` INTO TABLE emoji_styles.
+    INSERT `  width: 16px;` INTO TABLE emoji_styles.
+    INSERT `  line-height: 1;` INTO TABLE emoji_styles.
+    INSERT `  vertical-align: -0.1em;` INTO TABLE emoji_styles.
+    INSERT `}` INTO TABLE emoji_styles.
+
+    html->add( '<style>' ).
+    html->add( emoji_styles ).
+    html->add( '</style>' ).
+
+  ENDMETHOD.
+
+
   METHOD render_table_body.
 
     html->add( '<tbody>' ).
@@ -659,7 +688,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     " Description
     html->td(
       html->a(
-        iv_txt = package-description
+        iv_txt = zcl_abappm_emoji=>create( )->format_emoji( package-description )
         iv_act = |{ c_action-select }?key={ package-package }| ) ).
 
     " Details: changed by
@@ -895,6 +924,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     load_settings( ).
 
     DATA(html) = zcl_abapgit_html=>create( ).
+
+    render_styles( html ).
 
     html->add( |<div class="repo-overview">| ).
 
