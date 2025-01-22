@@ -19,6 +19,7 @@
       "/src/modules/markdown/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
+      "zcl_abappm_installer_objects*",
       "zcl_abappm_html_*"
     ],
     "skipGeneratedBOPFInterfaces": true,
@@ -272,7 +273,10 @@
     "rfc_error_handling": true,
     "select_add_order_by": false,
     "select_performance": {
-      "exclude": ["zcl_abappm_persist_apm"],
+      "exclude": [
+        "zcl_abappm_installer",
+        "zcl_abappm_persist_apm"
+      ],
       "endSelect": true,
       "selectStar": true,
       "starOkayIfFewColumns": 10
