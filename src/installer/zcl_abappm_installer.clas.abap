@@ -337,26 +337,23 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _check_uninstalled.
 
-    DATA:
-      msg      TYPE string,
-      ls_tadir LIKE LINE OF tadir,
-      lt_tadir LIKE tadir.
+    DATA lt_tadir LIKE tadir.
 
     CHECK tadir IS NOT INITIAL.
 
-    SELECT pgmid object obj_name FROM tadir INTO CORRESPONDING FIELDS OF TABLE lt_tadir
-      FOR ALL ENTRIES IN tadir
-      WHERE pgmid    = tadir-pgmid
-        AND object   = tadir-object
-        AND obj_name = tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
+    SELECT pgmid, object, obj_name FROM tadir INTO TABLE @lt_tadir
+      FOR ALL ENTRIES IN @tadir
+      WHERE pgmid    = @tadir-pgmid
+        AND object   = @tadir-object
+        AND obj_name = @tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
     IF sy-subrc = 0.
-      LOOP AT lt_tadir INTO ls_tadir WHERE object <> 'DEVC'.
+      LOOP AT lt_tadir TRANSPORTING NO FIELDS WHERE object <> 'DEVC'.
         EXIT.
       ENDLOOP.
       IF sy-subrc = 0.
         install_data-status = c_warning.
-        msg = |Some objects could not be uninstalled. Uninstall the remaining objects |
-              && |of pacakge { install_data-pack } manually|.
+        DATA(msg) = |Some objects could not be uninstalled. Uninstall the remaining objects |
+                 && |of pacakge { install_data-pack } manually|.
       ELSE.
         msg = |Release the transport and deleted the remaining pacakge { install_data-pack } manually|.
       ENDIF.
@@ -368,25 +365,18 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _check_version.
 
-    DATA:
-      comp     TYPE i,
-      msg      TYPE string,
-      question TYPE string,
-      lo_popup TYPE REF TO zcl_abappm_installer_popups,
-      answer   TYPE c LENGTH 1.
-
-    comp = zcl_abapgit_version=>compare(
+    DATA(comp) = zcl_abapgit_version=>compare(
       is_a = new_version
       is_b = installed_version ).
     IF comp <= 0.
 
-      msg = |{ install_data-name } is already installed (with same or newer version)|.
-      question = msg  && '. Do you want to overwrite it?'.
+      DATA(msg) = |{ install_data-name } is already installed (with same or newer version)|.
+      DATA(question) = msg  && '. Do you want to overwrite it?'.
 
       IF force IS INITIAL.
-        CREATE OBJECT lo_popup.
+        DATA(lo_popup) = NEW zcl_abappm_installer_popups( ).
 
-        answer = lo_popup->popup_to_confirm(
+        DATA(answer) = lo_popup->popup_to_confirm(
           title          = sy-title
           question       = question
           default_button = '2' ).
@@ -420,7 +410,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Confirm message about modification mode (DT, CLM_INFORMATION)
     " and backup old state (see _restore_messages)
-    SELECT * FROM clmcus INTO TABLE clmcus_backup WHERE username = sy-uname ##SUBRC_OK.
+    SELECT * FROM clmcus INTO TABLE @clmcus_backup WHERE username = @sy-uname ##SUBRC_OK.
 
     DATA(customizing) = VALUE clmcus(
       username = sy-uname
@@ -438,17 +428,13 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _deserialize_data.
 
-    DATA:
-      support   TYPE REF TO lcl_abapgit_data_supporter,
-      inject    TYPE REF TO zcl_abapgit_data_injector,
-      checks    TYPE zif_abapgit_definitions=>ty_deserialize_checks,
-      overwrite TYPE LINE OF zif_abapgit_definitions=>ty_deserialize_checks-overwrite,
-      result    TYPE LINE OF zif_abapgit_data_deserializer=>ty_results,
-      results   TYPE zif_abapgit_data_deserializer=>ty_results.
+    DATA checks TYPE zif_abapgit_definitions=>ty_deserialize_checks.
+    " DATA inject TYPE REF TO zcl_abapgit_data_injector
+
 
     " Bridge to abapGit
     TRY.
-        support = NEW #( ).
+        DATA(support) = NEW lcl_abapgit_data_supporter( ).
         " FIXME:
         "    CREATE OBJECT inject
         "    inject->set_supporter( lo_support )
@@ -457,15 +443,15 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         DATA(deser) = zcl_abapgit_data_factory=>get_deserializer( ).
 
-        results = deser->deserialize(
+        DATA(results) = deser->deserialize(
           ii_config = config
           it_files  = remote_files ).
 
-        LOOP AT results INTO result.
-          CLEAR overwrite.
-          overwrite-obj_type = result-type.
-          overwrite-obj_name = result-name.
-          overwrite-decision = zif_abapgit_definitions=>c_yes.
+        LOOP AT results INTO DATA(result).
+          DATA(overwrite) = VALUE zif_abapgit_definitions=>ty_overwrite(
+            obj_type = result-type
+            obj_name = result-name
+            decision = zif_abapgit_definitions=>c_yes ).
           COLLECT overwrite INTO checks-overwrite.
         ENDLOOP.
 
@@ -599,9 +585,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_dot_abapgit.
 
-    FIELD-SYMBOLS: <remote> LIKE LINE OF remote.
-
-    READ TABLE remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
+    READ TABLE remote ASSIGNING FIELD-SYMBOL(<remote>) WITH TABLE KEY file_path COMPONENTS
       path     = zif_abapgit_definitions=>c_root_dir
       filename = zif_abapgit_definitions=>c_dot_abapgit.
     IF sy-subrc = 0.
@@ -619,9 +603,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_dot_apack.
 
-    FIELD-SYMBOLS: <remote> LIKE LINE OF remote.
-
-    READ TABLE remote ASSIGNING <remote> WITH TABLE KEY file_path COMPONENTS
+    READ TABLE remote ASSIGNING FIELD-SYMBOL(<remote>) WITH TABLE KEY file_path COMPONENTS
       path     = zif_abapgit_definitions=>c_root_dir
       filename = '.apack-manifest.xml'.
     IF sy-subrc = 0.
@@ -633,9 +615,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _find_remote_namespaces.
 
-    FIELD-SYMBOLS: <remote> LIKE LINE OF remote_files.
-
-    LOOP AT remote_files ASSIGNING <remote> WHERE filename CP '*.nspc.xml'.
+    LOOP AT remote_files ASSIGNING FIELD-SYMBOL(<remote>) WHERE filename CP '*.nspc.xml'.
       INSERT <remote> INTO TABLE result.
     ENDLOOP.
 
@@ -669,7 +649,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
 
   METHOD _log_start.
-    CREATE OBJECT log TYPE zcl_abapgit_log.
+    log = NEW zcl_abapgit_log( ).
     log->set_title( |{ sy-title } Log| ).
   ENDMETHOD.
 
@@ -700,10 +680,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
 
   METHOD _packaging.
-
-    DATA:
-      name     TYPE string,
-      lo_popup TYPE REF TO zcl_abappm_installer_popups.
 
     dot_abapgit = _find_remote_dot_abapgit( remote_files ).
 
