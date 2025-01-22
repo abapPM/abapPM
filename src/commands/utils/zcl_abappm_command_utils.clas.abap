@@ -161,7 +161,7 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
     DATA(tarball) = get_tarball_from_registry(
       registry = registry
-      name     = manifest-name
+      name     = name
       tarball  = manifest-dist-tarball ).
 
     check_integrity(
@@ -170,13 +170,11 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
     " FUTURE: Allow other folder logic than prefix
     zcl_abappm_installer=>install(
-      apm_name          = name
-      apm_version       = version
-      enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
-      name              = |{ name }|
+      name              = name
       data              = tarball
       package           = package
       transport         = transport
+      enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
       enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix
       is_production     = is_production ).
 

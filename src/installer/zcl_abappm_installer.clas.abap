@@ -33,19 +33,15 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS install
       IMPORTING
-        !apm_name          TYPE string OPTIONAL
-        !apm_version       TYPE string OPTIONAL
-        !enum_zip          TYPE i OPTIONAL
-        !name              TYPE string OPTIONAL
-        !data              TYPE xstring OPTIONAL
-        !package           TYPE devclass OPTIONAL
-        !dlvunit           TYPE dlvunit OPTIONAL
-        !devlayer          TYPE devlayer OPTIONAL
-        !transport         TYPE trkorr OPTIONAL
-        !enum_folder_logic TYPE i OPTIONAL
-        !is_production     TYPE abap_bool DEFAULT abap_false
+        !name              TYPE string
+        !data              TYPE xstring
+        !package           TYPE devclass
+        !transport         TYPE trkorr
+        !enum_zip          TYPE i
+        !enum_folder_logic TYPE i
+        !is_production     TYPE abap_bool
       RAISING
-        zcx_abappm_error.
+        zcx_abappm_error ##NEEDED.
 
     CLASS-METHODS uninstall
       IMPORTING
@@ -53,15 +49,10 @@ CLASS zcl_abappm_installer DEFINITION
         !transport TYPE trkorr OPTIONAL
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CLASS-DATA:
-      BEGIN OF apm_params,
-        name    TYPE string,
-        version TYPE string,
-      END OF apm_params,
       remote_files  TYPE zif_abapgit_git_definitions=>ty_files_tt,
       dot_abapgit   TYPE REF TO zcl_abapgit_dot_abapgit,
       main_language TYPE sy-langu,
@@ -88,12 +79,6 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _folder_logic
       IMPORTING
         !enum_folder_logic TYPE i
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _transport_get
-      RETURNING
-        VALUE(result) TYPE trkorr
       RAISING
         zcx_abappm_error.
 
@@ -170,7 +155,6 @@ CLASS zcl_abappm_installer DEFINITION
       IMPORTING
         !transport TYPE trkorr
         !tadir     TYPE zif_abapgit_definitions=>ty_tadir_tt.
-
 ENDCLASS.
 
 
@@ -179,9 +163,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
 
   METHOD install.
-
-    apm_params-name    = apm_name.
-    apm_params-version = apm_version.
 
     TRY.
         _log_start( ).
@@ -355,16 +336,16 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Bridge to abapGit
     TRY.
-        DATA(support) = NEW lcl_abapgit_data_supporter( ).
+        " DATA(support) = NEW lcl_abapgit_data_supporter( )
         " FIXME:
         "    CREATE OBJECT inject
         "    inject->set_supporter( lo_support )
 
         DATA(config) = _find_remote_data_config( ).
 
-        DATA(deser) = zcl_abapgit_data_factory=>get_deserializer( ).
+        DATA(deserializer) = zcl_abapgit_data_factory=>get_deserializer( ).
 
-        DATA(results) = deser->deserialize(
+        DATA(results) = deserializer->deserialize(
           ii_config = config
           it_files  = remote_files ).
 
@@ -376,7 +357,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           COLLECT overwrite INTO checks-overwrite.
         ENDLOOP.
 
-        deser->actualize(
+        deserializer->actualize(
           is_checks = checks
           it_result = results ).
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -406,8 +387,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _files.
 
-    DATA package_data TYPE xstring.
-
     DATA(progress) = zcl_abapgit_progress=>get_instance( 100 ).
 
     progress->show(
@@ -417,7 +396,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     " Load abapGit ZIP File
     CASE enum_zip.
       WHEN c_enum_zip-internet.
-        package_data = zcl_abappm_installer_files=>load_internet( name ).
+        DATA(package_data) = zcl_abappm_installer_files=>load_internet( name ).
       WHEN c_enum_zip-local.
         package_data = zcl_abappm_installer_files=>load_local( name ).
       WHEN c_enum_zip-server.
@@ -464,9 +443,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     TRY.
         result = NEW zcl_abapgit_data_config( ).
 
-        READ TABLE remote_files ASSIGNING FIELD-SYMBOL(<remote>)
-          WITH KEY path = zif_abapgit_data_config=>c_default_path ##PRIMKEY[FILE_PATH].
-        IF sy-subrc = 0.
+        IF line_exists( remote_files[ KEY file_path COMPONENTS path = zif_abapgit_data_config=>c_default_path ] ).
           result->from_json( remote_files ).
         ENDIF.
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -671,45 +648,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         ENDIF.
       ENDIF.
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD _transport_get.
-
-    DATA request TYPE trwbo_request.
-
-    " Get previously used transport
-***    result = db_persist->select( name = install_data-name
-***                               pack = install_data-pack )-transport.
-
-    IF result IS INITIAL.
-      " Or last used transport
-***      result = db_persist->last( )-transport.
-    ENDIF.
-
-    IF result IS NOT INITIAL.
-      " Check if transport is still open
-      CALL FUNCTION 'TR_READ_REQUEST'
-        EXPORTING
-          read_attributes  = 'X'
-          trkorr           = result
-        CHANGING
-          cs_request       = request
-        EXCEPTIONS
-          error_occured    = 1
-          no_authorization = 2
-          OTHERS           = 3.
-      IF sy-subrc = 0 AND request-h-trstatus = 'D'.
-        RETURN.
-      ENDIF.
-    ENDIF.
-
-    " Get default transport
-    TRY.
-        result = zcl_abapgit_factory=>get_default_transport( )->get( )-ordernum.
-      CATCH zcx_abapgit_exception ##NO_HANDLER.
-    ENDTRY.
 
   ENDMETHOD.
 
