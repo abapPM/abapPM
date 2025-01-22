@@ -24,18 +24,6 @@ CLASS zcl_abappm_installer DEFINITION
       END OF c_enum_zip.
 
     CONSTANTS:
-      BEGIN OF c_enum_package,
-        local         TYPE i VALUE 1,
-        transportable TYPE i VALUE 2,
-      END OF c_enum_package.
-
-    CONSTANTS:
-      BEGIN OF c_enum_transport,
-        prompt   TYPE i VALUE 0,
-        existing TYPE i VALUE 1,
-      END OF c_enum_transport.
-
-    CONSTANTS:
       BEGIN OF c_enum_folder_logic,
         default TYPE i VALUE 0,
         prefix  TYPE i VALUE 1,
@@ -50,11 +38,9 @@ CLASS zcl_abappm_installer DEFINITION
         !enum_zip          TYPE i OPTIONAL
         !name              TYPE string OPTIONAL
         !data              TYPE xstring OPTIONAL
-        !enum_package      TYPE i OPTIONAL
         !package           TYPE devclass OPTIONAL
         !dlvunit           TYPE dlvunit OPTIONAL
         !devlayer          TYPE devlayer OPTIONAL
-        !enum_transport    TYPE i OPTIONAL
         !transport         TYPE trkorr OPTIONAL
         !enum_folder_logic TYPE i OPTIONAL
         !is_production     TYPE abap_bool DEFAULT abap_false
@@ -63,9 +49,11 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS uninstall
       IMPORTING
-        !package TYPE devclass
+        !package   TYPE devclass
+        !transport TYPE trkorr OPTIONAL
       RAISING
         zcx_abappm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -75,21 +63,15 @@ CLASS zcl_abappm_installer DEFINITION
         version TYPE string,
       END OF apm_params,
       remote_files  TYPE zif_abapgit_git_definitions=>ty_files_tt,
-      install_data  TYPE zif_abappm_installer_def=>ty_inst,
       dot_abapgit   TYPE REF TO zcl_abapgit_dot_abapgit,
+      main_language TYPE sy-langu,
+      folder_logic  TYPE string,
       log           TYPE REF TO zif_abapgit_log,
       clmcus_backup TYPE STANDARD TABLE OF clmcus WITH DEFAULT KEY.
-
-    CONSTANTS:
-      c_success TYPE sy-msgty VALUE 'S' ##NO_TEXT,
-      c_warning TYPE sy-msgty VALUE 'W' ##NO_TEXT,
-      c_error   TYPE sy-msgty VALUE 'E' ##NO_TEXT.
 
     CLASS-METHODS _system_check
       RAISING
         zcx_abappm_error.
-
-    CLASS-METHODS _clear.
 
     CLASS-METHODS _files
       IMPORTING
@@ -103,25 +85,9 @@ CLASS zcl_abappm_installer DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS _sap_package
-      IMPORTING
-        !enum_package TYPE i
-        !package      TYPE devclass OPTIONAL
-        !dlvunit      TYPE dlvunit OPTIONAL
-        !devlayer     TYPE devlayer OPTIONAL
-      RAISING
-        zcx_abappm_error.
-
     CLASS-METHODS _folder_logic
       IMPORTING
         !enum_folder_logic TYPE i
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _transport
-      IMPORTING
-        !enum_transport TYPE i
-        !transport      TYPE trkorr OPTIONAL
       RAISING
         zcx_abappm_error.
 
@@ -132,12 +98,19 @@ CLASS zcl_abappm_installer DEFINITION
         zcx_abappm_error.
 
     CLASS-METHODS _transport_check
+      IMPORTING
+        !package   TYPE devclass
+        !transport TYPE trkorr
       RAISING
         zcx_abappm_error.
 
     CLASS-METHODS _transport_reset.
 
     CLASS-METHODS _namespaces
+      IMPORTING
+        !package       TYPE devclass
+        !transport     TYPE trkorr
+        !main_language TYPE sy-langu
       RAISING
         zcx_abappm_error.
 
@@ -146,6 +119,10 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _restore_messages.
 
     CLASS-METHODS _deserialize_objects
+      IMPORTING
+        !package       TYPE devclass
+        !transport     TYPE trkorr
+        !main_language TYPE sy-langu
       RAISING
         zcx_abappm_error.
 
@@ -156,12 +133,10 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _log_start.
 
     CLASS-METHODS _log_end
+      RETURNING
+        VALUE(result) TYPE sy-msgty
       RAISING
         zcx_abappm_error.
-
-    CLASS-METHODS _final_message
-      IMPORTING
-        !type TYPE string.
 
     CLASS-METHODS _find_remote_dot_abapgit
       IMPORTING
@@ -183,15 +158,19 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS _check_uninstalled
       IMPORTING
-        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !package TYPE devclass
+        !tadir   TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     CLASS-METHODS _uninstall_sotr
       IMPORTING
-        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !transport TYPE trkorr
+        !tadir     TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     CLASS-METHODS _uninstall_sots
       IMPORTING
-        !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
+        !transport TYPE trkorr
+        !tadir     TYPE zif_abapgit_definitions=>ty_tadir_tt.
+
 ENDCLASS.
 
 
@@ -205,8 +184,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     apm_params-version = apm_version.
 
     TRY.
-        _clear( ).
-
         _log_start( ).
 
         _system_check( ).
@@ -218,21 +195,23 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _packaging( ).
 
-        _sap_package(
-          enum_package = enum_package
-          package      = package ).
-
         _folder_logic( enum_folder_logic ).
 
-        _transport(
-          enum_transport = enum_transport
-          transport      = transport ).
+        _transport_check(
+          package   = package
+          transport = transport ).
 
         _confirm_messages( ).
 
-        _namespaces( ).
+        _namespaces(
+          package       = package
+          transport     = transport
+          main_language = main_language ).
 
-        _deserialize_objects( ).
+        _deserialize_objects(
+          package       = package
+          transport     = transport
+          main_language = main_language ).
 
         _deserialize_data( ).
 
@@ -247,8 +226,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _restore_messages( ).
 
-        _final_message( 'Installation' ).
-
       CATCH cx_root INTO error.
         log->add_exception( error ).
     ENDTRY.
@@ -259,8 +236,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD uninstall.
 
     TRY.
-        _clear( ).
-
         _log_start( ).
 
         _system_check( ).
@@ -277,14 +252,18 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           DELETE tadir WHERE object = 'NSPC'.
 
           IF tadir IS NOT INITIAL.
-            _uninstall_sotr( tadir ).
+            _uninstall_sotr(
+              tadir     = tadir
+              transport = transport ).
 
-            _uninstall_sots( tadir ).
+            _uninstall_sots(
+              tadir     = tadir
+              transport = transport ).
 
             " Bridge to abapGit
             zcl_abappm_installer_objects=>delete(
               it_tadir     = tadir
-              iv_transport = install_data-transport
+              iv_transport = transport
               ii_log       = log ).
           ENDIF.
         ENDDO.
@@ -298,11 +277,11 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     TRY.
         _log_end( ).
 
-        _check_uninstalled( tadir ).
+        _check_uninstalled(
+          package = package
+          tadir   = tadir ).
 
         _restore_messages( ).
-
-        _final_message( 'Uninstall' ).
 
       CATCH cx_root INTO error.
         log->add_exception( error ).
@@ -327,20 +306,14 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         EXIT.
       ENDLOOP.
       IF sy-subrc = 0.
-        install_data-status = c_warning.
         DATA(msg) = |Some objects could not be uninstalled. Uninstall the remaining objects |
-                 && |of pacakge { install_data-pack } manually|.
+                 && |of pacakge { package } manually|.
       ELSE.
-        msg = |Release the transport and deleted the remaining pacakge { install_data-pack } manually|.
+        msg = |Release the transport and deleted the remaining pacakge { package } manually|.
       ENDIF.
       MESSAGE msg TYPE 'I'.
     ENDIF.
 
-  ENDMETHOD.
-
-
-  METHOD _clear.
-    CLEAR: install_data, dot_abapgit.
   ENDMETHOD.
 
 
@@ -418,9 +391,9 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     " Bridge to abapGit
     TRY.
         zcl_abappm_installer_objects=>deserialize(
-          iv_package   = install_data-pack
-          iv_language  = install_data-installed_langu
-          iv_transport = install_data-transport
+          iv_package   = package
+          iv_language  = main_language
+          iv_transport = transport
           it_remote    = remote_files
           io_dot       = dot_abapgit
           ii_log       = log ).
@@ -442,23 +415,16 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       iv_current = 5 ).
 
     " Load abapGit ZIP File
-    install_data-source_name = name.
-
     CASE enum_zip.
       WHEN c_enum_zip-internet.
-        install_data-source_type = 'INTERNET'.
         package_data = zcl_abappm_installer_files=>load_internet( name ).
       WHEN c_enum_zip-local.
-        install_data-source_type = 'LOCAL'.
         package_data = zcl_abappm_installer_files=>load_local( name ).
       WHEN c_enum_zip-server.
-        install_data-source_type = 'SERVER'.
         package_data = zcl_abappm_installer_files=>load_server( name ).
       WHEN c_enum_zip-data.
-        install_data-source_type = 'DATA'.
         package_data = data.
       WHEN c_enum_zip-registry.
-        install_data-source_type = 'REGISTRY'.
         package_data = data.
       WHEN OTHERS.
         zcx_abappm_error=>raise( |Unknown source for package| ).
@@ -489,27 +455,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       iv_current = 20 ).
 
     zcl_abappm_installer_files=>virus_scan( package_data ).
-
-  ENDMETHOD.
-
-
-  METHOD _final_message.
-
-    DATA msg TYPE string.
-
-    CASE install_data-status.
-      WHEN c_success.
-        msg = |{ type } of "{ install_data-name }" successfully completed|.
-        MESSAGE msg TYPE c_success.
-      WHEN c_warning.
-        msg = |{ type } of "{ install_data-name }" finished with warnings|.
-        MESSAGE msg TYPE c_success DISPLAY LIKE c_warning.
-      WHEN c_error.
-        msg = |{ type } of "{ install_data-name }" finshed with errors|.
-        MESSAGE msg TYPE c_success DISPLAY LIKE c_error.
-      WHEN OTHERS.
-        ASSERT 1 = 2.
-    ENDCASE.
 
   ENDMETHOD.
 
@@ -562,13 +507,13 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     CASE enum_folder_logic.
       WHEN c_enum_folder_logic-default.
-        install_data-folder_logic = dot_abapgit->get_folder_logic( ).
+        folder_logic = dot_abapgit->get_folder_logic( ).
       WHEN c_enum_folder_logic-prefix.
-        install_data-folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-prefix.
+        folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-prefix.
       WHEN c_enum_folder_logic-mixed.
-        install_data-folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-mixed.
+        folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-mixed.
       WHEN c_enum_folder_logic-full.
-        install_data-folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-full.
+        folder_logic = zif_abapgit_dot_abapgit=>c_folder_logic-full.
       WHEN OTHERS.
         zcx_abappm_error=>raise( 'Unknown folder logic' ).
     ENDCASE.
@@ -577,11 +522,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
 
   METHOD _log_end.
-    install_data-status = log->get_status( ).
-    IF install_data-status <> c_success.
-      " FUTURE: Pass log to caller
-      " zcl_abapinst_log_viewer=>show_log( log )
-    ENDIF.
+    result = log->get_status( ).
   ENDMETHOD.
 
 
@@ -600,9 +541,9 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     IF lines( remote_files ) > 0.
       TRY.
           zcl_abappm_installer_objects=>deserialize(
-            iv_package   = install_data-pack
-            iv_language  = install_data-installed_langu
-            iv_transport = install_data-transport
+            iv_package   = package
+            iv_language  = main_language
+            iv_transport = transport
             it_remote    = remote_files
             io_dot       = dot_abapgit
             ii_log       = log ).
@@ -621,14 +562,12 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     dot_abapgit = _find_remote_dot_abapgit( remote_files ).
 
     " Check language
-    install_data-installed_langu = dot_abapgit->get_main_language( ).
+    main_language = dot_abapgit->get_main_language( ).
 
-    IF install_data-installed_langu <> sy-langu.
+    IF main_language <> sy-langu.
       zcx_abappm_error=>raise(
-        |Unable to install. Logon in main language of package which is { install_data-installed_langu }| ).
+        |Unable to install. Logon in main language of package which is { main_language }| ).
     ENDIF.
-
-    install_data = CORRESPONDING #( apm_params ).
 
   ENDMETHOD.
 
@@ -637,26 +576,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     DELETE FROM clmcus WHERE username = @sy-uname ##SUBRC_OK.
     INSERT clmcus FROM TABLE @clmcus_backup ##SUBRC_OK.
-
-  ENDMETHOD.
-
-
-  METHOD _sap_package.
-
-    CASE enum_package.
-      WHEN c_enum_package-local.
-        IF package(1) <> '$'.
-          zcx_abappm_error=>raise( 'Local package must begin with $' ).
-        ENDIF.
-      WHEN c_enum_package-transportable.
-        IF package(1) = '$'.
-          zcx_abappm_error=>raise( 'Transportable package must not begin with $' ).
-        ENDIF.
-      WHEN OTHERS.
-        zcx_abappm_error=>raise( 'Unknown type of target package' ).
-    ENDCASE.
-
-    install_data-pack = package.
 
   ENDMETHOD.
 
@@ -691,42 +610,17 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _transport.
-
-    CHECK install_data-pack(1) <> '$'.
-
-    CASE enum_transport.
-      WHEN c_enum_transport-existing.
-        install_data-transport = transport.
-      WHEN c_enum_transport-prompt.
-        " TODO: Remove. Transport should be passed from caller
-        " install_data-transport = zcl_abapinst_screen=>f4_transport(
-        "   iv_package   = install_data-pack
-        "   iv_transport = _transport_get( ) )
-
-        IF install_data-transport IS INITIAL.
-          zcx_abappm_error=>raise( 'No transport selected. Installation cancelled' ).
-        ENDIF.
-    ENDCASE.
-
-    _transport_check( ).
-
-  ENDMETHOD.
-
-
   METHOD _transport_check.
 
     DATA:
       request_header  TYPE trwbo_request_header,
       request_headers TYPE trwbo_request_headers.
 
-    CHECK install_data-pack(1) <> '$'.
-
-    DATA(text) = install_data-name && ':' && install_data-description.
+    DATA(text) = |apm: Package { package }|.
 
     CALL FUNCTION 'TR_READ_REQUEST_WITH_TASKS'
       EXPORTING
-        trkorr             = install_data-transport
+        trkorr             = transport
       IMPORTING
         et_request_headers = request_headers
       EXCEPTIONS
@@ -740,7 +634,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     READ TABLE request_headers INTO request_header
       WITH KEY trfunction = 'K' trstatus = 'D' korrdev = 'SYST'.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Transport { install_data-transport } is not a changeable "workbench request"| ).
+      zcx_abappm_error=>raise( |Transport { transport } is not a changeable "workbench request"| ).
     ENDIF.
 
     " Task Type: Unclassified (ok)
@@ -763,7 +657,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     ENDIF.
 
     " Task Type: Repair (for namespaced projects)
-    IF install_data-pack(1) = '/'.
+    IF package(1) = '/'.
       IF NOT line_exists( request_headers[ trfunction = 'R' trstatus = 'D' korrdev = 'SYST' ] ).
         CALL FUNCTION 'TRINT_INSERT_NEW_COMM'
           EXPORTING
@@ -834,7 +728,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Necessary since older releases do not delete SOTR when package is deleted
 
-    DATA(use_korr) = xsdbool( install_data-transport IS NOT INITIAL ).
+    DATA(use_korr) = xsdbool( transport IS NOT INITIAL ).
 
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
@@ -848,7 +742,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
               concept                  = <sotr_head>-concept
-              corr_num                 = install_data-transport
+              corr_num                 = transport
               use_korrnum_immediatedly = use_korr
               flag_string              = abap_false
             EXCEPTIONS
@@ -888,7 +782,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Necessary since older releases do not delete SOTS when package is deleted
 
-    DATA(use_korr) = xsdbool( install_data-transport IS NOT INITIAL ).
+    DATA(use_korr) = xsdbool( transport IS NOT INITIAL ).
 
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
@@ -902,7 +796,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
               concept                  = <sotr_head>-concept
-              corr_num                 = install_data-transport
+              corr_num                 = transport
               use_korrnum_immediatedly = use_korr
               flag_string              = abap_true
             EXCEPTIONS

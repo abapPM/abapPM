@@ -156,6 +156,9 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
   METHOD install_package.
 
+    " TODO: Currently hardcoded to local packages (no transport)
+    DATA transport TYPE trkorr.
+
     DATA(tarball) = get_tarball_from_registry(
       registry = registry
       name     = manifest-name
@@ -165,7 +168,6 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
       tarball = tarball
       dist    = manifest-dist ).
 
-    " TODO: Currently hardcoded to local packages (no transport)
     " FUTURE: Allow other folder logic than prefix
     zcl_abappm_installer=>install(
       apm_name          = name
@@ -173,9 +175,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
       enum_zip          = zcl_abappm_installer=>c_enum_zip-registry
       name              = |{ name }|
       data              = tarball
-      enum_package      = zcl_abappm_installer=>c_enum_package-local
       package           = package
-      enum_transport    = zcl_abappm_installer=>c_enum_transport-prompt
+      transport         = transport
       enum_folder_logic = zcl_abappm_installer=>c_enum_folder_logic-prefix
       is_production     = is_production ).
 
