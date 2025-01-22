@@ -63,12 +63,9 @@ CLASS zcl_abappm_installer DEFINITION
 
     CLASS-METHODS uninstall
       IMPORTING
-        !apm  TYPE abap_bool DEFAULT abap_false
-        !name TYPE zif_abappm_installer_def=>ty_name OPTIONAL
-        !pack TYPE zif_abappm_installer_def=>ty_pack OPTIONAL
+        !package TYPE devclass
       RAISING
         zcx_abappm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -112,14 +109,6 @@ CLASS zcl_abappm_installer DEFINITION
         !package      TYPE devclass OPTIONAL
         !dlvunit      TYPE dlvunit OPTIONAL
         !devlayer     TYPE devlayer OPTIONAL
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _check_version
-      IMPORTING
-        !new_version       TYPE zif_abappm_installer_def=>ty_version
-        !installed_version TYPE zif_abappm_installer_def=>ty_version
-        !force             TYPE abap_bool DEFAULT abap_false
       RAISING
         zcx_abappm_error.
 
@@ -175,14 +164,6 @@ CLASS zcl_abappm_installer DEFINITION
         !type TYPE string.
 
     CLASS-METHODS _find_remote_dot_abapgit
-      IMPORTING
-        !remote       TYPE zif_abapgit_git_definitions=>ty_files_tt
-      RETURNING
-        VALUE(result) TYPE REF TO zcl_abapgit_dot_abapgit
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS _find_remote_dot_apack
       IMPORTING
         !remote       TYPE zif_abapgit_git_definitions=>ty_files_tt
       RETURNING
@@ -284,18 +265,14 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
         _system_check( ).
 
-        IF apm IS INITIAL.
-          " TODO: needs to work for apm
-          _transport( c_enum_transport-prompt ).
-        ELSE.
-          install_data-pack = pack.
-        ENDIF.
+        " TODO: needs to work for apm
+        " _transport( c_enum_transport-prompt )
 
         _confirm_messages( ).
 
         " A few tries to tackle dependencies
         DO 3 TIMES.
-          DATA(tadir) = zcl_abapgit_factory=>get_tadir( )->read( install_data-pack ).
+          DATA(tadir) = zcl_abapgit_factory=>get_tadir( )->read( package ).
 
           DELETE tadir WHERE object = 'NSPC'.
 
@@ -346,7 +323,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         AND object   = @tadir-object
         AND obj_name = @tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
     IF sy-subrc = 0.
-      LOOP AT tadir_list TRANSPORTING NO FIELDS WHERE object <> 'DEVC'.
+      LOOP AT tadir_list TRANSPORTING NO FIELDS WHERE object <> 'DEVC' AND object <> 'NSPC'.
         EXIT.
       ENDLOOP.
       IF sy-subrc = 0.
@@ -357,34 +334,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         msg = |Release the transport and deleted the remaining pacakge { install_data-pack } manually|.
       ENDIF.
       MESSAGE msg TYPE 'I'.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD _check_version.
-
-    DATA(comp) = zcl_abapgit_version=>compare(
-      is_a = new_version
-      is_b = installed_version ).
-    IF comp <= 0.
-
-      DATA(msg) = |{ install_data-name } is already installed (with same or newer version)|.
-      DATA(question) = msg  && '. Do you want to overwrite it?'.
-
-      IF force IS INITIAL.
-        DATA(popup) = NEW zcl_abappm_installer_popups( ).
-
-        DATA(answer) = popup->popup_to_confirm(
-          title          = sy-title
-          question       = question
-          default_button = '2' ).
-
-        IF answer <> '1'.
-          zcx_abappm_error=>raise( msg ).
-        ENDIF.
-      ENDIF.
-
     ENDIF.
 
   ENDMETHOD.
@@ -595,18 +544,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       ENDTRY.
     ELSE.
       zcx_abappm_error=>raise( |Error finding .abapgit.xml - Is this an package?| ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD _find_remote_dot_apack.
-
-    READ TABLE remote ASSIGNING FIELD-SYMBOL(<remote>) WITH TABLE KEY file_path COMPONENTS
-      path     = zif_abapgit_definitions=>c_root_dir
-      filename = '.apack-manifest.xml'.
-    IF sy-subrc = 0.
-      zcx_abappm_error=>raise( |Please migrate APACK to package setting| ).
     ENDIF.
 
   ENDMETHOD.

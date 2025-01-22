@@ -184,9 +184,7 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
   METHOD uninstall_package.
 
-    zcl_abappm_installer=>uninstall(
-      apm  = abap_true
-      pack = package ).
+    zcl_abappm_installer=>uninstall( package ).
 
   ENDMETHOD.
 ENDCLASS.
