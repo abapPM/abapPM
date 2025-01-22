@@ -208,7 +208,7 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
 
     DATA:
       file_size  TYPE i,
-      data_table TYPE TABLE OF ty_hex WITH DEFAULT KEY.
+      data_table TYPE STANDARD TABLE OF ty_hex WITH EMPTY KEY.
 
     cl_gui_frontend_services=>gui_upload(
       EXPORTING
@@ -254,7 +254,7 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
       eps_inbox  TYPE eps2path,
       file_name  TYPE file_name,
       file_size  TYPE i,
-      data_table TYPE TABLE OF ty_hex WITH DEFAULT KEY.
+      data_table TYPE STANDARD TABLE OF ty_hex WITH EMPTY KEY.
 
     CALL FUNCTION 'EPS_GET_DIRECTORY_PATH'
       EXPORTING
@@ -309,6 +309,7 @@ CLASS zcl_abappm_installer_files IMPLEMENTATION.
 
       IF <file>-name CA '/'.
         FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES file-path file-filename.
+        ASSERT sy-subrc = 0.
       ELSE.
         file-filename = <file>-name.
       ENDIF.

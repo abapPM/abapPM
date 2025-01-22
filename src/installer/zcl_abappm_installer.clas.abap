@@ -73,10 +73,10 @@ CLASS zcl_abappm_installer DEFINITION
   PRIVATE SECTION.
 
     CLASS-DATA:
-      BEGIN OF gs_apm,
+      BEGIN OF apm_params,
         name    TYPE string,
         version TYPE string,
-      END OF gs_apm,
+      END OF apm_params,
       remote_files  TYPE zif_abapgit_git_definitions=>ty_files_tt,
       install_data  TYPE zif_abappm_installer_def=>ty_inst,
       dot_abapgit   TYPE REF TO zcl_abapgit_dot_abapgit,
@@ -211,7 +211,6 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _uninstall_sots
       IMPORTING
         !tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
-
 ENDCLASS.
 
 
@@ -221,8 +220,8 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD install.
 
-    gs_apm-name    = apm_name.
-    gs_apm-version = apm_version.
+    apm_params-name    = apm_name.
+    apm_params-version = apm_version.
 
     TRY.
         _clear( ).
@@ -337,17 +336,17 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _check_uninstalled.
 
-    DATA lt_tadir LIKE tadir.
+    DATA tadir_list LIKE tadir.
 
     CHECK tadir IS NOT INITIAL.
 
-    SELECT pgmid, object, obj_name FROM tadir INTO TABLE @lt_tadir
+    SELECT pgmid, object, obj_name FROM tadir INTO TABLE @tadir_list
       FOR ALL ENTRIES IN @tadir
       WHERE pgmid    = @tadir-pgmid
         AND object   = @tadir-object
         AND obj_name = @tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
     IF sy-subrc = 0.
-      LOOP AT lt_tadir TRANSPORTING NO FIELDS WHERE object <> 'DEVC'.
+      LOOP AT tadir_list TRANSPORTING NO FIELDS WHERE object <> 'DEVC'.
         EXIT.
       ENDLOOP.
       IF sy-subrc = 0.
@@ -374,9 +373,9 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       DATA(question) = msg  && '. Do you want to overwrite it?'.
 
       IF force IS INITIAL.
-        DATA(lo_popup) = NEW zcl_abappm_installer_popups( ).
+        DATA(popup) = NEW zcl_abappm_installer_popups( ).
 
-        DATA(answer) = lo_popup->popup_to_confirm(
+        DATA(answer) = popup->popup_to_confirm(
           title          = sy-title
           question       = question
           default_button = '2' ).
@@ -415,13 +414,13 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     DATA(customizing) = VALUE clmcus(
       username = sy-uname
       obj_type = 'CLAS' ).
-    INSERT clmcus FROM customizing ##SUBRC_OK.
+    INSERT clmcus FROM @customizing ##SUBRC_OK.
 
     customizing-obj_type = 'INTF'.
-    INSERT clmcus FROM customizing ##SUBRC_OK.
+    INSERT clmcus FROM @customizing ##SUBRC_OK.
 
     customizing-obj_type = 'METH'.
-    INSERT clmcus FROM customizing ##SUBRC_OK.
+    INSERT clmcus FROM @customizing ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -569,7 +568,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _find_remote_data_config.
 
     TRY.
-        CREATE OBJECT result TYPE zcl_abapgit_data_config.
+        result = NEW zcl_abapgit_data_config( ).
 
         READ TABLE remote_files ASSIGNING FIELD-SYMBOL(<remote>)
           WITH KEY path = zif_abapgit_data_config=>c_default_path ##PRIMKEY[FILE_PATH].
@@ -643,7 +642,8 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD _log_end.
     install_data-status = log->get_status( ).
     IF install_data-status <> c_success.
-      zcl_abapinst_log_viewer=>show_log( log ).
+      " FUTURE: Pass log to caller
+      " zcl_abapinst_log_viewer=>show_log( log )
     ENDIF.
   ENDMETHOD.
 
@@ -691,15 +691,15 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
         |Unable to install. Logon in main language of package which is { install_data-installed_langu }| ).
     ENDIF.
 
-    MOVE-CORRESPONDING gs_apm TO install_data.
+    install_data = CORRESPONDING #( apm_params ).
 
   ENDMETHOD.
 
 
   METHOD _restore_messages.
 
-    DELETE FROM clmcus WHERE username = sy-uname ##SUBRC_OK.
-    INSERT clmcus FROM TABLE clmcus_backup ##SUBRC_OK.
+    DELETE FROM clmcus WHERE username = @sy-uname ##SUBRC_OK.
+    INSERT clmcus FROM TABLE @clmcus_backup ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -762,9 +762,10 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       WHEN c_enum_transport-existing.
         install_data-transport = transport.
       WHEN c_enum_transport-prompt.
-        install_data-transport = zcl_abapinst_screen=>f4_transport(
-          iv_package   = install_data-pack
-          iv_transport = _transport_get( ) ).
+        " TODO: Remove. Transport should be passed from caller
+        " install_data-transport = zcl_abapinst_screen=>f4_transport(
+        "   iv_package   = install_data-pack
+        "   iv_transport = _transport_get( ) )
 
         IF install_data-transport IS INITIAL.
           zcx_abappm_error=>raise( 'No transport selected. Installation cancelled' ).
@@ -806,16 +807,12 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
     ENDIF.
 
     " Task Type: Unclassified (ok)
-    READ TABLE request_headers TRANSPORTING NO FIELDS
-      WITH KEY trfunction = 'X' trstatus = 'D' korrdev = 'SYST'.
-    IF sy-subrc = 0.
+    IF line_exists( request_headers[ trfunction = 'X' trstatus = 'D' korrdev = 'SYST' ] ).
       RETURN.
     ENDIF.
 
     " Task Type: Development
-    READ TABLE request_headers TRANSPORTING NO FIELDS
-      WITH KEY trfunction = 'S' trstatus = 'D' korrdev = 'SYST'.
-    IF sy-subrc <> 0.
+    IF NOT line_exists( request_headers[ trfunction = 'S' trstatus = 'D' korrdev = 'SYST' ] ).
       CALL FUNCTION 'TRINT_INSERT_NEW_COMM'
         EXPORTING
           wi_kurztext   = text
@@ -830,9 +827,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     " Task Type: Repair (for namespaced projects)
     IF install_data-pack(1) = '/'.
-      READ TABLE request_headers TRANSPORTING NO FIELDS
-        WITH KEY trfunction = 'R' trstatus = 'D' korrdev = 'SYST'.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( request_headers[ trfunction = 'R' trstatus = 'D' korrdev = 'SYST' ] ).
         CALL FUNCTION 'TRINT_INSERT_NEW_COMM'
           EXPORTING
             wi_kurztext   = text
@@ -911,7 +906,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).
-          DELETE FROM sotr_use WHERE concept = <sotr_head>-concept.
+          DELETE FROM sotr_use WHERE concept = @<sotr_head>-concept.
 
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
@@ -965,7 +960,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).
-          DELETE FROM sotr_useu WHERE concept = <sotr_head>-concept.
+          DELETE FROM sotr_useu WHERE concept = @<sotr_head>-concept.
 
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
