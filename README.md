@@ -55,7 +55,7 @@ Recommended SAP Package: `$ABAPPM`
 
 ## Attribution
 
-This project include code of the following open source projects. Please support them if you can!
+This project includes code of the following open source projects. Please support them if you can!
 
 - [abapGit](https://github.com/abapGit/abapGit), abapGit Community, [MIT](https://github.com/abapGit/abapGit/blob/main/LICENSE)
 - [AJSON](https://github.com/sbcgua/ajson), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
