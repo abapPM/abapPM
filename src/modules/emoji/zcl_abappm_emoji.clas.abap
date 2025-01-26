@@ -412,7 +412,7 @@ CLASS zcl_abappm_emoji IMPLEMENTATION.
       x0400  TYPE x LENGTH 2 VALUE '0400',
       x7f    TYPE x LENGTH 1 VALUE '7F'.
 
-    TYPES four_bytes TYPE x LENGTH 4.
+    TYPES ty_four_bytes TYPE x LENGTH 4.
 
     CHECK strlen( codepoint ) BETWEEN 1 AND 8.
 
@@ -422,7 +422,7 @@ CLASS zcl_abappm_emoji IMPLEMENTATION.
       code_string = '0' && code_string.
     ENDDO.
 
-    DATA(code_x) = CONV four_bytes( code_string ).
+    DATA(code_x) = CONV ty_four_bytes( code_string ).
     DATA(code_i) = CONV i( code_x ).
 
     IF code_i > xffff.
