@@ -3,7 +3,7 @@ CLASS zcl_abappm_markdown_syn DEFINITION
   CREATE PUBLIC.
 
 ************************************************************************
-* Markdown Syntax Highlighter
+* Markdown Syntax highlighter
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -12,30 +12,30 @@ CLASS zcl_abappm_markdown_syn DEFINITION
 
     CLASS-METHODS process
       IMPORTING
-        !iv_source       TYPE string
-        !iv_language     TYPE string
+        !source       TYPE string
+        !language     TYPE string
       RETURNING
-        VALUE(rv_source) TYPE string.
+        VALUE(result) TYPE string.
 
     CLASS-METHODS process_line
       IMPORTING
-        !iv_line       TYPE string
-        !iv_language   TYPE string
+        !line         TYPE string
+        !language     TYPE string
       RETURNING
-        VALUE(rv_line) TYPE string.
+        VALUE(result) TYPE string.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CLASS-DATA:
-      gv_language    TYPE string,
-      go_highlighter TYPE REF TO zcl_abappm_highlighter.
+      current_language TYPE string,
+      highlighter      TYPE REF TO zcl_highlighter.
 
     CLASS-METHODS create
       IMPORTING
-        !iv_language       TYPE string
+        !language     TYPE string
       RETURNING
-        VALUE(ro_instance) TYPE REF TO zcl_abappm_highlighter.
+        VALUE(result) TYPE REF TO zcl_highlighter.
 
 ENDCLASS.
 
@@ -45,10 +45,10 @@ CLASS zcl_abappm_markdown_syn IMPLEMENTATION.
 
 
   METHOD create.
-    ro_instance = zcl_abappm_highlighter_factory=>create( |.{ iv_language }| ).
+    result = zcl_highlighter_factory=>create( |.{ language }| ).
 
-    IF ro_instance IS INITIAL.
-      ro_instance = zcl_abappm_highlighter_factory=>create( |.txt| ).
+    IF result IS INITIAL.
+      result = zcl_highlighter_factory=>create( |.txt| ).
     ENDIF.
   ENDMETHOD.
 
@@ -56,31 +56,31 @@ CLASS zcl_abappm_markdown_syn IMPLEMENTATION.
   METHOD process.
 
     DATA:
-      lv_line  TYPE string,
-      lt_lines TYPE TABLE OF string.
+      line  TYPE string,
+      lines TYPE string_table.
 
-    go_highlighter = create( iv_language ).
+    highlighter = create( language ).
 
-    SPLIT iv_source AT cl_abap_char_utilities=>newline INTO TABLE lt_lines.
+    SPLIT source AT cl_abap_char_utilities=>newline INTO TABLE lines.
 
-    LOOP AT lt_lines INTO lv_line.
-      IF rv_source IS NOT INITIAL.
-        rv_source = rv_source && cl_abap_char_utilities=>newline.
+    LOOP AT lines INTO line.
+      IF result IS NOT INITIAL.
+        result = result && cl_abap_char_utilities=>newline.
       ENDIF.
-      rv_source = rv_source && go_highlighter->process_line( lv_line ).
+      result = result && highlighter->process_line( line ).
     ENDLOOP.
 
   ENDMETHOD.
 
 
   METHOD process_line.
-    IF go_highlighter IS INITIAL OR gv_language <> iv_language.
-      gv_language    = iv_language.
-      go_highlighter = create( iv_language ).
+    IF highlighter IS INITIAL OR language <> current_language.
+      current_language    = language.
+      highlighter = create( language ).
     ENDIF.
 
-    IF go_highlighter IS BOUND.
-      rv_line = go_highlighter->process_line( iv_line ).
+    IF highlighter IS BOUND.
+      result = highlighter->process_line( line ).
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

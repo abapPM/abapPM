@@ -713,8 +713,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         ENDIF.
 
         markup = zcl_abappm_markdown_syn=>process(
-          iv_source   = <line>
-          iv_language = code_block_language ).
+          source   = <line>
+          language = code_block_language ).
 
         IF codeblock IS NOT INITIAL.
           code_block_language = codeblock.
