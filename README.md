@@ -48,7 +48,7 @@ Install the developer version of *apm* using [abapGit](https://github.com/abapGi
 Recommended SAP Package: `$ABAPPM`
 
 > [!IMPORTANT]
-> Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on the [apm Website](https://abappm.com) and contribute there.
+> Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on the [apm Website](https://abappm.com) and contribute to its repository.
 
 > [!NOTE]
 > Unlike other projects, a build process is required to create the standalone version. This process is not automated or documented!
