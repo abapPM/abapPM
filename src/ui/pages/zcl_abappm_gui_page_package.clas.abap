@@ -797,16 +797,18 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
       WHEN c_action-edit_readme.
 
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
-          key       = zcl_abappm_readme=>get_package_key( package )
-          edit_mode = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+          key          = zcl_abappm_readme=>get_package_key( package )
+          edit_mode    = abap_true
+          back_on_save = abap_true ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
 
       WHEN c_action-edit_json.
 
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
-          key       = zcl_abappm_package_json=>get_package_key( package )
-          edit_mode = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+          key          = zcl_abappm_package_json=>get_package_key( package )
+          edit_mode    = abap_true
+          back_on_save = abap_true ).
+        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
 
       WHEN c_action-update_dependencies.
 

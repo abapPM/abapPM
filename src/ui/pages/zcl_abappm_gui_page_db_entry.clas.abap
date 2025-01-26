@@ -24,6 +24,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       IMPORTING
         !key          TYPE zif_abappm_persist_apm=>ty_key
         !edit_mode    TYPE abap_bool DEFAULT abap_false
+        !back_on_save TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
       RAISING
@@ -31,8 +32,9 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
 
     METHODS constructor
       IMPORTING
-        !key       TYPE zif_abappm_persist_apm=>ty_key
-        !edit_mode TYPE abap_bool
+        !key          TYPE zif_abappm_persist_apm=>ty_key
+        !edit_mode    TYPE abap_bool
+        !back_on_save TYPE abap_bool
       RAISING
         zcx_abapgit_exception.
 
@@ -54,7 +56,8 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
     DATA:
       db_entry     TYPE zif_abappm_persist_apm=>ty_zabappm,
       content_type TYPE string,
-      edit_mode    TYPE abap_bool.
+      edit_mode    TYPE abap_bool,
+      back_on_save TYPE abap_bool.
 
     METHODS load_entry
       IMPORTING
@@ -131,9 +134,10 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
     register_stylesheet( ).
 
-    me->edit_mode = edit_mode.
-    content_type  = zcl_abappm_persist_apm=>explain_key( key )-content_type.
-    db_entry      = load_entry( key ).
+    me->edit_mode    = edit_mode.
+    me->back_on_save = back_on_save.
+    content_type     = zcl_abappm_persist_apm=>explain_key( key )-content_type.
+    db_entry         = load_entry( key ).
 
   ENDMETHOD.
 
@@ -141,8 +145,9 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   METHOD create.
 
     DATA(component) = NEW zcl_abappm_gui_page_db_entry(
-      key       = key
-      edit_mode = edit_mode ).
+      key          = key
+      edit_mode    = edit_mode
+      back_on_save = back_on_save ).
 
     result = zcl_abappm_gui_page_hoc=>create(
       extra_css_url       = c_css_url
@@ -291,7 +296,11 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
           key   = ii_event->form_data( )->get( 'KEYS' )
           value = ii_event->form_data( )->get( 'VALUE' ) ).
         edit_mode        = abap_false.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        IF back_on_save = abap_true.
+          rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back_to_bookmark.
+        ELSE.
+          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        ENDIF.
     ENDCASE.
 
   ENDMETHOD.
