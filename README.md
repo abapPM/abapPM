@@ -33,7 +33,7 @@ SAP Basis 7.50 or higher
 1. Download the standalone version of apm from [zabappm_standalone](https://github.com/abapPM/abapPM/build/zabappm_standalone.prog.abap)
 1. Create SAP package `$ZAPM` in your system
 1. Create the program `ZABAPPM_STANDALONE` in package `$ZAPM`, upload the code, and activate
-1. Create transaction `ZAPM` in package `$ZAPM` for program `ZABAPPM_STANDALONE`
+1. Create transaction `ZAPM` in package `$ZAPM` for the program `ZABAPPM_STANDALONE`
 
 ## Usage
 
@@ -48,14 +48,14 @@ Install the developer version of *apm* using [abapGit](https://github.com/abapGi
 Recommended SAP Package: `$ABAPPM`
 
 > [!IMPORTANT]
-> Do not make changes to dependencies found in `/src/modules`. To change a dependency, find the corresponding module on the [apm Website](https://abappm.com) and contribute there.
+> Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on the [apm Website](https://abappm.com) and contribute there.
 
 > [!NOTE]
-> Unlike other projects, a build process is required to create the standalone version. This process is not automated nor documented!
+> Unlike other projects, a build process is required to create the standalone version. This process is not automated or documented!
 
 ## Attribution
 
-This project includes code of the following open source projects. Please support them if you can!
+This project includes the code for the following open-source projects. Please support them if you can!
 
 - [abapGit](https://github.com/abapGit/abapGit), abapGit Community, [MIT](https://github.com/abapGit/abapGit/blob/main/LICENSE)
 - [AJSON](https://github.com/sbcgua/ajson), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
