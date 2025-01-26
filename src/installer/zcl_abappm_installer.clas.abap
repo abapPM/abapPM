@@ -34,21 +34,25 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS install
       IMPORTING
         !name              TYPE string
+        !version           TYPE string
         !data              TYPE xstring
         !package           TYPE devclass
-        !transport         TYPE trkorr
-        !enum_zip          TYPE i
-        !enum_folder_logic TYPE i
+        !transport         TYPE trkorr OPTIONAL
+        !enum_zip          TYPE i " FUTURE
+        !enum_folder_logic TYPE i " FUTURE
         !is_production     TYPE abap_bool
       RAISING
         zcx_abappm_error ##NEEDED.
 
     CLASS-METHODS uninstall
       IMPORTING
+        !name      TYPE string
+        !version   TYPE string
         !package   TYPE devclass
         !transport TYPE trkorr OPTIONAL
       RAISING
         zcx_abappm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -115,7 +119,11 @@ CLASS zcl_abappm_installer DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS _log_start.
+    CLASS-METHODS _log_start
+      IMPORTING
+        !title   TYPE string
+        !name    TYPE string
+        !version TYPE string.
 
     CLASS-METHODS _log_end
       RETURNING
@@ -165,7 +173,10 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD install.
 
     TRY.
-        _log_start( ).
+        _log_start(
+          title   = 'Install'
+          name    = name
+          version = version ).
 
         _system_check( ).
 
@@ -217,7 +228,10 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   METHOD uninstall.
 
     TRY.
-        _log_start( ).
+        _log_start(
+          title   = 'Uninstall'
+          name    = name
+          version = version ).
 
         _system_check( ).
 
@@ -505,7 +519,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _log_start.
     log = NEW zcl_abapgit_log( ).
-    log->set_title( |{ sy-title } Log| ).
+    log->set_title( |{ title } Log for { name }@{ version }| ).
   ENDMETHOD.
 
 

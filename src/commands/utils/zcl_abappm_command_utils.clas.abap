@@ -55,6 +55,8 @@ CLASS zcl_abappm_command_utils DEFINITION
 
     CLASS-METHODS uninstall_package
       IMPORTING
+        !name    TYPE string
+        !version TYPE string
         !package TYPE devclass
       RAISING
         zcx_abappm_error.
@@ -111,7 +113,7 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
-   " TODO: determine integrity (sha512)
+    " TODO: determine integrity (sha512)
     " https://www.npmjs.com/package/ssri
 
     result = VALUE #(
@@ -171,6 +173,7 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
     " FUTURE: Allow other folder logic than prefix
     zcl_abappm_installer=>install(
       name              = name
+      version           = version
       data              = tarball
       package           = package
       transport         = transport
@@ -183,7 +186,10 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
 
   METHOD uninstall_package.
 
-    zcl_abappm_installer=>uninstall( package ).
+    zcl_abappm_installer=>uninstall(
+      name    = name
+      version = version
+      package = package ).
 
   ENDMETHOD.
 ENDCLASS.

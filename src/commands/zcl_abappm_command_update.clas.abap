@@ -220,7 +220,10 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
     LOOP AT dependencies ASSIGNING <dependency>
       WHERE action = zif_abappm_importer=>c_action-remove.
 
-      zcl_abappm_command_utils=>uninstall_package( <dependency>-package ).
+      zcl_abappm_command_utils=>uninstall_package(
+        name    = <dependency>-name
+        version = <dependency>-version
+        package = <dependency>-package ).
     ENDLOOP.
 
   ENDMETHOD.

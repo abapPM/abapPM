@@ -24,7 +24,9 @@ CLASS zcl_abappm_command_uninstall DEFINITION
 
     CLASS-METHODS check_package
       IMPORTING
-        !package TYPE devclass
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE zif_abappm_types=>ty_package_json
       RAISING
         zcx_abappm_error.
 
@@ -48,8 +50,10 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
     DATA(package_json_service) = zcl_abappm_package_json=>factory( package ).
 
     IF package_json_service->exists( ) = abap_false.
-      zcx_abappm_error=>raise( |Package { package } does not exist| ).
+      zcx_abappm_error=>raise( |Package { package } not found| ).
     ENDIF.
+
+    result = package_json_service->get( ).
 
   ENDMETHOD.
 
@@ -87,13 +91,16 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
   METHOD run.
 
-    check_package( package ).
+    DATA(package_json) = check_package( package ).
 
     IF confirm_popup( package ) = abap_false.
       RETURN.
     ENDIF.
 
-    zcl_abappm_command_utils=>uninstall_package( package ).
+    zcl_abappm_command_utils=>uninstall_package(
+      name    = package_json-name
+      version = package_json-version
+      package = package ).
 
     MESSAGE 'Package successfully uninstalled' TYPE 'S'.
 
