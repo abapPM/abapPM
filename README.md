@@ -43,7 +43,7 @@ Start apm using transaction `ZAPM`.
 
 All contributions are welcome! Read our [Contribution Guidelines](https://github.com/abapPM/abapPM/blob/main/CONTRIBUTING.md), fork this repo, and create a pull request.
 
-Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) by creating a new online repository for https://github.com/abapPM/abapPM.
+Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) by creating a new online repository for `https://github.com/abapPM/abapPM`.
 
 Recommended SAP Package: `$ABAPPM`
 
