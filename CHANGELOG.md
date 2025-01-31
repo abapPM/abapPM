@@ -12,6 +12,5 @@ See [Unreleased Changes] for the latest updates.
 
 Initial Release.
 
-
 [Unreleased Changes]: https://github.com/abapPM/abapPM/compare/1.0.0...main
 [1.0.0]: https://github.com/abapPM/abapPM/releases/tag/1.0.0
