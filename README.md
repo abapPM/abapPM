@@ -66,6 +66,6 @@ This project includes the code for the following open-source projects. Please su
 
 Made with ❤ in Canada
 
-Copyright 2024 apm.to Inc. <https://apm.to>
+Copyright 2025 apm.to Inc. <https://apm.to>
 
-Follow [@marcf.be](https://bsky.app/profile/marcf.be) on Bluesky and [@marcfbe](https://linkedin.com/in/marcfbe) on LinkedIn
+Follow [@marcf.be](https://bsky.app/profile/marcf.be) on Blueksy and [@marcfbe](https://linkedin.com/in/marcfbe) or LinkedIn
