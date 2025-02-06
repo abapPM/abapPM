@@ -13,10 +13,10 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_menu_provider,
-      zif_abapgit_gui_renderable,
-      zif_abapgit_gui_page_title.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_menu_provider,
+      zif_abappm_gui_renderable,
+      zif_abappm_gui_page_title.
 
     CLASS-METHODS class_constructor.
 
@@ -26,9 +26,9 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
         !edit_mode    TYPE abap_bool DEFAULT abap_false
         !back_on_save TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       IMPORTING
@@ -36,7 +36,7 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
         !edit_mode    TYPE abap_bool
         !back_on_save TYPE abap_bool
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -65,35 +65,35 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       RETURNING
         VALUE(result) TYPE zif_abappm_persist_apm=>ty_zabappm
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS register_stylesheet
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_scripts
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_html
+        VALUE(result) TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_view
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_edit
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_header
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_entry_tag
       RETURNING
@@ -105,14 +105,14 @@ CLASS zcl_abappm_gui_page_db_entry DEFINITION
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS do_update
       IMPORTING
         !key   TYPE csequence
         !value TYPE csequence
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -168,13 +168,9 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
       db_entry-value = validate_and_pretty_json( value ).
     ENDIF.
 
-    TRY.
-        db_persist->save(
-          key   = db_entry-keys
-          value = db_entry-value ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    db_persist->save(
+      key   = db_entry-keys
+      value = db_entry-value ).
 
     COMMIT WORK.
 
@@ -195,7 +191,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD get_scripts.
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
     " TODO: Replace with
@@ -208,11 +204,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD load_entry.
 
-    TRY.
-        result = db_persist->load( key ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    result = db_persist->load( key ).
 
   ENDMETHOD.
 
@@ -279,43 +271,48 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
           iv_json            = value
           iv_keep_item_order = abap_true )->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     CASE ii_event->mv_action.
       WHEN c_action-switch_mode.
+
         edit_mode        = xsdbool( edit_mode = abap_false ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
+
       WHEN c_action-update.
+
         do_update(
           key   = ii_event->form_data( )->get( 'KEYS' )
           value = ii_event->form_data( )->get( 'VALUE' ) ).
+
         edit_mode        = abap_false.
         IF back_on_save = abap_true.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back_to_bookmark.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-go_back_to_bookmark.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
         ENDIF.
+
     ENDCASE.
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_menu_provider~get_menu.
+  METHOD zif_abappm_gui_menu_provider~get_menu.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-database-entry' ).
+    DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-database-entry' ).
 
     IF edit_mode = abap_true.
       toolbar->add(
         iv_txt = 'Save'
         iv_act = |submitFormById('{ c_edit_form_id }');|
-        iv_typ = zif_abapgit_html=>c_action_type-onclick
-        iv_opt = zif_abapgit_html=>c_html_opt-strong ).
+        iv_typ = zif_abappm_html=>c_action_type-onclick
+        iv_opt = zif_abappm_html=>c_html_opt-strong ).
     ELSE.
       IF edit_mode = abap_true.
         DATA(txt) = `Display`.
@@ -336,7 +333,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_page_title~get_page_title.
+  METHOD zif_abappm_gui_page_title~get_page_title.
 
     IF edit_mode = abap_true.
       rv_title = 'Config Edit'.
@@ -347,11 +344,11 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div class="db-entry">' ).
 
@@ -362,7 +359,7 @@ CLASS zcl_abappm_gui_page_db_entry IMPLEMENTATION.
           db_persist->lock( db_entry-keys ).
         CATCH zcx_abappm_error INTO DATA(error).
           edit_mode = abap_false.
-          zcx_abapgit_exception=>raise_with_text( error ).
+          zcx_abappm_error=>raise_with_text( error ).
       ENDTRY.
 
       render_edit( html ).

@@ -60,29 +60,35 @@ CLASS zcl_abappm_command_uninstall IMPLEMENTATION.
 
   METHOD confirm_popup.
 
-    TRY.
-        DATA(question) = |This will DELETE all objects in package { package } | &&
-                         |including subpackages from the system|.
+    DATA answer TYPE c LENGTH 1.
 
-        DATA(answer) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
-          iv_titlebar              = 'Uninstall'
-          iv_text_question         = question
-          iv_text_button_1         = 'Delete'
-          iv_icon_button_1         = 'ICON_DELETE'
-          iv_text_button_2         = 'Cancel'
-          iv_icon_button_2         = 'ICON_CANCEL'
-          iv_default_button        = '2'
-          iv_popup_type            = 'ICON_MESSAGE_WARNING'
-          iv_display_cancel_button = abap_false ).
+    DATA(question) = |This will DELETE all objects in package { package } | &&
+                     |including subpackages from the system|.
 
-        IF answer = '2'.
-          MESSAGE 'Uninstall cancelled' TYPE 'S'.
-          RETURN.
-        ENDIF.
+    CALL FUNCTION 'POPUP_TO_CONFIRM'
+      EXPORTING
+        titlebar              = 'Uninstall'
+        text_question         = question
+        text_button_1         = 'Delete'
+        icon_button_1         = 'ICON_DELETE'
+        text_button_2         = 'Cancel'
+        icon_button_2         = 'ICON_CANCEL'
+        default_button        = '2'
+        display_cancel_button = abap_false
+        popup_type            = 'ICON_MESSAGE_WARNING'
+*       start_column          = ms_position-start_column
+*       start_row             = ms_position-start_row
+      IMPORTING
+        answer                = answer
+      EXCEPTIONS
+        text_not_found        = 1
+        OTHERS                = 2.
+    ASSERT sy-subrc = 0.
 
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
+    IF answer = '2'.
+      MESSAGE 'Uninstall cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
 
     result = abap_true.
 

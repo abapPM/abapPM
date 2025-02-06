@@ -13,22 +13,22 @@ CLASS zcl_abappm_gui_page_db DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_menu_provider,
-      zif_abapgit_gui_renderable,
-      zif_abapgit_html_table.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_menu_provider,
+      zif_abappm_gui_renderable,
+      zif_abappm_html_table.
 
     CLASS-METHODS class_constructor.
 
     CLASS-METHODS create
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -69,33 +69,33 @@ CLASS zcl_abappm_gui_page_db DEFINITION
 
     METHODS register_stylesheet
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_stats
       IMPORTING
-        html TYPE REF TO zif_abapgit_html
+        html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_table
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS do_backup_db
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS do_delete_entry
       IMPORTING
         !key TYPE zif_abappm_persist_apm=>ty_key
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS do_restore_db
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     CLASS-METHODS explain_key
       IMPORTING
@@ -155,20 +155,20 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
       zip->add(
         name    = filename
-        content = zcl_abapgit_convert=>string_to_xstring_utf8( <data>-value ) ).
+        content = zcl_abappm_convert=>string_to_xstring_utf8( <data>-value ) ).
 
       INSERT explain_key( <data>-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
     zip->add(
       name    = c_toc_filename
-      content = zcl_abapgit_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ) ).
+      content = zcl_abappm_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ) ).
 
     DATA(zip_content) = zip->save( ).
 
     CONCATENATE 'apm_Backup_' sy-datlo '_' sy-timlo '.zip' INTO filename.
 
-    DATA(frontend_service) = zcl_abapgit_ui_factory=>get_frontend_services( ).
+    DATA(frontend_service) = zcl_abappm_gui_factory=>get_frontend_services( ).
 
     DATA(path) = frontend_service->show_file_save_dialog(
       iv_title            = 'apm Backup'
@@ -188,7 +188,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     ASSERT key IS NOT INITIAL.
 
-    DATA(answer) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
+    DATA(answer) = zcl_abappm_gui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Warning'
       iv_text_question         = |Are you sure you want to delete entry { key }?|
       iv_text_button_1         = 'Yes'
@@ -199,14 +199,10 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       iv_display_cancel_button = abap_false ).
 
     IF answer = '2'.
-      RAISE EXCEPTION TYPE zcx_abapgit_cancel.
+      RAISE EXCEPTION TYPE zcx_abappm_cancel.
     ENDIF.
 
-    TRY.
-        db_persist->delete( key ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    db_persist->delete( key ).
 
     COMMIT WORK.
 
@@ -223,7 +219,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       db_entries_old TYPE zif_abappm_persist_apm=>ty_list,
       db_entry       TYPE zif_abappm_persist_apm=>ty_list_item.
 
-    DATA(frontend_service) = zcl_abapgit_ui_factory=>get_frontend_services( ).
+    DATA(frontend_service) = zcl_abappm_gui_factory=>get_frontend_services( ).
 
     DATA(path) = frontend_service->show_file_open_dialog(
       iv_title            = 'Restore apm Backup'
@@ -241,7 +237,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         zip_parse_error = 1
         OTHERS          = 2 ).
     IF sy-subrc <> 0.
-      zcx_abapgit_exception=>raise( 'Error loading ZIP file' ).
+      zcx_abappm_error=>raise( 'Error loading ZIP file' ).
     ENDIF.
 
     LOOP AT zip->files ASSIGNING FIELD-SYMBOL(<file>) WHERE name <> c_toc_filename.
@@ -253,7 +249,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
       " Validate DB key
       IF zcl_abappm_persist_apm=>validate_key( key ) = abap_false.
-        zcx_abapgit_exception=>raise( |Invalid DB entry type. This is not an apm Backup| ).
+        zcx_abappm_error=>raise( |Invalid DB entry type. This is not an apm Backup| ).
       ENDIF.
 
       zip->get(
@@ -266,14 +262,14 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
           zip_decompression_error = 2
           OTHERS                  = 3 ).
       IF sy-subrc <> 0.
-        zcx_abapgit_exception=>raise( |Error getting file { <file>-name } from ZIP| ).
+        zcx_abappm_error=>raise( |Error getting file { <file>-name } from ZIP| ).
       ENDIF.
 
-      db_entry-value = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
+      db_entry-value = zcl_abappm_convert=>xstring_to_string_utf8( file_data ).
       INSERT db_entry INTO TABLE db_entries.
     ENDLOOP.
 
-    DATA(answer) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
+    DATA(answer) = zcl_abappm_gui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Warning'
       iv_text_question         = 'All existing packages and settings will be deleted and overwritten! Continue?'
       iv_text_button_1         = 'Restore'
@@ -284,29 +280,25 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       iv_display_cancel_button = abap_false ).
 
     IF answer <> '1'.
-      RAISE EXCEPTION TYPE zcx_abapgit_cancel.
+      RAISE EXCEPTION TYPE zcx_abappm_cancel.
     ENDIF.
 
-    TRY.
-        db_persist->lock( db_entry-keys ).
+    db_persist->lock( db_entry-keys ).
 
-        db_entries_old = db_persist->list( ).
-        LOOP AT db_entries_old INTO db_entry.
-          db_persist->delete( db_entry-keys ).
-        ENDLOOP.
+    db_entries_old = db_persist->list( ).
+    LOOP AT db_entries_old INTO db_entry.
+      db_persist->delete( db_entry-keys ).
+    ENDLOOP.
 
-        COMMIT WORK.
+    COMMIT WORK.
 
-        LOOP AT db_entries INTO db_entry.
-          db_persist->save(
-            key   = db_entry-keys
-            value = db_entry-value ).
-        ENDLOOP.
+    LOOP AT db_entries INTO db_entry.
+      db_persist->save(
+        key   = db_entry-keys
+        value = db_entry-value ).
+    ENDLOOP.
 
-        COMMIT WORK.
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    COMMIT WORK.
 
     MESSAGE 'apm Backup successfully restored' TYPE 'S'.
 
@@ -334,7 +326,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       INSERT list_entry INTO TABLE sorted_list.
     ENDLOOP.
 
-    DATA(icon) = zcl_abapgit_html=>icon( 'folder' ).
+    DATA(icon) = zcl_abappm_html=>icon( 'folder' ).
 
     LOOP AT sorted_list INTO list_entry.
       AT NEW key_type.
@@ -391,7 +383,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD render_table.
 
-    html->add( zcl_abapgit_html_table=>create( me
+    html->add( zcl_abappm_html_table=>create( me
       )->define_column(
         iv_column_id    = 'show_key'
         iv_column_title = 'Key'
@@ -412,7 +404,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     DATA(key) = CONV zif_abappm_persist_apm=>ty_key( ii_event->query( )->get( 'KEY' ) ).
 
@@ -421,29 +413,29 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
           key          = key
           edit_mode    = abap_false ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-new_page.
       WHEN c_action-db_edit.
         rs_handled-page  = zcl_abappm_gui_page_db_entry=>create(
           key          = key
           edit_mode    = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-new_page.
       WHEN c_action-delete.
         do_delete_entry( key ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
       WHEN c_action-backup.
         do_backup_db( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
       WHEN c_action-restore.
         do_restore_db( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
     ENDCASE.
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_menu_provider~get_menu.
+  METHOD zif_abappm_gui_menu_provider~get_menu.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-database-utility' ).
+    DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-database-utility' ).
 
     toolbar->add(
       iv_txt = 'Backup'
@@ -460,7 +452,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
@@ -468,7 +460,7 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
     prepare_list( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div class="db-list">' ).
     render_stats( html ).
@@ -483,11 +475,11 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_html_table~get_row_attrs.
+  METHOD zif_abappm_html_table~get_row_attrs.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_html_table~render_cell.
+  METHOD zif_abappm_html_table~render_cell.
 
     ASSIGN COMPONENT 'KEYS' OF STRUCTURE is_row TO FIELD-SYMBOL(<key>).
     ASSERT sy-subrc = 0.
@@ -519,18 +511,18 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
       WHEN 'user'.
         IF <key_extra> IS NOT INITIAL.
           DATA(user)          = CONV syuname( iv_value ).
-          rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_user_name( user )->render( ).
+          rs_render-content   = zcl_abappm_gui_chunk_lib=>render_user_name( user )->render( ).
         ENDIF.
       WHEN 'timestamp'.
         IF <key_extra> IS NOT INITIAL.
           DATA(timestamp)     = CONV timestampl( iv_value ).
-          rs_render-content   = zcl_abapgit_gui_chunk_lib=>render_timestamp( timestamp ).
+          rs_render-content   = zcl_abappm_gui_chunk_lib=>render_timestamp( timestamp ).
           rs_render-css_class = 'data'.
         ENDIF.
       WHEN 'cmd'.
         IF <key_extra> IS NOT INITIAL.
           DATA(action)  = |key={ cl_http_utility=>escape_url( |{ <key> }| ) }|.
-          DATA(toolbar) = zcl_abapgit_html_toolbar=>create(
+          DATA(toolbar) = zcl_abappm_html_toolbar=>create(
             )->add(
               iv_txt = 'Display'
               iv_act = |{ c_action-db_display }?{ action }|

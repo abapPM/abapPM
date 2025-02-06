@@ -13,24 +13,24 @@ CLASS zcl_abappm_gui_page_list DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_hotkeys,
-      zif_abapgit_gui_menu_provider,
-      zif_abapgit_gui_renderable.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_hotkeys,
+      zif_abappm_gui_menu_provider,
+      zif_abappm_gui_renderable.
 
     CLASS-METHODS create
       IMPORTING
         !only_favorites TYPE abap_bool OPTIONAL
       RETURNING
-        VALUE(result)   TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result)   TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       IMPORTING
         !only_favorites TYPE abap_bool OPTIONAL
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -58,19 +58,19 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       IMPORTING
         !order_by TYPE string
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS set_order_direction
       IMPORTING
         !order_descending TYPE abap_bool
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS set_filter
       IMPORTING
-        !postdata TYPE zif_abapgit_html_viewer=>ty_post_data
+        !postdata TYPE zif_abappm_html_viewer=>ty_post_data
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS apply_filter
       CHANGING
@@ -78,50 +78,50 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     METHODS render_package_list
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_palette
       IMPORTING
         !action       TYPE string
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_html
+        VALUE(result) TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_styles
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_table_header
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_table_footer
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_table_body
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_table_item
       IMPORTING
-        !html    TYPE REF TO zif_abapgit_html
+        !html    TYPE REF TO zif_abappm_html
         !package TYPE zif_abappm_package_json=>ty_package
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_header_bar
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_header_label_list
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS apply_order_by
       CHANGING
@@ -131,25 +131,25 @@ CLASS zcl_abappm_gui_page_list DEFINITION
       RETURNING
         VALUE(result) TYPE zif_abappm_package_json=>ty_packages
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_scripts
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_html
+        VALUE(result) TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_action_toolbar
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_filter_bar
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS render_registry
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html.
+        !html TYPE REF TO zif_abappm_html.
 
     METHODS build_table_scheme
       RETURNING
@@ -167,15 +167,15 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     METHODS load_package_list
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS load_settings
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS save_settings
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -352,16 +352,18 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     DATA(package_count) = lines( package_list ).
     SORT package_list BY description AS TEXT.
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( 'var repoCatalog = [' ).
     LOOP AT package_list ASSIGNING FIELD-SYMBOL(<package>).
+      DATA(display_name) = escape(
+        val    = <package>-description
+        format = cl_abap_format=>e_html_js ) &&
+        |  ({ <package>-package }, { <package>-name }@{ <package>-version })|.
       DATA(json) = |\{|
         && | key: "{ <package>-package }",|
         && | isOffline: "",|
-        && | displayName: "{ escape(
-                               val    = <package>-description
-                               format = cl_abap_format=>e_html_js ) } ({ <package>-package })"|
+        && | displayName: "{ display_name }"|
         && | \}|.
       IF sy-tabix < package_count.
         json = json && ','.
@@ -383,7 +385,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD get_scripts.
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
     html->add( 'var gHelper = new RepoOverViewHelper({ focusFilterKey: "f" });' ).
@@ -451,7 +453,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   METHOD render_filter_bar.
 
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
-    html->add( zcl_abapgit_gui_chunk_lib=>render_text_input(
+    html->add( zcl_abappm_gui_chunk_lib=>render_text_input(
       iv_name      = |filter|
       iv_label     = |Filter: { render_filter_help_hint( ) }|
       iv_value     = settings-list_settings-filter ) ).
@@ -473,7 +475,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       iv_txt   = '<i id="icon-filter-detail" class="icon icon-check"></i> Detail'
       iv_act   = |gHelper.toggleRepoListDetail()|
       iv_class = 'command'
-      iv_typ   = zif_abapgit_html=>c_action_type-onclick ) ).
+      iv_typ   = zif_abappm_html=>c_action_type-onclick ) ).
     html->add( '</span>' ).
 
   ENDMETHOD.
@@ -490,7 +492,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     APPEND ` <code>all</code> (to select all packages that have at least one label)` TO fragments.
     APPEND ` and <code>none</code> (to select unlabeled packages).` TO fragments.
 
-    result = zcl_abapgit_gui_chunk_lib=>render_help_hint( concat_lines_of( table = fragments ) ).
+    result = zcl_abappm_gui_chunk_lib=>render_help_hint( concat_lines_of( table = fragments ) ).
 
   ENDMETHOD.
 
@@ -516,7 +518,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     html->add( |<div class="repo-label-catalog">| ).
     html->add( '<label>Filter by label:</label>' ).
-    html->add( zcl_abapgit_gui_chunk_lib=>render_label_list(
+    html->add( zcl_abappm_gui_chunk_lib=>render_label_list(
       it_labels           = all_labels
       io_label_colors     = label_colors
       iv_clickable_action = c_action-label_filter ) ).
@@ -619,7 +621,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_table_header.
 
-    html->add( zcl_abapgit_gui_chunk_lib=>render_table_header(
+    html->add( zcl_abappm_gui_chunk_lib=>render_table_header(
       it_col_spec         = build_table_scheme( )
       iv_order_by         = settings-list_settings-order_by
       iv_order_descending = settings-list_settings-order_descending ) ).
@@ -660,14 +662,14 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         iv_hint  = 'Locked against changes by apm' ).
     ENDIF.
 
-    html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name(
+    html->td( ii_content = zcl_abappm_gui_chunk_lib=>render_package_name(
       iv_package        = package-package
       iv_suppress_title = xsdbool( settings-list_settings-only_favorites = abap_false ) ) ).
 
     " Labels
     IF all_labels IS NOT INITIAL.
       html->td(
-        iv_content = zcl_abapgit_gui_chunk_lib=>render_label_list(
+        iv_content = zcl_abappm_gui_chunk_lib=>render_label_list(
           it_labels       = package-labels
           io_label_colors = label_colors )
         iv_class   = 'labels' ).
@@ -694,7 +696,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     " Details: changed by
     html->td(
       iv_class   = 'ro-detail'
-      ii_content = zcl_abapgit_gui_chunk_lib=>render_user_name(
+      ii_content = zcl_abappm_gui_chunk_lib=>render_user_name(
         iv_username       = package-changed_by
         iv_suppress_title = xsdbool( settings-list_settings-only_favorites = abap_false ) ) ).
 
@@ -718,11 +720,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD save_settings.
 
-    TRY.
-        zcl_abappm_settings=>factory( )->set( settings )->save( ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    zcl_abappm_settings=>factory( )->set( settings )->save( ).
 
   ENDMETHOD.
 
@@ -762,13 +760,13 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     DATA(package) = CONV devclass( ii_event->query( )->get( 'KEY' ) ).
 
     CASE ii_event->mv_action.
       WHEN c_action-refresh.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-select.
 
@@ -776,12 +774,12 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
         save_settings( ).
 
         rs_handled-page  = zcl_abappm_gui_page_package=>create( package ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-new_page.
 
       WHEN c_action-change_order_by.
 
         set_order_by( ii_event->query( )->get( 'ORDERBY' ) ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-toggle_favorites.
 
@@ -791,17 +789,17 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
           settings-list_settings-only_favorites = xsdbool( settings-list_settings-only_favorites = abap_false ).
         ENDIF.
         save_settings( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-direction.
 
         set_order_direction( xsdbool( ii_event->query( )->get( 'DIRECTION' ) = 'DESCENDING' ) ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-apply_filter.
 
         set_filter( ii_event->mt_postdata ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-label_filter.
 
@@ -811,22 +809,27 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
           CLEAR settings-list_settings-filter. " Unexpected request
         ENDIF.
         save_settings( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
     ENDCASE.
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_hotkeys~get_hotkey_actions.
+  METHOD zif_abappm_gui_hotkeys~get_hotkey_actions.
 
     DATA hotkey_action LIKE LINE OF rt_hotkey_actions.
 
     hotkey_action-ui_component = 'Package List'.
 
-    hotkey_action-description = |Settings|.
+    hotkey_action-description = |Global Settings|.
     hotkey_action-action      = zif_abappm_gui_router=>c_action-go_settings.
     hotkey_action-hotkey      = |x|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Personal Settings|.
+    hotkey_action-action      = zif_abappm_gui_router=>c_action-go_settings_personal.
+    hotkey_action-hotkey      = |p|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
     hotkey_action-description = |Refresh|.
@@ -878,29 +881,29 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_menu_provider~get_menu.
+  METHOD zif_abappm_gui_menu_provider~get_menu.
 
     CONSTANTS c_dummy_key TYPE string VALUE `?key=#`.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-package-list' ).
+    DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-package-list' ).
 
     toolbar->add(
-      iv_txt = zcl_abapgit_html=>icon( 'file' ) && ' Init'
+      iv_txt = zcl_abappm_html=>icon( 'file' ) && ' Init'
       iv_act = zif_abappm_gui_router=>c_action-apm_init
     )->add(
-      iv_txt = zcl_abapgit_html=>icon( 'download-solid' ) && ' Install'
+      iv_txt = zcl_abappm_html=>icon( 'download-solid' ) && ' Install'
       iv_act = |{ zif_abappm_gui_router=>c_action-apm_install }{ c_dummy_key }|
     )->add(
-      iv_txt = zcl_abapgit_html=>icon( 'upload-solid' ) && ' Publish'
+      iv_txt = zcl_abappm_html=>icon( 'upload-solid' ) && ' Publish'
       iv_act = |{ zif_abappm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
     )->add(
-      iv_txt = zcl_abapgit_html=>icon( 'times-solid' ) && ' Uninstall'
+      iv_txt = zcl_abappm_html=>icon( 'times-solid' ) && ' Uninstall'
       iv_act = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>settings( )
       io_sub = zcl_abappm_gui_menus=>settings( )
     )->add(
-      iv_txt = zcl_abapgit_html=>icon( 'redo-alt-solid' )
+      iv_txt = zcl_abappm_html=>icon( 'redo-alt-solid' )
       iv_act = c_action-refresh
     )->add(
       iv_txt = zcl_abappm_gui_buttons=>advanced( )
@@ -914,7 +917,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
@@ -923,7 +926,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     load_package_list( ).
     load_settings( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     render_styles( html ).
 

@@ -93,7 +93,7 @@ CLASS zcl_abappm_tar DEFINITION
     "! Read file from archive
     METHODS get
       IMPORTING
-        !name         TYPE string
+        !name         TYPE csequence
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
@@ -123,7 +123,7 @@ CLASS zcl_abappm_tar DEFINITION
     "! Append file to archive
     METHODS append
       IMPORTING
-        !name         TYPE string
+        !name         TYPE csequence
         !content      TYPE xsequence
         !date         TYPE d OPTIONAL
         !time         TYPE t OPTIONAL
@@ -138,7 +138,7 @@ CLASS zcl_abappm_tar DEFINITION
     "! Delete file from archive
     METHODS delete
       IMPORTING
-        !name         TYPE string
+        !name         TYPE csequence
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_tar
       RAISING
@@ -392,12 +392,12 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
   METHOD delete.
 
-    DELETE tar_files WHERE name = name.
+    DELETE tar_files WHERE name = CONV string( name ).
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( 'Error deleting file (list)' ).
     ENDIF.
 
-    DELETE tar_data WHERE name = name.
+    DELETE tar_data WHERE name = CONV string( name ).
     IF sy-subrc <> 0.
       zcx_abappm_error=>raise( 'Error deleting file (data)' ).
     ENDIF.

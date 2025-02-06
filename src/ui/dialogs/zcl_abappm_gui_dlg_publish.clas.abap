@@ -13,22 +13,22 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_renderable.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_renderable.
 
     CLASS-METHODS create
       IMPORTING
         !package      TYPE devclass OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       IMPORTING
         !package TYPE devclass
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -78,7 +78,7 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_string_map
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS read_package
       IMPORTING
@@ -86,7 +86,7 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_string_map
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -109,11 +109,7 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
       form_data = read_package( pubish_package ).
     ENDIF.
 
-    TRY.
-        registry = zcl_abappm_settings=>factory( )->get( )-registry.
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    registry = zcl_abappm_settings=>factory( )->get( )-registry.
 
   ENDMETHOD.
 
@@ -176,11 +172,7 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD read_package.
 
-    TRY.
-        DATA(package_json) = zcl_abappm_package_json=>factory( package )->get( ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    DATA(package_json) = zcl_abappm_package_json=>factory( package )->get( ).
 
     result = NEW #( ).
 
@@ -206,13 +198,13 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
     package = form_data->get( c_id-package ).
     IF package IS NOT INITIAL.
       TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+          zcl_abappm_factory=>get_sap_package( package )->validate_name( ).
 
           " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
+          DATA(username) = zcl_abappm_factory=>get_sap_package( package )->read_responsible( ).
 
           IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
+            zcl_abappm_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
             zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
           ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
@@ -225,7 +217,7 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
@@ -234,18 +226,19 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
 
         form_data->set(
           iv_key = c_id-package
-          iv_val = zcl_abapgit_ui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+          iv_val = zcl_abappm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
         ELSE.
           form_data = read_package( |{ form_data->get( c_id-package ) }| ).
         ENDIF.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-refresh.
 
         form_data = read_package( |{ form_data->get( c_id-package ) }| ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-publish_package.
 
@@ -254,17 +247,13 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          TRY.
-              zcl_abappm_command_publish=>run(
-                registry     = registry
-                package      = params-package ).
+          zcl_abappm_command_publish=>run(
+            registry     = registry
+            package      = params-package ).
 
-              rs_handled-state = zcl_abapgit_gui=>c_event_state-go_back.
-            CATCH zcx_abappm_error INTO DATA(error).
-              zcx_abapgit_exception=>raise_with_text( error ).
-          ENDTRY.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-go_back.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render. " Display errors
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
 
     ENDCASE.
@@ -272,11 +261,11 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div class="form-container">' ).
     html->add( form->render(

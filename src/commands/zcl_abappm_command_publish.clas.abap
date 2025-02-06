@@ -115,9 +115,18 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(dist) = zcl_abappm_command_utils=>get_integrity( tarball ).
 
+    DATA(tarball_name) = packument-name.
+    IF tarball_name(1) = '@'.
+      tarball_name = replace(
+        val  = tarball_name
+        sub  = '/'
+        with = '-'
+        occ  = 1 ).
+    ENDIF.
+
     dist-file_count    = tar->file_count( ).
     dist-unpacked_size = tar->unpacked_size( ).
-    dist-tarball       = |{ packument-name }-{ version }.tgz|.
+    dist-tarball       = |{ tarball_name }-{ version }.tgz|.
 
     packument-versions[ key = version ]-version-dist = dist.
 
@@ -154,29 +163,35 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
   METHOD confirm_popup.
 
-    TRY.
-        DATA(question) = |This will PUBLISH all objects in package { package } | &&
-                         |including subpackages to the registry|.
+    DATA answer TYPE c LENGTH 1.
 
-        DATA(answer) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_confirm(
-          iv_titlebar              = 'Publish'
-          iv_text_question         = question
-          iv_text_button_1         = 'Publish'
-          iv_icon_button_1         = 'ICON_EXPORT'
-          iv_text_button_2         = 'Cancel'
-          iv_icon_button_2         = 'ICON_CANCEL'
-          iv_default_button        = '2'
-          iv_popup_type            = 'ICON_MESSAGE_WARNING'
-          iv_display_cancel_button = abap_false ).
+    DATA(question) = |This will PUBLISH all objects in package { package } | &&
+                     |including subpackages to the registry|.
 
-        IF answer = '2'.
-          MESSAGE 'Publish cancelled' TYPE 'S'.
-          RETURN.
-        ENDIF.
+    CALL FUNCTION 'POPUP_TO_CONFIRM'
+      EXPORTING
+        titlebar              = 'Publish'
+        text_question         = question
+        text_button_1         = 'Publish'
+        icon_button_1         = 'ICON_EXPORT'
+        text_button_2         = 'Cancel'
+        icon_button_2         = 'ICON_CANCEL'
+        default_button        = '2'
+        display_cancel_button = abap_false
+        popup_type            = 'ICON_MESSAGE_WARNING'
+*       start_column          = ms_position-start_column
+*       start_row             = ms_position-start_row
+      IMPORTING
+        answer                = answer
+      EXCEPTIONS
+        text_not_found        = 1
+        OTHERS                = 2.
+    ASSERT sy-subrc = 0.
 
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
+    IF answer = '2'.
+      MESSAGE 'Publish cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
 
     result = abap_true.
 
@@ -250,7 +265,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         dot_abapgit->set_folder_logic( zif_abapgit_dot_abapgit=>c_folder_logic-prefix ).
         dot_abapgit->set_starting_folder( 'src' ).
 
-        DATA(serializer) = NEW zcl_abapgit_serialize(
+        DATA(serializer) = NEW zcl_abappm_abapgit_serialize(
           io_dot_abapgit    = dot_abapgit
           is_local_settings = local_settings ).
 
@@ -294,11 +309,11 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     TRY.
         tar->append(
-          name    = 'package.json'
+          name    = CONV string( zif_abappm_types=>c_package_json_file )
           content = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
 
         tar->append(
-          name    = 'README.md'
+          name    = zif_abappm_types=>c_readme_file
           content = zcl_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
       CATCH zcx_abapgit_exception INTO error.
         zcx_abappm_error=>raise_with_text( error ).

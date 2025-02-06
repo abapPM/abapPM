@@ -214,6 +214,9 @@ INTERFACE zif_abappm_types PUBLIC.
       extension TYPE c LENGTH 4 VALUE 'json',
     END OF c_package_json_file.
 
+    "! Package Readme File
+  CONSTANTS c_readme_file TYPE string VALUE 'README.md'.
+
   CONSTANTS:
     "! Package Types
     BEGIN OF c_package_type,

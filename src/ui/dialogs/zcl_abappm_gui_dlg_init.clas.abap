@@ -13,18 +13,18 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_renderable.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_renderable.
 
     CLASS-METHODS create
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -80,11 +80,11 @@ CLASS zcl_abappm_gui_dlg_init DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_string_map
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS choose_labels
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -95,13 +95,15 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
   METHOD choose_labels.
 
-    DATA(old_labels) = form_data->get( c_id-labels ).
-
-    DATA(new_labels) = zcl_abapgit_ui_factory=>get_popups( )->popup_to_select_labels( old_labels ).
-
-    form_data->set(
-      iv_key = c_id-labels
-      iv_val = new_labels ).
+    ASSERT 0 = 0.
+    " FUTURE
+*    DATA(old_labels) = form_data->get( c_id-labels ).
+*
+*    DATA(new_labels) = zcl_abappm_ui_factory=>get_popups( )->popup_to_select_labels( old_labels ).
+*
+*    form_data->set(
+*      iv_key = c_id-labels
+*      iv_val = new_labels ).
 
   ENDMETHOD.
 
@@ -159,17 +161,18 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     )->text(
       iv_name        = c_id-description
       iv_label       = 'Description'
-    )->text(
-      iv_name        = c_id-labels
-      iv_side_action = c_action-choose_labels
-      iv_label       = |Labels (comma-separated, allowed chars: "{ zcl_abapgit_repo_labels=>c_allowed_chars }")|
-      iv_hint        = 'Comma-separated labels for grouping and repo organization (optional)'
+* FUTURE
+*    )->text(
+*      iv_name        = c_id-labels
+*      iv_side_action = c_action-choose_labels
+*      iv_label       = |Labels (comma-separated, allowed chars: "{ zcl_abappm_repo_labels=>c_allowed_chars }")|
+*      iv_hint        = 'Comma-separated labels for grouping and repo organization (optional)'
     )->checkbox(
       iv_name        = c_id-private
       iv_label       = 'Private Package (will not become public)' ).
 
 * FUTURE
-*    IF zcl_abapgit_feature=>is_enabled( zcl_abapgit_abap_language_vers=>c_feature_flag ) = abap_true.
+*    IF zcl_abappm_feature=>is_enabled( zcl_abappm_abap_language_vers=>c_feature_flag ) = abap_true.
 *      result->radio(
 *        iv_name        = c_id-abap_lang_vers
 *        iv_default_value = ''
@@ -222,14 +225,14 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+          zcl_abappm_factory=>get_sap_package( package )->validate_name( ).
 
           " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
+          DATA(username) = zcl_abappm_factory=>get_sap_package( package )->read_responsible( ).
 
           IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
+            zcl_abappm_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
+            zcx_abappm_error=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
           ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
@@ -250,18 +253,19 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
         iv_val = 'Invalid version' ).
     ENDIF.
 
-    TRY.
-        zcl_abapgit_repo_labels=>validate( form_data->get( c_id-labels ) ).
-      CATCH zcx_abapgit_exception INTO error.
-        result->set(
-          iv_key = c_id-labels
-          iv_val = error->get_text( ) ).
-    ENDTRY.
+    " FUTURE
+    " TRY
+    " zcl_abappm_repo_labels=>validate( form_data->get( c_id-labels ) )
+    " CATCH zcx_abapgit_exception INTO error
+    " result->set(
+    " iv_key = c_id-labels
+    " iv_val = error->get_text( ) )
+    " ENDTRY
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
@@ -270,31 +274,32 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
 
         form_data->set(
           iv_key = c_id-package
-          iv_val = zcl_abapgit_services_repo=>create_package(
-            iv_prefill_package = |{ form_data->get( c_id-package ) }| ) ).
+          iv_val = zcl_abappm_popup_utils=>create_package( form_data->get( c_id-package ) ) ).
+
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-no_more_act.
         ENDIF.
 
       WHEN c_action-choose_package.
 
         form_data->set(
           iv_key = c_id-package
-          iv_val = zcl_abapgit_ui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+          iv_val = zcl_abappm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-no_more_act.
         ENDIF.
 
       WHEN c_action-choose_labels.
 
         choose_labels( ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-init_package.
 
@@ -303,18 +308,14 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          TRY.
-              zcl_abappm_command_init=>run(
-                package      = params-package
-                package_json = params-package_json ).
+          zcl_abappm_command_init=>run(
+            package      = params-package
+            package_json = params-package_json ).
 
-              rs_handled-page  = zcl_abappm_gui_page_package=>create( params-package ).
-              rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
-            CATCH zcx_abappm_error INTO DATA(error).
-              zcx_abapgit_exception=>raise_with_text( error ).
-          ENDTRY.
+          rs_handled-page  = zcl_abappm_gui_page_package=>create( params-package ).
+          rs_handled-state = zcl_abappm_gui=>c_event_state-new_page_replacing.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render. " Display errors
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
 
     ENDCASE.
@@ -322,11 +323,11 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div class="form-container">' ).
     html->add( form->render(

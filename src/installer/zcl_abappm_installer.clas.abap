@@ -115,10 +115,6 @@ CLASS zcl_abappm_installer DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS _deserialize_data
-      RAISING
-        zcx_abappm_error.
-
     CLASS-METHODS _log_start
       IMPORTING
         !title   TYPE string
@@ -142,12 +138,6 @@ CLASS zcl_abappm_installer DEFINITION
     CLASS-METHODS _find_remote_namespaces
       RETURNING
         VALUE(result) TYPE zif_abapgit_git_definitions=>ty_files_tt.
-
-    CLASS-METHODS _find_remote_data_config
-      RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_data_config
-      RAISING
-        zcx_abappm_error.
 
     CLASS-METHODS _check_uninstalled
       IMPORTING
@@ -205,8 +195,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
           transport     = transport
           main_language = main_language ).
 
-        _deserialize_data( ).
-
       CATCH cx_root INTO DATA(error).
         _transport_reset( ).
 
@@ -256,7 +244,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
               transport = transport ).
 
             " Bridge to abapGit
-            zcl_abappm_installer_objects=>delete(
+            zcl_abappm_abapgit_objects=>delete(
               it_tadir     = tadir
               iv_transport = transport
               ii_log       = log ).
@@ -342,50 +330,11 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _deserialize_data.
-
-    DATA checks TYPE zif_abapgit_definitions=>ty_deserialize_checks.
-    " DATA inject TYPE REF TO zcl_abapgit_data_injector
-
-
-    " Bridge to abapGit
-    TRY.
-        " DATA(support) = NEW lcl_abapgit_data_supporter( )
-        " FIXME:
-        "    CREATE OBJECT inject
-        "    inject->set_supporter( lo_support )
-
-        DATA(config) = _find_remote_data_config( ).
-
-        DATA(deserializer) = zcl_abapgit_data_factory=>get_deserializer( ).
-
-        DATA(results) = deserializer->deserialize(
-          ii_config = config
-          it_files  = remote_files ).
-
-        LOOP AT results INTO DATA(result).
-          DATA(overwrite) = VALUE zif_abapgit_definitions=>ty_overwrite(
-            obj_type = result-type
-            obj_name = result-name
-            decision = zif_abapgit_definitions=>c_yes ).
-          COLLECT overwrite INTO checks-overwrite.
-        ENDLOOP.
-
-        deserializer->actualize(
-          is_checks = checks
-          it_result = results ).
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
-
-  ENDMETHOD.
-
-
   METHOD _deserialize_objects.
 
     " Bridge to abapGit
     TRY.
-        zcl_abappm_installer_objects=>deserialize(
+        zcl_abappm_abapgit_objects=>deserialize(
           iv_package   = package
           iv_language  = main_language
           iv_transport = transport
@@ -448,21 +397,6 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
       iv_current = 20 ).
 
     zcl_abappm_installer_files=>virus_scan( package_data ).
-
-  ENDMETHOD.
-
-
-  METHOD _find_remote_data_config.
-
-    TRY.
-        result = NEW zcl_abapgit_data_config( ).
-
-        IF line_exists( remote_files[ KEY file_path COMPONENTS path = zif_abapgit_data_config=>c_default_path ] ).
-          result->from_json( remote_files ).
-        ENDIF.
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
 
   ENDMETHOD.
 
@@ -531,7 +465,7 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
     IF lines( remote_files ) > 0.
       TRY.
-          zcl_abappm_installer_objects=>deserialize(
+          zcl_abappm_abapgit_objects=>deserialize(
             iv_package   = package
             iv_language  = main_language
             iv_transport = transport

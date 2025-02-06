@@ -15,9 +15,9 @@ CLASS zcl_abappm_gui_page_package DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_renderable,
-      zif_abapgit_gui_menu_provider.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_renderable,
+      zif_abappm_gui_menu_provider.
 
     CONSTANTS:
       BEGIN OF c_default,
@@ -30,15 +30,15 @@ CLASS zcl_abappm_gui_page_package DEFINITION
       IMPORTING
         !package      TYPE devclass
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       IMPORTING
         !package TYPE devclass
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -78,27 +78,27 @@ CLASS zcl_abappm_gui_page_package DEFINITION
 
     METHODS get_toolbar
       RETURNING
-        VALUE(result) TYPE REF TO zcl_abapgit_html_toolbar
+        VALUE(result) TYPE REF TO zcl_abappm_html_toolbar
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_markdown
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_package_json
       RETURNING
         VALUE(result) TYPE zif_abappm_types=>ty_package_json
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_json_data
       RETURNING
         VALUE(result) TYPE string
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_mime
       IMPORTING
@@ -129,74 +129,74 @@ CLASS zcl_abappm_gui_page_package DEFINITION
 
     METHODS render_styles
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_top
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_header
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_header_content
       IMPORTING
-        !html  TYPE REF TO zif_abapgit_html
+        !html  TYPE REF TO zif_abappm_html
         !image TYPE string
         !text  TYPE string
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_content
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_markdown
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_markdown_source
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
         !raw  TYPE abap_bool DEFAULT abap_false
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_dependencies
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_dependencies_table
       IMPORTING
-        !html                TYPE REF TO zif_abapgit_html
+        !html                TYPE REF TO zif_abappm_html
         !dependencies        TYPE zif_abappm_types=>ty_dependencies
         !bundle_dependencies TYPE string_table OPTIONAL
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_json
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS render_footer
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 ENDCLASS.
 
 
@@ -209,7 +209,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     super->constructor( ).
 
     IF package IS INITIAL.
-      zcx_abapgit_exception=>raise( 'Missing package' ).
+      zcx_abappm_error=>raise( 'Missing package' ).
     ELSE.
       me->package = package.
     ENDIF.
@@ -243,24 +243,16 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD get_json_data.
 
-    TRY.
-        " Always load data since it can be edited in another page
-        result = zcl_abappm_package_json=>factory( package )->load( )->get_json( ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    " Always load data since it can be edited in another page
+    result = zcl_abappm_package_json=>factory( package )->load( )->get_json( ).
 
   ENDMETHOD.
 
 
   METHOD get_markdown.
 
-    TRY.
-        " Always load data since it can be edited in another page
-        result = zcl_abappm_readme=>factory( package )->load( )->get( ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    " Always load data since it can be edited in another page
+    result = zcl_abappm_readme=>factory( package )->load( )->get( ).
 
   ENDMETHOD.
 
@@ -328,12 +320,8 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
   METHOD get_package_json.
 
-    TRY.
-        " Always load data since it can be edited in another page
-        result = zcl_abappm_package_json=>factory( package )->load( )->get( ).
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
+    " Always load data since it can be edited in another page
+    result = zcl_abappm_package_json=>factory( package )->load( )->get( ).
 
   ENDMETHOD.
 
@@ -371,7 +359,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     CASE view.
       WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
 
-        DATA(readme_menu) = zcl_abapgit_html_toolbar=>create( 'apm-package-readme' )->add(
+        DATA(readme_menu) = zcl_abappm_html_toolbar=>create( 'apm-package-readme' )->add(
           iv_txt = 'Rendered'
           iv_chk = boolc( view = c_action-view_readme OR view IS INITIAL )
           iv_act = c_action-view_readme
@@ -384,7 +372,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           iv_chk = boolc( view = c_action-view_readme_raw )
           iv_act = c_action-view_readme_raw ).
 
-        result = zcl_abapgit_html_toolbar=>create( 'apm-package-readme-actions' )->add(
+        result = zcl_abappm_html_toolbar=>create( 'apm-package-readme-actions' )->add(
           iv_txt = 'View'
           io_sub = readme_menu
         )->add(
@@ -393,7 +381,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_dependencies.
 
-        result = zcl_abapgit_html_toolbar=>create( 'apm-package-dependencies-actions' )->add(
+        result = zcl_abappm_html_toolbar=>create( 'apm-package-dependencies-actions' )->add(
           iv_txt = 'Add'
           iv_act = |{ c_action-add_dependency }?key={ package }|
         )->add(
@@ -405,7 +393,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_json.
 
-        result = zcl_abapgit_html_toolbar=>create( 'apm-package-manifest-actions' )->add(
+        result = zcl_abappm_html_toolbar=>create( 'apm-package-manifest-actions' )->add(
           iv_txt = 'Edit'
           iv_act = |{ c_action-edit_json }?key={ package }| ).
 
@@ -547,17 +535,13 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         html->td( '' ).
         html->td( '' ).
       ELSE.
-        html->td( ii_content = zcl_abapgit_gui_chunk_lib=>render_package_name( installed_package-package ) ).
+        html->td( ii_content = zcl_abappm_gui_chunk_lib=>render_package_name( installed_package-package ) ).
         html->td( installed_package-version ).
       ENDIF.
 
-      TRY.
-          DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
-            version = installed_package-version
-            range   = <dependency>-range ).
-        CATCH zcx_abappm_error INTO DATA(error).
-          zcx_abapgit_exception=>raise_with_text( error ).
-      ENDTRY.
+      DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
+        version = installed_package-version
+        range   = <dependency>-range ).
 
       IF satisfies = abap_true.
         html->td( html->icon( 'check/success' ) ).
@@ -595,7 +579,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         ELSE.
           render_header_content(
             html   = html
-            image = zcl_abapgit_html=>icon( 'markdown' )
+            image = zcl_abappm_html=>icon( 'markdown' )
             text  = |{ markdown-path+1 }{ markdown-filename }| ).
         ENDIF.
 
@@ -604,14 +588,14 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         " TODO: Replace with "chain-link" icon
         render_header_content(
           html   = html
-          image = zcl_abapgit_html=>icon( 'file-alt' )
+          image = zcl_abappm_html=>icon( 'file-alt' )
           text  = 'Dependencies' ).
 
       WHEN c_action-view_json.
 
         render_header_content(
           html   = html
-          image = zcl_abapgit_html=>icon( 'code-solid' )
+          image = zcl_abappm_html=>icon( 'code-solid' )
           text  = 'package.abap.json' ).
 
       WHEN OTHERS.
@@ -757,9 +741,10 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   METHOD render_top.
 
     html->add( '<div class="paddings">' ).
+
     html->add( '<table class="w100"><tr>' ).
     html->add( '<td>' ).
-    html->add( zcl_abapgit_gui_chunk_lib=>render_package_name( package ) ).
+    html->add( zcl_abappm_gui_chunk_lib=>render_package_name( package ) ).
     html->add( '<span class="indent5em">' ).
     html->add( get_package_boxed(
       name  = package_json-name
@@ -770,12 +755,13 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     html->add( get_toolbar( )->render( iv_right = abap_true ) ).
     html->add( '</td>' ).
     html->add( '</tr></table>' ).
+
     html->add( '</div>' ).
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     " TODO: Add "copy to clipboard" and "download to file"
     " see zcl_fileview_abapgit_ext_ui
@@ -785,14 +771,14 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
         markdown-data = get_markdown( ).
 
         view = ii_event->mv_action.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-view_dependencies OR c_action-view_json.
 
         package_json = get_package_json( ).
 
         view = ii_event->mv_action.
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-edit_readme.
 
@@ -800,7 +786,7 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           key          = zcl_abappm_readme=>get_package_key( package )
           edit_mode    = abap_true
           back_on_save = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-new_page_w_bookmark.
 
       WHEN c_action-edit_json.
 
@@ -808,37 +794,33 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
           key          = zcl_abappm_package_json=>get_package_key( package )
           edit_mode    = abap_true
           back_on_save = abap_true ).
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_w_bookmark.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-new_page_w_bookmark.
 
       WHEN c_action-update_dependencies.
 
-        TRY.
-            DATA(registry) = zcl_abappm_settings=>factory( )->get( )-registry.
+        DATA(registry) = zcl_abappm_settings=>factory( )->get( )-registry.
 
-            zcl_abappm_command_update=>run(
-              registry = registry
-              package  = package ).
-          CATCH zcx_abappm_error INTO DATA(error).
-            zcx_abapgit_exception=>raise_with_text( error ).
-        ENDTRY.
+        zcl_abappm_command_update=>run(
+          registry = registry
+          package  = package ).
 
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN c_action-add_dependency OR c_action-remove_dependency.
 
-        zcx_abapgit_exception=>raise( `The feature has not been implemented yet. `
+        zcx_abappm_error=>raise( `The feature has not been implemented yet. `
           && `Edit the manifest and then update the dependencies.` ).
 
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-no_more_act.
 
     ENDCASE.
 
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_menu_provider~get_menu.
+  METHOD zif_abappm_gui_menu_provider~get_menu.
 
-    ro_toolbar = zcl_abapgit_html_toolbar=>create( 'apm-package-view' )->add(
+    ro_toolbar = zcl_abappm_html_toolbar=>create( 'apm-package-view' )->add(
       iv_txt = 'Readme'
       iv_act = c_action-view_readme
     )->add(
@@ -854,11 +836,11 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     markdown-data = get_markdown( ).
     package_json  = get_package_json( ).

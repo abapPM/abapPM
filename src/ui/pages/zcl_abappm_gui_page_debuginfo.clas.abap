@@ -13,15 +13,15 @@ CLASS zcl_abappm_gui_page_debuginfo DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_menu_provider,
-      zif_abapgit_gui_renderable.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_menu_provider,
+      zif_abappm_gui_renderable.
 
     CLASS-METHODS create
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -35,15 +35,15 @@ CLASS zcl_abappm_gui_page_debuginfo DEFINITION
 
     METHODS render_debug_info
       IMPORTING
-        !html TYPE REF TO zif_abapgit_html
+        !html TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS get_scripts
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_html
+        VALUE(result) TYPE REF TO zif_abappm_html
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -66,7 +66,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
 
   METHOD get_scripts.
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
     html->add( 'debugOutput("<table><tr><td>Browser:</td><td>" + navigator.userAgent + ' &&
@@ -81,25 +81,29 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
 
     DATA gui_version TYPE string.
 
-    DATA(frontend_service) = zcl_abapgit_ui_factory=>get_frontend_services( ).
+    DATA(frontend_service) = zcl_abappm_gui_factory=>get_frontend_services( ).
 
     TRY.
         frontend_service->get_gui_version( IMPORTING ev_gui_version_string = gui_version ).
-      CATCH zcx_abapgit_exception ##NO_HANDLER.
+      CATCH zcx_abappm_error ##NO_HANDLER.
         " Continue rendering even if this fails
     ENDTRY.
 
-    IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
+    IF zcl_abappm_factory=>get_environment( )->is_merged( ) = abap_true.
       html->add( '<h2>apm - Standalone Version</h2>' ).
       html->add( '<div>To keep apm up-to-date (or also to contribute) you need to' ).
       html->add( |install it as a repository ({ html->a(
         iv_txt = 'Developer Version'
         iv_act = zif_abappm_constants=>c_repository
-        iv_typ = zif_abapgit_html=>c_action_type-url ) }).</div>| ).
+        iv_typ = zif_abappm_html=>c_action_type-url ) }).</div>| ).
     ELSE.
-      DATA(package) = zcl_abapgit_factory=>get_tadir( )->get_object_package(
-        iv_object   = 'PROG'
-        iv_obj_name = 'ZABAPPM' ).
+      TRY.
+          DATA(package) = zcl_abappm_factory=>get_tadir( )->get_object_package(
+            iv_object   = 'PROG'
+            iv_obj_name = 'ZABAPPM' ).
+        CATCH cx_root ##NO_HANDLER.
+          package = 'UNKNOWN'.
+      ENDTRY.
       html->add( '<h2>apm - Developer Version</h2>' ).
       html->add( |<div>apm is installed in package { package }</div>| ).
     ENDIF.
@@ -112,7 +116,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
         iv_class = |url| ).
     html->add( '</div>' ).
 
-    DATA(release) = zcl_abapgit_factory=>get_environment( )->get_basis_release( ).
+    DATA(release) = zcl_abappm_factory=>get_environment( )->get_basis_release( ).
 
     html->add( '<h2>Environment</h2>' ).
 
@@ -129,14 +133,14 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     CASE ii_event->mv_action.
       WHEN c_action-save.
 
         DATA(filename) = |apm_Debug_Info_{ sy-datlo }_{ sy-timlo }.html|.
 
-        DATA(frontend_services) = zcl_abapgit_ui_factory=>get_frontend_services( ).
+        DATA(frontend_services) = zcl_abappm_gui_factory=>get_frontend_services( ).
 
         DATA(path) = frontend_services->show_file_save_dialog(
           iv_title            = 'apm - Debug Info'
@@ -145,11 +149,11 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
 
         frontend_services->file_download(
           iv_path = path
-          iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( html_for_download ) ).
+          iv_xstr = zcl_abappm_convert=>string_to_xstring_utf8( html_for_download ) ).
 
         MESSAGE 'apm debug info successfully saved' TYPE 'S'.
 
-        rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+        rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
 
       WHEN OTHERS.
         ASSERT 1 = 1.
@@ -158,9 +162,9 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_menu_provider~get_menu.
+  METHOD zif_abappm_gui_menu_provider~get_menu.
 
-    DATA(toolbar) = zcl_abapgit_html_toolbar=>create( 'apm-debug-info' ).
+    DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-debug-info' ).
 
     toolbar->add(
       iv_txt = 'Save'
@@ -174,11 +178,11 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div id="debug_info" class="debug_container">' ).
     render_debug_info( html ).

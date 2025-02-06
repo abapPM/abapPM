@@ -22,7 +22,7 @@ FORM run.
 
 ENDFORM.
 
-FORM open_gui RAISING zcx_abapgit_exception.
+FORM open_gui RAISING zcx_abappm_error.
 
   DATA:
     action TYPE string,

@@ -13,18 +13,18 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_abapgit_gui_event_handler,
-      zif_abapgit_gui_renderable.
+      zif_abappm_gui_event_handler,
+      zif_abappm_gui_renderable.
 
     CLASS-METHODS create
       RETURNING
-        VALUE(result) TYPE REF TO zif_abapgit_gui_renderable
+        VALUE(result) TYPE REF TO zif_abappm_gui_renderable
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
     METHODS constructor
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -39,9 +39,9 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
 
     CONSTANTS:
       BEGIN OF c_id,
-        package   TYPE string VALUE 'package',
-        name      TYPE string VALUE 'name',
-        version   TYPE string VALUE 'version',
+        package TYPE string VALUE 'package',
+        name    TYPE string VALUE 'name',
+        version TYPE string VALUE 'version',
       END OF c_id.
 
     CONSTANTS:
@@ -74,7 +74,7 @@ CLASS zcl_abappm_gui_dlg_install DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO zcl_abappm_string_map
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -92,11 +92,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = zcl_abappm_html_form_utils=>create( form ).
 
-    TRY.
         registry = zcl_abappm_settings=>factory( )->get( )-registry.
-      CATCH zcx_abappm_error INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
-    ENDTRY.
 
   ENDMETHOD.
 
@@ -171,13 +167,13 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+          zcl_abappm_factory=>get_sap_package( package )->validate_name( ).
 
           " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
           DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
 
           IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
+            zcl_abappm_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
             zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
           ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
@@ -202,7 +198,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_event_handler~on_event.
+  METHOD zif_abappm_gui_event_handler~on_event.
 
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
@@ -211,25 +207,26 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
 
         form_data->set(
           iv_key = c_id-package
-          iv_val = zcl_abapgit_services_repo=>create_package(
-            iv_prefill_package = |{ form_data->get( c_id-package ) }| ) ).
+          iv_val = zcl_abappm_popup_utils=>create_package( form_data->get( c_id-package ) ) ).
+
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-no_more_act.
         ENDIF.
 
       WHEN c_action-choose_package.
 
         form_data->set(
           iv_key = c_id-package
-          iv_val = zcl_abapgit_ui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+          iv_val = zcl_abappm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
         IF form_data->get( c_id-package ) IS NOT INITIAL.
           validation_log = validate_form( form_data ).
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-no_more_act.
+          rs_handled-state = zcl_abappm_gui=>c_event_state-no_more_act.
         ENDIF.
 
       WHEN c_action-install_package.
@@ -239,19 +236,15 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          TRY.
-              zcl_abappm_command_install=>run(
-                registry     = registry
-                package      = params-package
-                package_json = params-package_json ).
+          zcl_abappm_command_install=>run(
+            registry     = registry
+            package      = params-package
+            package_json = params-package_json ).
 
-              rs_handled-page  = zcl_abappm_gui_page_package=>create( params-package ).
-              rs_handled-state = zcl_abapgit_gui=>c_event_state-new_page_replacing.
-            CATCH zcx_abappm_error INTO DATA(error).
-              zcx_abapgit_exception=>raise_with_text( error ).
-          ENDTRY.
+          rs_handled-page  = zcl_abappm_gui_page_package=>create( params-package ).
+          rs_handled-state = zcl_abappm_gui=>c_event_state-new_page_replacing.
         ELSE.
-          rs_handled-state = zcl_abapgit_gui=>c_event_state-re_render. " Display errors
+          rs_handled-state = zcl_abappm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
 
     ENDCASE.
@@ -259,11 +252,11 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_abapgit_gui_renderable~render.
+  METHOD zif_abappm_gui_renderable~render.
 
     register_handlers( ).
 
-    DATA(html) = zcl_abapgit_html=>create( ).
+    DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div class="form-container">' ).
     html->add( form->render(
