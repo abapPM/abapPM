@@ -41,7 +41,7 @@ ENDCLASS.
 
 
 
-CLASS cl_abappm_markdown_syn IMPLEMENTATION.
+CLASS zcl_abappm_markdown_syn IMPLEMENTATION.
 
 
   METHOD create.
