@@ -20,6 +20,7 @@
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
       "zcl_abappm_abapgit_*",
+      "zcl_abappm_convert*",
       "zcl_abappm_installer_objects*",
       "zcl_abappm_html_*"
     ],
