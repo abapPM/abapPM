@@ -22,6 +22,7 @@
       "zcl_abappm_abapgit_*",
       "zcl_abappm_convert*",
       "zcl_abappm_gui*",
+      "zif_abappm_gui*",
       "zcl_abappm_installer_objects*",
       "zcl_abappm_html_*"
     ],
