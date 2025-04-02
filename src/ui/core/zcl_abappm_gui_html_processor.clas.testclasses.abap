@@ -210,7 +210,7 @@ CLASS ltcl_html_processor_test IMPLEMENTATION.
     DATA: lv_head_end TYPE i,
           lv_html     TYPE string.
 
-    lv_html = '<!DOCTYPE html><html><head><title>abappm</title><link rel="stylesheet" type="text/css" ' &&
+    lv_html = '<!DOCTYPE html><html><head><title>abappm </title><link rel="stylesheet" type="text/css" ' &&
               'href="css/common.css"><link rel="stylesheet" type="text/css" href="css/ag-icons.css">' &&
               '<link rel="stylesheet" type="text/css" href="css/theme-default.css"><script type="text/javascript"' &&
               ' src="js/common.js"></script></head>'.

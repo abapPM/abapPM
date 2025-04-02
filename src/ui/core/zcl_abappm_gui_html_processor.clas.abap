@@ -56,12 +56,12 @@ ENDCLASS.
 CLASS zcl_abappm_gui_html_processor IMPLEMENTATION.
 
 
-  METHOD CONSTRUCTOR.
+  METHOD constructor.
     mi_asset_man = ii_asset_man.
   ENDMETHOD.
 
 
-  METHOD FIND_HEAD_OFFSET.
+  METHOD find_head_offset.
 
     rv_head_end = find( val = iv_html
                         regex = |{ cl_abap_char_utilities=>newline }?\\s*</head>|
@@ -78,13 +78,13 @@ CLASS zcl_abappm_gui_html_processor IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD IS_PRESERVED.
+  METHOD is_preserved.
     READ TABLE mt_preserve_css TRANSPORTING NO FIELDS WITH KEY table_line = iv_css_url.
     rv_yes = boolc( sy-subrc = 0 ).
   ENDMETHOD.
 
 
-  METHOD PATCH_HTML.
+  METHOD patch_html.
 
     CONSTANTS lc_css_re TYPE string VALUE `<link\s+rel="stylesheet"\s+type="text/css"\s+href="(\S+)">`.
 
@@ -144,12 +144,12 @@ CLASS zcl_abappm_gui_html_processor IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD PRESERVE_CSS.
+  METHOD preserve_css.
     APPEND iv_css_url TO mt_preserve_css.
   ENDMETHOD.
 
 
-  METHOD ZIF_abappm_GUI_HTML_PROCESSOR~PROCESS.
+  METHOD zif_abappm_gui_html_processor~process.
 
     DATA lo_css_processor TYPE REF TO zcl_abappm_gui_css_processor.
     DATA lt_css_urls TYPE string_table.

@@ -89,7 +89,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
         " Continue rendering even if this fails
     ENDTRY.
 
-    IF zcl_abappm_factory=>get_environment( )->is_merged( ) = abap_true.
+    IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
       html->add( '<h2>apm - Standalone Version</h2>' ).
       html->add( '<div>To keep apm up-to-date (or also to contribute) you need to' ).
       html->add( |install it as a repository ({ html->a(
@@ -98,7 +98,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
         iv_typ = zif_abappm_html=>c_action_type-url ) }).</div>| ).
     ELSE.
       TRY.
-          DATA(package) = zcl_abappm_factory=>get_tadir( )->get_object_package(
+          DATA(package) = zcl_abapgit_factory=>get_tadir( )->get_object_package(
             iv_object   = 'PROG'
             iv_obj_name = 'ZABAPPM' ).
         CATCH cx_root ##NO_HANDLER.
@@ -116,7 +116,7 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
         iv_class = |url| ).
     html->add( '</div>' ).
 
-    DATA(release) = zcl_abappm_factory=>get_environment( )->get_basis_release( ).
+    DATA(release) = zcl_abapgit_factory=>get_environment( )->get_basis_release( ).
 
     html->add( '<h2>Environment</h2>' ).
 

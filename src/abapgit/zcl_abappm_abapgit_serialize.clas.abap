@@ -117,7 +117,7 @@ CLASS zcl_abappm_abapgit_serialize IMPLEMENTATION.
           lt_found  LIKE ct_files,
           lt_tadir  TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
-    lt_tadir = zcl_abappm_factory=>get_tadir( )->read(
+    lt_tadir = zcl_abapgit_factory=>get_tadir( )->read(
       iv_package            = iv_package
       iv_ignore_subpackages = ms_local_settings-ignore_subpackages
       iv_only_local_objects = ms_local_settings-only_local_objects

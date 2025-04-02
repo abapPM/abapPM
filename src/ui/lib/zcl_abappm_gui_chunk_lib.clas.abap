@@ -449,7 +449,7 @@ CLASS zcl_abappm_gui_chunk_lib IMPLEMENTATION.
     ENDIF.
 
     IF iv_suppress_title = abap_false.
-      lv_title = zcl_abappm_factory=>get_sap_package( iv_package )->read_description( ).
+      lv_title = zcl_abapgit_factory=>get_sap_package( iv_package )->read_description( ).
     ENDIF.
 
     lv_obj_name = iv_package.

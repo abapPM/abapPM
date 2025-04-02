@@ -184,7 +184,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
     result = zif_abappm_version=>c_version. " apm
 
-    IF zcl_abappm_factory=>get_environment( )->is_merged( ) = abap_true.
+    IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
       result = result && ` - Standalone Version`.
     ELSE.
       result = result && ` - Developer Version`.

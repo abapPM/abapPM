@@ -131,7 +131,7 @@ CLASS ltcl_event IMPLEMENTATION.
   METHOD immutability.
 
     DATA li_cut TYPE REF TO zif_abappm_gui_event.
-    DATA lo_x TYPE REF TO zcx_abappm_error.
+    DATA lo_x TYPE REF TO cx_root.
 
     CREATE OBJECT li_cut TYPE zcl_abappm_gui_event
       EXPORTING
@@ -143,10 +143,10 @@ CLASS ltcl_event IMPLEMENTATION.
           iv_key = 'x'
           iv_val = 'y' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH zcx_abappm_error INTO lo_x.
+      CATCH cx_root INTO lo_x.
         cl_abap_unit_assert=>assert_char_cp(
           act = lo_x->get_text( )
-          exp = '*immutable*' ).
+          exp = 'String map is read only' ).
     ENDTRY.
 
     TRY.
@@ -154,10 +154,10 @@ CLASS ltcl_event IMPLEMENTATION.
           iv_key = 'x'
           iv_val = 'y' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH zcx_abappm_error INTO lo_x.
+      CATCH cx_root INTO lo_x.
         cl_abap_unit_assert=>assert_char_cp(
           act = lo_x->get_text( )
-          exp = '*immutable*' ).
+          exp = 'String map is read only' ).
     ENDTRY.
 
   ENDMETHOD.

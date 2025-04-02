@@ -47,6 +47,8 @@ REPORT zabappm LINE-SIZE 100.
 * @@require clas zcl_abapgit_abap_language_vers
 * @@require clas zcl_abapgit_cts_api
 * @@require intf zif_abapgit_cts_api
+* @@require intf zif_abapgit_data_config
+* @@require intf zif_abapgit_data_supporter
 * @@require clas zcl_abapgit_default_transport
 * @@require intf zif_abapgit_default_transport
 * @@require intf zif_abapgit_definitions
@@ -57,6 +59,8 @@ REPORT zabappm LINE-SIZE 100.
 * @@require clas zcx_abapgit_exception
 * @@require clas zcl_abapgit_exit
 * @@require intf zif_abapgit_exit
+* @@require clas zcl_abapgit_factory
+* @@require clas zcl_abapgit_injector
 * @@require intf zif_abapgit_git_definitions
 * @@require clas zcl_abapgit_hash
 * @@require clas zcl_abapgit_language

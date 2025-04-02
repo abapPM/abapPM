@@ -499,6 +499,14 @@ CLASS zcl_abappm_installer IMPLEMENTATION.
 
   METHOD _restore_messages.
 
+    CONSTANTS c_toolflag_reset TYPE funcname VALUE 'SCWG_TOOLFLAG_RESET'.
+
+    " Reset tool flag
+    TRY.
+        CALL FUNCTION c_toolflag_reset.
+      CATCH cx_root ##NO_HANDLER.
+    ENDTRY.
+
     DELETE FROM clmcus WHERE username = @sy-uname ##SUBRC_OK.
     INSERT clmcus FROM TABLE @clmcus_backup ##SUBRC_OK.
 

@@ -43,7 +43,7 @@ CLASS zcl_abappm_popup_utils IMPLEMENTATION.
 
     IF create_it = abap_true.
       TRY.
-          zcl_abappm_factory=>get_sap_package( package_data-devclass )->create( package_data ).
+          zcl_abapgit_factory=>get_sap_package( package_data-devclass )->create( package_data ).
           result = package_data-devclass.
           COMMIT WORK AND WAIT.
         CATCH zcx_abapgit_exception INTO DATA(error).

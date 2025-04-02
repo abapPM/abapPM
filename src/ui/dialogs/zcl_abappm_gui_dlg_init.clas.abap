@@ -225,13 +225,13 @@ CLASS zcl_abappm_gui_dlg_init IMPLEMENTATION.
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
-          zcl_abappm_factory=>get_sap_package( package )->validate_name( ).
+          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
 
           " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abappm_factory=>get_sap_package( package )->read_responsible( ).
+          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
 
           IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abappm_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
+            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
             zcx_abappm_error=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
           ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).

@@ -142,7 +142,7 @@ CLASS zcl_abappm_popups IMPLEMENTATION.
 
     MOVE-CORRESPONDING is_package_data TO ls_data.
 
-    IF zcl_abappm_factory=>get_function_module( )->function_exists( 'PB_POPUP_PACKAGE_CREATE' ) = abap_false.
+    IF zcl_abapgit_factory=>get_function_module( )->function_exists( 'PB_POPUP_PACKAGE_CREATE' ) = abap_false.
       " looks like the function module used does not exist on all versions since 702
       zcx_abappm_error=>raise( 'Your system does not support automatic creation of packages.' &&
         'Please, create the package manually.' ).
