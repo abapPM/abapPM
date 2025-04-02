@@ -19,6 +19,7 @@
       "/src/modules/markdown/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
+      "zcl_abappm_abapgit_*",
       "zcl_abappm_installer_objects*",
       "zcl_abappm_html_*"
     ],
