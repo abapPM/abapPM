@@ -277,7 +277,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
 
       LOOP AT set ASSIGNING FIELD-SYMBOL(<set>).
         IF lines( <set> ) = 1 AND is_null_set( <set>[ 1 ] ).
-          DELETE set.
+          DELETE set INDEX sy-tabix.
         ENDIF.
       ENDLOOP.
 
@@ -501,7 +501,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
       LOOP AT comps ASSIGNING <comp>.
         DATA(m) = r->create_matcher( text = <comp> ).
         IF NOT m->match( ).
-          DELETE comps.
+          DELETE comps INDEX sy-tabix.
         ENDIF.
       ENDLOOP.
     ENDIF.
