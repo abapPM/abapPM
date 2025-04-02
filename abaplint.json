@@ -21,10 +21,12 @@
       "/src/modules/string-map/*.*",
       "zcl_abappm_abapgit_*",
       "zcl_abappm_convert*",
+      "zcl_abappm_exception_viewer*",
       "zcl_abappm_gui*",
       "zif_abappm_gui*",
       "zcl_abappm_installer_objects*",
-      "zcl_abappm_html_*"
+      "zcl_abappm_html_*",
+      "zif_abappm_html_*"
     ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
