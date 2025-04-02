@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ABAPPM_CONVERT</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>abapGit - Convertion Routines</DESCRIPT>
+    <DESCRIPT>apm - Convertion Routines</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
