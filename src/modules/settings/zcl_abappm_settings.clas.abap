@@ -86,9 +86,13 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
   METHOD check_settings.
 
-    IF zcl_abappm_package_json_valid=>is_valid_url( is_settings-registry ) = abap_false.
-      INSERT |Invalid registry URL: { is_settings-registry }| INTO TABLE result.
-    ENDIF.
+    TRY.
+        IF is_settings-registry IS NOT INITIAL.
+          zcl_abappm_url=>parse( is_settings-registry ).
+        ENDIF.
+      CATCH zcx_abappm_error.
+        INSERT |Invalid registry URL: { is_settings-registry }| INTO TABLE result.
+    ENDTRY.
 
   ENDMETHOD.
 

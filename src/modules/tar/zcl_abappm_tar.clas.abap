@@ -21,10 +21,15 @@ CLASS zcl_abappm_tar DEFINITION
 ************************************************************************
 * Limitation: Block size is hardcoded to 512 bytes
 ************************************************************************
+* Performance note: Do not use && to concatenate xstring since it
+* converts to string implicitly. Use CONCATENATE ... IN BYTE MODE.
+************************************************************************
 
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '2.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '2.0.1' ##NEEDED.
+
+    CONSTANTS c_blocksize TYPE i VALUE 512.
 
     TYPES:
       ty_typeflag TYPE c LENGTH 1,
@@ -45,6 +50,28 @@ CLASS zcl_abappm_tar DEFINITION
         keywords TYPE ty_keywords,
       END OF ty_file,
       ty_tar_files TYPE STANDARD TABLE OF ty_file WITH KEY name.
+
+    TYPES:
+      "! Ustar header record (512 bytes)
+      BEGIN OF ty_header,
+        name     TYPE c LENGTH 100, " Offset 0
+        mode     TYPE c LENGTH 8,   " 100
+        uid      TYPE c LENGTH 8,   " 108
+        gid      TYPE c LENGTH 8,   " 116
+        size     TYPE c LENGTH 12,  " 124
+        mtime    TYPE c LENGTH 12,  " 136
+        chksum   TYPE c LENGTH 8,   " 148
+        typeflag TYPE c LENGTH 1,   " 156
+        linkname TYPE c LENGTH 100, " 157
+        magic    TYPE c LENGTH 6,   " 257
+        version  TYPE c LENGTH 2,   " 263
+        uname    TYPE c LENGTH 32,  " 265
+        gname    TYPE c LENGTH 32,  " 297
+        devmajor TYPE c LENGTH 8,   " 329
+        devminor TYPE c LENGTH 8,   " 337
+        prefix   TYPE c LENGTH 155, " 345
+        padding  TYPE c LENGTH 12,  " 500
+      END OF ty_header.
 
     CONSTANTS:
       BEGIN OF c_typeflag,
@@ -166,34 +193,11 @@ CLASS zcl_abappm_tar DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
-      c_blocksize     TYPE i VALUE 512,
       c_ustar_magic   TYPE c LENGTH 5 VALUE 'ustar',
       c_ustar_version TYPE c LENGTH 2 VALUE '00',
       c_mode_default  TYPE i VALUE 436, " octal 664 rw-rw-r--
       c_path_sep      TYPE c VALUE '/', " unix
       c_epoch         TYPE timestamp VALUE '19700101000000'.
-
-    TYPES:
-      "! Ustar header record (512 bytes)
-      BEGIN OF ty_header,
-        name     TYPE c LENGTH 100, " Offset 0
-        mode     TYPE c LENGTH 8,   " 100
-        uid      TYPE c LENGTH 8,   " 108
-        gid      TYPE c LENGTH 8,   " 116
-        size     TYPE c LENGTH 12,  " 124
-        mtime    TYPE c LENGTH 12,  " 136
-        chksum   TYPE c LENGTH 8,   " 148
-        typeflag TYPE c LENGTH 1,   " 156
-        linkname TYPE c LENGTH 100, " 157
-        magic    TYPE c LENGTH 6,   " 257
-        version  TYPE c LENGTH 2,   " 263
-        uname    TYPE c LENGTH 32,  " 265
-        gname    TYPE c LENGTH 32,  " 297
-        devmajor TYPE c LENGTH 8,   " 329
-        devminor TYPE c LENGTH 8,   " 337
-        prefix   TYPE c LENGTH 155, " 345
-        padding  TYPE c LENGTH 12,  " 500
-      END OF ty_header.
 
     TYPES:
       BEGIN OF ty_tar_item,
@@ -204,10 +208,7 @@ CLASS zcl_abappm_tar DEFINITION
 
     TYPES ty_block TYPE x LENGTH c_blocksize.
 
-    CLASS-DATA:
-      null        TYPE c LENGTH 256,
-      convert_in  TYPE REF TO cl_abap_conv_in_ce,
-      convert_out TYPE REF TO cl_abap_conv_out_ce.
+    CLASS-DATA null TYPE c LENGTH 256.
 
     DATA:
       force_ustar TYPE abap_bool,
@@ -375,10 +376,6 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     DO 8 TIMES.
       null = null && null.
     ENDDO.
-
-    " Initialize converters
-    convert_in  = cl_abap_conv_in_ce=>create( encoding = 'UTF-8' ).
-    convert_out = cl_abap_conv_out_ce=>create( encoding = 'UTF-8' ).
 
   ENDMETHOD.
 
@@ -563,7 +560,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         ELSE.
           block = tar+offset(length).
         ENDIF.
-        item-content = item-content && block.
+        CONCATENATE item-content block INTO item-content IN BYTE MODE.
         offset = offset + c_blocksize.
         length = length - c_blocksize.
       ENDDO.
@@ -598,7 +595,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       " Add extended header block for pax keywords
       IF <file>-keywords IS NOT INITIAL.
         DATA(pax) = abap_true.
-        result = result && lcl_pax=>encode_keywords( <file>-keywords ).
+        DATA(keywords) = lcl_pax=>encode_keywords( <file>-keywords ).
+        CONCATENATE result keywords INTO result IN BYTE MODE.
         CONTINUE.
       ENDIF.
 
@@ -632,7 +630,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       header-chksum = _pad( number = _checksum( header ) length = 7 ) && null.
 
       DATA(block)  = CONV ty_block( _to_xstring( header ) ).
-      result = result && block.
+      CONCATENATE result block INTO result IN BYTE MODE.
 
       " Data blocks
       READ TABLE tar_data ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
@@ -650,7 +648,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
         ELSE.
           block = <item>-content+offset(length).
         ENDIF.
-        result = result && block.
+        CONCATENATE result block INTO result IN BYTE MODE.
         offset = offset + c_blocksize.
         length = length - c_blocksize.
       ENDDO.
@@ -659,7 +657,8 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     IF pax = abap_true.
       " Add two null blocks
-      result = result && block && block.
+      CLEAR block.
+      CONCATENATE result block block INTO result IN BYTE MODE.
     ENDIF.
 
   ENDMETHOD.
@@ -729,14 +728,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD _from_octal.
-
-    DATA(offset) = 0.
-
-    DO strlen( octal ) TIMES.
-      result = result * 8 + octal+offset(1).
-      offset = offset + 1.
-    ENDDO.
-
+    result = lcl_tar_helpers=>from_octal( octal ).
   ENDMETHOD.
 
 
@@ -758,21 +750,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD _from_xstring.
-
-    TRY.
-        convert_in->convert(
-          EXPORTING
-            input = data
-            n     = xstrlen( data )
-          IMPORTING
-            data  = result ).
-
-      CATCH cx_sy_codepage_converter_init
-            cx_sy_conversion_codepage
-            cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting from xstring' ).
-    ENDTRY.
-
+    result = lcl_tar_helpers=>from_xstring( data ).
   ENDMETHOD.
 
 
@@ -811,18 +789,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD _to_octal.
-
-    DATA(temp_number) = CONV i( number ).
-
-    WHILE temp_number > 0.
-      result      = |{ temp_number MOD 8 }{ result }|.
-      temp_number = temp_number DIV 8.
-    ENDWHILE.
-
-    IF result IS INITIAL.
-      result = '0'.
-    ENDIF.
-
+    result = lcl_tar_helpers=>to_octal( number ).
   ENDMETHOD.
 
 
@@ -846,22 +813,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
 
   METHOD _to_xstring.
-
-    DATA(string_data) = CONV string( data ).
-
-    TRY.
-        convert_out->convert(
-          EXPORTING
-            data   = string_data
-          IMPORTING
-            buffer = result ).
-
-      CATCH cx_sy_codepage_converter_init
-            cx_sy_conversion_codepage
-            cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting to xstring' ).
-    ENDTRY.
-
+    result = lcl_tar_helpers=>to_xstring( data ).
   ENDMETHOD.
 
 

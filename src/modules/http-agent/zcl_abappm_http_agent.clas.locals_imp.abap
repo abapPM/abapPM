@@ -85,7 +85,8 @@ CLASS lcl_http_response IMPLEMENTATION.
 
     DATA headers TYPE tihttpnvp.
 
-    result = NEW #( ).
+    " HTTP headers are not case sensitive and can have multiple entries (i.e. for cookies)
+    result = NEW #( iv_case_insensitive = abap_true iv_list_mode = abap_true ).
 
     http_response->get_header_fields( CHANGING fields = headers ).
 

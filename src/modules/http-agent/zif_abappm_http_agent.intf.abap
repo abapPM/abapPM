@@ -22,10 +22,14 @@ INTERFACE zif_abappm_http_agent PUBLIC.
       authorization TYPE string VALUE 'authorization',
       content_type  TYPE string VALUE 'content-type',
       user_agent    TYPE string VALUE 'user-agent',
+      cookie        TYPE string VALUE 'cookie',
+      set_cookie    TYPE string VALUE 'set-cookie',
+      x_csrf_token  TYPE string VALUE 'x-csrf-token',
     END OF c_header,
     BEGIN OF c_content_type,
       json TYPE string VALUE 'application/json',
       text TYPE string VALUE 'application/text',
+      xml  TYPE string VALUE 'application/xml',
       bin  TYPE string VALUE 'application/octet-stream',
     END OF c_content_type.
 
@@ -40,7 +44,7 @@ INTERFACE zif_abappm_http_agent PUBLIC.
       !method       TYPE string DEFAULT c_method-get
       !query        TYPE REF TO zcl_abappm_string_map OPTIONAL
       !headers      TYPE REF TO zcl_abappm_string_map OPTIONAL
-      !payload      TYPE any OPTIONAL " can be string, xstring
+      !payload      TYPE any OPTIONAL " can be char, string, xstring
     RETURNING
       VALUE(result) TYPE REF TO zif_abappm_http_response
     RAISING

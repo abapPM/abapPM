@@ -281,7 +281,10 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
     result = line.
 
     IF hidden_chars = abap_true.
+      " The order matters :-)
       REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>horizontal_tab IN result WITH '&nbsp;&rarr;&nbsp;'.
+      REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf          IN result WITH '&para;'.
+      REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>newline        IN result WITH '&crarr;'.
       REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf(1)       IN result WITH '&para;'.
       REPLACE ALL OCCURRENCES OF ` `                                    IN result WITH '&middot;'.
       REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>form_feed IN result
@@ -290,7 +293,7 @@ CLASS zcl_abappm_highlighter IMPLEMENTATION.
       IF strlen( result ) BETWEEN 1 AND 2.
         TRY.
             DATA(bom) = CONV ty_bom( lcl_out=>convert( result ) ).
-          CATCH zcx_abapgit_exception ##NO_HANDLER.
+          CATCH zcx_abappm_error ##NO_HANDLER.
         ENDTRY.
         IF bom(2) = cl_abap_char_utilities=>byte_order_mark_big.
           result = '<span class="red">&squf;</span>'. " UTF-16 big-endian (FE FF)

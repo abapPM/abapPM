@@ -8,7 +8,7 @@ CLASS lcl_out DEFINITION.
       RETURNING
         VALUE(result) TYPE xstring
       RAISING
-        zcx_abapgit_exception.
+        zcx_abappm_error.
 
   PRIVATE SECTION.
 
@@ -54,7 +54,7 @@ CLASS lcl_out IMPLEMENTATION.
             cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type INTO DATA(error).
-        zcx_abapgit_exception=>raise_with_text( error ).
+        zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
   ENDMETHOD.
 

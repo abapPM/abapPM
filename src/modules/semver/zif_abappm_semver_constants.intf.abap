@@ -9,6 +9,8 @@ INTERFACE zif_abappm_semver_constants PUBLIC.
 ************************************************************************
 * Based on node semver package v7.6.3 (July 2024)
 * https://github.com/npm/node-semver/releases/tag/v7.6.3
+* not included yet:
+* https://github.com/npm/node-semver/compare/v7.6.3...main
 ************************************************************************
 
   " Package version

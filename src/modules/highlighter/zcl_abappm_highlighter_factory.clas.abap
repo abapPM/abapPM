@@ -28,11 +28,11 @@ CLASS zcl_abappm_highlighter_factory IMPLEMENTATION.
       result = NEW zcl_abappm_highlighter_abap( ).
     ELSEIF filename CP '*.xml' OR filename CP '*.html'.
       result = NEW zcl_abappm_highlighter_xml( ).
-    ELSEIF filename CP '*.css'.
+    ELSEIF filename CP '*.css' OR filename CP '*.scss' OR filename CP '*.sass'.
       result = NEW zcl_abappm_highlighter_css( ).
     ELSEIF filename CP '*.js'.
       result = NEW zcl_abappm_highlighter_js( ).
-    ELSEIF filename CP '*.json' OR filename CP '*.jsonc'.
+    ELSEIF filename CP '*.json' OR filename CP '*.jsonc' OR filename CP '*.json5'.
       result = NEW zcl_abappm_highlighter_json( ).
     ELSEIF filename CP '*.txt' OR filename CP '*.ini'  OR filename CP '*.text'.
       result = NEW zcl_abappm_highlighter_txt( ).

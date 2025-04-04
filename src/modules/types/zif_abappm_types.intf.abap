@@ -71,8 +71,7 @@ INTERFACE zif_abappm_types PUBLIC.
   " *** PACKAGE.ABAP.JSON ***
 
   TYPES:
-    "! Full manifest (fetched with "accept: application/json" in HTTP headers)
-    "! This type mirrors the package.abap.json schema
+    "! Schema for package.abap.json
     BEGIN OF ty_package_json,
       name                  TYPE string,
       version               TYPE string,
@@ -128,7 +127,7 @@ INTERFACE zif_abappm_types PUBLIC.
   TYPES:
     "! Abbreviated manifest
     "! (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
-    BEGIN OF ty_manifest_abbreviated,
+    BEGIN OF ty_manifest_abbreviated ##NEEDED,
       name                  TYPE string,
       version               TYPE string,
       dependencies          TYPE ty_dependencies,
@@ -167,7 +166,7 @@ INTERFACE zif_abappm_types PUBLIC.
   TYPES:
     "! Full packument (as fetched from registry)
     "! Some fields are hoisted from latest version to root
-    BEGIN OF ty_packument,
+    BEGIN OF ty_packument ##NEEDED,
       name          TYPE string,
       description   TYPE string,
       dist_tags     TYPE STANDARD TABLE OF ty_generic WITH KEY key,
@@ -214,7 +213,7 @@ INTERFACE zif_abappm_types PUBLIC.
       extension TYPE c LENGTH 4 VALUE 'json',
     END OF c_package_json_file.
 
-    "! Package Readme File
+  "! Package Readme File
   CONSTANTS c_readme_file TYPE string VALUE 'README.md'.
 
   CONSTANTS:
@@ -229,6 +228,7 @@ INTERFACE zif_abappm_types PUBLIC.
     BEGIN OF c_engine,
       abap TYPE string VALUE 'abap',
       apm  TYPE string VALUE 'apm',
+      btp  TYPE string VALUE 'btp',
     END OF c_engine.
 
   CONSTANTS:

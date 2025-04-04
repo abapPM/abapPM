@@ -223,8 +223,8 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
 
     " 4) CSS Functions
     keyword_list =
-    'attr|calc|cubic-bezier|hsl|hsla|linear-gradient|radial-gradient|repeating-linear-gradient|' &&
-    'repeating-radial-gradient|rgb|rgba|rotate|scale|translateX|translateY|var'.
+    'attr|calc|cubic-bezier|hsl|hsla|linear-gradient|math|radial-gradient|repeating-linear-gradient|' &&
+    'repeating-radial-gradient|rgb|rgba|rotate|scale|theme|translateX|translateY|var'.
     insert_keywords( list  = keyword_list
                      token = c_token-functions ).
 
@@ -309,9 +309,9 @@ CLASS zcl_abappm_highlighter_css IMPLEMENTATION.
     insert_keywords( list  = keyword_list
                      token = c_token-extensions ).
 
-    " 6) CSS At-Rules
+    " 6) CSS At-Rules (SASS/SCSS)
     keyword_list =
-    '@|charset|counter-style|font-face|import|keyframes'.
+    '@|charset|counter-style|font-face|import|keyframes|@use|@mixin|@include|@extend'.
     insert_keywords( list  = keyword_list
                      token = c_token-at_rules ).
 

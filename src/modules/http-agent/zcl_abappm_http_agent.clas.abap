@@ -47,6 +47,8 @@ CLASS zcl_abappm_http_agent IMPLEMENTATION.
         request->set_data( payload ).
       WHEN cl_abap_typedescr=>typekind_string.
         request->set_cdata( payload ).
+      WHEN cl_abap_typedescr=>typekind_char.
+        request->set_cdata( |{ payload }| ).
       WHEN OTHERS.
         zcx_abappm_error=>raise( |Unexpected payload type { payload_type->absolute_name }| ).
     ENDCASE.

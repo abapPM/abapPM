@@ -265,6 +265,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
       IF NOT zcl_abappm_semver_functions=>valid( <version> ).
         DELETE versions INDEX tabix.
       ENDIF.
+
     ENDLOOP.
 
     IF versions IS INITIAL.
