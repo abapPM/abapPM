@@ -331,7 +331,7 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
         ENDLOOP.
 
         IF is_complete = abap_false.
-          ajson = ajson->filter( lcl_ajson_filters=>create_empty_filter( ) ).
+          ajson = ajson->filter( lcl_ajson_filters_pack_json=>create_empty_filter( ) ).
           IF manifest-private = abap_false.
             INSERT `/private` INTO TABLE skip_paths.
           ENDIF.

@@ -1,5 +1,5 @@
 * Same as zcl_ajson_filter_lib=>create_empty_filter( ) but also removing initial numbers and null
-CLASS lcl_ajson_filters DEFINITION FINAL.
+CLASS lcl_ajson_filters_pack_json DEFINITION FINAL.
 
   PUBLIC SECTION.
 
@@ -13,10 +13,10 @@ CLASS lcl_ajson_filters DEFINITION FINAL.
 
 ENDCLASS.
 
-CLASS lcl_ajson_filters IMPLEMENTATION.
+CLASS lcl_ajson_filters_pack_json IMPLEMENTATION.
 
   METHOD create_empty_filter.
-    result = NEW lcl_ajson_filters( ).
+    result = NEW lcl_ajson_filters_pack_json( ).
   ENDMETHOD.
 
   METHOD zif_abappm_ajson_filter~keep_node.

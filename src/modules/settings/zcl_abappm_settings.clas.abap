@@ -270,7 +270,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
             iv_val  = zif_abappm_settings~get( ) ).
 
         IF is_complete = abap_false.
-          ajson = ajson->filter( lcl_ajson_filters=>create_empty_filter( ) ).
+          ajson = ajson->filter( lcl_ajson_filters_settings=>create_empty_filter( ) ).
         ENDIF.
 
         result = ajson->stringify( 2 ).
