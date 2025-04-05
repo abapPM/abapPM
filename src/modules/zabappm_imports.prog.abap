@@ -5,7 +5,7 @@
 * core apm modules
 IMPORT '*' TO 'package-json/z$1_abappm$2'            FROM '@apm/package-json'.
 IMPORT '*' TO 'pacote/z$1_abappm$2'                  FROM '@apm/pacote'.
-IMPORT '*' TO 'persist/z$1_abappm$2'                 FROM '@apm/persist'.
+IMPORT '*' TO 'persist/z$1_abappm$2'                 FROM '@apm/persistence'.
 IMPORT '*' TO 'readme/z$1_abappm$2'                  FROM '@apm/readme'.
 IMPORT '*' TO 'settings/z$1_abappm$2'                FROM '@apm/settings'.
 IMPORT '*' TO 'types/z$1_abappm$2'                   FROM '@apm/types'.

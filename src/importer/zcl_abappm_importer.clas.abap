@@ -152,7 +152,9 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    DATA(list) = zcl_abappm_package_json=>list( instanciate = abap_true ).
+    DATA(list) = zcl_abappm_package_json=>list(
+      instanciate = abap_true
+      is_bundle   = abap_false ).
 
     IF is_logging = abap_true.
       FORMAT COLOR COL_HEADING.
