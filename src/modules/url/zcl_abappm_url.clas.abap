@@ -14,9 +14,10 @@ CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 ************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '1.1.0' ##NEEDED.
 
     TYPES:
+      "! scheme://username:password@host:port/path?query#fragment
       BEGIN OF ty_url_components,
         scheme     TYPE string,
         username   TYPE string,
@@ -47,9 +48,9 @@ CLASS zcl_abappm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CLASS-METHODS serialize
       IMPORTING
-        components TYPE ty_url_components
+        components    TYPE ty_url_components
       RETURNING
-        VALUE(url) TYPE string
+        VALUE(result) TYPE string
       RAISING
         zcx_abappm_error.
 
@@ -386,7 +387,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     ENDIF.
 
     " Validate IPv4 or IPv6 address if present
-    IF temp(1) = '['.
+    IF temp IS NOT INITIAL AND temp(1) = '['.
       validate_ipv6_address( host ).
     ELSEIF host CO '0123456789. '.
       validate_ipv4_address( host ).
@@ -447,7 +448,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
   METHOD serialize.
 
-    url = |{ components-scheme }:|.
+    DATA(url) = |{ components-scheme }:|.
 
     " Add authority if host is present
     IF components-host IS NOT INITIAL OR components-scheme = 'file'.
@@ -489,12 +490,14 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       url = |{ url }#{ percent_encode( components-fragment ) }|.
     ENDIF.
 
+    result = url.
+
   ENDMETHOD.
 
 
   METHOD validate_ipv4_address.
 
-    IF address(1) = '.'.
+    IF address IS NOT INITIAL AND address(1) = '.'.
       zcx_abappm_error=>raise( 'Invalid IPv4 address: initial segment is empty' ).
     ENDIF.
 

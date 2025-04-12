@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ABAPPM_EMOJI</CLSNAME>
+    <CLSNAME>ZCL_ABAPPM_URL_PARAMS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Emoji</DESCRIPT>
+    <DESCRIPT>URL Query Parameters</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

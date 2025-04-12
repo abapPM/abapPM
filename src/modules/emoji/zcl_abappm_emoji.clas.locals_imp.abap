@@ -5,3696 +5,2042 @@
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-* Twemoji prodived by Twitter (Emoji 14.0)
-* https://github.com/twitter/twemoji
-* https://github.com/SebastianAigner/twemoji-amazing (CSS)
+* Unicode Emoji provided by GitHub (v8, 2025-04-05)
+* Count: 1935
+*
+* API for JSON: https://api.github.com/emojis
+* Base URL: https://github.githubassets.com/images/icons/emoji/
 
-" 1st-place-medal
-" 2nd-place-medal
-" 3rd-place-medal
-" a-button-blood-type
-" ab-button-blood-type
-" abacus
-" accordion
-" adhesive-bandage
-" admission-tickets
-" aerial-tramway
-" airplane
-" airplane-arrival
-" airplane-departure
-" alarm-clock
-" alembic
-" alien
-" alien-monster
-" ambulance
-" american-football
-" amphora
-" anatomical-heart
-" anchor
-" anger-symbol
-" angry-face
-" angry-face-with-horns
-" anguished-face
-" ant
-" antenna-bars
-" anxious-face-with-sweat
-" aquarius
-" aries
-" articulated-lorry
-" artist
-" artist-dark-skin-tone
-" artist-light-skin-tone
-" artist-medium-dark-skin-tone
-" artist-medium-light-skin-tone
-" artist-medium-skin-tone
-" artist-palette
-" astonished-face
-" astronaut
-" astronaut-dark-skin-tone
-" astronaut-light-skin-tone
-" astronaut-medium-dark-skin-tone
-" astronaut-medium-light-skin-tone
-" astronaut-medium-skin-tone
-" atm-sign
-" atom-symbol
-" auto-rickshaw
-" automobile
-" avocado
-" axe
-" b-button-blood-type
-" baby
-" baby-angel
-" baby-angel-dark-skin-tone
-" baby-angel-light-skin-tone
-" baby-angel-medium-dark-skin-tone
-" baby-angel-medium-light-skin-tone
-" baby-angel-medium-skin-tone
-" baby-bottle
-" baby-chick
-" baby-dark-skin-tone
-" baby-light-skin-tone
-" baby-medium-dark-skin-tone
-" baby-medium-light-skin-tone
-" baby-medium-skin-tone
-" baby-symbol
-" back-arrow
-" backhand-index-pointing-down
-" backhand-index-pointing-down-dark-skin-tone
-" backhand-index-pointing-down-light-skin-tone
-" backhand-index-pointing-down-medium-dark-skin-tone
-" backhand-index-pointing-down-medium-light-skin-tone
-" backhand-index-pointing-down-medium-skin-tone
-" backhand-index-pointing-left
-" backhand-index-pointing-left-dark-skin-tone
-" backhand-index-pointing-left-light-skin-tone
-" backhand-index-pointing-left-medium-dark-skin-tone
-" backhand-index-pointing-left-medium-light-skin-tone
-" backhand-index-pointing-left-medium-skin-tone
-" backhand-index-pointing-right
-" backhand-index-pointing-right-dark-skin-tone
-" backhand-index-pointing-right-light-skin-tone
-" backhand-index-pointing-right-medium-dark-skin-tone
-" backhand-index-pointing-right-medium-light-skin-tone
-" backhand-index-pointing-right-medium-skin-tone
-" backhand-index-pointing-up
-" backhand-index-pointing-up-dark-skin-tone
-" backhand-index-pointing-up-light-skin-tone
-" backhand-index-pointing-up-medium-dark-skin-tone
-" backhand-index-pointing-up-medium-light-skin-tone
-" backhand-index-pointing-up-medium-skin-tone
-" backpack
-" bacon
-" badger
-" badminton
-" bagel
-" baggage-claim
-" baguette-bread
-" balance-scale
-" bald
-" ballet-shoes
-" balloon
-" ballot-box-with-ballot
-" banana
-" banjo
-" bank
-" bar-chart
-" barber-pole
-" baseball
-" basket
-" basketball
-" bat
-" bathtub
-" battery
-" beach-with-umbrella
-" beaming-face-with-smiling-eyes
-" beans
-" bear
-" beating-heart
-" beaver
-" bed
-" beer-mug
-" beetle
-" bell
-" bell-pepper
-" bell-with-slash
-" bellhop-bell
-" bento-box
-" beverage-box
-" bicycle
-" bikini
-" billed-cap
-" biohazard
-" bird
-" birthday-cake
-" bison
-" biting-lip
-" black-cat
-" black-circle
-" black-flag
-" black-heart
-" black-large-square
-" black-medium-small-square
-" black-medium-square
-" black-nib
-" black-small-square
-" black-square-button
-" blossom
-" blowfish
-" blue-book
-" blue-circle
-" blue-heart
-" blue-square
-" blueberries
-" boar
-" bomb
-" bone
-" bookmark
-" bookmark-tabs
-" books
-" boomerang
-" bottle-with-popping-cork
-" bouquet
-" bow-and-arrow
-" bowl-with-spoon
-" bowling
-" boxing-glove
-" boy
-" boy-dark-skin-tone
-" boy-light-skin-tone
-" boy-medium-dark-skin-tone
-" boy-medium-light-skin-tone
-" boy-medium-skin-tone
-" brain
-" bread
-" breast-feeding
-" breast-feeding-dark-skin-tone
-" breast-feeding-light-skin-tone
-" breast-feeding-medium-dark-skin-tone
-" breast-feeding-medium-light-skin-tone
-" breast-feeding-medium-skin-tone
-" brick
-" bridge-at-night
-" briefcase
-" briefs
-" bright-button
-" broccoli
-" broken-heart
-" broom
-" brown-circle
-" brown-heart
-" brown-square
-" bubble-tea
-" bubbles
-" bucket
-" bug
-" building-construction
-" bullet-train
-" bullseye
-" burrito
-" bus
-" bus-stop
-" bust-in-silhouette
-" busts-in-silhouette
-" butter
-" butterfly
-" cactus
-" calendar
-" call-me-hand
-" call-me-hand-dark-skin-tone
-" call-me-hand-light-skin-tone
-" call-me-hand-medium-dark-skin-tone
-" call-me-hand-medium-light-skin-tone
-" call-me-hand-medium-skin-tone
-" camel
-" camera
-" camera-with-flash
-" camping
-" cancer
-" candle
-" candy
-" canned-food
-" canoe
-" capricorn
-" card-file-box
-" card-index
-" card-index-dividers
-" carousel-horse
-" carp-streamer
-" carpentry-saw
-" carrot
-" castle
-" cat
-" cat-face
-" cat-with-tears-of-joy
-" cat-with-wry-smile
-" chains
-" chair
-" chart-decreasing
-" chart-increasing
-" chart-increasing-with-yen
-" check-box-with-check
-" check-mark
-" check-mark-button
-" cheese-wedge
-" chequered-flag
-" cherries
-" cherry-blossom
-" chess-pawn
-" chestnut
-" chicken
-" child
-" child-dark-skin-tone
-" child-light-skin-tone
-" child-medium-dark-skin-tone
-" child-medium-light-skin-tone
-" child-medium-skin-tone
-" children-crossing
-" chipmunk
-" chocolate-bar
-" chopsticks
-" christmas-tree
-" church
-" cigarette
-" cinema
-" circled-m
-" circus-tent
-" cityscape
-" cityscape-at-dusk
-" cl-button
-" clamp
-" clapper-board
-" clapping-hands
-" clapping-hands-dark-skin-tone
-" clapping-hands-light-skin-tone
-" clapping-hands-medium-dark-skin-tone
-" clapping-hands-medium-light-skin-tone
-" clapping-hands-medium-skin-tone
-" classical-building
-" clinking-beer-mugs
-" clinking-glasses
-" clipboard
-" clockwise-vertical-arrows
-" closed-book
-" closed-mailbox-with-lowered-flag
-" closed-mailbox-with-raised-flag
-" closed-umbrella
-" cloud
-" cloud-with-lightning
-" cloud-with-lightning-and-rain
-" cloud-with-rain
-" cloud-with-snow
-" clown-face
-" club-suit
-" clutch-bag
-" coat
-" cockroach
-" cocktail-glass
-" coconut
-" coffin
-" coin
-" cold-face
-" collision
-" comet
-" compass
-" computer-disk
-" computer-mouse
-" confetti-ball
-" confounded-face
-" confused-face
-" construction
-" construction-worker
-" construction-worker-dark-skin-tone
-" construction-worker-light-skin-tone
-" construction-worker-medium-dark-skin-tone
-" construction-worker-medium-light-skin-tone
-" construction-worker-medium-skin-tone
-" control-knobs
-" convenience-store
-" cook
-" cook-dark-skin-tone
-" cook-light-skin-tone
-" cook-medium-dark-skin-tone
-" cook-medium-light-skin-tone
-" cook-medium-skin-tone
-" cooked-rice
-" cookie
-" cooking
-" cool-button
-" copyright
-" coral
-" couch-and-lamp
-" counterclockwise-arrows-button
-" couple-with-heart
-" couple-with-heart-dark-skin-tone
-" couple-with-heart-light-skin-tone
-" couple-with-heart-man-man
-" couple-with-heart-man-man-dark-skin-tone
-" couple-with-heart-man-man-dark-skin-tone-light-skin-tone
-" couple-with-heart-man-man-dark-skin-tone-medium-dark-skin-tone
-" couple-with-heart-man-man-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-man-man-dark-skin-tone-medium-skin-tone
-" couple-with-heart-man-man-light-skin-tone
-" couple-with-heart-man-man-light-skin-tone-dark-skin-tone
-" couple-with-heart-man-man-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-man-man-light-skin-tone-medium-light-skin-tone
-" couple-with-heart-man-man-light-skin-tone-medium-skin-tone
-" couple-with-heart-man-man-medium-dark-skin-tone
-" couple-with-heart-man-man-medium-dark-skin-tone-dark-skin-tone
-" couple-with-heart-man-man-medium-dark-skin-tone-light-skin-tone
-" couple-with-heart-man-man-medium-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-man-man-medium-dark-skin-tone-medium-skin-tone
-" couple-with-heart-man-man-medium-light-skin-tone
-" couple-with-heart-man-man-medium-light-skin-tone-dark-skin-tone
-" couple-with-heart-man-man-medium-light-skin-tone-light-skin-tone
-" couple-with-heart-man-man-medium-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-man-man-medium-light-skin-tone-medium-skin-tone
-" couple-with-heart-man-man-medium-skin-tone
-" couple-with-heart-man-man-medium-skin-tone-dark-skin-tone
-" couple-with-heart-man-man-medium-skin-tone-light-skin-tone
-" couple-with-heart-man-man-medium-skin-tone-medium-dark-skin-tone
-" couple-with-heart-man-man-medium-skin-tone-medium-light-skin-tone
-" couple-with-heart-medium-dark-skin-tone
-" couple-with-heart-medium-light-skin-tone
-" couple-with-heart-medium-skin-tone
-" couple-with-heart-person-person-dark-skin-tone-light-skin-tone
-" couple-with-heart-person-person-dark-skin-tone-medium-dark-skin-tone
-" couple-with-heart-person-person-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-person-person-dark-skin-tone-medium-skin-tone
-" couple-with-heart-person-person-light-skin-tone-dark-skin-tone
-" couple-with-heart-person-person-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-person-person-light-skin-tone-medium-light-skin-tone
-" couple-with-heart-person-person-light-skin-tone-medium-skin-tone
-" couple-with-heart-person-person-medium-dark-skin-tone-dark-skin-tone
-" couple-with-heart-person-person-medium-dark-skin-tone-light-skin-tone
-" couple-with-heart-person-person-medium-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-person-person-medium-dark-skin-tone-medium-skin-tone
-" couple-with-heart-person-person-medium-light-skin-tone-dark-skin-tone
-" couple-with-heart-person-person-medium-light-skin-tone-light-skin-tone
-" couple-with-heart-person-person-medium-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-person-person-medium-light-skin-tone-medium-skin-tone
-" couple-with-heart-person-person-medium-skin-tone-dark-skin-tone
-" couple-with-heart-person-person-medium-skin-tone-light-skin-tone
-" couple-with-heart-person-person-medium-skin-tone-medium-dark-skin-tone
-" couple-with-heart-person-person-medium-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-man
-" couple-with-heart-woman-man-dark-skin-tone
-" couple-with-heart-woman-man-dark-skin-tone-light-skin-tone
-" couple-with-heart-woman-man-dark-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-man-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-man-dark-skin-tone-medium-skin-tone
-" couple-with-heart-woman-man-light-skin-tone
-" couple-with-heart-woman-man-light-skin-tone-dark-skin-tone
-" couple-with-heart-woman-man-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-man-light-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-man-light-skin-tone-medium-skin-tone
-" couple-with-heart-woman-man-medium-dark-skin-tone
-" couple-with-heart-woman-man-medium-dark-skin-tone-dark-skin-tone
-" couple-with-heart-woman-man-medium-dark-skin-tone-light-skin-tone
-" couple-with-heart-woman-man-medium-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-man-medium-dark-skin-tone-medium-skin-tone
-" couple-with-heart-woman-man-medium-light-skin-tone
-" couple-with-heart-woman-man-medium-light-skin-tone-dark-skin-tone
-" couple-with-heart-woman-man-medium-light-skin-tone-light-skin-tone
-" couple-with-heart-woman-man-medium-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-man-medium-light-skin-tone-medium-skin-tone
-" couple-with-heart-woman-man-medium-skin-tone
-" couple-with-heart-woman-man-medium-skin-tone-dark-skin-tone
-" couple-with-heart-woman-man-medium-skin-tone-light-skin-tone
-" couple-with-heart-woman-man-medium-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-man-medium-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-woman
-" couple-with-heart-woman-woman-dark-skin-tone
-" couple-with-heart-woman-woman-dark-skin-tone-light-skin-tone
-" couple-with-heart-woman-woman-dark-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-woman-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-woman-dark-skin-tone-medium-skin-tone
-" couple-with-heart-woman-woman-light-skin-tone
-" couple-with-heart-woman-woman-light-skin-tone-dark-skin-tone
-" couple-with-heart-woman-woman-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-woman-light-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-woman-light-skin-tone-medium-skin-tone
-" couple-with-heart-woman-woman-medium-dark-skin-tone
-" couple-with-heart-woman-woman-medium-dark-skin-tone-dark-skin-tone
-" couple-with-heart-woman-woman-medium-dark-skin-tone-light-skin-tone
-" couple-with-heart-woman-woman-medium-dark-skin-tone-medium-light-skin-tone
-" couple-with-heart-woman-woman-medium-dark-skin-tone-medium-skin-tone
-" couple-with-heart-woman-woman-medium-light-skin-tone
-" couple-with-heart-woman-woman-medium-light-skin-tone-dark-skin-tone
-" couple-with-heart-woman-woman-medium-light-skin-tone-light-skin-tone
-" couple-with-heart-woman-woman-medium-light-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-woman-medium-light-skin-tone-medium-skin-tone
-" couple-with-heart-woman-woman-medium-skin-tone
-" couple-with-heart-woman-woman-medium-skin-tone-dark-skin-tone
-" couple-with-heart-woman-woman-medium-skin-tone-light-skin-tone
-" couple-with-heart-woman-woman-medium-skin-tone-medium-dark-skin-tone
-" couple-with-heart-woman-woman-medium-skin-tone-medium-light-skin-tone
-" cow
-" cow-face
-" cowboy-hat-face
-" crab
-" crayon
-" credit-card
-" crescent-moon
-" cricket
-" cricket-game
-" crocodile
-" croissant
-" cross-mark
-" cross-mark-button
-" crossed-fingers
-" crossed-fingers-dark-skin-tone
-" crossed-fingers-light-skin-tone
-" crossed-fingers-medium-dark-skin-tone
-" crossed-fingers-medium-light-skin-tone
-" crossed-fingers-medium-skin-tone
-" crossed-flags
-" crossed-swords
-" crown
-" crutch
-" crying-cat
-" crying-face
-" crystal-ball
-" cucumber
-" cup-with-straw
-" cupcake
-" curling-stone
-" curly-hair
-" curly-loop
-" currency-exchange
-" curry-rice
-" custard
-" customs
-" cut-of-meat
-" cyclone
-" dagger
-" dango
-" dark-skin-tone
-" dashing-away
-" deaf-man
-" deaf-man-dark-skin-tone
-" deaf-man-light-skin-tone
-" deaf-man-medium-dark-skin-tone
-" deaf-man-medium-light-skin-tone
-" deaf-man-medium-skin-tone
-" deaf-person
-" deaf-person-dark-skin-tone
-" deaf-person-light-skin-tone
-" deaf-person-medium-dark-skin-tone
-" deaf-person-medium-light-skin-tone
-" deaf-person-medium-skin-tone
-" deaf-woman
-" deaf-woman-dark-skin-tone
-" deaf-woman-light-skin-tone
-" deaf-woman-medium-dark-skin-tone
-" deaf-woman-medium-light-skin-tone
-" deaf-woman-medium-skin-tone
-" deciduous-tree
-" deer
-" delivery-truck
-" department-store
-" derelict-house
-" desert
-" desert-island
-" desktop-computer
-" detective
-" detective-dark-skin-tone
-" detective-light-skin-tone
-" detective-medium-dark-skin-tone
-" detective-medium-light-skin-tone
-" detective-medium-skin-tone
-" diamond-suit
-" diamond-with-a-dot
-" dim-button
-" disappointed-face
-" disguised-face
-" divide
-" diving-mask
-" diya-lamp
-" dizzy
-" dna
-" dodo
-" dog
-" dog-face
-" dollar-banknote
-" dolphin
-" door
-" dotted-line-face
-" dotted-six-pointed-star
-" double-curly-loop
-" double-exclamation-mark
-" doughnut
-" dove
-" down-arrow
-" down-left-arrow
-" down-right-arrow
-" downcast-face-with-sweat
-" downwards-button
-" dragon
-" dragon-face
-" dress
-" drooling-face
-" drop-of-blood
-" droplet
-" drum
-" duck
-" dumpling
-" dvd
-" e-mail
-" eagle
-" ear
-" ear-dark-skin-tone
-" ear-light-skin-tone
-" ear-medium-dark-skin-tone
-" ear-medium-light-skin-tone
-" ear-medium-skin-tone
-" ear-of-corn
-" ear-with-hearing-aid
-" ear-with-hearing-aid-dark-skin-tone
-" ear-with-hearing-aid-light-skin-tone
-" ear-with-hearing-aid-medium-dark-skin-tone
-" ear-with-hearing-aid-medium-light-skin-tone
-" ear-with-hearing-aid-medium-skin-tone
-" egg
-" eggplant
-" eight-o-clock
-" eight-pointed-star
-" eight-spoked-asterisk
-" eight-thirty
-" eject-button
-" electric-plug
-" elephant
-" elevator
-" eleven-o-clock
-" eleven-thirty
-" elf
-" elf-dark-skin-tone
-" elf-light-skin-tone
-" elf-medium-dark-skin-tone
-" elf-medium-light-skin-tone
-" elf-medium-skin-tone
-" empty-nest
-" end-arrow
-" envelope
-" envelope-with-arrow
-" euro-banknote
-" evergreen-tree
-" ewe
-" exclamation-question-mark
-" exploding-head
-" expressionless-face
-" eye
-" eye-in-speech-bubble
-" eyes
-" face-blowing-a-kiss
-" face-exhaling
-" face-holding-back-tears
-" face-in-clouds
-" face-savoring-food
-" face-screaming-in-fear
-" face-vomiting
-" face-with-diagonal-mouth
-" face-with-hand-over-mouth
-" face-with-head-bandage
-" face-with-medical-mask
-" face-with-monocle
-" face-with-open-eyes-and-hand-over-mouth
-" face-with-open-mouth
-" face-with-peeking-eye
-" face-with-raised-eyebrow
-" face-with-rolling-eyes
-" face-with-spiral-eyes
-" face-with-steam-from-nose
-" face-with-symbols-on-mouth
-" face-with-tears-of-joy
-" face-with-thermometer
-" face-with-tongue
-" face-without-mouth
-" factory
-" factory-worker
-" factory-worker-dark-skin-tone
-" factory-worker-light-skin-tone
-" factory-worker-medium-dark-skin-tone
-" factory-worker-medium-light-skin-tone
-" factory-worker-medium-skin-tone
-" fairy
-" fairy-dark-skin-tone
-" fairy-light-skin-tone
-" fairy-medium-dark-skin-tone
-" fairy-medium-light-skin-tone
-" fairy-medium-skin-tone
-" falafel
-" fallen-leaf
-" family
-" family-man-boy
-" family-man-boy-boy
-" family-man-girl
-" family-man-girl-boy
-" family-man-girl-girl
-" family-man-man-boy
-" family-man-man-boy-boy
-" family-man-man-girl
-" family-man-man-girl-boy
-" family-man-man-girl-girl
-" family-man-woman-boy
-" family-man-woman-boy-boy
-" family-man-woman-girl
-" family-man-woman-girl-boy
-" family-man-woman-girl-girl
-" family-woman-boy
-" family-woman-boy-boy
-" family-woman-girl
-" family-woman-girl-boy
-" family-woman-girl-girl
-" family-woman-woman-boy
-" family-woman-woman-boy-boy
-" family-woman-woman-girl
-" family-woman-woman-girl-boy
-" family-woman-woman-girl-girl
-" farmer
-" farmer-dark-skin-tone
-" farmer-light-skin-tone
-" farmer-medium-dark-skin-tone
-" farmer-medium-light-skin-tone
-" farmer-medium-skin-tone
-" fast-down-button
-" fast-forward-button
-" fast-reverse-button
-" fast-up-button
-" fax-machine
-" fearful-face
-" feather
-" female-sign
-" ferris-wheel
-" ferry
-" field-hockey
-" file-cabinet
-" file-folder
-" film-frames
-" film-projector
-" fire
-" fire-engine
-" fire-extinguisher
-" firecracker
-" firefighter
-" firefighter-dark-skin-tone
-" firefighter-light-skin-tone
-" firefighter-medium-dark-skin-tone
-" firefighter-medium-light-skin-tone
-" firefighter-medium-skin-tone
-" fireworks
-" first-quarter-moon
-" first-quarter-moon-face
-" fish
-" fish-cake-with-swirl
-" fishing-pole
-" five-o-clock
-" five-thirty
-" flag-afghanistan
-" flag-albania
-" flag-algeria
-" flag-american-samoa
-" flag-andorra
-" flag-angola
-" flag-anguilla
-" flag-antarctica
-" flag-antigua-barbuda
-" flag-argentina
-" flag-armenia
-" flag-aruba
-" flag-ascension-island
-" flag-australia
-" flag-austria
-" flag-azerbaijan
-" flag-bahamas
-" flag-bahrain
-" flag-bangladesh
-" flag-barbados
-" flag-belarus
-" flag-belgium
-" flag-belize
-" flag-benin
-" flag-bermuda
-" flag-bhutan
-" flag-bolivia
-" flag-bosnia-herzegovina
-" flag-botswana
-" flag-bouvet-island
-" flag-brazil
-" flag-british-indian-ocean-territory
-" flag-british-virgin-islands
-" flag-brunei
-" flag-bulgaria
-" flag-burkina-faso
-" flag-burundi
-" flag-c-te-d-ivoire
-" flag-cambodia
-" flag-cameroon
-" flag-canada
-" flag-canary-islands
-" flag-cape-verde
-" flag-caribbean-netherlands
-" flag-cayman-islands
-" flag-central-african-republic
-" flag-ceuta-melilla
-" flag-chad
-" flag-chile
-" flag-china
-" flag-christmas-island
-" flag-clipperton-island
-" flag-cocos-keeling-islands
-" flag-colombia
-" flag-comoros
-" flag-congo-brazzaville
-" flag-congo-kinshasa
-" flag-cook-islands
-" flag-costa-rica
-" flag-croatia
-" flag-cuba
-" flag-cura-ao
-" flag-cyprus
-" flag-czechia
-" flag-denmark
-" flag-diego-garcia
-" flag-djibouti
-" flag-dominica
-" flag-dominican-republic
-" flag-ecuador
-" flag-egypt
-" flag-el-salvador
-" flag-england
-" flag-equatorial-guinea
-" flag-eritrea
-" flag-estonia
-" flag-eswatini
-" flag-ethiopia
-" flag-european-union
-" flag-falkland-islands
-" flag-faroe-islands
-" flag-fiji
-" flag-finland
-" flag-france
-" flag-french-guiana
-" flag-french-polynesia
-" flag-french-southern-territories
-" flag-gabon
-" flag-gambia
-" flag-georgia
-" flag-germany
-" flag-ghana
-" flag-gibraltar
-" flag-greece
-" flag-greenland
-" flag-grenada
-" flag-guadeloupe
-" flag-guam
-" flag-guatemala
-" flag-guernsey
-" flag-guinea
-" flag-guinea-bissau
-" flag-guyana
-" flag-haiti
-" flag-heard-mcdonald-islands
-" flag-honduras
-" flag-hong-kong-sar-china
-" flag-hungary
-" flag-iceland
-" flag-in-hole
-" flag-india
-" flag-indonesia
-" flag-iran
-" flag-iraq
-" flag-ireland
-" flag-isle-of-man
-" flag-israel
-" flag-italy
-" flag-jamaica
-" flag-japan
-" flag-jersey
-" flag-jordan
-" flag-kazakhstan
-" flag-kenya
-" flag-kiribati
-" flag-kosovo
-" flag-kuwait
-" flag-kyrgyzstan
-" flag-land-islands
-" flag-laos
-" flag-latvia
-" flag-lebanon
-" flag-lesotho
-" flag-liberia
-" flag-libya
-" flag-liechtenstein
-" flag-lithuania
-" flag-luxembourg
-" flag-macao-sar-china
-" flag-madagascar
-" flag-malawi
-" flag-malaysia
-" flag-maldives
-" flag-mali
-" flag-malta
-" flag-marshall-islands
-" flag-martinique
-" flag-mauritania
-" flag-mauritius
-" flag-mayotte
-" flag-mexico
-" flag-micronesia
-" flag-moldova
-" flag-monaco
-" flag-mongolia
-" flag-montenegro
-" flag-montserrat
-" flag-morocco
-" flag-mozambique
-" flag-myanmar-burma
-" flag-namibia
-" flag-nauru
-" flag-nepal
-" flag-netherlands
-" flag-new-caledonia
-" flag-new-zealand
-" flag-nicaragua
-" flag-niger
-" flag-nigeria
-" flag-niue
-" flag-norfolk-island
-" flag-north-korea
-" flag-north-macedonia
-" flag-northern-mariana-islands
-" flag-norway
-" flag-oman
-" flag-pakistan
-" flag-palau
-" flag-palestinian-territories
-" flag-panama
-" flag-papua-new-guinea
-" flag-paraguay
-" flag-peru
-" flag-philippines
-" flag-pitcairn-islands
-" flag-poland
-" flag-portugal
-" flag-puerto-rico
-" flag-qatar
-" flag-r-union
-" flag-romania
-" flag-russia
-" flag-rwanda
-" flag-s-o-tom-pr-ncipe
-" flag-samoa
-" flag-san-marino
-" flag-saudi-arabia
-" flag-scotland
-" flag-senegal
-" flag-serbia
-" flag-seychelles
-" flag-sierra-leone
-" flag-singapore
-" flag-sint-maarten
-" flag-slovakia
-" flag-slovenia
-" flag-solomon-islands
-" flag-somalia
-" flag-south-africa
-" flag-south-georgia-south-sandwich-islands
-" flag-south-korea
-" flag-south-sudan
-" flag-spain
-" flag-sri-lanka
-" flag-st-barth-lemy
-" flag-st-helena
-" flag-st-kitts-nevis
-" flag-st-lucia
-" flag-st-martin
-" flag-st-pierre-miquelon
-" flag-st-vincent-grenadines
-" flag-sudan
-" flag-suriname
-" flag-svalbard-jan-mayen
-" flag-sweden
-" flag-switzerland
-" flag-syria
-" flag-taiwan
-" flag-tajikistan
-" flag-tanzania
-" flag-thailand
-" flag-timor-leste
-" flag-togo
-" flag-tokelau
-" flag-tonga
-" flag-trinidad-tobago
-" flag-tristan-da-cunha
-" flag-tunisia
-" flag-turkey
-" flag-turkmenistan
-" flag-turks-caicos-islands
-" flag-tuvalu
-" flag-u-s-outlying-islands
-" flag-u-s-virgin-islands
-" flag-uganda
-" flag-ukraine
-" flag-united-arab-emirates
-" flag-united-kingdom
-" flag-united-nations
-" flag-united-states
-" flag-uruguay
-" flag-uzbekistan
-" flag-vanuatu
-" flag-vatican-city
-" flag-venezuela
-" flag-vietnam
-" flag-wales
-" flag-wallis-futuna
-" flag-western-sahara
-" flag-yemen
-" flag-zambia
-" flag-zimbabwe
-" flamingo
-" flashlight
-" flat-shoe
-" flatbread
-" fleur-de-lis
-" flexed-biceps
-" flexed-biceps-dark-skin-tone
-" flexed-biceps-light-skin-tone
-" flexed-biceps-medium-dark-skin-tone
-" flexed-biceps-medium-light-skin-tone
-" flexed-biceps-medium-skin-tone
-" floppy-disk
-" flower-playing-cards
-" flushed-face
-" fly
-" flying-disc
-" flying-saucer
-" fog
-" foggy
-" folded-hands
-" folded-hands-dark-skin-tone
-" folded-hands-light-skin-tone
-" folded-hands-medium-dark-skin-tone
-" folded-hands-medium-light-skin-tone
-" folded-hands-medium-skin-tone
-" fondue
-" foot
-" foot-dark-skin-tone
-" foot-light-skin-tone
-" foot-medium-dark-skin-tone
-" foot-medium-light-skin-tone
-" foot-medium-skin-tone
-" footprints
-" fork-and-knife
-" fork-and-knife-with-plate
-" fortune-cookie
-" fountain
-" fountain-pen
-" four-leaf-clover
-" four-o-clock
-" four-thirty
-" fox
-" framed-picture
-" free-button
-" french-fries
-" fried-shrimp
-" frog
-" front-facing-baby-chick
-" frowning-face
-" frowning-face-with-open-mouth
-" fuel-pump
-" full-moon
-" full-moon-face
-" funeral-urn
-" game-die
-" garlic
-" gear
-" gem-stone
-" gemini
-" genie
-" ghost
-" giraffe
-" girl
-" girl-dark-skin-tone
-" girl-light-skin-tone
-" girl-medium-dark-skin-tone
-" girl-medium-light-skin-tone
-" girl-medium-skin-tone
-" glass-of-milk
-" glasses
-" globe-showing-americas
-" globe-showing-asia-australia
-" globe-showing-europe-africa
-" globe-with-meridians
-" gloves
-" glowing-star
-" goal-net
-" goat
-" goblin
-" goggles
-" gorilla
-" graduation-cap
-" grapes
-" green-apple
-" green-book
-" green-circle
-" green-heart
-" green-salad
-" green-square
-" grimacing-face
-" grinning-cat
-" grinning-cat-with-smiling-eyes
-" grinning-face
-" grinning-face-with-big-eyes
-" grinning-face-with-smiling-eyes
-" grinning-face-with-sweat
-" grinning-squinting-face
-" growing-heart
-" guard
-" guard-dark-skin-tone
-" guard-light-skin-tone
-" guard-medium-dark-skin-tone
-" guard-medium-light-skin-tone
-" guard-medium-skin-tone
-" guide-dog
-" guitar
-" hamburger
-" hammer
-" hammer-and-pick
-" hammer-and-wrench
-" hamsa
-" hamster
-" hand-with-fingers-splayed
-" hand-with-fingers-splayed-dark-skin-tone
-" hand-with-fingers-splayed-light-skin-tone
-" hand-with-fingers-splayed-medium-dark-skin-tone
-" hand-with-fingers-splayed-medium-light-skin-tone
-" hand-with-fingers-splayed-medium-skin-tone
-" hand-with-index-finger-and-thumb-crossed
-" hand-with-index-finger-and-thumb-crossed-dark-skin-tone
-" hand-with-index-finger-and-thumb-crossed-light-skin-tone
-" hand-with-index-finger-and-thumb-crossed-medium-dark-skin-tone
-" hand-with-index-finger-and-thumb-crossed-medium-light-skin-tone
-" hand-with-index-finger-and-thumb-crossed-medium-skin-tone
-" handbag
-" handshake
-" handshake-dark-skin-tone
-" handshake-light-skin-tone
-" handshake-medium-dark-skin-tone
-" handshake-medium-light-skin-tone
-" handshake-medium-skin-tone
-" hatching-chick
-" headphone
-" headstone
-" health-worker
-" health-worker-dark-skin-tone
-" health-worker-light-skin-tone
-" health-worker-medium-dark-skin-tone
-" health-worker-medium-light-skin-tone
-" health-worker-medium-skin-tone
-" hear-no-evil-monkey
-" heart-decoration
-" heart-exclamation
-" heart-hands
-" heart-hands-dark-skin-tone
-" heart-hands-light-skin-tone
-" heart-hands-medium-dark-skin-tone
-" heart-hands-medium-light-skin-tone
-" heart-hands-medium-skin-tone
-" heart-on-fire
-" heart-suit
-" heart-with-arrow
-" heart-with-ribbon
-" heavy-dollar-sign
-" heavy-equals-sign
-" hedgehog
-" helicopter
-" herb
-" hibiscus
-" high-heeled-shoe
-" high-speed-train
-" high-voltage
-" hiking-boot
-" hindu-temple
-" hippopotamus
-" hole
-" hollow-red-circle
-" honey-pot
-" honeybee
-" hook
-" horizontal-traffic-light
-" horse
-" horse-face
-" horse-racing
-" horse-racing-dark-skin-tone
-" horse-racing-light-skin-tone
-" horse-racing-medium-dark-skin-tone
-" horse-racing-medium-light-skin-tone
-" horse-racing-medium-skin-tone
-" hospital
-" hot-beverage
-" hot-dog
-" hot-face
-" hot-pepper
-" hot-springs
-" hotel
-" hourglass-done
-" hourglass-not-done
-" house
-" house-with-garden
-" houses
-" hugging-face
-" hundred-points
-" hushed-face
-" hut
-" ice
-" ice-cream
-" ice-hockey
-" ice-skate
-" id-button
-" identification-card
-" inbox-tray
-" incoming-envelope
-" index-pointing-at-the-viewer
-" index-pointing-at-the-viewer-dark-skin-tone
-" index-pointing-at-the-viewer-light-skin-tone
-" index-pointing-at-the-viewer-medium-dark-skin-tone
-" index-pointing-at-the-viewer-medium-light-skin-tone
-" index-pointing-at-the-viewer-medium-skin-tone
-" index-pointing-up
-" index-pointing-up-dark-skin-tone
-" index-pointing-up-light-skin-tone
-" index-pointing-up-medium-dark-skin-tone
-" index-pointing-up-medium-light-skin-tone
-" index-pointing-up-medium-skin-tone
-" infinity
-" information
-" input-latin-letters
-" input-latin-lowercase
-" input-latin-uppercase
-" input-numbers
-" input-symbols
-" jack-o-lantern
-" japanese-acceptable-button
-" japanese-application-button
-" japanese-bargain-button
-" japanese-castle
-" japanese-congratulations-button
-" japanese-discount-button
-" japanese-dolls
-" japanese-free-of-charge-button
-" japanese-here-button
-" japanese-monthly-amount-button
-" japanese-no-vacancy-button
-" japanese-not-free-of-charge-button
-" japanese-open-for-business-button
-" japanese-passing-grade-button
-" japanese-post-office
-" japanese-prohibited-button
-" japanese-reserved-button
-" japanese-secret-button
-" japanese-service-charge-button
-" japanese-symbol-for-beginner
-" japanese-vacancy-button
-" jar
-" jeans
-" joker
-" joystick
-" judge
-" judge-dark-skin-tone
-" judge-light-skin-tone
-" judge-medium-dark-skin-tone
-" judge-medium-light-skin-tone
-" judge-medium-skin-tone
-" kaaba
-" kangaroo
-" key
-" keyboard
-" keycap-0
-" keycap-1
-" keycap-10
-" keycap-2
-" keycap-3
-" keycap-4
-" keycap-5
-" keycap-6
-" keycap-7
-" keycap-8
-" keycap-9
-" keycap-number
-" keycap-star
-" kick-scooter
-" kimono
-" kiss
-" kiss-dark-skin-tone
-" kiss-light-skin-tone
-" kiss-man-man
-" kiss-man-man-dark-skin-tone
-" kiss-man-man-dark-skin-tone-light-skin-tone
-" kiss-man-man-dark-skin-tone-medium-dark-skin-tone
-" kiss-man-man-dark-skin-tone-medium-light-skin-tone
-" kiss-man-man-dark-skin-tone-medium-skin-tone
-" kiss-man-man-light-skin-tone
-" kiss-man-man-light-skin-tone-dark-skin-tone
-" kiss-man-man-light-skin-tone-medium-dark-skin-tone
-" kiss-man-man-light-skin-tone-medium-light-skin-tone
-" kiss-man-man-light-skin-tone-medium-skin-tone
-" kiss-man-man-medium-dark-skin-tone
-" kiss-man-man-medium-dark-skin-tone-dark-skin-tone
-" kiss-man-man-medium-dark-skin-tone-light-skin-tone
-" kiss-man-man-medium-dark-skin-tone-medium-light-skin-tone
-" kiss-man-man-medium-dark-skin-tone-medium-skin-tone
-" kiss-man-man-medium-light-skin-tone
-" kiss-man-man-medium-light-skin-tone-dark-skin-tone
-" kiss-man-man-medium-light-skin-tone-light-skin-tone
-" kiss-man-man-medium-light-skin-tone-medium-dark-skin-tone
-" kiss-man-man-medium-light-skin-tone-medium-skin-tone
-" kiss-man-man-medium-skin-tone
-" kiss-man-man-medium-skin-tone-dark-skin-tone
-" kiss-man-man-medium-skin-tone-light-skin-tone
-" kiss-man-man-medium-skin-tone-medium-dark-skin-tone
-" kiss-man-man-medium-skin-tone-medium-light-skin-tone
-" kiss-mark
-" kiss-medium-dark-skin-tone
-" kiss-medium-light-skin-tone
-" kiss-medium-skin-tone
-" kiss-person-person-dark-skin-tone-light-skin-tone
-" kiss-person-person-dark-skin-tone-medium-dark-skin-tone
-" kiss-person-person-dark-skin-tone-medium-light-skin-tone
-" kiss-person-person-dark-skin-tone-medium-skin-tone
-" kiss-person-person-light-skin-tone-dark-skin-tone
-" kiss-person-person-light-skin-tone-medium-dark-skin-tone
-" kiss-person-person-light-skin-tone-medium-light-skin-tone
-" kiss-person-person-light-skin-tone-medium-skin-tone
-" kiss-person-person-medium-dark-skin-tone-dark-skin-tone
-" kiss-person-person-medium-dark-skin-tone-light-skin-tone
-" kiss-person-person-medium-dark-skin-tone-medium-light-skin-tone
-" kiss-person-person-medium-dark-skin-tone-medium-skin-tone
-" kiss-person-person-medium-light-skin-tone-dark-skin-tone
-" kiss-person-person-medium-light-skin-tone-light-skin-tone
-" kiss-person-person-medium-light-skin-tone-medium-dark-skin-tone
-" kiss-person-person-medium-light-skin-tone-medium-skin-tone
-" kiss-person-person-medium-skin-tone-dark-skin-tone
-" kiss-person-person-medium-skin-tone-light-skin-tone
-" kiss-person-person-medium-skin-tone-medium-dark-skin-tone
-" kiss-person-person-medium-skin-tone-medium-light-skin-tone
-" kiss-woman-man
-" kiss-woman-man-dark-skin-tone
-" kiss-woman-man-dark-skin-tone-light-skin-tone
-" kiss-woman-man-dark-skin-tone-medium-dark-skin-tone
-" kiss-woman-man-dark-skin-tone-medium-light-skin-tone
-" kiss-woman-man-dark-skin-tone-medium-skin-tone
-" kiss-woman-man-light-skin-tone
-" kiss-woman-man-light-skin-tone-dark-skin-tone
-" kiss-woman-man-light-skin-tone-medium-dark-skin-tone
-" kiss-woman-man-light-skin-tone-medium-light-skin-tone
-" kiss-woman-man-light-skin-tone-medium-skin-tone
-" kiss-woman-man-medium-dark-skin-tone
-" kiss-woman-man-medium-dark-skin-tone-dark-skin-tone
-" kiss-woman-man-medium-dark-skin-tone-light-skin-tone
-" kiss-woman-man-medium-dark-skin-tone-medium-light-skin-tone
-" kiss-woman-man-medium-dark-skin-tone-medium-skin-tone
-" kiss-woman-man-medium-light-skin-tone
-" kiss-woman-man-medium-light-skin-tone-dark-skin-tone
-" kiss-woman-man-medium-light-skin-tone-light-skin-tone
-" kiss-woman-man-medium-light-skin-tone-medium-dark-skin-tone
-" kiss-woman-man-medium-light-skin-tone-medium-skin-tone
-" kiss-woman-man-medium-skin-tone
-" kiss-woman-man-medium-skin-tone-dark-skin-tone
-" kiss-woman-man-medium-skin-tone-light-skin-tone
-" kiss-woman-man-medium-skin-tone-medium-dark-skin-tone
-" kiss-woman-man-medium-skin-tone-medium-light-skin-tone
-" kiss-woman-woman
-" kiss-woman-woman-dark-skin-tone
-" kiss-woman-woman-dark-skin-tone-light-skin-tone
-" kiss-woman-woman-dark-skin-tone-medium-dark-skin-tone
-" kiss-woman-woman-dark-skin-tone-medium-light-skin-tone
-" kiss-woman-woman-dark-skin-tone-medium-skin-tone
-" kiss-woman-woman-light-skin-tone
-" kiss-woman-woman-light-skin-tone-dark-skin-tone
-" kiss-woman-woman-light-skin-tone-medium-dark-skin-tone
-" kiss-woman-woman-light-skin-tone-medium-light-skin-tone
-" kiss-woman-woman-light-skin-tone-medium-skin-tone
-" kiss-woman-woman-medium-dark-skin-tone
-" kiss-woman-woman-medium-dark-skin-tone-dark-skin-tone
-" kiss-woman-woman-medium-dark-skin-tone-light-skin-tone
-" kiss-woman-woman-medium-dark-skin-tone-medium-light-skin-tone
-" kiss-woman-woman-medium-dark-skin-tone-medium-skin-tone
-" kiss-woman-woman-medium-light-skin-tone
-" kiss-woman-woman-medium-light-skin-tone-dark-skin-tone
-" kiss-woman-woman-medium-light-skin-tone-light-skin-tone
-" kiss-woman-woman-medium-light-skin-tone-medium-dark-skin-tone
-" kiss-woman-woman-medium-light-skin-tone-medium-skin-tone
-" kiss-woman-woman-medium-skin-tone
-" kiss-woman-woman-medium-skin-tone-dark-skin-tone
-" kiss-woman-woman-medium-skin-tone-light-skin-tone
-" kiss-woman-woman-medium-skin-tone-medium-dark-skin-tone
-" kiss-woman-woman-medium-skin-tone-medium-light-skin-tone
-" kissing-cat
-" kissing-face
-" kissing-face-with-closed-eyes
-" kissing-face-with-smiling-eyes
-" kitchen-knife
-" kite
-" kiwi-fruit
-" knocked-out-face
-" knot
-" koala
-" lab-coat
-" label
-" lacrosse
-" ladder
-" lady-beetle
-" laptop
-" large-blue-diamond
-" large-orange-diamond
-" last-quarter-moon
-" last-quarter-moon-face
-" last-track-button
-" latin-cross
-" leaf-fluttering-in-wind
-" leafy-green
-" ledger
-" left-arrow
-" left-arrow-curving-right
-" left-facing-fist
-" left-facing-fist-dark-skin-tone
-" left-facing-fist-light-skin-tone
-" left-facing-fist-medium-dark-skin-tone
-" left-facing-fist-medium-light-skin-tone
-" left-facing-fist-medium-skin-tone
-" left-luggage
-" left-right-arrow
-" left-speech-bubble
-" leftwards-hand
-" leftwards-hand-dark-skin-tone
-" leftwards-hand-light-skin-tone
-" leftwards-hand-medium-dark-skin-tone
-" leftwards-hand-medium-light-skin-tone
-" leftwards-hand-medium-skin-tone
-" leg
-" leg-dark-skin-tone
-" leg-light-skin-tone
-" leg-medium-dark-skin-tone
-" leg-medium-light-skin-tone
-" leg-medium-skin-tone
-" lemon
-" leo
-" leopard
-" level-slider
-" libra
-" light-bulb
-" light-rail
-" light-skin-tone
-" link
-" linked-paperclips
-" lion
-" lipstick
-" litter-in-bin-sign
-" lizard
-" llama
-" lobster
-" locked
-" locked-with-key
-" locked-with-pen
-" locomotive
-" lollipop
-" long-drum
-" lotion-bottle
-" lotus
-" loudly-crying-face
-" loudspeaker
-" love-hotel
-" love-letter
-" love-you-gesture
-" love-you-gesture-dark-skin-tone
-" love-you-gesture-light-skin-tone
-" love-you-gesture-medium-dark-skin-tone
-" love-you-gesture-medium-light-skin-tone
-" love-you-gesture-medium-skin-tone
-" low-battery
-" luggage
-" lungs
-" lying-face
-" mage
-" mage-dark-skin-tone
-" mage-light-skin-tone
-" mage-medium-dark-skin-tone
-" mage-medium-light-skin-tone
-" mage-medium-skin-tone
-" magic-wand
-" magnet
-" magnifying-glass-tilted-left
-" magnifying-glass-tilted-right
-" mahjong-red-dragon
-" male-sign
-" mammoth
-" man
-" man-artist
-" man-artist-dark-skin-tone
-" man-artist-light-skin-tone
-" man-artist-medium-dark-skin-tone
-" man-artist-medium-light-skin-tone
-" man-artist-medium-skin-tone
-" man-astronaut
-" man-astronaut-dark-skin-tone
-" man-astronaut-light-skin-tone
-" man-astronaut-medium-dark-skin-tone
-" man-astronaut-medium-light-skin-tone
-" man-astronaut-medium-skin-tone
-" man-bald
-" man-beard
-" man-biking
-" man-biking-dark-skin-tone
-" man-biking-light-skin-tone
-" man-biking-medium-dark-skin-tone
-" man-biking-medium-light-skin-tone
-" man-biking-medium-skin-tone
-" man-blond-hair
-" man-bouncing-ball
-" man-bouncing-ball-dark-skin-tone
-" man-bouncing-ball-light-skin-tone
-" man-bouncing-ball-medium-dark-skin-tone
-" man-bouncing-ball-medium-light-skin-tone
-" man-bouncing-ball-medium-skin-tone
-" man-bowing
-" man-bowing-dark-skin-tone
-" man-bowing-light-skin-tone
-" man-bowing-medium-dark-skin-tone
-" man-bowing-medium-light-skin-tone
-" man-bowing-medium-skin-tone
-" man-cartwheeling
-" man-cartwheeling-dark-skin-tone
-" man-cartwheeling-light-skin-tone
-" man-cartwheeling-medium-dark-skin-tone
-" man-cartwheeling-medium-light-skin-tone
-" man-cartwheeling-medium-skin-tone
-" man-christmas
-" man-climbing
-" man-climbing-dark-skin-tone
-" man-climbing-light-skin-tone
-" man-climbing-medium-dark-skin-tone
-" man-climbing-medium-light-skin-tone
-" man-climbing-medium-skin-tone
-" man-construction-worker
-" man-construction-worker-dark-skin-tone
-" man-construction-worker-light-skin-tone
-" man-construction-worker-medium-dark-skin-tone
-" man-construction-worker-medium-light-skin-tone
-" man-construction-worker-medium-skin-tone
-" man-cook
-" man-cook-dark-skin-tone
-" man-cook-light-skin-tone
-" man-cook-medium-dark-skin-tone
-" man-cook-medium-light-skin-tone
-" man-cook-medium-skin-tone
-" man-curly-hair
-" man-dancing
-" man-dancing-dark-skin-tone
-" man-dancing-light-skin-tone
-" man-dancing-medium-dark-skin-tone
-" man-dancing-medium-light-skin-tone
-" man-dancing-medium-skin-tone
-" man-dark-skin-tone
-" man-dark-skin-tone-bald
-" man-dark-skin-tone-beard
-" man-dark-skin-tone-blond-hair
-" man-dark-skin-tone-christmas
-" man-dark-skin-tone-curly-hair
-" man-dark-skin-tone-red-hair
-" man-dark-skin-tone-white-hair
-" man-detective
-" man-detective-dark-skin-tone
-" man-detective-light-skin-tone
-" man-detective-medium-dark-skin-tone
-" man-detective-medium-light-skin-tone
-" man-detective-medium-skin-tone
-" man-elf
-" man-elf-dark-skin-tone
-" man-elf-light-skin-tone
-" man-elf-medium-dark-skin-tone
-" man-elf-medium-light-skin-tone
-" man-elf-medium-skin-tone
-" man-facepalming
-" man-facepalming-dark-skin-tone
-" man-facepalming-light-skin-tone
-" man-facepalming-medium-dark-skin-tone
-" man-facepalming-medium-light-skin-tone
-" man-facepalming-medium-skin-tone
-" man-factory-worker
-" man-factory-worker-dark-skin-tone
-" man-factory-worker-light-skin-tone
-" man-factory-worker-medium-dark-skin-tone
-" man-factory-worker-medium-light-skin-tone
-" man-factory-worker-medium-skin-tone
-" man-fairy
-" man-fairy-dark-skin-tone
-" man-fairy-light-skin-tone
-" man-fairy-medium-dark-skin-tone
-" man-fairy-medium-light-skin-tone
-" man-fairy-medium-skin-tone
-" man-farmer
-" man-farmer-dark-skin-tone
-" man-farmer-light-skin-tone
-" man-farmer-medium-dark-skin-tone
-" man-farmer-medium-light-skin-tone
-" man-farmer-medium-skin-tone
-" man-feeding-baby
-" man-feeding-baby-dark-skin-tone
-" man-feeding-baby-light-skin-tone
-" man-feeding-baby-medium-dark-skin-tone
-" man-feeding-baby-medium-light-skin-tone
-" man-feeding-baby-medium-skin-tone
-" man-firefighter
-" man-firefighter-dark-skin-tone
-" man-firefighter-light-skin-tone
-" man-firefighter-medium-dark-skin-tone
-" man-firefighter-medium-light-skin-tone
-" man-firefighter-medium-skin-tone
-" man-frowning
-" man-frowning-dark-skin-tone
-" man-frowning-light-skin-tone
-" man-frowning-medium-dark-skin-tone
-" man-frowning-medium-light-skin-tone
-" man-frowning-medium-skin-tone
-" man-genie
-" man-gesturing-no
-" man-gesturing-no-dark-skin-tone
-" man-gesturing-no-light-skin-tone
-" man-gesturing-no-medium-dark-skin-tone
-" man-gesturing-no-medium-light-skin-tone
-" man-gesturing-no-medium-skin-tone
-" man-gesturing-ok
-" man-gesturing-ok-dark-skin-tone
-" man-gesturing-ok-light-skin-tone
-" man-gesturing-ok-medium-dark-skin-tone
-" man-gesturing-ok-medium-light-skin-tone
-" man-gesturing-ok-medium-skin-tone
-" man-getting-haircut
-" man-getting-haircut-dark-skin-tone
-" man-getting-haircut-light-skin-tone
-" man-getting-haircut-medium-dark-skin-tone
-" man-getting-haircut-medium-light-skin-tone
-" man-getting-haircut-medium-skin-tone
-" man-getting-massage
-" man-getting-massage-dark-skin-tone
-" man-getting-massage-light-skin-tone
-" man-getting-massage-medium-dark-skin-tone
-" man-getting-massage-medium-light-skin-tone
-" man-getting-massage-medium-skin-tone
-" man-golfing
-" man-golfing-dark-skin-tone
-" man-golfing-light-skin-tone
-" man-golfing-medium-dark-skin-tone
-" man-golfing-medium-light-skin-tone
-" man-golfing-medium-skin-tone
-" man-guard
-" man-guard-dark-skin-tone
-" man-guard-light-skin-tone
-" man-guard-medium-dark-skin-tone
-" man-guard-medium-light-skin-tone
-" man-guard-medium-skin-tone
-" man-health-worker
-" man-health-worker-dark-skin-tone
-" man-health-worker-light-skin-tone
-" man-health-worker-medium-dark-skin-tone
-" man-health-worker-medium-light-skin-tone
-" man-health-worker-medium-skin-tone
-" man-in-business-suit-levitating-dark-skin-tone-female
-" man-in-business-suit-levitating-dark-skin-tone-male
-" man-in-business-suit-levitating-female
-" man-in-business-suit-levitating-light-skin-tone-female
-" man-in-business-suit-levitating-light-skin-tone-male
-" man-in-business-suit-levitating-male
-" man-in-business-suit-levitating-medium-dark-skin-tone-female
-" man-in-business-suit-levitating-medium-dark-skin-tone-male
-" man-in-business-suit-levitating-medium-light-skin-tone-female
-" man-in-business-suit-levitating-medium-light-skin-tone-male
-" man-in-business-suit-levitating-medium-skin-tone-female
-" man-in-business-suit-levitating-medium-skin-tone-male
-" man-in-lotus-position
-" man-in-lotus-position-dark-skin-tone
-" man-in-lotus-position-light-skin-tone
-" man-in-lotus-position-medium-dark-skin-tone
-" man-in-lotus-position-medium-light-skin-tone
-" man-in-lotus-position-medium-skin-tone
-" man-in-manual-wheelchair
-" man-in-manual-wheelchair-dark-skin-tone
-" man-in-manual-wheelchair-light-skin-tone
-" man-in-manual-wheelchair-medium-dark-skin-tone
-" man-in-manual-wheelchair-medium-light-skin-tone
-" man-in-manual-wheelchair-medium-skin-tone
-" man-in-motorized-wheelchair
-" man-in-motorized-wheelchair-dark-skin-tone
-" man-in-motorized-wheelchair-light-skin-tone
-" man-in-motorized-wheelchair-medium-dark-skin-tone
-" man-in-motorized-wheelchair-medium-light-skin-tone
-" man-in-motorized-wheelchair-medium-skin-tone
-" man-in-steamy-room
-" man-in-steamy-room-dark-skin-tone
-" man-in-steamy-room-light-skin-tone
-" man-in-steamy-room-medium-dark-skin-tone
-" man-in-steamy-room-medium-light-skin-tone
-" man-in-steamy-room-medium-skin-tone
-" man-in-tuxedo
-" man-in-tuxedo-dark-skin-tone
-" man-in-tuxedo-light-skin-tone
-" man-in-tuxedo-medium-dark-skin-tone
-" man-in-tuxedo-medium-light-skin-tone
-" man-in-tuxedo-medium-skin-tone
-" man-judge
-" man-judge-dark-skin-tone
-" man-judge-light-skin-tone
-" man-judge-medium-dark-skin-tone
-" man-judge-medium-light-skin-tone
-" man-judge-medium-skin-tone
-" man-juggling
-" man-juggling-dark-skin-tone
-" man-juggling-light-skin-tone
-" man-juggling-medium-dark-skin-tone
-" man-juggling-medium-light-skin-tone
-" man-juggling-medium-skin-tone
-" man-kneeling
-" man-kneeling-dark-skin-tone
-" man-kneeling-light-skin-tone
-" man-kneeling-medium-dark-skin-tone
-" man-kneeling-medium-light-skin-tone
-" man-kneeling-medium-skin-tone
-" man-lifting-weights
-" man-lifting-weights-dark-skin-tone
-" man-lifting-weights-light-skin-tone
-" man-lifting-weights-medium-dark-skin-tone
-" man-lifting-weights-medium-light-skin-tone
-" man-lifting-weights-medium-skin-tone
-" man-light-skin-tone
-" man-light-skin-tone-bald
-" man-light-skin-tone-beard
-" man-light-skin-tone-blond-hair
-" man-light-skin-tone-christmas
-" man-light-skin-tone-curly-hair
-" man-light-skin-tone-red-hair
-" man-light-skin-tone-white-hair
-" man-mage
-" man-mage-dark-skin-tone
-" man-mage-light-skin-tone
-" man-mage-medium-dark-skin-tone
-" man-mage-medium-light-skin-tone
-" man-mage-medium-skin-tone
-" man-mechanic
-" man-mechanic-dark-skin-tone
-" man-mechanic-light-skin-tone
-" man-mechanic-medium-dark-skin-tone
-" man-mechanic-medium-light-skin-tone
-" man-mechanic-medium-skin-tone
-" man-medium-dark-skin-tone
-" man-medium-dark-skin-tone-bald
-" man-medium-dark-skin-tone-beard
-" man-medium-dark-skin-tone-blond-hair
-" man-medium-dark-skin-tone-christmas
-" man-medium-dark-skin-tone-curly-hair
-" man-medium-dark-skin-tone-red-hair
-" man-medium-dark-skin-tone-white-hair
-" man-medium-light-skin-tone
-" man-medium-light-skin-tone-bald
-" man-medium-light-skin-tone-beard
-" man-medium-light-skin-tone-blond-hair
-" man-medium-light-skin-tone-christmas
-" man-medium-light-skin-tone-curly-hair
-" man-medium-light-skin-tone-red-hair
-" man-medium-light-skin-tone-white-hair
-" man-medium-skin-tone
-" man-medium-skin-tone-bald
-" man-medium-skin-tone-beard
-" man-medium-skin-tone-blond-hair
-" man-medium-skin-tone-christmas
-" man-medium-skin-tone-curly-hair
-" man-medium-skin-tone-red-hair
-" man-medium-skin-tone-white-hair
-" man-mountain-biking
-" man-mountain-biking-dark-skin-tone
-" man-mountain-biking-light-skin-tone
-" man-mountain-biking-medium-dark-skin-tone
-" man-mountain-biking-medium-light-skin-tone
-" man-mountain-biking-medium-skin-tone
-" man-office-worker
-" man-office-worker-dark-skin-tone
-" man-office-worker-light-skin-tone
-" man-office-worker-medium-dark-skin-tone
-" man-office-worker-medium-light-skin-tone
-" man-office-worker-medium-skin-tone
-" man-pilot
-" man-pilot-dark-skin-tone
-" man-pilot-light-skin-tone
-" man-pilot-medium-dark-skin-tone
-" man-pilot-medium-light-skin-tone
-" man-pilot-medium-skin-tone
-" man-playing-handball
-" man-playing-handball-dark-skin-tone
-" man-playing-handball-light-skin-tone
-" man-playing-handball-medium-dark-skin-tone
-" man-playing-handball-medium-light-skin-tone
-" man-playing-handball-medium-skin-tone
-" man-playing-water-polo
-" man-playing-water-polo-dark-skin-tone
-" man-playing-water-polo-light-skin-tone
-" man-playing-water-polo-medium-dark-skin-tone
-" man-playing-water-polo-medium-light-skin-tone
-" man-playing-water-polo-medium-skin-tone
-" man-police-officer
-" man-police-officer-dark-skin-tone
-" man-police-officer-light-skin-tone
-" man-police-officer-medium-dark-skin-tone
-" man-police-officer-medium-light-skin-tone
-" man-police-officer-medium-skin-tone
-" man-pouting
-" man-pouting-dark-skin-tone
-" man-pouting-light-skin-tone
-" man-pouting-medium-dark-skin-tone
-" man-pouting-medium-light-skin-tone
-" man-pouting-medium-skin-tone
-" man-raising-hand
-" man-raising-hand-dark-skin-tone
-" man-raising-hand-light-skin-tone
-" man-raising-hand-medium-dark-skin-tone
-" man-raising-hand-medium-light-skin-tone
-" man-raising-hand-medium-skin-tone
-" man-red-hair
-" man-rowing-boat
-" man-rowing-boat-dark-skin-tone
-" man-rowing-boat-light-skin-tone
-" man-rowing-boat-medium-dark-skin-tone
-" man-rowing-boat-medium-light-skin-tone
-" man-rowing-boat-medium-skin-tone
-" man-running
-" man-running-dark-skin-tone
-" man-running-light-skin-tone
-" man-running-medium-dark-skin-tone
-" man-running-medium-light-skin-tone
-" man-running-medium-skin-tone
-" man-s-shoe
-" man-scientist
-" man-scientist-dark-skin-tone
-" man-scientist-light-skin-tone
-" man-scientist-medium-dark-skin-tone
-" man-scientist-medium-light-skin-tone
-" man-scientist-medium-skin-tone
-" man-shrugging
-" man-shrugging-dark-skin-tone
-" man-shrugging-light-skin-tone
-" man-shrugging-medium-dark-skin-tone
-" man-shrugging-medium-light-skin-tone
-" man-shrugging-medium-skin-tone
-" man-singer
-" man-singer-dark-skin-tone
-" man-singer-light-skin-tone
-" man-singer-medium-dark-skin-tone
-" man-singer-medium-light-skin-tone
-" man-singer-medium-skin-tone
-" man-standing
-" man-standing-dark-skin-tone
-" man-standing-light-skin-tone
-" man-standing-medium-dark-skin-tone
-" man-standing-medium-light-skin-tone
-" man-standing-medium-skin-tone
-" man-student
-" man-student-dark-skin-tone
-" man-student-light-skin-tone
-" man-student-medium-dark-skin-tone
-" man-student-medium-light-skin-tone
-" man-student-medium-skin-tone
-" man-superhero
-" man-superhero-dark-skin-tone
-" man-superhero-light-skin-tone
-" man-superhero-medium-dark-skin-tone
-" man-superhero-medium-light-skin-tone
-" man-superhero-medium-skin-tone
-" man-supervillain
-" man-supervillain-dark-skin-tone
-" man-supervillain-light-skin-tone
-" man-supervillain-medium-dark-skin-tone
-" man-supervillain-medium-light-skin-tone
-" man-supervillain-medium-skin-tone
-" man-surfing
-" man-surfing-dark-skin-tone
-" man-surfing-light-skin-tone
-" man-surfing-medium-dark-skin-tone
-" man-surfing-medium-light-skin-tone
-" man-surfing-medium-skin-tone
-" man-swimming
-" man-swimming-dark-skin-tone
-" man-swimming-light-skin-tone
-" man-swimming-medium-dark-skin-tone
-" man-swimming-medium-light-skin-tone
-" man-swimming-medium-skin-tone
-" man-teacher
-" man-teacher-dark-skin-tone
-" man-teacher-light-skin-tone
-" man-teacher-medium-dark-skin-tone
-" man-teacher-medium-light-skin-tone
-" man-teacher-medium-skin-tone
-" man-technologist
-" man-technologist-dark-skin-tone
-" man-technologist-light-skin-tone
-" man-technologist-medium-dark-skin-tone
-" man-technologist-medium-light-skin-tone
-" man-technologist-medium-skin-tone
-" man-tipping-hand
-" man-tipping-hand-dark-skin-tone
-" man-tipping-hand-light-skin-tone
-" man-tipping-hand-medium-dark-skin-tone
-" man-tipping-hand-medium-light-skin-tone
-" man-tipping-hand-medium-skin-tone
-" man-vampire
-" man-vampire-dark-skin-tone
-" man-vampire-light-skin-tone
-" man-vampire-medium-dark-skin-tone
-" man-vampire-medium-light-skin-tone
-" man-vampire-medium-skin-tone
-" man-walking
-" man-walking-dark-skin-tone
-" man-walking-light-skin-tone
-" man-walking-medium-dark-skin-tone
-" man-walking-medium-light-skin-tone
-" man-walking-medium-skin-tone
-" man-wearing-turban
-" man-wearing-turban-dark-skin-tone
-" man-wearing-turban-light-skin-tone
-" man-wearing-turban-medium-dark-skin-tone
-" man-wearing-turban-medium-light-skin-tone
-" man-wearing-turban-medium-skin-tone
-" man-white-hair
-" man-with-veil
-" man-with-veil-dark-skin-tone
-" man-with-veil-light-skin-tone
-" man-with-veil-medium-dark-skin-tone
-" man-with-veil-medium-light-skin-tone
-" man-with-veil-medium-skin-tone
-" man-with-white-cane
-" man-with-white-cane-dark-skin-tone
-" man-with-white-cane-light-skin-tone
-" man-with-white-cane-medium-dark-skin-tone
-" man-with-white-cane-medium-light-skin-tone
-" man-with-white-cane-medium-skin-tone
-" man-zombie
-" mango
-" mantelpiece-clock
-" manual-wheelchair
-" map-of-japan
-" maple-leaf
-" martial-arts-uniform
-" mate
-" meat-on-bone
-" mechanic
-" mechanic-dark-skin-tone
-" mechanic-light-skin-tone
-" mechanic-medium-dark-skin-tone
-" mechanic-medium-light-skin-tone
-" mechanic-medium-skin-tone
-" mechanical-arm
-" mechanical-leg
-" medical-symbol
-" medium-dark-skin-tone
-" medium-light-skin-tone
-" medium-skin-tone
-" megaphone
-" melon
-" melting-face
-" memo
-" men-holding-hands
-" men-holding-hands-dark-skin-tone
-" men-holding-hands-dark-skin-tone-light-skin-tone
-" men-holding-hands-dark-skin-tone-medium-dark-skin-tone
-" men-holding-hands-dark-skin-tone-medium-light-skin-tone
-" men-holding-hands-dark-skin-tone-medium-skin-tone
-" men-holding-hands-light-skin-tone
-" men-holding-hands-light-skin-tone-dark-skin-tone
-" men-holding-hands-light-skin-tone-medium-dark-skin-tone
-" men-holding-hands-light-skin-tone-medium-light-skin-tone
-" men-holding-hands-light-skin-tone-medium-skin-tone
-" men-holding-hands-medium-dark-skin-tone
-" men-holding-hands-medium-dark-skin-tone-dark-skin-tone
-" men-holding-hands-medium-dark-skin-tone-light-skin-tone
-" men-holding-hands-medium-dark-skin-tone-medium-light-skin-tone
-" men-holding-hands-medium-dark-skin-tone-medium-skin-tone
-" men-holding-hands-medium-light-skin-tone
-" men-holding-hands-medium-light-skin-tone-dark-skin-tone
-" men-holding-hands-medium-light-skin-tone-light-skin-tone
-" men-holding-hands-medium-light-skin-tone-medium-dark-skin-tone
-" men-holding-hands-medium-light-skin-tone-medium-skin-tone
-" men-holding-hands-medium-skin-tone
-" men-holding-hands-medium-skin-tone-dark-skin-tone
-" men-holding-hands-medium-skin-tone-light-skin-tone
-" men-holding-hands-medium-skin-tone-medium-dark-skin-tone
-" men-holding-hands-medium-skin-tone-medium-light-skin-tone
-" men-s-room
-" men-with-bunny-ears
-" men-wrestling
-" mending-heart
-" menorah
-" mermaid
-" mermaid-dark-skin-tone
-" mermaid-light-skin-tone
-" mermaid-medium-dark-skin-tone
-" mermaid-medium-light-skin-tone
-" mermaid-medium-skin-tone
-" merman
-" merman-dark-skin-tone
-" merman-light-skin-tone
-" merman-medium-dark-skin-tone
-" merman-medium-light-skin-tone
-" merman-medium-skin-tone
-" merperson
-" merperson-dark-skin-tone
-" merperson-light-skin-tone
-" merperson-medium-dark-skin-tone
-" merperson-medium-light-skin-tone
-" merperson-medium-skin-tone
-" metro
-" microbe
-" microphone
-" microscope
-" middle-finger
-" middle-finger-dark-skin-tone
-" middle-finger-light-skin-tone
-" middle-finger-medium-dark-skin-tone
-" middle-finger-medium-light-skin-tone
-" middle-finger-medium-skin-tone
-" military-helmet
-" military-medal
-" milky-way
-" minibus
-" minus
-" mirror
-" mirror-ball
-" moai
-" mobile-phone
-" mobile-phone-off
-" mobile-phone-with-arrow
-" money-bag
-" money-mouth-face
-" money-with-wings
-" monkey
-" monkey-face
-" monorail
-" moon-cake
-" moon-viewing-ceremony
-" mosque
-" mosquito
-" motor-boat
-" motor-scooter
-" motorcycle
-" motorized-wheelchair
-" motorway
-" mount-fuji
-" mountain
-" mountain-cableway
-" mountain-railway
-" mouse
-" mouse-face
-" mouse-trap
-" mouth
-" movie-camera
-" mrs-claus
-" mrs-claus-dark-skin-tone
-" mrs-claus-light-skin-tone
-" mrs-claus-medium-dark-skin-tone
-" mrs-claus-medium-light-skin-tone
-" mrs-claus-medium-skin-tone
-" multiply
-" mushroom
-" musical-keyboard
-" musical-note
-" musical-notes
-" musical-score
-" muted-speaker
-" mx-claus
-" mx-claus-dark-skin-tone
-" mx-claus-light-skin-tone
-" mx-claus-medium-dark-skin-tone
-" mx-claus-medium-light-skin-tone
-" mx-claus-medium-skin-tone
-" nail-polish
-" nail-polish-dark-skin-tone
-" nail-polish-light-skin-tone
-" nail-polish-medium-dark-skin-tone
-" nail-polish-medium-light-skin-tone
-" nail-polish-medium-skin-tone
-" name-badge
-" national-park
-" nauseated-face
-" nazar-amulet
-" necktie
-" nerd-face
-" nest-with-eggs
-" nesting-dolls
-" neutral-face
-" new-button
-" new-moon
-" new-moon-face
-" newspaper
-" next-track-button
-" ng-button
-" night-with-stars
-" nine-o-clock
-" nine-thirty
-" ninja
-" ninja-dark-skin-tone
-" ninja-light-skin-tone
-" ninja-medium-dark-skin-tone
-" ninja-medium-light-skin-tone
-" ninja-medium-skin-tone
-" no-bicycles
-" no-entry
-" no-littering
-" no-mobile-phones
-" no-one-under-eighteen
-" no-pedestrians
-" no-smoking
-" non-potable-water
-" nose
-" nose-dark-skin-tone
-" nose-light-skin-tone
-" nose-medium-dark-skin-tone
-" nose-medium-light-skin-tone
-" nose-medium-skin-tone
-" notebook
-" notebook-with-decorative-cover
-" nut-and-bolt
-" o-button-blood-type
-" octopus
-" oden
-" office-building
-" office-worker
-" office-worker-dark-skin-tone
-" office-worker-light-skin-tone
-" office-worker-medium-dark-skin-tone
-" office-worker-medium-light-skin-tone
-" office-worker-medium-skin-tone
-" ogre
-" oil-drum
-" ok-button
-" ok-hand
-" ok-hand-dark-skin-tone
-" ok-hand-light-skin-tone
-" ok-hand-medium-dark-skin-tone
-" ok-hand-medium-light-skin-tone
-" ok-hand-medium-skin-tone
-" old-key
-" old-man
-" old-man-dark-skin-tone
-" old-man-light-skin-tone
-" old-man-medium-dark-skin-tone
-" old-man-medium-light-skin-tone
-" old-man-medium-skin-tone
-" old-woman
-" old-woman-dark-skin-tone
-" old-woman-light-skin-tone
-" old-woman-medium-dark-skin-tone
-" old-woman-medium-light-skin-tone
-" old-woman-medium-skin-tone
-" older-person
-" older-person-dark-skin-tone
-" older-person-light-skin-tone
-" older-person-medium-dark-skin-tone
-" older-person-medium-light-skin-tone
-" older-person-medium-skin-tone
-" olive
-" om
-" on-arrow
-" oncoming-automobile
-" oncoming-bus
-" oncoming-fist
-" oncoming-fist-dark-skin-tone
-" oncoming-fist-light-skin-tone
-" oncoming-fist-medium-dark-skin-tone
-" oncoming-fist-medium-light-skin-tone
-" oncoming-fist-medium-skin-tone
-" oncoming-police-car
-" oncoming-taxi
-" one-o-clock
-" one-piece-swimsuit
-" one-thirty
-" onion
-" open-book
-" open-file-folder
-" open-hands
-" open-hands-dark-skin-tone
-" open-hands-light-skin-tone
-" open-hands-medium-dark-skin-tone
-" open-hands-medium-light-skin-tone
-" open-hands-medium-skin-tone
-" open-mailbox-with-lowered-flag
-" open-mailbox-with-raised-flag
-" ophiuchus
-" optical-disk
-" orange-book
-" orange-circle
-" orange-heart
-" orange-square
-" orangutan
-" orthodox-cross
-" otter
-" outbox-tray
-" owl
-" ox
-" oyster
-" p-button
-" package
-" page-facing-up
-" page-with-curl
-" pager
-" paintbrush
-" palm-down-hand
-" palm-down-hand-dark-skin-tone
-" palm-down-hand-light-skin-tone
-" palm-down-hand-medium-dark-skin-tone
-" palm-down-hand-medium-light-skin-tone
-" palm-down-hand-medium-skin-tone
-" palm-tree
-" palm-up-hand
-" palm-up-hand-dark-skin-tone
-" palm-up-hand-light-skin-tone
-" palm-up-hand-medium-dark-skin-tone
-" palm-up-hand-medium-light-skin-tone
-" palm-up-hand-medium-skin-tone
-" palms-up-together
-" palms-up-together-dark-skin-tone
-" palms-up-together-light-skin-tone
-" palms-up-together-medium-dark-skin-tone
-" palms-up-together-medium-light-skin-tone
-" palms-up-together-medium-skin-tone
-" pancakes
-" panda
-" paperclip
-" parachute
-" parrot
-" part-alternation-mark
-" party-popper
-" partying-face
-" passenger-ship
-" passport-control
-" pause-button
-" paw-prints
-" peace-symbol
-" peach
-" peacock
-" peanuts
-" pear
-" pen
-" pencil
-" penguin
-" pensive-face
-" people-holding-hands
-" people-holding-hands-dark-skin-tone
-" people-holding-hands-dark-skin-tone-light-skin-tone
-" people-holding-hands-dark-skin-tone-medium-dark-skin-tone
-" people-holding-hands-dark-skin-tone-medium-light-skin-tone
-" people-holding-hands-dark-skin-tone-medium-skin-tone
-" people-holding-hands-light-skin-tone
-" people-holding-hands-light-skin-tone-dark-skin-tone
-" people-holding-hands-light-skin-tone-medium-dark-skin-tone
-" people-holding-hands-light-skin-tone-medium-light-skin-tone
-" people-holding-hands-light-skin-tone-medium-skin-tone
-" people-holding-hands-medium-dark-skin-tone
-" people-holding-hands-medium-dark-skin-tone-dark-skin-tone
-" people-holding-hands-medium-dark-skin-tone-light-skin-tone
-" people-holding-hands-medium-dark-skin-tone-medium-light-skin-tone
-" people-holding-hands-medium-dark-skin-tone-medium-skin-tone
-" people-holding-hands-medium-light-skin-tone
-" people-holding-hands-medium-light-skin-tone-dark-skin-tone
-" people-holding-hands-medium-light-skin-tone-light-skin-tone
-" people-holding-hands-medium-light-skin-tone-medium-dark-skin-tone
-" people-holding-hands-medium-light-skin-tone-medium-skin-tone
-" people-holding-hands-medium-skin-tone
-" people-holding-hands-medium-skin-tone-dark-skin-tone
-" people-holding-hands-medium-skin-tone-light-skin-tone
-" people-holding-hands-medium-skin-tone-medium-dark-skin-tone
-" people-holding-hands-medium-skin-tone-medium-light-skin-tone
-" people-hugging
-" people-with-bunny-ears
-" people-wrestling
-" performing-arts
-" persevering-face
-" person
-" person-bald
-" person-beard
-" person-biking
-" person-biking-dark-skin-tone
-" person-biking-light-skin-tone
-" person-biking-medium-dark-skin-tone
-" person-biking-medium-light-skin-tone
-" person-biking-medium-skin-tone
-" person-blond-hair
-" person-bouncing-ball
-" person-bouncing-ball-dark-skin-tone
-" person-bouncing-ball-light-skin-tone
-" person-bouncing-ball-medium-dark-skin-tone
-" person-bouncing-ball-medium-light-skin-tone
-" person-bouncing-ball-medium-skin-tone
-" person-bowing
-" person-bowing-dark-skin-tone
-" person-bowing-light-skin-tone
-" person-bowing-medium-dark-skin-tone
-" person-bowing-medium-light-skin-tone
-" person-bowing-medium-skin-tone
-" person-cartwheeling
-" person-cartwheeling-dark-skin-tone
-" person-cartwheeling-light-skin-tone
-" person-cartwheeling-medium-dark-skin-tone
-" person-cartwheeling-medium-light-skin-tone
-" person-cartwheeling-medium-skin-tone
-" person-climbing
-" person-climbing-dark-skin-tone
-" person-climbing-light-skin-tone
-" person-climbing-medium-dark-skin-tone
-" person-climbing-medium-light-skin-tone
-" person-climbing-medium-skin-tone
-" person-curly-hair
-" person-dark-skin-tone
-" person-dark-skin-tone-bald
-" person-dark-skin-tone-beard
-" person-dark-skin-tone-blond-hair
-" person-dark-skin-tone-curly-hair
-" person-dark-skin-tone-red-hair
-" person-dark-skin-tone-white-hair
-" person-facepalming
-" person-facepalming-dark-skin-tone
-" person-facepalming-light-skin-tone
-" person-facepalming-medium-dark-skin-tone
-" person-facepalming-medium-light-skin-tone
-" person-facepalming-medium-skin-tone
-" person-feeding-baby
-" person-feeding-baby-dark-skin-tone
-" person-feeding-baby-light-skin-tone
-" person-feeding-baby-medium-dark-skin-tone
-" person-feeding-baby-medium-light-skin-tone
-" person-feeding-baby-medium-skin-tone
-" person-fencing
-" person-frowning
-" person-frowning-dark-skin-tone
-" person-frowning-light-skin-tone
-" person-frowning-medium-dark-skin-tone
-" person-frowning-medium-light-skin-tone
-" person-frowning-medium-skin-tone
-" person-gesturing-no
-" person-gesturing-no-dark-skin-tone
-" person-gesturing-no-light-skin-tone
-" person-gesturing-no-medium-dark-skin-tone
-" person-gesturing-no-medium-light-skin-tone
-" person-gesturing-no-medium-skin-tone
-" person-gesturing-ok
-" person-gesturing-ok-dark-skin-tone
-" person-gesturing-ok-light-skin-tone
-" person-gesturing-ok-medium-dark-skin-tone
-" person-gesturing-ok-medium-light-skin-tone
-" person-gesturing-ok-medium-skin-tone
-" person-getting-haircut
-" person-getting-haircut-dark-skin-tone
-" person-getting-haircut-light-skin-tone
-" person-getting-haircut-medium-dark-skin-tone
-" person-getting-haircut-medium-light-skin-tone
-" person-getting-haircut-medium-skin-tone
-" person-getting-massage
-" person-getting-massage-dark-skin-tone
-" person-getting-massage-light-skin-tone
-" person-getting-massage-medium-dark-skin-tone
-" person-getting-massage-medium-light-skin-tone
-" person-getting-massage-medium-skin-tone
-" person-golfing
-" person-golfing-dark-skin-tone
-" person-golfing-light-skin-tone
-" person-golfing-medium-dark-skin-tone
-" person-golfing-medium-light-skin-tone
-" person-golfing-medium-skin-tone
-" person-in-bed
-" person-in-bed-dark-skin-tone
-" person-in-bed-light-skin-tone
-" person-in-bed-medium-dark-skin-tone
-" person-in-bed-medium-light-skin-tone
-" person-in-bed-medium-skin-tone
-" person-in-lotus-position
-" person-in-lotus-position-dark-skin-tone
-" person-in-lotus-position-light-skin-tone
-" person-in-lotus-position-medium-dark-skin-tone
-" person-in-lotus-position-medium-light-skin-tone
-" person-in-lotus-position-medium-skin-tone
-" person-in-manual-wheelchair
-" person-in-manual-wheelchair-dark-skin-tone
-" person-in-manual-wheelchair-light-skin-tone
-" person-in-manual-wheelchair-medium-dark-skin-tone
-" person-in-manual-wheelchair-medium-light-skin-tone
-" person-in-manual-wheelchair-medium-skin-tone
-" person-in-motorized-wheelchair
-" person-in-motorized-wheelchair-dark-skin-tone
-" person-in-motorized-wheelchair-light-skin-tone
-" person-in-motorized-wheelchair-medium-dark-skin-tone
-" person-in-motorized-wheelchair-medium-light-skin-tone
-" person-in-motorized-wheelchair-medium-skin-tone
-" person-in-steamy-room
-" person-in-steamy-room-dark-skin-tone
-" person-in-steamy-room-light-skin-tone
-" person-in-steamy-room-medium-dark-skin-tone
-" person-in-steamy-room-medium-light-skin-tone
-" person-in-steamy-room-medium-skin-tone
-" person-in-suit-levitating
-" person-in-suit-levitating-dark-skin-tone
-" person-in-suit-levitating-light-skin-tone
-" person-in-suit-levitating-medium-dark-skin-tone
-" person-in-suit-levitating-medium-light-skin-tone
-" person-in-suit-levitating-medium-skin-tone
-" person-in-tuxedo
-" person-in-tuxedo-dark-skin-tone
-" person-in-tuxedo-light-skin-tone
-" person-in-tuxedo-medium-dark-skin-tone
-" person-in-tuxedo-medium-light-skin-tone
-" person-in-tuxedo-medium-skin-tone
-" person-juggling
-" person-juggling-dark-skin-tone
-" person-juggling-light-skin-tone
-" person-juggling-medium-dark-skin-tone
-" person-juggling-medium-light-skin-tone
-" person-juggling-medium-skin-tone
-" person-kneeling
-" person-kneeling-dark-skin-tone
-" person-kneeling-light-skin-tone
-" person-kneeling-medium-dark-skin-tone
-" person-kneeling-medium-light-skin-tone
-" person-kneeling-medium-skin-tone
-" person-lifting-weights
-" person-lifting-weights-dark-skin-tone
-" person-lifting-weights-light-skin-tone
-" person-lifting-weights-medium-dark-skin-tone
-" person-lifting-weights-medium-light-skin-tone
-" person-lifting-weights-medium-skin-tone
-" person-light-skin-tone
-" person-light-skin-tone-bald
-" person-light-skin-tone-beard
-" person-light-skin-tone-blond-hair
-" person-light-skin-tone-curly-hair
-" person-light-skin-tone-red-hair
-" person-light-skin-tone-white-hair
-" person-medium-dark-skin-tone
-" person-medium-dark-skin-tone-bald
-" person-medium-dark-skin-tone-beard
-" person-medium-dark-skin-tone-blond-hair
-" person-medium-dark-skin-tone-curly-hair
-" person-medium-dark-skin-tone-red-hair
-" person-medium-dark-skin-tone-white-hair
-" person-medium-light-skin-tone
-" person-medium-light-skin-tone-bald
-" person-medium-light-skin-tone-beard
-" person-medium-light-skin-tone-blond-hair
-" person-medium-light-skin-tone-curly-hair
-" person-medium-light-skin-tone-red-hair
-" person-medium-light-skin-tone-white-hair
-" person-medium-skin-tone
-" person-medium-skin-tone-bald
-" person-medium-skin-tone-beard
-" person-medium-skin-tone-blond-hair
-" person-medium-skin-tone-curly-hair
-" person-medium-skin-tone-red-hair
-" person-medium-skin-tone-white-hair
-" person-mountain-biking
-" person-mountain-biking-dark-skin-tone
-" person-mountain-biking-light-skin-tone
-" person-mountain-biking-medium-dark-skin-tone
-" person-mountain-biking-medium-light-skin-tone
-" person-mountain-biking-medium-skin-tone
-" person-playing-handball
-" person-playing-handball-dark-skin-tone
-" person-playing-handball-light-skin-tone
-" person-playing-handball-medium-dark-skin-tone
-" person-playing-handball-medium-light-skin-tone
-" person-playing-handball-medium-skin-tone
-" person-playing-water-polo
-" person-playing-water-polo-dark-skin-tone
-" person-playing-water-polo-light-skin-tone
-" person-playing-water-polo-medium-dark-skin-tone
-" person-playing-water-polo-medium-light-skin-tone
-" person-playing-water-polo-medium-skin-tone
-" person-pouting
-" person-pouting-dark-skin-tone
-" person-pouting-light-skin-tone
-" person-pouting-medium-dark-skin-tone
-" person-pouting-medium-light-skin-tone
-" person-pouting-medium-skin-tone
-" person-raising-hand
-" person-raising-hand-dark-skin-tone
-" person-raising-hand-light-skin-tone
-" person-raising-hand-medium-dark-skin-tone
-" person-raising-hand-medium-light-skin-tone
-" person-raising-hand-medium-skin-tone
-" person-red-hair
-" person-rowing-boat
-" person-rowing-boat-dark-skin-tone
-" person-rowing-boat-light-skin-tone
-" person-rowing-boat-medium-dark-skin-tone
-" person-rowing-boat-medium-light-skin-tone
-" person-rowing-boat-medium-skin-tone
-" person-running
-" person-running-dark-skin-tone
-" person-running-light-skin-tone
-" person-running-medium-dark-skin-tone
-" person-running-medium-light-skin-tone
-" person-running-medium-skin-tone
-" person-shrugging
-" person-shrugging-dark-skin-tone
-" person-shrugging-light-skin-tone
-" person-shrugging-medium-dark-skin-tone
-" person-shrugging-medium-light-skin-tone
-" person-shrugging-medium-skin-tone
-" person-standing
-" person-standing-dark-skin-tone
-" person-standing-light-skin-tone
-" person-standing-medium-dark-skin-tone
-" person-standing-medium-light-skin-tone
-" person-standing-medium-skin-tone
-" person-surfing
-" person-surfing-dark-skin-tone
-" person-surfing-light-skin-tone
-" person-surfing-medium-dark-skin-tone
-" person-surfing-medium-light-skin-tone
-" person-surfing-medium-skin-tone
-" person-swimming
-" person-swimming-dark-skin-tone
-" person-swimming-light-skin-tone
-" person-swimming-medium-dark-skin-tone
-" person-swimming-medium-light-skin-tone
-" person-swimming-medium-skin-tone
-" person-taking-bath
-" person-taking-bath-dark-skin-tone
-" person-taking-bath-light-skin-tone
-" person-taking-bath-medium-dark-skin-tone
-" person-taking-bath-medium-light-skin-tone
-" person-taking-bath-medium-skin-tone
-" person-tipping-hand
-" person-tipping-hand-dark-skin-tone
-" person-tipping-hand-light-skin-tone
-" person-tipping-hand-medium-dark-skin-tone
-" person-tipping-hand-medium-light-skin-tone
-" person-tipping-hand-medium-skin-tone
-" person-walking
-" person-walking-dark-skin-tone
-" person-walking-light-skin-tone
-" person-walking-medium-dark-skin-tone
-" person-walking-medium-light-skin-tone
-" person-walking-medium-skin-tone
-" person-wearing-turban
-" person-wearing-turban-dark-skin-tone
-" person-wearing-turban-light-skin-tone
-" person-wearing-turban-medium-dark-skin-tone
-" person-wearing-turban-medium-light-skin-tone
-" person-wearing-turban-medium-skin-tone
-" person-white-hair
-" person-with-crown
-" person-with-crown-dark-skin-tone
-" person-with-crown-light-skin-tone
-" person-with-crown-medium-dark-skin-tone
-" person-with-crown-medium-light-skin-tone
-" person-with-crown-medium-skin-tone
-" person-with-skullcap
-" person-with-skullcap-dark-skin-tone
-" person-with-skullcap-light-skin-tone
-" person-with-skullcap-medium-dark-skin-tone
-" person-with-skullcap-medium-light-skin-tone
-" person-with-skullcap-medium-skin-tone
-" person-with-veil
-" person-with-veil-dark-skin-tone
-" person-with-veil-light-skin-tone
-" person-with-veil-medium-dark-skin-tone
-" person-with-veil-medium-light-skin-tone
-" person-with-veil-medium-skin-tone
-" person-with-white-cane
-" person-with-white-cane-dark-skin-tone
-" person-with-white-cane-light-skin-tone
-" person-with-white-cane-medium-dark-skin-tone
-" person-with-white-cane-medium-light-skin-tone
-" person-with-white-cane-medium-skin-tone
-" petri-dish
-" pi-ata
-" pick
-" pickup-truck
-" pie
-" pig
-" pig-face
-" pig-nose
-" pile-of-poo
-" pill
-" pilot
-" pilot-dark-skin-tone
-" pilot-light-skin-tone
-" pilot-medium-dark-skin-tone
-" pilot-medium-light-skin-tone
-" pilot-medium-skin-tone
-" pinched-fingers
-" pinched-fingers-dark-skin-tone
-" pinched-fingers-light-skin-tone
-" pinched-fingers-medium-dark-skin-tone
-" pinched-fingers-medium-light-skin-tone
-" pinched-fingers-medium-skin-tone
-" pinching-hand
-" pinching-hand-dark-skin-tone
-" pinching-hand-light-skin-tone
-" pinching-hand-medium-dark-skin-tone
-" pinching-hand-medium-light-skin-tone
-" pinching-hand-medium-skin-tone
-" pine-decoration
-" pineapple
-" ping-pong
-" pirate-flag
-" pisces
-" pizza
-" placard
-" place-of-worship
-" play-button
-" play-or-pause-button
-" playground-slide
-" pleading-face
-" plunger
-" plus
-" polar-bear
-" police-car
-" police-car-light
-" police-officer
-" police-officer-dark-skin-tone
-" police-officer-light-skin-tone
-" police-officer-medium-dark-skin-tone
-" police-officer-medium-light-skin-tone
-" police-officer-medium-skin-tone
-" poodle
-" pool-8-ball
-" popcorn
-" post-office
-" postal-horn
-" postbox
-" pot-of-food
-" potable-water
-" potato
-" potted-plant
-" poultry-leg
-" pound-banknote
-" pouring-liquid
-" pouting-cat
-" pouting-face
-" prayer-beads
-" pregnant-man
-" pregnant-man-dark-skin-tone
-" pregnant-man-light-skin-tone
-" pregnant-man-medium-dark-skin-tone
-" pregnant-man-medium-light-skin-tone
-" pregnant-man-medium-skin-tone
-" pregnant-person
-" pregnant-person-dark-skin-tone
-" pregnant-person-light-skin-tone
-" pregnant-person-medium-dark-skin-tone
-" pregnant-person-medium-light-skin-tone
-" pregnant-person-medium-skin-tone
-" pregnant-woman
-" pregnant-woman-dark-skin-tone
-" pregnant-woman-light-skin-tone
-" pregnant-woman-medium-dark-skin-tone
-" pregnant-woman-medium-light-skin-tone
-" pregnant-woman-medium-skin-tone
-" pretzel
-" prince
-" prince-dark-skin-tone
-" prince-light-skin-tone
-" prince-medium-dark-skin-tone
-" prince-medium-light-skin-tone
-" prince-medium-skin-tone
-" princess
-" princess-dark-skin-tone
-" princess-light-skin-tone
-" princess-medium-dark-skin-tone
-" princess-medium-light-skin-tone
-" princess-medium-skin-tone
-" printer
-" prohibited
-" purple-circle
-" purple-heart
-" purple-square
-" purse
-" pushpin
-" puzzle-piece
-" rabbit
-" rabbit-face
-" raccoon
-" racing-car
-" radio
-" radio-button
-" radioactive
-" railway-car
-" railway-track
-" rainbow
-" rainbow-flag
-" raised-back-of-hand
-" raised-back-of-hand-dark-skin-tone
-" raised-back-of-hand-light-skin-tone
-" raised-back-of-hand-medium-dark-skin-tone
-" raised-back-of-hand-medium-light-skin-tone
-" raised-back-of-hand-medium-skin-tone
-" raised-fist
-" raised-fist-dark-skin-tone
-" raised-fist-light-skin-tone
-" raised-fist-medium-dark-skin-tone
-" raised-fist-medium-light-skin-tone
-" raised-fist-medium-skin-tone
-" raised-hand
-" raised-hand-dark-skin-tone
-" raised-hand-light-skin-tone
-" raised-hand-medium-dark-skin-tone
-" raised-hand-medium-light-skin-tone
-" raised-hand-medium-skin-tone
-" raising-hands
-" raising-hands-dark-skin-tone
-" raising-hands-light-skin-tone
-" raising-hands-medium-dark-skin-tone
-" raising-hands-medium-light-skin-tone
-" raising-hands-medium-skin-tone
-" ram
-" rat
-" razor
-" receipt
-" record-button
-" recycling-symbol
-" red-apple
-" red-circle
-" red-envelope
-" red-exclamation-mark
-" red-hair
-" red-heart
-" red-paper-lantern
-" red-question-mark
-" red-square
-" red-triangle-pointed-down
-" red-triangle-pointed-up
-" regional-indicator-symbol-letter-a
-" regional-indicator-symbol-letter-b
-" regional-indicator-symbol-letter-c
-" regional-indicator-symbol-letter-d
-" regional-indicator-symbol-letter-e
-" regional-indicator-symbol-letter-f
-" regional-indicator-symbol-letter-g
-" regional-indicator-symbol-letter-h
-" regional-indicator-symbol-letter-i
-" regional-indicator-symbol-letter-j
-" regional-indicator-symbol-letter-k
-" regional-indicator-symbol-letter-l
-" regional-indicator-symbol-letter-m
-" regional-indicator-symbol-letter-n
-" regional-indicator-symbol-letter-o
-" regional-indicator-symbol-letter-p
-" regional-indicator-symbol-letter-q
-" regional-indicator-symbol-letter-r
-" regional-indicator-symbol-letter-s
-" regional-indicator-symbol-letter-t
-" regional-indicator-symbol-letter-u
-" regional-indicator-symbol-letter-v
-" regional-indicator-symbol-letter-w
-" regional-indicator-symbol-letter-x
-" regional-indicator-symbol-letter-y
-" regional-indicator-symbol-letter-z
-" registered
-" relieved-face
-" reminder-ribbon
-" repeat-button
-" repeat-single-button
-" rescue-worker-s-helmet
-" restroom
-" reverse-button
-" revolving-hearts
-" rhinoceros
-" ribbon
-" rice-ball
-" rice-cracker
-" right-anger-bubble
-" right-arrow
-" right-arrow-curving-down
-" right-arrow-curving-left
-" right-arrow-curving-up
-" right-facing-fist
-" right-facing-fist-dark-skin-tone
-" right-facing-fist-light-skin-tone
-" right-facing-fist-medium-dark-skin-tone
-" right-facing-fist-medium-light-skin-tone
-" right-facing-fist-medium-skin-tone
-" rightwards-hand
-" rightwards-hand-dark-skin-tone
-" rightwards-hand-dark-skin-tone-leftwards-hand-light-skin-tone
-" rightwards-hand-dark-skin-tone-leftwards-hand-medium-dark-skin-tone
-" rightwards-hand-dark-skin-tone-leftwards-hand-medium-light-skin-tone
-" rightwards-hand-dark-skin-tone-leftwards-hand-medium-skin-tone
-" rightwards-hand-light-skin-tone
-" rightwards-hand-light-skin-tone-leftwards-hand-dark-skin-tone
-" rightwards-hand-light-skin-tone-leftwards-hand-medium-dark-skin-tone
-" rightwards-hand-light-skin-tone-leftwards-hand-medium-light-skin-tone
-" rightwards-hand-light-skin-tone-leftwards-hand-medium-skin-tone
-" rightwards-hand-medium-dark-skin-tone
-" rightwards-hand-medium-dark-skin-tone-leftwards-hand-dark-skin-tone
-" rightwards-hand-medium-dark-skin-tone-leftwards-hand-light-skin-tone
-" rightwards-hand-medium-dark-skin-tone-leftwards-hand-medium-light-skin-tone
-" rightwards-hand-medium-dark-skin-tone-leftwards-hand-medium-skin-tone
-" rightwards-hand-medium-light-skin-tone
-" rightwards-hand-medium-light-skin-tone-leftwards-hand-dark-skin-tone
-" rightwards-hand-medium-light-skin-tone-leftwards-hand-light-skin-tone
-" rightwards-hand-medium-light-skin-tone-leftwards-hand-medium-dark-skin-tone
-" rightwards-hand-medium-light-skin-tone-leftwards-hand-medium-skin-tone
-" rightwards-hand-medium-skin-tone
-" rightwards-hand-medium-skin-tone-leftwards-hand-dark-skin-tone
-" rightwards-hand-medium-skin-tone-leftwards-hand-light-skin-tone
-" rightwards-hand-medium-skin-tone-leftwards-hand-medium-dark-skin-tone
-" rightwards-hand-medium-skin-tone-leftwards-hand-medium-light-skin-tone
-" ring
-" ring-buoy
-" ringed-planet
-" roasted-sweet-potato
-" robot
-" rock
-" rocket
-" roll-of-paper
-" rolled-up-newspaper
-" roller-coaster
-" roller-skate
-" rolling-on-the-floor-laughing
-" rooster
-" rose
-" rosette
-" round-pushpin
-" rugby-football
-" running-shirt
-" running-shoe
-" sad-but-relieved-face
-" safety-pin
-" safety-vest
-" sagittarius
-" sailboat
-" sake
-" salt
-" saluting-face
-" sandwich
-" santa-claus
-" santa-claus-dark-skin-tone
-" santa-claus-light-skin-tone
-" santa-claus-medium-dark-skin-tone
-" santa-claus-medium-light-skin-tone
-" santa-claus-medium-skin-tone
-" sari
-" satellite
-" satellite-antenna
-" sauropod
-" saxophone
-" scarf
-" school
-" scientist
-" scientist-dark-skin-tone
-" scientist-light-skin-tone
-" scientist-medium-dark-skin-tone
-" scientist-medium-light-skin-tone
-" scientist-medium-skin-tone
-" scissors
-" scorpio
-" scorpion
-" screwdriver
-" scroll
-" seal
-" seat
-" see-no-evil-monkey
-" seedling
-" selfie
-" selfie-dark-skin-tone
-" selfie-light-skin-tone
-" selfie-medium-dark-skin-tone
-" selfie-medium-light-skin-tone
-" selfie-medium-skin-tone
-" service-dog
-" seven-o-clock
-" seven-thirty
-" sewing-needle
-" shallow-pan-of-food
-" shamrock
-" shark
-" shaved-ice
-" sheaf-of-rice
-" shibuya
-" shield
-" shinto-shrine
-" ship
-" shooting-star
-" shopping-bags
-" shopping-cart
-" shortcake
-" shorts
-" shower
-" shrimp
-" shuffle-tracks-button
-" shushing-face
-" sign-of-the-horns
-" sign-of-the-horns-dark-skin-tone
-" sign-of-the-horns-light-skin-tone
-" sign-of-the-horns-medium-dark-skin-tone
-" sign-of-the-horns-medium-light-skin-tone
-" sign-of-the-horns-medium-skin-tone
-" singer
-" singer-dark-skin-tone
-" singer-light-skin-tone
-" singer-medium-dark-skin-tone
-" singer-medium-light-skin-tone
-" singer-medium-skin-tone
-" six-o-clock
-" six-thirty
-" skateboard
-" skier
-" skier-dark-skin-tone
-" skier-light-skin-tone
-" skier-medium-dark-skin-tone
-" skier-medium-light-skin-tone
-" skier-medium-skin-tone
-" skis
-" skull
-" skull-and-crossbones
-" skunk
-" sled
-" sleeping-face
-" sleepy-face
-" slightly-frowning-face
-" slightly-smiling-face
-" slot-machine
-" sloth
-" small-airplane
-" small-blue-diamond
-" small-orange-diamond
-" smiling-cat-with-heart-eyes
-" smiling-face
-" smiling-face-with-halo
-" smiling-face-with-heart-eyes
-" smiling-face-with-hearts
-" smiling-face-with-horns
-" smiling-face-with-smiling-eyes
-" smiling-face-with-sunglasses
-" smiling-face-with-tear
-" smirking-face
-" snail
-" snake
-" sneezing-face
-" snow-capped-mountain
-" snowboarder
-" snowboarder-dark-skin-tone
-" snowboarder-light-skin-tone
-" snowboarder-medium-dark-skin-tone
-" snowboarder-medium-light-skin-tone
-" snowboarder-medium-skin-tone
-" snowflake
-" snowman
-" snowman-without-snow
-" soap
-" soccer-ball
-" socks
-" soft-ice-cream
-" softball
-" soon-arrow
-" sos-button
-" spade-suit
-" spaghetti
-" sparkle
-" sparkler
-" sparkles
-" sparkling-heart
-" speak-no-evil-monkey
-" speaker-high-volume
-" speaker-low-volume
-" speaker-medium-volume
-" speaking-head
-" speech-balloon
-" speedboat
-" spider
-" spider-web
-" spiral-calendar
-" spiral-notepad
-" spiral-shell
-" sponge
-" spoon
-" sport-utility-vehicle
-" sports-medal
-" spouting-whale
-" squid
-" squinting-face-with-tongue
-" stadium
-" star
-" star-and-crescent
-" star-of-david
-" star-struck
-" station
-" statue-of-liberty
-" steaming-bowl
-" stethoscope
-" stop-button
-" stop-sign
-" stopwatch
-" straight-ruler
-" strawberry
-" student
-" student-dark-skin-tone
-" student-light-skin-tone
-" student-medium-dark-skin-tone
-" student-medium-light-skin-tone
-" student-medium-skin-tone
-" studio-microphone
-" stuffed-flatbread
-" sun
-" sun-behind-cloud
-" sun-behind-large-cloud
-" sun-behind-rain-cloud
-" sun-behind-small-cloud
-" sun-with-face
-" sunflower
-" sunglasses
-" sunrise
-" sunrise-over-mountains
-" sunset
-" superhero
-" superhero-dark-skin-tone
-" superhero-light-skin-tone
-" superhero-medium-dark-skin-tone
-" superhero-medium-light-skin-tone
-" superhero-medium-skin-tone
-" supervillain
-" supervillain-dark-skin-tone
-" supervillain-light-skin-tone
-" supervillain-medium-dark-skin-tone
-" supervillain-medium-light-skin-tone
-" supervillain-medium-skin-tone
-" sushi
-" suspension-railway
-" swan
-" sweat-droplets
-" synagogue
-" syringe
-" t-rex
-" t-shirt
-" taco
-" takeout-box
-" tamale
-" tanabata-tree
-" tangerine
-" taurus
-" taxi
-" teacher
-" teacher-dark-skin-tone
-" teacher-light-skin-tone
-" teacher-medium-dark-skin-tone
-" teacher-medium-light-skin-tone
-" teacher-medium-skin-tone
-" teacup-without-handle
-" teapot
-" tear-off-calendar
-" technologist
-" technologist-dark-skin-tone
-" technologist-light-skin-tone
-" technologist-medium-dark-skin-tone
-" technologist-medium-light-skin-tone
-" technologist-medium-skin-tone
-" teddy-bear
-" telephone
-" telephone-receiver
-" telescope
-" television
-" ten-o-clock
-" ten-thirty
-" tennis
-" tent
-" test-tube
-" thermometer
-" thinking-face
-" thong-sandal
-" thought-balloon
-" thread
-" three-o-clock
-" three-thirty
-" thumbs-down
-" thumbs-down-dark-skin-tone
-" thumbs-down-light-skin-tone
-" thumbs-down-medium-dark-skin-tone
-" thumbs-down-medium-light-skin-tone
-" thumbs-down-medium-skin-tone
-" thumbs-up
-" thumbs-up-dark-skin-tone
-" thumbs-up-light-skin-tone
-" thumbs-up-medium-dark-skin-tone
-" thumbs-up-medium-light-skin-tone
-" thumbs-up-medium-skin-tone
-" ticket
-" tiger
-" tiger-face
-" timer-clock
-" tired-face
-" toilet
-" tokyo-tower
-" tomato
-" tongue
-" toolbox
-" tooth
-" toothbrush
-" top-arrow
-" top-hat
-" tornado
-" trackball
-" tractor
-" trade-mark
-" train
-" tram
-" tram-car
-" transgender-flag
-" transgender-symbol
-" triangular-flag
-" triangular-ruler
-" trident-emblem
-" troll
-" trolleybus
-" trophy
-" tropical-drink
-" tropical-fish
-" trumpet
-" tulip
-" tumbler-glass
-" turkey
-" turtle
-" twelve-o-clock
-" twelve-thirty
-" two-hearts
-" two-hump-camel
-" two-o-clock
-" two-thirty
-" umbrella
-" umbrella-on-ground
-" umbrella-with-rain-drops
-" unamused-face
-" unicorn
-" unlocked
-" up-arrow
-" up-button
-" up-down-arrow
-" up-left-arrow
-" up-right-arrow
-" upside-down-face
-" upwards-button
-" vampire
-" vampire-dark-skin-tone
-" vampire-light-skin-tone
-" vampire-medium-dark-skin-tone
-" vampire-medium-light-skin-tone
-" vampire-medium-skin-tone
-" vertical-traffic-light
-" vibration-mode
-" victory-hand
-" victory-hand-dark-skin-tone
-" victory-hand-light-skin-tone
-" victory-hand-medium-dark-skin-tone
-" victory-hand-medium-light-skin-tone
-" victory-hand-medium-skin-tone
-" video-camera
-" video-game
-" videocassette
-" violin
-" virgo
-" volcano
-" volleyball
-" vs-button
-" vulcan-salute
-" vulcan-salute-dark-skin-tone
-" vulcan-salute-light-skin-tone
-" vulcan-salute-medium-dark-skin-tone
-" vulcan-salute-medium-light-skin-tone
-" vulcan-salute-medium-skin-tone
-" waffle
-" waning-crescent-moon
-" waning-gibbous-moon
-" warning
-" wastebasket
-" watch
-" water-buffalo
-" water-closet
-" water-pistol
-" water-wave
-" watermelon
-" waving-hand
-" waving-hand-dark-skin-tone
-" waving-hand-light-skin-tone
-" waving-hand-medium-dark-skin-tone
-" waving-hand-medium-light-skin-tone
-" waving-hand-medium-skin-tone
-" wavy-dash
-" waxing-crescent-moon
-" waxing-gibbous-moon
-" weary-cat
-" weary-face
-" wedding
-" whale
-" wheel
-" wheel-of-dharma
-" wheelchair-symbol
-" white-cane
-" white-circle
-" white-exclamation-mark
-" white-flag
-" white-flower
-" white-hair
-" white-heart
-" white-large-square
-" white-medium-small-square
-" white-medium-square
-" white-question-mark
-" white-small-square
-" white-square-button
-" wilted-flower
-" wind-chime
-" wind-face
-" window
-" wine-glass
-" winking-face
-" winking-face-with-tongue
-" wolf
-" woman
-" woman-and-man-holding-hands
-" woman-and-man-holding-hands-dark-skin-tone
-" woman-and-man-holding-hands-dark-skin-tone-light-skin-tone
-" woman-and-man-holding-hands-dark-skin-tone-medium-dark-skin-tone
-" woman-and-man-holding-hands-dark-skin-tone-medium-light-skin-tone
-" woman-and-man-holding-hands-dark-skin-tone-medium-skin-tone
-" woman-and-man-holding-hands-light-skin-tone
-" woman-and-man-holding-hands-light-skin-tone-dark-skin-tone
-" woman-and-man-holding-hands-light-skin-tone-medium-dark-skin-tone
-" woman-and-man-holding-hands-light-skin-tone-medium-light-skin-tone
-" woman-and-man-holding-hands-light-skin-tone-medium-skin-tone
-" woman-and-man-holding-hands-medium-dark-skin-tone
-" woman-and-man-holding-hands-medium-dark-skin-tone-dark-skin-tone
-" woman-and-man-holding-hands-medium-dark-skin-tone-light-skin-tone
-" woman-and-man-holding-hands-medium-dark-skin-tone-medium-light-skin-tone
-" woman-and-man-holding-hands-medium-dark-skin-tone-medium-skin-tone
-" woman-and-man-holding-hands-medium-light-skin-tone
-" woman-and-man-holding-hands-medium-light-skin-tone-dark-skin-tone
-" woman-and-man-holding-hands-medium-light-skin-tone-light-skin-tone
-" woman-and-man-holding-hands-medium-light-skin-tone-medium-dark-skin-tone
-" woman-and-man-holding-hands-medium-light-skin-tone-medium-skin-tone
-" woman-and-man-holding-hands-medium-skin-tone
-" woman-and-man-holding-hands-medium-skin-tone-dark-skin-tone
-" woman-and-man-holding-hands-medium-skin-tone-light-skin-tone
-" woman-and-man-holding-hands-medium-skin-tone-medium-dark-skin-tone
-" woman-and-man-holding-hands-medium-skin-tone-medium-light-skin-tone
-" woman-artist
-" woman-artist-dark-skin-tone
-" woman-artist-light-skin-tone
-" woman-artist-medium-dark-skin-tone
-" woman-artist-medium-light-skin-tone
-" woman-artist-medium-skin-tone
-" woman-astronaut
-" woman-astronaut-dark-skin-tone
-" woman-astronaut-light-skin-tone
-" woman-astronaut-medium-dark-skin-tone
-" woman-astronaut-medium-light-skin-tone
-" woman-astronaut-medium-skin-tone
-" woman-bald
-" woman-beard
-" woman-biking
-" woman-biking-dark-skin-tone
-" woman-biking-light-skin-tone
-" woman-biking-medium-dark-skin-tone
-" woman-biking-medium-light-skin-tone
-" woman-biking-medium-skin-tone
-" woman-blond-hair
-" woman-bouncing-ball
-" woman-bouncing-ball-dark-skin-tone
-" woman-bouncing-ball-light-skin-tone
-" woman-bouncing-ball-medium-dark-skin-tone
-" woman-bouncing-ball-medium-light-skin-tone
-" woman-bouncing-ball-medium-skin-tone
-" woman-bowing
-" woman-bowing-dark-skin-tone
-" woman-bowing-light-skin-tone
-" woman-bowing-medium-dark-skin-tone
-" woman-bowing-medium-light-skin-tone
-" woman-bowing-medium-skin-tone
-" woman-cartwheeling
-" woman-cartwheeling-dark-skin-tone
-" woman-cartwheeling-light-skin-tone
-" woman-cartwheeling-medium-dark-skin-tone
-" woman-cartwheeling-medium-light-skin-tone
-" woman-cartwheeling-medium-skin-tone
-" woman-christmas
-" woman-climbing
-" woman-climbing-dark-skin-tone
-" woman-climbing-light-skin-tone
-" woman-climbing-medium-dark-skin-tone
-" woman-climbing-medium-light-skin-tone
-" woman-climbing-medium-skin-tone
-" woman-construction-worker
-" woman-construction-worker-dark-skin-tone
-" woman-construction-worker-light-skin-tone
-" woman-construction-worker-medium-dark-skin-tone
-" woman-construction-worker-medium-light-skin-tone
-" woman-construction-worker-medium-skin-tone
-" woman-cook
-" woman-cook-dark-skin-tone
-" woman-cook-light-skin-tone
-" woman-cook-medium-dark-skin-tone
-" woman-cook-medium-light-skin-tone
-" woman-cook-medium-skin-tone
-" woman-curly-hair
-" woman-dancing
-" woman-dancing-dark-skin-tone
-" woman-dancing-light-skin-tone
-" woman-dancing-medium-dark-skin-tone
-" woman-dancing-medium-light-skin-tone
-" woman-dancing-medium-skin-tone
-" woman-dark-skin-tone
-" woman-dark-skin-tone-bald
-" woman-dark-skin-tone-beard
-" woman-dark-skin-tone-blond-hair
-" woman-dark-skin-tone-christmas
-" woman-dark-skin-tone-curly-hair
-" woman-dark-skin-tone-red-hair
-" woman-dark-skin-tone-white-hair
-" woman-detective
-" woman-detective-dark-skin-tone
-" woman-detective-light-skin-tone
-" woman-detective-medium-dark-skin-tone
-" woman-detective-medium-light-skin-tone
-" woman-detective-medium-skin-tone
-" woman-elf
-" woman-elf-dark-skin-tone
-" woman-elf-light-skin-tone
-" woman-elf-medium-dark-skin-tone
-" woman-elf-medium-light-skin-tone
-" woman-elf-medium-skin-tone
-" woman-facepalming
-" woman-facepalming-dark-skin-tone
-" woman-facepalming-light-skin-tone
-" woman-facepalming-medium-dark-skin-tone
-" woman-facepalming-medium-light-skin-tone
-" woman-facepalming-medium-skin-tone
-" woman-factory-worker
-" woman-factory-worker-dark-skin-tone
-" woman-factory-worker-light-skin-tone
-" woman-factory-worker-medium-dark-skin-tone
-" woman-factory-worker-medium-light-skin-tone
-" woman-factory-worker-medium-skin-tone
-" woman-fairy
-" woman-fairy-dark-skin-tone
-" woman-fairy-light-skin-tone
-" woman-fairy-medium-dark-skin-tone
-" woman-fairy-medium-light-skin-tone
-" woman-fairy-medium-skin-tone
-" woman-farmer
-" woman-farmer-dark-skin-tone
-" woman-farmer-light-skin-tone
-" woman-farmer-medium-dark-skin-tone
-" woman-farmer-medium-light-skin-tone
-" woman-farmer-medium-skin-tone
-" woman-feeding-baby
-" woman-feeding-baby-dark-skin-tone
-" woman-feeding-baby-light-skin-tone
-" woman-feeding-baby-medium-dark-skin-tone
-" woman-feeding-baby-medium-light-skin-tone
-" woman-feeding-baby-medium-skin-tone
-" woman-firefighter
-" woman-firefighter-dark-skin-tone
-" woman-firefighter-light-skin-tone
-" woman-firefighter-medium-dark-skin-tone
-" woman-firefighter-medium-light-skin-tone
-" woman-firefighter-medium-skin-tone
-" woman-frowning
-" woman-frowning-dark-skin-tone
-" woman-frowning-light-skin-tone
-" woman-frowning-medium-dark-skin-tone
-" woman-frowning-medium-light-skin-tone
-" woman-frowning-medium-skin-tone
-" woman-genie
-" woman-gesturing-no
-" woman-gesturing-no-dark-skin-tone
-" woman-gesturing-no-light-skin-tone
-" woman-gesturing-no-medium-dark-skin-tone
-" woman-gesturing-no-medium-light-skin-tone
-" woman-gesturing-no-medium-skin-tone
-" woman-gesturing-ok
-" woman-gesturing-ok-dark-skin-tone
-" woman-gesturing-ok-light-skin-tone
-" woman-gesturing-ok-medium-dark-skin-tone
-" woman-gesturing-ok-medium-light-skin-tone
-" woman-gesturing-ok-medium-skin-tone
-" woman-getting-haircut
-" woman-getting-haircut-dark-skin-tone
-" woman-getting-haircut-light-skin-tone
-" woman-getting-haircut-medium-dark-skin-tone
-" woman-getting-haircut-medium-light-skin-tone
-" woman-getting-haircut-medium-skin-tone
-" woman-getting-massage
-" woman-getting-massage-dark-skin-tone
-" woman-getting-massage-light-skin-tone
-" woman-getting-massage-medium-dark-skin-tone
-" woman-getting-massage-medium-light-skin-tone
-" woman-getting-massage-medium-skin-tone
-" woman-golfing
-" woman-golfing-dark-skin-tone
-" woman-golfing-light-skin-tone
-" woman-golfing-medium-dark-skin-tone
-" woman-golfing-medium-light-skin-tone
-" woman-golfing-medium-skin-tone
-" woman-guard
-" woman-guard-dark-skin-tone
-" woman-guard-light-skin-tone
-" woman-guard-medium-dark-skin-tone
-" woman-guard-medium-light-skin-tone
-" woman-guard-medium-skin-tone
-" woman-health-worker
-" woman-health-worker-dark-skin-tone
-" woman-health-worker-light-skin-tone
-" woman-health-worker-medium-dark-skin-tone
-" woman-health-worker-medium-light-skin-tone
-" woman-health-worker-medium-skin-tone
-" woman-in-lotus-position
-" woman-in-lotus-position-dark-skin-tone
-" woman-in-lotus-position-light-skin-tone
-" woman-in-lotus-position-medium-dark-skin-tone
-" woman-in-lotus-position-medium-light-skin-tone
-" woman-in-lotus-position-medium-skin-tone
-" woman-in-manual-wheelchair
-" woman-in-manual-wheelchair-dark-skin-tone
-" woman-in-manual-wheelchair-light-skin-tone
-" woman-in-manual-wheelchair-medium-dark-skin-tone
-" woman-in-manual-wheelchair-medium-light-skin-tone
-" woman-in-manual-wheelchair-medium-skin-tone
-" woman-in-motorized-wheelchair
-" woman-in-motorized-wheelchair-dark-skin-tone
-" woman-in-motorized-wheelchair-light-skin-tone
-" woman-in-motorized-wheelchair-medium-dark-skin-tone
-" woman-in-motorized-wheelchair-medium-light-skin-tone
-" woman-in-motorized-wheelchair-medium-skin-tone
-" woman-in-steamy-room
-" woman-in-steamy-room-dark-skin-tone
-" woman-in-steamy-room-light-skin-tone
-" woman-in-steamy-room-medium-dark-skin-tone
-" woman-in-steamy-room-medium-light-skin-tone
-" woman-in-steamy-room-medium-skin-tone
-" woman-in-tuxedo
-" woman-in-tuxedo-dark-skin-tone
-" woman-in-tuxedo-light-skin-tone
-" woman-in-tuxedo-medium-dark-skin-tone
-" woman-in-tuxedo-medium-light-skin-tone
-" woman-in-tuxedo-medium-skin-tone
-" woman-judge
-" woman-judge-dark-skin-tone
-" woman-judge-light-skin-tone
-" woman-judge-medium-dark-skin-tone
-" woman-judge-medium-light-skin-tone
-" woman-judge-medium-skin-tone
-" woman-juggling
-" woman-juggling-dark-skin-tone
-" woman-juggling-light-skin-tone
-" woman-juggling-medium-dark-skin-tone
-" woman-juggling-medium-light-skin-tone
-" woman-juggling-medium-skin-tone
-" woman-kneeling
-" woman-kneeling-dark-skin-tone
-" woman-kneeling-light-skin-tone
-" woman-kneeling-medium-dark-skin-tone
-" woman-kneeling-medium-light-skin-tone
-" woman-kneeling-medium-skin-tone
-" woman-lifting-weights
-" woman-lifting-weights-dark-skin-tone
-" woman-lifting-weights-light-skin-tone
-" woman-lifting-weights-medium-dark-skin-tone
-" woman-lifting-weights-medium-light-skin-tone
-" woman-lifting-weights-medium-skin-tone
-" woman-light-skin-tone
-" woman-light-skin-tone-bald
-" woman-light-skin-tone-beard
-" woman-light-skin-tone-blond-hair
-" woman-light-skin-tone-christmas
-" woman-light-skin-tone-curly-hair
-" woman-light-skin-tone-red-hair
-" woman-light-skin-tone-white-hair
-" woman-mage
-" woman-mage-dark-skin-tone
-" woman-mage-light-skin-tone
-" woman-mage-medium-dark-skin-tone
-" woman-mage-medium-light-skin-tone
-" woman-mage-medium-skin-tone
-" woman-mechanic
-" woman-mechanic-dark-skin-tone
-" woman-mechanic-light-skin-tone
-" woman-mechanic-medium-dark-skin-tone
-" woman-mechanic-medium-light-skin-tone
-" woman-mechanic-medium-skin-tone
-" woman-medium-dark-skin-tone
-" woman-medium-dark-skin-tone-bald
-" woman-medium-dark-skin-tone-beard
-" woman-medium-dark-skin-tone-blond-hair
-" woman-medium-dark-skin-tone-christmas
-" woman-medium-dark-skin-tone-curly-hair
-" woman-medium-dark-skin-tone-red-hair
-" woman-medium-dark-skin-tone-white-hair
-" woman-medium-light-skin-tone
-" woman-medium-light-skin-tone-bald
-" woman-medium-light-skin-tone-beard
-" woman-medium-light-skin-tone-blond-hair
-" woman-medium-light-skin-tone-christmas
-" woman-medium-light-skin-tone-curly-hair
-" woman-medium-light-skin-tone-red-hair
-" woman-medium-light-skin-tone-white-hair
-" woman-medium-skin-tone
-" woman-medium-skin-tone-bald
-" woman-medium-skin-tone-beard
-" woman-medium-skin-tone-blond-hair
-" woman-medium-skin-tone-christmas
-" woman-medium-skin-tone-curly-hair
-" woman-medium-skin-tone-red-hair
-" woman-medium-skin-tone-white-hair
-" woman-mountain-biking
-" woman-mountain-biking-dark-skin-tone
-" woman-mountain-biking-light-skin-tone
-" woman-mountain-biking-medium-dark-skin-tone
-" woman-mountain-biking-medium-light-skin-tone
-" woman-mountain-biking-medium-skin-tone
-" woman-office-worker
-" woman-office-worker-dark-skin-tone
-" woman-office-worker-light-skin-tone
-" woman-office-worker-medium-dark-skin-tone
-" woman-office-worker-medium-light-skin-tone
-" woman-office-worker-medium-skin-tone
-" woman-pilot
-" woman-pilot-dark-skin-tone
-" woman-pilot-light-skin-tone
-" woman-pilot-medium-dark-skin-tone
-" woman-pilot-medium-light-skin-tone
-" woman-pilot-medium-skin-tone
-" woman-playing-handball
-" woman-playing-handball-dark-skin-tone
-" woman-playing-handball-light-skin-tone
-" woman-playing-handball-medium-dark-skin-tone
-" woman-playing-handball-medium-light-skin-tone
-" woman-playing-handball-medium-skin-tone
-" woman-playing-water-polo
-" woman-playing-water-polo-dark-skin-tone
-" woman-playing-water-polo-light-skin-tone
-" woman-playing-water-polo-medium-dark-skin-tone
-" woman-playing-water-polo-medium-light-skin-tone
-" woman-playing-water-polo-medium-skin-tone
-" woman-police-officer
-" woman-police-officer-dark-skin-tone
-" woman-police-officer-light-skin-tone
-" woman-police-officer-medium-dark-skin-tone
-" woman-police-officer-medium-light-skin-tone
-" woman-police-officer-medium-skin-tone
-" woman-pouting
-" woman-pouting-dark-skin-tone
-" woman-pouting-light-skin-tone
-" woman-pouting-medium-dark-skin-tone
-" woman-pouting-medium-light-skin-tone
-" woman-pouting-medium-skin-tone
-" woman-raising-hand
-" woman-raising-hand-dark-skin-tone
-" woman-raising-hand-light-skin-tone
-" woman-raising-hand-medium-dark-skin-tone
-" woman-raising-hand-medium-light-skin-tone
-" woman-raising-hand-medium-skin-tone
-" woman-red-hair
-" woman-rowing-boat
-" woman-rowing-boat-dark-skin-tone
-" woman-rowing-boat-light-skin-tone
-" woman-rowing-boat-medium-dark-skin-tone
-" woman-rowing-boat-medium-light-skin-tone
-" woman-rowing-boat-medium-skin-tone
-" woman-running
-" woman-running-dark-skin-tone
-" woman-running-light-skin-tone
-" woman-running-medium-dark-skin-tone
-" woman-running-medium-light-skin-tone
-" woman-running-medium-skin-tone
-" woman-s-boot
-" woman-s-clothes
-" woman-s-hat
-" woman-s-sandal
-" woman-scientist
-" woman-scientist-dark-skin-tone
-" woman-scientist-light-skin-tone
-" woman-scientist-medium-dark-skin-tone
-" woman-scientist-medium-light-skin-tone
-" woman-scientist-medium-skin-tone
-" woman-shrugging
-" woman-shrugging-dark-skin-tone
-" woman-shrugging-light-skin-tone
-" woman-shrugging-medium-dark-skin-tone
-" woman-shrugging-medium-light-skin-tone
-" woman-shrugging-medium-skin-tone
-" woman-singer
-" woman-singer-dark-skin-tone
-" woman-singer-light-skin-tone
-" woman-singer-medium-dark-skin-tone
-" woman-singer-medium-light-skin-tone
-" woman-singer-medium-skin-tone
-" woman-standing
-" woman-standing-dark-skin-tone
-" woman-standing-light-skin-tone
-" woman-standing-medium-dark-skin-tone
-" woman-standing-medium-light-skin-tone
-" woman-standing-medium-skin-tone
-" woman-student
-" woman-student-dark-skin-tone
-" woman-student-light-skin-tone
-" woman-student-medium-dark-skin-tone
-" woman-student-medium-light-skin-tone
-" woman-student-medium-skin-tone
-" woman-superhero
-" woman-superhero-dark-skin-tone
-" woman-superhero-light-skin-tone
-" woman-superhero-medium-dark-skin-tone
-" woman-superhero-medium-light-skin-tone
-" woman-superhero-medium-skin-tone
-" woman-supervillain
-" woman-supervillain-dark-skin-tone
-" woman-supervillain-light-skin-tone
-" woman-supervillain-medium-dark-skin-tone
-" woman-supervillain-medium-light-skin-tone
-" woman-supervillain-medium-skin-tone
-" woman-surfing
-" woman-surfing-dark-skin-tone
-" woman-surfing-light-skin-tone
-" woman-surfing-medium-dark-skin-tone
-" woman-surfing-medium-light-skin-tone
-" woman-surfing-medium-skin-tone
-" woman-swimming
-" woman-swimming-dark-skin-tone
-" woman-swimming-light-skin-tone
-" woman-swimming-medium-dark-skin-tone
-" woman-swimming-medium-light-skin-tone
-" woman-swimming-medium-skin-tone
-" woman-teacher
-" woman-teacher-dark-skin-tone
-" woman-teacher-light-skin-tone
-" woman-teacher-medium-dark-skin-tone
-" woman-teacher-medium-light-skin-tone
-" woman-teacher-medium-skin-tone
-" woman-technologist
-" woman-technologist-dark-skin-tone
-" woman-technologist-light-skin-tone
-" woman-technologist-medium-dark-skin-tone
-" woman-technologist-medium-light-skin-tone
-" woman-technologist-medium-skin-tone
-" woman-tipping-hand
-" woman-tipping-hand-dark-skin-tone
-" woman-tipping-hand-light-skin-tone
-" woman-tipping-hand-medium-dark-skin-tone
-" woman-tipping-hand-medium-light-skin-tone
-" woman-tipping-hand-medium-skin-tone
-" woman-vampire
-" woman-vampire-dark-skin-tone
-" woman-vampire-light-skin-tone
-" woman-vampire-medium-dark-skin-tone
-" woman-vampire-medium-light-skin-tone
-" woman-vampire-medium-skin-tone
-" woman-walking
-" woman-walking-dark-skin-tone
-" woman-walking-light-skin-tone
-" woman-walking-medium-dark-skin-tone
-" woman-walking-medium-light-skin-tone
-" woman-walking-medium-skin-tone
-" woman-wearing-turban
-" woman-wearing-turban-dark-skin-tone
-" woman-wearing-turban-light-skin-tone
-" woman-wearing-turban-medium-dark-skin-tone
-" woman-wearing-turban-medium-light-skin-tone
-" woman-wearing-turban-medium-skin-tone
-" woman-white-hair
-" woman-with-headscarf
-" woman-with-headscarf-dark-skin-tone
-" woman-with-headscarf-light-skin-tone
-" woman-with-headscarf-medium-dark-skin-tone
-" woman-with-headscarf-medium-light-skin-tone
-" woman-with-headscarf-medium-skin-tone
-" woman-with-veil
-" woman-with-veil-dark-skin-tone
-" woman-with-veil-light-skin-tone
-" woman-with-veil-medium-dark-skin-tone
-" woman-with-veil-medium-light-skin-tone
-" woman-with-veil-medium-skin-tone
-" woman-with-white-cane
-" woman-with-white-cane-dark-skin-tone
-" woman-with-white-cane-light-skin-tone
-" woman-with-white-cane-medium-dark-skin-tone
-" woman-with-white-cane-medium-light-skin-tone
-" woman-with-white-cane-medium-skin-tone
-" woman-zombie
-" women-holding-hands
-" women-holding-hands-dark-skin-tone
-" women-holding-hands-dark-skin-tone-light-skin-tone
-" women-holding-hands-dark-skin-tone-medium-dark-skin-tone
-" women-holding-hands-dark-skin-tone-medium-light-skin-tone
-" women-holding-hands-dark-skin-tone-medium-skin-tone
-" women-holding-hands-light-skin-tone
-" women-holding-hands-light-skin-tone-dark-skin-tone
-" women-holding-hands-light-skin-tone-medium-dark-skin-tone
-" women-holding-hands-light-skin-tone-medium-light-skin-tone
-" women-holding-hands-light-skin-tone-medium-skin-tone
-" women-holding-hands-medium-dark-skin-tone
-" women-holding-hands-medium-dark-skin-tone-dark-skin-tone
-" women-holding-hands-medium-dark-skin-tone-light-skin-tone
-" women-holding-hands-medium-dark-skin-tone-medium-light-skin-tone
-" women-holding-hands-medium-dark-skin-tone-medium-skin-tone
-" women-holding-hands-medium-light-skin-tone
-" women-holding-hands-medium-light-skin-tone-dark-skin-tone
-" women-holding-hands-medium-light-skin-tone-light-skin-tone
-" women-holding-hands-medium-light-skin-tone-medium-dark-skin-tone
-" women-holding-hands-medium-light-skin-tone-medium-skin-tone
-" women-holding-hands-medium-skin-tone
-" women-holding-hands-medium-skin-tone-dark-skin-tone
-" women-holding-hands-medium-skin-tone-light-skin-tone
-" women-holding-hands-medium-skin-tone-medium-dark-skin-tone
-" women-holding-hands-medium-skin-tone-medium-light-skin-tone
-" women-s-room
-" women-with-bunny-ears
-" women-wrestling
-" wood
-" woozy-face
-" world-map
-" worm
-" worried-face
-" wrapped-gift
-" wrench
-" writing-hand
-" writing-hand-dark-skin-tone
-" writing-hand-light-skin-tone
-" writing-hand-medium-dark-skin-tone
-" writing-hand-medium-light-skin-tone
-" writing-hand-medium-skin-tone
-" x-ray
-" yarn
-" yawning-face
-" yellow-circle
-" yellow-heart
-" yellow-square
-" yen-banknote
-" yin-yang
-" yo-yo
-" zany-face
-" zebra
-" zipper-mouth-face
-" zombie
-" zzz
+CLASS lcl_github_emoji DEFINITION.
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS get
+      RETURNING
+        VALUE(result) TYPE zcl_abappm_emoji=>ty_emojis.
+
+  PRIVATE SECTION.
+
+    CLASS-METHODS list
+      RETURNING
+        VALUE(result) TYPE string_table.
+
+    CLASS-METHODS unicode_to_utf16_string
+      IMPORTING
+        codepoint     TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
+ENDCLASS.
+
+CLASS lcl_github_emoji IMPLEMENTATION.
+
+  METHOD get.
+
+    DATA emoji LIKE LINE OF result.
+
+    DATA(list) = list( ).
+
+    LOOP AT list ASSIGNING FIELD-SYMBOL(<line>).
+      CLEAR emoji.
+      SPLIT <line> AT ':' INTO emoji-name emoji-img.
+      DATA(charcodes) = substring_after( val = emoji-img sub = '/' ).
+      SPLIT charcodes AT '-' INTO TABLE DATA(codes).
+      IF lines( codes ) = 1.
+        emoji-hex = to_lower( charcodes ).
+      ENDIF.
+      LOOP AT codes INTO DATA(charcode).
+        emoji-code = emoji-code && unicode_to_utf16_string( to_upper( charcode ) ).
+      ENDLOOP.
+      emoji-img = emoji-img && '.png'.
+      INSERT emoji INTO TABLE result.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD unicode_to_utf16_string.
+
+    CONSTANTS:
+      x10000 TYPE x LENGTH 4 VALUE '00010000',
+      xffff  TYPE x LENGTH 2 VALUE 'FFFF',
+      xd800  TYPE x LENGTH 2 VALUE 'D800',
+      xdc00  TYPE x LENGTH 2 VALUE 'DC00',
+      x0400  TYPE x LENGTH 2 VALUE '0400',
+      x7f    TYPE x LENGTH 1 VALUE '7F'.
+
+    TYPES ty_four_bytes TYPE x LENGTH 4.
+
+    CHECK strlen( codepoint ) BETWEEN 1 AND 8.
+
+    " Convert the Unicode code point string to an integer
+    DATA(code_string) = codepoint.
+    DO 8 - strlen( codepoint ) TIMES.
+      code_string = '0' && code_string.
+    ENDDO.
+
+    DATA(code_x) = CONV ty_four_bytes( code_string ).
+    DATA(code_i) = CONV i( code_x ).
+
+    IF code_i > xffff.
+      " Calculate high and low surrogate
+      DATA(high_surrogate) = CONV xstring( xd800 + ( code_i - x10000 ) DIV x0400 ).
+      DATA(low_surrogate)  = CONV xstring( xdc00 + ( code_i - x10000 ) MOD x0400 ).
+      DATA(utf16)          = CONV xstring( high_surrogate && low_surrogate ).
+    ELSEIF code_i > x7f.
+      " Directly convert for non-surrogate values
+      utf16 = code_x+2(2).
+    ELSE.
+      " Ignore ASCII
+      RETURN.
+    ENDIF.
+
+    result = cl_binary_convert=>xstring_utf16be_to_string( utf16 ).
+
+  ENDMETHOD.
+
+  METHOD list.
+
+    DATA(list) =
+      `+1:unicode/1f44d,` &&
+      `-1:unicode/1f44e,` &&
+      `100:unicode/1f4af,` &&
+      `1234:unicode/1f522,` &&
+      `1st_place_medal:unicode/1f947,` &&
+      `2nd_place_medal:unicode/1f948,` &&
+      `3rd_place_medal:unicode/1f949,` &&
+      `8ball:unicode/1f3b1,` &&
+      `a:unicode/1f170,` &&
+      `ab:unicode/1f18e,` &&
+      `abacus:unicode/1f9ee,` &&
+      `abc:unicode/1f524,` &&
+      `abcd:unicode/1f521,` &&
+      `accept:unicode/1f251,` &&
+      `accessibility:accessibility,` &&
+      `accordion:unicode/1fa97,` &&
+      `adhesive_bandage:unicode/1fa79,` &&
+      `adult:unicode/1f9d1,` &&
+      `aerial_tramway:unicode/1f6a1,` &&
+      `afghanistan:unicode/1f1e6-1f1eb,` &&
+      `airplane:unicode/2708,` &&
+      `aland_islands:unicode/1f1e6-1f1fd,` &&
+      `alarm_clock:unicode/23f0,` &&
+      `albania:unicode/1f1e6-1f1f1,` &&
+      `alembic:unicode/2697,` &&
+      `algeria:unicode/1f1e9-1f1ff,` &&
+      `alien:unicode/1f47d,` &&
+      `ambulance:unicode/1f691,` &&
+      `american_samoa:unicode/1f1e6-1f1f8,` &&
+      `amphora:unicode/1f3fa,` &&
+      `anatomical_heart:unicode/1fac0,` &&
+      `anchor:unicode/2693,` &&
+      `andorra:unicode/1f1e6-1f1e9,` &&
+      `angel:unicode/1f47c,` &&
+      `anger:unicode/1f4a2,` &&
+      `angola:unicode/1f1e6-1f1f4,` &&
+      `angry:unicode/1f620,` &&
+      `anguilla:unicode/1f1e6-1f1ee,` &&
+      `anguished:unicode/1f627,` &&
+      `ant:unicode/1f41c,` &&
+      `antarctica:unicode/1f1e6-1f1f6,` &&
+      `antigua_barbuda:unicode/1f1e6-1f1ec,` &&
+      `apple:unicode/1f34e,` &&
+      `aquarius:unicode/2652,` &&
+      `argentina:unicode/1f1e6-1f1f7,` &&
+      `aries:unicode/2648,` &&
+      `armenia:unicode/1f1e6-1f1f2,` &&
+      `arrow_backward:unicode/25c0,` &&
+      `arrow_double_down:unicode/23ec,` &&
+      `arrow_double_up:unicode/23eb,` &&
+      `arrow_down:unicode/2b07,` &&
+      `arrow_down_small:unicode/1f53d,` &&
+      `arrow_forward:unicode/25b6,` &&
+      `arrow_heading_down:unicode/2935,` &&
+      `arrow_heading_up:unicode/2934,` &&
+      `arrow_left:unicode/2b05,` &&
+      `arrow_lower_left:unicode/2199,` &&
+      `arrow_lower_right:unicode/2198,` &&
+      `arrow_right:unicode/27a1,` &&
+      `arrow_right_hook:unicode/21aa,` &&
+      `arrow_up:unicode/2b06,` &&
+      `arrow_up_down:unicode/2195,` &&
+      `arrow_up_small:unicode/1f53c,` &&
+      `arrow_upper_left:unicode/2196,` &&
+      `arrow_upper_right:unicode/2197,` &&
+      `arrows_clockwise:unicode/1f503,` &&
+      `arrows_counterclockwise:unicode/1f504,` &&
+      `art:unicode/1f3a8,` &&
+      `articulated_lorry:unicode/1f69b,` &&
+      `artificial_satellite:unicode/1f6f0,` &&
+      `artist:unicode/1f9d1-1f3a8,` &&
+      `aruba:unicode/1f1e6-1f1fc,` &&
+      `ascension_island:unicode/1f1e6-1f1e8,` &&
+      `asterisk:unicode/002a-20e3,` &&
+      `astonished:unicode/1f632,` &&
+      `astronaut:unicode/1f9d1-1f680,` &&
+      `athletic_shoe:unicode/1f45f,` &&
+      `atm:unicode/1f3e7,` &&
+      `atom:atom,` &&
+      `atom_symbol:unicode/269b,` &&
+      `australia:unicode/1f1e6-1f1fa,` &&
+      `austria:unicode/1f1e6-1f1f9,` &&
+      `auto_rickshaw:unicode/1f6fa,` &&
+      `avocado:unicode/1f951,` &&
+      `axe:unicode/1fa93,` &&
+      `azerbaijan:unicode/1f1e6-1f1ff,` &&
+      `b:unicode/1f171,` &&
+      `baby:unicode/1f476,` &&
+      `baby_bottle:unicode/1f37c,` &&
+      `baby_chick:unicode/1f424,` &&
+      `baby_symbol:unicode/1f6bc,` &&
+      `back:unicode/1f519,` &&
+      `bacon:unicode/1f953,` &&
+      `badger:unicode/1f9a1,` &&
+      `badminton:unicode/1f3f8,` &&
+      `bagel:unicode/1f96f,` &&
+      `baggage_claim:unicode/1f6c4,` &&
+      `baguette_bread:unicode/1f956,` &&
+      `bahamas:unicode/1f1e7-1f1f8,` &&
+      `bahrain:unicode/1f1e7-1f1ed,` &&
+      `balance_scale:unicode/2696,` &&
+      `bald_man:unicode/1f468-1f9b2,` &&
+      `bald_woman:unicode/1f469-1f9b2,` &&
+      `ballet_shoes:unicode/1fa70,` &&
+      `balloon:unicode/1f388,` &&
+      `ballot_box:unicode/1f5f3,` &&
+      `ballot_box_with_check:unicode/2611,` &&
+      `bamboo:unicode/1f38d,` &&
+      `banana:unicode/1f34c,` &&
+      `bangbang:unicode/203c,` &&
+      `bangladesh:unicode/1f1e7-1f1e9,` &&
+      `banjo:unicode/1fa95,` &&
+      `bank:unicode/1f3e6,` &&
+      `bar_chart:unicode/1f4ca,` &&
+      `barbados:unicode/1f1e7-1f1e7,` &&
+      `barber:unicode/1f488,` &&
+      `baseball:unicode/26be,` &&
+      `basecamp:basecamp,` &&
+      `basecampy:basecampy,` &&
+      `basket:unicode/1f9fa,` &&
+      `basketball:unicode/1f3c0,` &&
+      `basketball_man:unicode/26f9-2642,` &&
+      `basketball_woman:unicode/26f9-2640,` &&
+      `bat:unicode/1f987,` &&
+      `bath:unicode/1f6c0,` &&
+      `bathtub:unicode/1f6c1,` &&
+      `battery:unicode/1f50b,` &&
+      `beach_umbrella:unicode/1f3d6,` &&
+      `beans:unicode/1fad8,` &&
+      `bear:unicode/1f43b,` &&
+      `bearded_person:unicode/1f9d4,` &&
+      `beaver:unicode/1f9ab,` &&
+      `bed:unicode/1f6cf,` &&
+      `bee:unicode/1f41d,` &&
+      `beer:unicode/1f37a,` &&
+      `beers:unicode/1f37b,` &&
+      `beetle:unicode/1fab2,` &&
+      `beginner:unicode/1f530,` &&
+      `belarus:unicode/1f1e7-1f1fe,` &&
+      `belgium:unicode/1f1e7-1f1ea,` &&
+      `belize:unicode/1f1e7-1f1ff,` &&
+      `bell:unicode/1f514,` &&
+      `bell_pepper:unicode/1fad1,` &&
+      `bellhop_bell:unicode/1f6ce,` &&
+      `benin:unicode/1f1e7-1f1ef,` &&
+      `bento:unicode/1f371,` &&
+      `bermuda:unicode/1f1e7-1f1f2,` &&
+      `beverage_box:unicode/1f9c3,` &&
+      `bhutan:unicode/1f1e7-1f1f9,` &&
+      `bicyclist:unicode/1f6b4,` &&
+      `bike:unicode/1f6b2,` &&
+      `biking_man:unicode/1f6b4-2642,` &&
+      `biking_woman:unicode/1f6b4-2640,` &&
+      `bikini:unicode/1f459,` &&
+      `billed_cap:unicode/1f9e2,` &&
+      `biohazard:unicode/2623,` &&
+      `bird:unicode/1f426,` &&
+      `birthday:unicode/1f382,` &&
+      `bison:unicode/1f9ac,` &&
+      `biting_lip:unicode/1fae6,` &&
+      `black_bird:unicode/1f426-2b1b,` &&
+      `black_cat:unicode/1f408-2b1b,` &&
+      `black_circle:unicode/26ab,` &&
+      `black_flag:unicode/1f3f4,` &&
+      `black_heart:unicode/1f5a4,` &&
+      `black_joker:unicode/1f0cf,` &&
+      `black_large_square:unicode/2b1b,` &&
+      `black_medium_small_square:unicode/25fe,` &&
+      `black_medium_square:unicode/25fc,` &&
+      `black_nib:unicode/2712,` &&
+      `black_small_square:unicode/25aa,` &&
+      `black_square_button:unicode/1f532,` &&
+      `blond_haired_man:unicode/1f471-2642,` &&
+      `blond_haired_person:unicode/1f471,` &&
+      `blond_haired_woman:unicode/1f471-2640,` &&
+      `blonde_woman:unicode/1f471-2640,` &&
+      `blossom:unicode/1f33c,` &&
+      `blowfish:unicode/1f421,` &&
+      `blue_book:unicode/1f4d8,` &&
+      `blue_car:unicode/1f699,` &&
+      `blue_heart:unicode/1f499,` &&
+      `blue_square:unicode/1f7e6,` &&
+      `blueberries:unicode/1fad0,` &&
+      `blush:unicode/1f60a,` &&
+      `boar:unicode/1f417,` &&
+      `boat:unicode/26f5,` &&
+      `bolivia:unicode/1f1e7-1f1f4,` &&
+      `bomb:unicode/1f4a3,` &&
+      `bone:unicode/1f9b4,` &&
+      `book:unicode/1f4d6,` &&
+      `bookmark:unicode/1f516,` &&
+      `bookmark_tabs:unicode/1f4d1,` &&
+      `books:unicode/1f4da,` &&
+      `boom:unicode/1f4a5,` &&
+      `boomerang:unicode/1fa83,` &&
+      `boot:unicode/1f462,` &&
+      `bosnia_herzegovina:unicode/1f1e7-1f1e6,` &&
+      `botswana:unicode/1f1e7-1f1fc,` &&
+      `bouncing_ball_man:unicode/26f9-2642,` &&
+      `bouncing_ball_person:unicode/26f9,` &&
+      `bouncing_ball_woman:unicode/26f9-2640,` &&
+      `bouquet:unicode/1f490,` &&
+      `bouvet_island:unicode/1f1e7-1f1fb,` &&
+      `bow:unicode/1f647,` &&
+      `bow_and_arrow:unicode/1f3f9,` &&
+      `bowing_man:unicode/1f647-2642,` &&
+      `bowing_woman:unicode/1f647-2640,` &&
+      `bowl_with_spoon:unicode/1f963,` &&
+      `bowling:unicode/1f3b3,` &&
+      `bowtie:bowtie,` &&
+      `boxing_glove:unicode/1f94a,` &&
+      `boy:unicode/1f466,` &&
+      `brain:unicode/1f9e0,` &&
+      `brazil:unicode/1f1e7-1f1f7,` &&
+      `bread:unicode/1f35e,` &&
+      `breast_feeding:unicode/1f931,` &&
+      `bricks:unicode/1f9f1,` &&
+      `bride_with_veil:unicode/1f470-2640,` &&
+      `bridge_at_night:unicode/1f309,` &&
+      `briefcase:unicode/1f4bc,` &&
+      `british_indian_ocean_territory:unicode/1f1ee-1f1f4,` &&
+      `british_virgin_islands:unicode/1f1fb-1f1ec,` &&
+      `broccoli:unicode/1f966,` &&
+      `broken_heart:unicode/1f494,` &&
+      `broom:unicode/1f9f9,` &&
+      `brown_circle:unicode/1f7e4,` &&
+      `brown_heart:unicode/1f90e,` &&
+      `brown_square:unicode/1f7eb,` &&
+      `brunei:unicode/1f1e7-1f1f3,` &&
+      `bubble_tea:unicode/1f9cb,` &&
+      `bubbles:unicode/1fae7,` &&
+      `bucket:unicode/1faa3,` &&
+      `bug:unicode/1f41b,` &&
+      `building_construction:unicode/1f3d7,` &&
+      `bulb:unicode/1f4a1,` &&
+      `bulgaria:unicode/1f1e7-1f1ec,` &&
+      `bullettrain_front:unicode/1f685,` &&
+      `bullettrain_side:unicode/1f684,` &&
+      `burkina_faso:unicode/1f1e7-1f1eb,` &&
+      `burrito:unicode/1f32f,` &&
+      `burundi:unicode/1f1e7-1f1ee,` &&
+      `bus:unicode/1f68c,` &&
+      `business_suit_levitating:unicode/1f574,` &&
+      `busstop:unicode/1f68f,` &&
+      `bust_in_silhouette:unicode/1f464,` &&
+      `busts_in_silhouette:unicode/1f465,` &&
+      `butter:unicode/1f9c8,` &&
+      `butterfly:unicode/1f98b,` &&
+      `cactus:unicode/1f335,` &&
+      `cake:unicode/1f370,` &&
+      `calendar:unicode/1f4c6,` &&
+      `call_me_hand:unicode/1f919,` &&
+      `calling:unicode/1f4f2,` &&
+      `cambodia:unicode/1f1f0-1f1ed,` &&
+      `camel:unicode/1f42b,` &&
+      `camera:unicode/1f4f7,` &&
+      `camera_flash:unicode/1f4f8,` &&
+      `cameroon:unicode/1f1e8-1f1f2,` &&
+      `camping:unicode/1f3d5,` &&
+      `canada:unicode/1f1e8-1f1e6,` &&
+      `canary_islands:unicode/1f1ee-1f1e8,` &&
+      `cancer:unicode/264b,` &&
+      `candle:unicode/1f56f,` &&
+      `candy:unicode/1f36c,` &&
+      `canned_food:unicode/1f96b,` &&
+      `canoe:unicode/1f6f6,` &&
+      `cape_verde:unicode/1f1e8-1f1fb,` &&
+      `capital_abcd:unicode/1f520,` &&
+      `capricorn:unicode/2651,` &&
+      `car:unicode/1f697,` &&
+      `card_file_box:unicode/1f5c3,` &&
+      `card_index:unicode/1f4c7,` &&
+      `card_index_dividers:unicode/1f5c2,` &&
+      `caribbean_netherlands:unicode/1f1e7-1f1f6,` &&
+      `carousel_horse:unicode/1f3a0,` &&
+      `carpentry_saw:unicode/1fa9a,` &&
+      `carrot:unicode/1f955,` &&
+      `cartwheeling:unicode/1f938,` &&
+      `cat:unicode/1f431,` &&
+      `cat2:unicode/1f408,` &&
+      `cayman_islands:unicode/1f1f0-1f1fe,` &&
+      `cd:unicode/1f4bf,` &&
+      `central_african_republic:unicode/1f1e8-1f1eb,` &&
+      `ceuta_melilla:unicode/1f1ea-1f1e6,` &&
+      `chad:unicode/1f1f9-1f1e9,` &&
+      `chains:unicode/26d3,` &&
+      `chair:unicode/1fa91,` &&
+      `champagne:unicode/1f37e,` &&
+      `chart:unicode/1f4b9,` &&
+      `chart_with_downwards_trend:unicode/1f4c9,` &&
+      `chart_with_upwards_trend:unicode/1f4c8,` &&
+      `checkered_flag:unicode/1f3c1,` &&
+      `cheese:unicode/1f9c0,` &&
+      `cherries:unicode/1f352,` &&
+      `cherry_blossom:unicode/1f338,` &&
+      `chess_pawn:unicode/265f,` &&
+      `chestnut:unicode/1f330,` &&
+      `chicken:unicode/1f414,` &&
+      `child:unicode/1f9d2,` &&
+      `children_crossing:unicode/1f6b8,` &&
+      `chile:unicode/1f1e8-1f1f1,` &&
+      `chipmunk:unicode/1f43f,` &&
+      `chocolate_bar:unicode/1f36b,` &&
+      `chopsticks:unicode/1f962,` &&
+      `christmas_island:unicode/1f1e8-1f1fd,` &&
+      `christmas_tree:unicode/1f384,` &&
+      `church:unicode/26ea,` &&
+      `cinema:unicode/1f3a6,` &&
+      `circus_tent:unicode/1f3aa,` &&
+      `city_sunrise:unicode/1f307,` &&
+      `city_sunset:unicode/1f306,` &&
+      `cityscape:unicode/1f3d9,` &&
+      `cl:unicode/1f191,` &&
+      `clamp:unicode/1f5dc,` &&
+      `clap:unicode/1f44f,` &&
+      `clapper:unicode/1f3ac,` &&
+      `classical_building:unicode/1f3db,` &&
+      `climbing:unicode/1f9d7,` &&
+      `climbing_man:unicode/1f9d7-2642,` &&
+      `climbing_woman:unicode/1f9d7-2640,` &&
+      `clinking_glasses:unicode/1f942,` &&
+      `clipboard:unicode/1f4cb,` &&
+      `clipperton_island:unicode/1f1e8-1f1f5,` &&
+      `clock1:unicode/1f550,` &&
+      `clock10:unicode/1f559,` &&
+      `clock1030:unicode/1f565,` &&
+      `clock11:unicode/1f55a,` &&
+      `clock1130:unicode/1f566,` &&
+      `clock12:unicode/1f55b,` &&
+      `clock1230:unicode/1f567,` &&
+      `clock130:unicode/1f55c,` &&
+      `clock2:unicode/1f551,` &&
+      `clock230:unicode/1f55d,` &&
+      `clock3:unicode/1f552,` &&
+      `clock330:unicode/1f55e,` &&
+      `clock4:unicode/1f553,` &&
+      `clock430:unicode/1f55f,` &&
+      `clock5:unicode/1f554,` &&
+      `clock530:unicode/1f560,` &&
+      `clock6:unicode/1f555,` &&
+      `clock630:unicode/1f561,` &&
+      `clock7:unicode/1f556,` &&
+      `clock730:unicode/1f562,` &&
+      `clock8:unicode/1f557,` &&
+      `clock830:unicode/1f563,` &&
+      `clock9:unicode/1f558,` &&
+      `clock930:unicode/1f564,` &&
+      `closed_book:unicode/1f4d5,` &&
+      `closed_lock_with_key:unicode/1f510,` &&
+      `closed_umbrella:unicode/1f302,` &&
+      `cloud:unicode/2601,` &&
+      `cloud_with_lightning:unicode/1f329,` &&
+      `cloud_with_lightning_and_rain:unicode/26c8,` &&
+      `cloud_with_rain:unicode/1f327,` &&
+      `cloud_with_snow:unicode/1f328,` &&
+      `clown_face:unicode/1f921,` &&
+      `clubs:unicode/2663,` &&
+      `cn:unicode/1f1e8-1f1f3,` &&
+      `coat:unicode/1f9e5,` &&
+      `cockroach:unicode/1fab3,` &&
+      `cocktail:unicode/1f378,` &&
+      `coconut:unicode/1f965,` &&
+      `cocos_islands:unicode/1f1e8-1f1e8,` &&
+      `coffee:unicode/2615,` &&
+      `coffin:unicode/26b0,` &&
+      `coin:unicode/1fa99,` &&
+      `cold_face:unicode/1f976,` &&
+      `cold_sweat:unicode/1f630,` &&
+      `collision:unicode/1f4a5,` &&
+      `colombia:unicode/1f1e8-1f1f4,` &&
+      `comet:unicode/2604,` &&
+      `comoros:unicode/1f1f0-1f1f2,` &&
+      `compass:unicode/1f9ed,` &&
+      `computer:unicode/1f4bb,` &&
+      `computer_mouse:unicode/1f5b1,` &&
+      `confetti_ball:unicode/1f38a,` &&
+      `confounded:unicode/1f616,` &&
+      `confused:unicode/1f615,` &&
+      `congo_brazzaville:unicode/1f1e8-1f1ec,` &&
+      `congo_kinshasa:unicode/1f1e8-1f1e9,` &&
+      `congratulations:unicode/3297,` &&
+      `construction:unicode/1f6a7,` &&
+      `construction_worker:unicode/1f477,` &&
+      `construction_worker_man:unicode/1f477-2642,` &&
+      `construction_worker_woman:unicode/1f477-2640,` &&
+      `control_knobs:unicode/1f39b,` &&
+      `convenience_store:unicode/1f3ea,` &&
+      `cook:unicode/1f9d1-1f373,` &&
+      `cook_islands:unicode/1f1e8-1f1f0,` &&
+      `cookie:unicode/1f36a,` &&
+      `cool:unicode/1f192,` &&
+      `cop:unicode/1f46e,` &&
+      `copyright:unicode/00a9,` &&
+      `coral:unicode/1fab8,` &&
+      `corn:unicode/1f33d,` &&
+      `costa_rica:unicode/1f1e8-1f1f7,` &&
+      `cote_divoire:unicode/1f1e8-1f1ee,` &&
+      `couch_and_lamp:unicode/1f6cb,` &&
+      `couple:unicode/1f46b,` &&
+      `couple_with_heart:unicode/1f491,` &&
+      `couple_with_heart_man_man:unicode/1f468-2764-1f468,` &&
+      `couple_with_heart_woman_man:unicode/1f469-2764-1f468,` &&
+      `couple_with_heart_woman_woman:unicode/1f469-2764-1f469,` &&
+      `couplekiss:unicode/1f48f,` &&
+      `couplekiss_man_man:unicode/1f468-2764-1f48b-1f468,` &&
+      `couplekiss_man_woman:unicode/1f469-2764-1f48b-1f468,` &&
+      `couplekiss_woman_woman:unicode/1f469-2764-1f48b-1f469,` &&
+      `cow:unicode/1f42e,` &&
+      `cow2:unicode/1f404,` &&
+      `cowboy_hat_face:unicode/1f920,` &&
+      `crab:unicode/1f980,` &&
+      `crayon:unicode/1f58d,` &&
+      `credit_card:unicode/1f4b3,` &&
+      `crescent_moon:unicode/1f319,` &&
+      `cricket:unicode/1f997,` &&
+      `cricket_game:unicode/1f3cf,` &&
+      `croatia:unicode/1f1ed-1f1f7,` &&
+      `crocodile:unicode/1f40a,` &&
+      `croissant:unicode/1f950,` &&
+      `crossed_fingers:unicode/1f91e,` &&
+      `crossed_flags:unicode/1f38c,` &&
+      `crossed_swords:unicode/2694,` &&
+      `crown:unicode/1f451,` &&
+      `crutch:unicode/1fa7c,` &&
+      `cry:unicode/1f622,` &&
+      `crying_cat_face:unicode/1f63f,` &&
+      `crystal_ball:unicode/1f52e,` &&
+      `cuba:unicode/1f1e8-1f1fa,` &&
+      `cucumber:unicode/1f952,` &&
+      `cup_with_straw:unicode/1f964,` &&
+      `cupcake:unicode/1f9c1,` &&
+      `cupid:unicode/1f498,` &&
+      `curacao:unicode/1f1e8-1f1fc,` &&
+      `curling_stone:unicode/1f94c,` &&
+      `curly_haired_man:unicode/1f468-1f9b1,` &&
+      `curly_haired_woman:unicode/1f469-1f9b1,` &&
+      `curly_loop:unicode/27b0,` &&
+      `currency_exchange:unicode/1f4b1,` &&
+      `curry:unicode/1f35b,` &&
+      `cursing_face:unicode/1f92c,` &&
+      `custard:unicode/1f36e,` &&
+      `customs:unicode/1f6c3,` &&
+      `cut_of_meat:unicode/1f969,` &&
+      `cyclone:unicode/1f300,` &&
+      `cyprus:unicode/1f1e8-1f1fe,` &&
+      `czech_republic:unicode/1f1e8-1f1ff,` &&
+      `dagger:unicode/1f5e1,` &&
+      `dancer:unicode/1f483,` &&
+      `dancers:unicode/1f46f,` &&
+      `dancing_men:unicode/1f46f-2642,` &&
+      `dancing_women:unicode/1f46f-2640,` &&
+      `dango:unicode/1f361,` &&
+      `dark_sunglasses:unicode/1f576,` &&
+      `dart:unicode/1f3af,` &&
+      `dash:unicode/1f4a8,` &&
+      `date:unicode/1f4c5,` &&
+      `de:unicode/1f1e9-1f1ea,` &&
+      `deaf_man:unicode/1f9cf-2642,` &&
+      `deaf_person:unicode/1f9cf,` &&
+      `deaf_woman:unicode/1f9cf-2640,` &&
+      `deciduous_tree:unicode/1f333,` &&
+      `deer:unicode/1f98c,` &&
+      `denmark:unicode/1f1e9-1f1f0,` &&
+      `department_store:unicode/1f3ec,` &&
+      `dependabot:dependabot,` &&
+      `derelict_house:unicode/1f3da,` &&
+      `desert:unicode/1f3dc,` &&
+      `desert_island:unicode/1f3dd,` &&
+      `desktop_computer:unicode/1f5a5,` &&
+      `detective:unicode/1f575,` &&
+      `diamond_shape_with_a_dot_inside:unicode/1f4a0,` &&
+      `diamonds:unicode/2666,` &&
+      `diego_garcia:unicode/1f1e9-1f1ec,` &&
+      `disappointed:unicode/1f61e,` &&
+      `disappointed_relieved:unicode/1f625,` &&
+      `disguised_face:unicode/1f978,` &&
+      `diving_mask:unicode/1f93f,` &&
+      `diya_lamp:unicode/1fa94,` &&
+      `dizzy:unicode/1f4ab,` &&
+      `dizzy_face:unicode/1f635,` &&
+      `djibouti:unicode/1f1e9-1f1ef,` &&
+      `dna:unicode/1f9ec,` &&
+      `do_not_litter:unicode/1f6af,` &&
+      `dodo:unicode/1f9a4,` &&
+      `dog:unicode/1f436,` &&
+      `dog2:unicode/1f415,` &&
+      `dollar:unicode/1f4b5,` &&
+      `dolls:unicode/1f38e,` &&
+      `dolphin:unicode/1f42c,` &&
+      `dominica:unicode/1f1e9-1f1f2,` &&
+      `dominican_republic:unicode/1f1e9-1f1f4,` &&
+      `donkey:unicode/1facf,` &&
+      `door:unicode/1f6aa,` &&
+      `dotted_line_face:unicode/1fae5,` &&
+      `doughnut:unicode/1f369,` &&
+      `dove:unicode/1f54a,` &&
+      `dragon:unicode/1f409,` &&
+      `dragon_face:unicode/1f432,` &&
+      `dress:unicode/1f457,`.
+    list = list &&
+      `dromedary_camel:unicode/1f42a,` &&
+      `drooling_face:unicode/1f924,` &&
+      `drop_of_blood:unicode/1fa78,` &&
+      `droplet:unicode/1f4a7,` &&
+      `drum:unicode/1f941,` &&
+      `duck:unicode/1f986,` &&
+      `dumpling:unicode/1f95f,` &&
+      `dvd:unicode/1f4c0,` &&
+      `e-mail:unicode/1f4e7,` &&
+      `eagle:unicode/1f985,` &&
+      `ear:unicode/1f442,` &&
+      `ear_of_rice:unicode/1f33e,` &&
+      `ear_with_hearing_aid:unicode/1f9bb,` &&
+      `earth_africa:unicode/1f30d,` &&
+      `earth_americas:unicode/1f30e,` &&
+      `earth_asia:unicode/1f30f,` &&
+      `ecuador:unicode/1f1ea-1f1e8,` &&
+      `egg:unicode/1f95a,` &&
+      `eggplant:unicode/1f346,` &&
+      `egypt:unicode/1f1ea-1f1ec,` &&
+      `eight:unicode/0038-20e3,` &&
+      `eight_pointed_black_star:unicode/2734,` &&
+      `eight_spoked_asterisk:unicode/2733,` &&
+      `eject_button:unicode/23cf,` &&
+      `el_salvador:unicode/1f1f8-1f1fb,` &&
+      `electric_plug:unicode/1f50c,` &&
+      `electron:electron,` &&
+      `elephant:unicode/1f418,` &&
+      `elevator:unicode/1f6d7,` &&
+      `elf:unicode/1f9dd,` &&
+      `elf_man:unicode/1f9dd-2642,` &&
+      `elf_woman:unicode/1f9dd-2640,` &&
+      `email:unicode/1f4e7,` &&
+      `empty_nest:unicode/1fab9,` &&
+      `end:unicode/1f51a,` &&
+      `england:unicode/1f3f4-e0067-e0062-e0065-e006e-e0067-e007f,` &&
+      `envelope:unicode/2709,` &&
+      `envelope_with_arrow:unicode/1f4e9,` &&
+      `equatorial_guinea:unicode/1f1ec-1f1f6,` &&
+      `eritrea:unicode/1f1ea-1f1f7,` &&
+      `es:unicode/1f1ea-1f1f8,` &&
+      `estonia:unicode/1f1ea-1f1ea,` &&
+      `ethiopia:unicode/1f1ea-1f1f9,` &&
+      `eu:unicode/1f1ea-1f1fa,` &&
+      `euro:unicode/1f4b6,` &&
+      `european_castle:unicode/1f3f0,` &&
+      `european_post_office:unicode/1f3e4,` &&
+      `european_union:unicode/1f1ea-1f1fa,` &&
+      `evergreen_tree:unicode/1f332,` &&
+      `exclamation:unicode/2757,` &&
+      `exploding_head:unicode/1f92f,` &&
+      `expressionless:unicode/1f611,` &&
+      `eye:unicode/1f441,` &&
+      `eye_speech_bubble:unicode/1f441-1f5e8,` &&
+      `eyeglasses:unicode/1f453,` &&
+      `eyes:unicode/1f440,` &&
+      `face_exhaling:unicode/1f62e-1f4a8,` &&
+      `face_holding_back_tears:unicode/1f979,` &&
+      `face_in_clouds:unicode/1f636-1f32b,` &&
+      `face_with_diagonal_mouth:unicode/1fae4,` &&
+      `face_with_head_bandage:unicode/1f915,` &&
+      `face_with_open_eyes_and_hand_over_mouth:unicode/1fae2,` &&
+      `face_with_peeking_eye:unicode/1fae3,` &&
+      `face_with_spiral_eyes:unicode/1f635-1f4ab,` &&
+      `face_with_thermometer:unicode/1f912,` &&
+      `facepalm:unicode/1f926,` &&
+      `facepunch:unicode/1f44a,` &&
+      `factory:unicode/1f3ed,` &&
+      `factory_worker:unicode/1f9d1-1f3ed,` &&
+      `fairy:unicode/1f9da,` &&
+      `fairy_man:unicode/1f9da-2642,` &&
+      `fairy_woman:unicode/1f9da-2640,` &&
+      `falafel:unicode/1f9c6,` &&
+      `falkland_islands:unicode/1f1eb-1f1f0,` &&
+      `fallen_leaf:unicode/1f342,` &&
+      `family:unicode/1f46a,` &&
+      `family_man_boy:unicode/1f468-1f466,` &&
+      `family_man_boy_boy:unicode/1f468-1f466-1f466,` &&
+      `family_man_girl:unicode/1f468-1f467,` &&
+      `family_man_girl_boy:unicode/1f468-1f467-1f466,` &&
+      `family_man_girl_girl:unicode/1f468-1f467-1f467,` &&
+      `family_man_man_boy:unicode/1f468-1f468-1f466,` &&
+      `family_man_man_boy_boy:unicode/1f468-1f468-1f466-1f466,` &&
+      `family_man_man_girl:unicode/1f468-1f468-1f467,` &&
+      `family_man_man_girl_boy:unicode/1f468-1f468-1f467-1f466,` &&
+      `family_man_man_girl_girl:unicode/1f468-1f468-1f467-1f467,` &&
+      `family_man_woman_boy:unicode/1f468-1f469-1f466,` &&
+      `family_man_woman_boy_boy:unicode/1f468-1f469-1f466-1f466,` &&
+      `family_man_woman_girl:unicode/1f468-1f469-1f467,` &&
+      `family_man_woman_girl_boy:unicode/1f468-1f469-1f467-1f466,` &&
+      `family_man_woman_girl_girl:unicode/1f468-1f469-1f467-1f467,` &&
+      `family_woman_boy:unicode/1f469-1f466,` &&
+      `family_woman_boy_boy:unicode/1f469-1f466-1f466,` &&
+      `family_woman_girl:unicode/1f469-1f467,` &&
+      `family_woman_girl_boy:unicode/1f469-1f467-1f466,` &&
+      `family_woman_girl_girl:unicode/1f469-1f467-1f467,` &&
+      `family_woman_woman_boy:unicode/1f469-1f469-1f466,` &&
+      `family_woman_woman_boy_boy:unicode/1f469-1f469-1f466-1f466,` &&
+      `family_woman_woman_girl:unicode/1f469-1f469-1f467,` &&
+      `family_woman_woman_girl_boy:unicode/1f469-1f469-1f467-1f466,` &&
+      `family_woman_woman_girl_girl:unicode/1f469-1f469-1f467-1f467,` &&
+      `farmer:unicode/1f9d1-1f33e,` &&
+      `faroe_islands:unicode/1f1eb-1f1f4,` &&
+      `fast_forward:unicode/23e9,` &&
+      `fax:unicode/1f4e0,` &&
+      `fearful:unicode/1f628,` &&
+      `feather:unicode/1fab6,` &&
+      `feelsgood:feelsgood,` &&
+      `feet:unicode/1f43e,` &&
+      `female_detective:unicode/1f575-2640,` &&
+      `female_sign:unicode/2640,` &&
+      `ferris_wheel:unicode/1f3a1,` &&
+      `ferry:unicode/26f4,` &&
+      `field_hockey:unicode/1f3d1,` &&
+      `fiji:unicode/1f1eb-1f1ef,` &&
+      `file_cabinet:unicode/1f5c4,` &&
+      `file_folder:unicode/1f4c1,` &&
+      `film_projector:unicode/1f4fd,` &&
+      `film_strip:unicode/1f39e,` &&
+      `finland:unicode/1f1eb-1f1ee,` &&
+      `finnadie:finnadie,` &&
+      `fire:unicode/1f525,` &&
+      `fire_engine:unicode/1f692,` &&
+      `fire_extinguisher:unicode/1f9ef,` &&
+      `firecracker:unicode/1f9e8,` &&
+      `firefighter:unicode/1f9d1-1f692,` &&
+      `fireworks:unicode/1f386,` &&
+      `first_quarter_moon:unicode/1f313,` &&
+      `first_quarter_moon_with_face:unicode/1f31b,` &&
+      `fish:unicode/1f41f,` &&
+      `fish_cake:unicode/1f365,` &&
+      `fishing_pole_and_fish:unicode/1f3a3,` &&
+      `fishsticks:fishsticks,` &&
+      `fist:unicode/270a,` &&
+      `fist_left:unicode/1f91b,` &&
+      `fist_oncoming:unicode/1f44a,` &&
+      `fist_raised:unicode/270a,` &&
+      `fist_right:unicode/1f91c,` &&
+      `five:unicode/0035-20e3,` &&
+      `flags:unicode/1f38f,` &&
+      `flamingo:unicode/1f9a9,` &&
+      `flashlight:unicode/1f526,` &&
+      `flat_shoe:unicode/1f97f,` &&
+      `flatbread:unicode/1fad3,` &&
+      `fleur_de_lis:unicode/269c,` &&
+      `flight_arrival:unicode/1f6ec,` &&
+      `flight_departure:unicode/1f6eb,` &&
+      `flipper:unicode/1f42c,` &&
+      `floppy_disk:unicode/1f4be,` &&
+      `flower_playing_cards:unicode/1f3b4,` &&
+      `flushed:unicode/1f633,` &&
+      `flute:unicode/1fa88,` &&
+      `fly:unicode/1fab0,` &&
+      `flying_disc:unicode/1f94f,` &&
+      `flying_saucer:unicode/1f6f8,` &&
+      `fog:unicode/1f32b,` &&
+      `foggy:unicode/1f301,` &&
+      `folding_hand_fan:unicode/1faad,` &&
+      `fondue:unicode/1fad5,` &&
+      `foot:unicode/1f9b6,` &&
+      `football:unicode/1f3c8,` &&
+      `footprints:unicode/1f463,` &&
+      `fork_and_knife:unicode/1f374,` &&
+      `fortune_cookie:unicode/1f960,` &&
+      `fountain:unicode/26f2,` &&
+      `fountain_pen:unicode/1f58b,` &&
+      `four:unicode/0034-20e3,` &&
+      `four_leaf_clover:unicode/1f340,` &&
+      `fox_face:unicode/1f98a,` &&
+      `fr:unicode/1f1eb-1f1f7,` &&
+      `framed_picture:unicode/1f5bc,` &&
+      `free:unicode/1f193,` &&
+      `french_guiana:unicode/1f1ec-1f1eb,` &&
+      `french_polynesia:unicode/1f1f5-1f1eb,` &&
+      `french_southern_territories:unicode/1f1f9-1f1eb,` &&
+      `fried_egg:unicode/1f373,` &&
+      `fried_shrimp:unicode/1f364,` &&
+      `fries:unicode/1f35f,` &&
+      `frog:unicode/1f438,` &&
+      `frowning:unicode/1f626,` &&
+      `frowning_face:unicode/2639,` &&
+      `frowning_man:unicode/1f64d-2642,` &&
+      `frowning_person:unicode/1f64d,` &&
+      `frowning_woman:unicode/1f64d-2640,` &&
+      `fu:unicode/1f595,` &&
+      `fuelpump:unicode/26fd,` &&
+      `full_moon:unicode/1f315,` &&
+      `full_moon_with_face:unicode/1f31d,` &&
+      `funeral_urn:unicode/26b1,` &&
+      `gabon:unicode/1f1ec-1f1e6,` &&
+      `gambia:unicode/1f1ec-1f1f2,` &&
+      `game_die:unicode/1f3b2,` &&
+      `garlic:unicode/1f9c4,` &&
+      `gb:unicode/1f1ec-1f1e7,` &&
+      `gear:unicode/2699,` &&
+      `gem:unicode/1f48e,` &&
+      `gemini:unicode/264a,` &&
+      `genie:unicode/1f9de,` &&
+      `genie_man:unicode/1f9de-2642,` &&
+      `genie_woman:unicode/1f9de-2640,` &&
+      `georgia:unicode/1f1ec-1f1ea,` &&
+      `ghana:unicode/1f1ec-1f1ed,` &&
+      `ghost:unicode/1f47b,` &&
+      `gibraltar:unicode/1f1ec-1f1ee,` &&
+      `gift:unicode/1f381,` &&
+      `gift_heart:unicode/1f49d,` &&
+      `ginger_root:unicode/1fada,` &&
+      `giraffe:unicode/1f992,` &&
+      `girl:unicode/1f467,` &&
+      `globe_with_meridians:unicode/1f310,` &&
+      `gloves:unicode/1f9e4,` &&
+      `goal_net:unicode/1f945,` &&
+      `goat:unicode/1f410,` &&
+      `goberserk:goberserk,` &&
+      `godmode:godmode,` &&
+      `goggles:unicode/1f97d,` &&
+      `golf:unicode/26f3,` &&
+      `golfing:unicode/1f3cc,` &&
+      `golfing_man:unicode/1f3cc-2642,` &&
+      `golfing_woman:unicode/1f3cc-2640,` &&
+      `goose:unicode/1fabf,` &&
+      `gorilla:unicode/1f98d,` &&
+      `grapes:unicode/1f347,` &&
+      `greece:unicode/1f1ec-1f1f7,` &&
+      `green_apple:unicode/1f34f,` &&
+      `green_book:unicode/1f4d7,` &&
+      `green_circle:unicode/1f7e2,` &&
+      `green_heart:unicode/1f49a,` &&
+      `green_salad:unicode/1f957,` &&
+      `green_square:unicode/1f7e9,` &&
+      `greenland:unicode/1f1ec-1f1f1,` &&
+      `grenada:unicode/1f1ec-1f1e9,` &&
+      `grey_exclamation:unicode/2755,` &&
+      `grey_heart:unicode/1fa76,` &&
+      `grey_question:unicode/2754,` &&
+      `grimacing:unicode/1f62c,` &&
+      `grin:unicode/1f601,` &&
+      `grinning:unicode/1f600,` &&
+      `guadeloupe:unicode/1f1ec-1f1f5,` &&
+      `guam:unicode/1f1ec-1f1fa,` &&
+      `guard:unicode/1f482,` &&
+      `guardsman:unicode/1f482-2642,` &&
+      `guardswoman:unicode/1f482-2640,` &&
+      `guatemala:unicode/1f1ec-1f1f9,` &&
+      `guernsey:unicode/1f1ec-1f1ec,` &&
+      `guide_dog:unicode/1f9ae,` &&
+      `guinea:unicode/1f1ec-1f1f3,` &&
+      `guinea_bissau:unicode/1f1ec-1f1fc,` &&
+      `guitar:unicode/1f3b8,` &&
+      `gun:unicode/1f52b,` &&
+      `guyana:unicode/1f1ec-1f1fe,` &&
+      `hair_pick:unicode/1faae,` &&
+      `haircut:unicode/1f487,` &&
+      `haircut_man:unicode/1f487-2642,` &&
+      `haircut_woman:unicode/1f487-2640,` &&
+      `haiti:unicode/1f1ed-1f1f9,` &&
+      `hamburger:unicode/1f354,` &&
+      `hammer:unicode/1f528,` &&
+      `hammer_and_pick:unicode/2692,` &&
+      `hammer_and_wrench:unicode/1f6e0,` &&
+      `hamsa:unicode/1faac,` &&
+      `hamster:unicode/1f439,` &&
+      `hand:unicode/270b,` &&
+      `hand_over_mouth:unicode/1f92d,` &&
+      `hand_with_index_finger_and_thumb_crossed:unicode/1faf0,` &&
+      `handbag:unicode/1f45c,` &&
+      `handball_person:unicode/1f93e,` &&
+      `handshake:unicode/1f91d,` &&
+      `hankey:unicode/1f4a9,` &&
+      `hash:unicode/0023-20e3,` &&
+      `hatched_chick:unicode/1f425,` &&
+      `hatching_chick:unicode/1f423,` &&
+      `headphones:unicode/1f3a7,` &&
+      `headstone:unicode/1faa6,` &&
+      `health_worker:unicode/1f9d1-2695,` &&
+      `hear_no_evil:unicode/1f649,` &&
+      `heard_mcdonald_islands:unicode/1f1ed-1f1f2,` &&
+      `heart:unicode/2764,` &&
+      `heart_decoration:unicode/1f49f,` &&
+      `heart_eyes:unicode/1f60d,` &&
+      `heart_eyes_cat:unicode/1f63b,` &&
+      `heart_hands:unicode/1faf6,` &&
+      `heart_on_fire:unicode/2764-1f525,` &&
+      `heartbeat:unicode/1f493,` &&
+      `heartpulse:unicode/1f497,` &&
+      `hearts:unicode/2665,` &&
+      `heavy_check_mark:unicode/2714,` &&
+      `heavy_division_sign:unicode/2797,` &&
+      `heavy_dollar_sign:unicode/1f4b2,` &&
+      `heavy_equals_sign:unicode/1f7f0,` &&
+      `heavy_exclamation_mark:unicode/2757,` &&
+      `heavy_heart_exclamation:unicode/2763,` &&
+      `heavy_minus_sign:unicode/2796,` &&
+      `heavy_multiplication_x:unicode/2716,` &&
+      `heavy_plus_sign:unicode/2795,` &&
+      `hedgehog:unicode/1f994,` &&
+      `helicopter:unicode/1f681,` &&
+      `herb:unicode/1f33f,` &&
+      `hibiscus:unicode/1f33a,` &&
+      `high_brightness:unicode/1f506,` &&
+      `high_heel:unicode/1f460,` &&
+      `hiking_boot:unicode/1f97e,` &&
+      `hindu_temple:unicode/1f6d5,` &&
+      `hippopotamus:unicode/1f99b,` &&
+      `hocho:unicode/1f52a,` &&
+      `hole:unicode/1f573,` &&
+      `honduras:unicode/1f1ed-1f1f3,` &&
+      `honey_pot:unicode/1f36f,` &&
+      `honeybee:unicode/1f41d,` &&
+      `hong_kong:unicode/1f1ed-1f1f0,` &&
+      `hook:unicode/1fa9d,` &&
+      `horse:unicode/1f434,` &&
+      `horse_racing:unicode/1f3c7,` &&
+      `hospital:unicode/1f3e5,` &&
+      `hot_face:unicode/1f975,` &&
+      `hot_pepper:unicode/1f336,` &&
+      `hotdog:unicode/1f32d,` &&
+      `hotel:unicode/1f3e8,` &&
+      `hotsprings:unicode/2668,` &&
+      `hourglass:unicode/231b,` &&
+      `hourglass_flowing_sand:unicode/23f3,` &&
+      `house:unicode/1f3e0,` &&
+      `house_with_garden:unicode/1f3e1,` &&
+      `houses:unicode/1f3d8,` &&
+      `hugs:unicode/1f917,` &&
+      `hungary:unicode/1f1ed-1f1fa,` &&
+      `hurtrealbad:hurtrealbad,` &&
+      `hushed:unicode/1f62f,` &&
+      `hut:unicode/1f6d6,` &&
+      `hyacinth:unicode/1fabb,` &&
+      `ice_cream:unicode/1f368,` &&
+      `ice_cube:unicode/1f9ca,` &&
+      `ice_hockey:unicode/1f3d2,` &&
+      `ice_skate:unicode/26f8,` &&
+      `icecream:unicode/1f366,` &&
+      `iceland:unicode/1f1ee-1f1f8,` &&
+      `id:unicode/1f194,` &&
+      `identification_card:unicode/1faaa,` &&
+      `ideograph_advantage:unicode/1f250,` &&
+      `imp:unicode/1f47f,` &&
+      `inbox_tray:unicode/1f4e5,` &&
+      `incoming_envelope:unicode/1f4e8,` &&
+      `index_pointing_at_the_viewer:unicode/1faf5,` &&
+      `india:unicode/1f1ee-1f1f3,` &&
+      `indonesia:unicode/1f1ee-1f1e9,` &&
+      `infinity:unicode/267e,` &&
+      `information_desk_person:unicode/1f481,` &&
+      `information_source:unicode/2139,` &&
+      `innocent:unicode/1f607,` &&
+      `interrobang:unicode/2049,` &&
+      `iphone:unicode/1f4f1,` &&
+      `iran:unicode/1f1ee-1f1f7,` &&
+      `iraq:unicode/1f1ee-1f1f6,` &&
+      `ireland:unicode/1f1ee-1f1ea,` &&
+      `isle_of_man:unicode/1f1ee-1f1f2,` &&
+      `israel:unicode/1f1ee-1f1f1,` &&
+      `it:unicode/1f1ee-1f1f9,` &&
+      `izakaya_lantern:unicode/1f3ee,` &&
+      `jack_o_lantern:unicode/1f383,` &&
+      `jamaica:unicode/1f1ef-1f1f2,` &&
+      `japan:unicode/1f5fe,` &&
+      `japanese_castle:unicode/1f3ef,` &&
+      `japanese_goblin:unicode/1f47a,` &&
+      `japanese_ogre:unicode/1f479,` &&
+      `jar:unicode/1fad9,` &&
+      `jeans:unicode/1f456,` &&
+      `jellyfish:unicode/1fabc,` &&
+      `jersey:unicode/1f1ef-1f1ea,` &&
+      `jigsaw:unicode/1f9e9,` &&
+      `jordan:unicode/1f1ef-1f1f4,` &&
+      `joy:unicode/1f602,` &&
+      `joy_cat:unicode/1f639,` &&
+      `joystick:unicode/1f579,` &&
+      `jp:unicode/1f1ef-1f1f5,` &&
+      `judge:unicode/1f9d1-2696,` &&
+      `juggling_person:unicode/1f939,` &&
+      `kaaba:unicode/1f54b,` &&
+      `kangaroo:unicode/1f998,` &&
+      `kazakhstan:unicode/1f1f0-1f1ff,` &&
+      `kenya:unicode/1f1f0-1f1ea,` &&
+      `key:unicode/1f511,` &&
+      `keyboard:unicode/2328,` &&
+      `keycap_ten:unicode/1f51f,` &&
+      `khanda:unicode/1faaf,` &&
+      `kick_scooter:unicode/1f6f4,` &&
+      `kimono:unicode/1f458,` &&
+      `kiribati:unicode/1f1f0-1f1ee,` &&
+      `kiss:unicode/1f48b,` &&
+      `kissing:unicode/1f617,` &&
+      `kissing_cat:unicode/1f63d,` &&
+      `kissing_closed_eyes:unicode/1f61a,` &&
+      `kissing_heart:unicode/1f618,` &&
+      `kissing_smiling_eyes:unicode/1f619,` &&
+      `kite:unicode/1fa81,` &&
+      `kiwi_fruit:unicode/1f95d,` &&
+      `kneeling_man:unicode/1f9ce-2642,` &&
+      `kneeling_person:unicode/1f9ce,` &&
+      `kneeling_woman:unicode/1f9ce-2640,` &&
+      `knife:unicode/1f52a,` &&
+      `knot:unicode/1faa2,` &&
+      `koala:unicode/1f428,` &&
+      `koko:unicode/1f201,` &&
+      `kosovo:unicode/1f1fd-1f1f0,` &&
+      `kr:unicode/1f1f0-1f1f7,` &&
+      `kuwait:unicode/1f1f0-1f1fc,` &&
+      `kyrgyzstan:unicode/1f1f0-1f1ec,` &&
+      `lab_coat:unicode/1f97c,` &&
+      `label:unicode/1f3f7,` &&
+      `lacrosse:unicode/1f94d,` &&
+      `ladder:unicode/1fa9c,` &&
+      `lady_beetle:unicode/1f41e,` &&
+      `lantern:unicode/1f3ee,` &&
+      `laos:unicode/1f1f1-1f1e6,` &&
+      `large_blue_circle:unicode/1f535,` &&
+      `large_blue_diamond:unicode/1f537,` &&
+      `large_orange_diamond:unicode/1f536,` &&
+      `last_quarter_moon:unicode/1f317,` &&
+      `last_quarter_moon_with_face:unicode/1f31c,` &&
+      `latin_cross:unicode/271d,` &&
+      `latvia:unicode/1f1f1-1f1fb,` &&
+      `laughing:unicode/1f606,` &&
+      `leafy_green:unicode/1f96c,` &&
+      `leaves:unicode/1f343,` &&
+      `lebanon:unicode/1f1f1-1f1e7,` &&
+      `ledger:unicode/1f4d2,` &&
+      `left_luggage:unicode/1f6c5,` &&
+      `left_right_arrow:unicode/2194,` &&
+      `left_speech_bubble:unicode/1f5e8,` &&
+      `leftwards_arrow_with_hook:unicode/21a9,` &&
+      `leftwards_hand:unicode/1faf2,` &&
+      `leftwards_pushing_hand:unicode/1faf7,` &&
+      `leg:unicode/1f9b5,` &&
+      `lemon:unicode/1f34b,` &&
+      `leo:unicode/264c,` &&
+      `leopard:unicode/1f406,` &&
+      `lesotho:unicode/1f1f1-1f1f8,` &&
+      `level_slider:unicode/1f39a,` &&
+      `liberia:unicode/1f1f1-1f1f7,` &&
+      `libra:unicode/264e,` &&
+      `libya:unicode/1f1f1-1f1fe,` &&
+      `liechtenstein:unicode/1f1f1-1f1ee,` &&
+      `light_blue_heart:unicode/1fa75,` &&
+      `light_rail:unicode/1f688,` &&
+      `link:unicode/1f517,` &&
+      `lion:unicode/1f981,` &&
+      `lips:unicode/1f444,` &&
+      `lipstick:unicode/1f484,` &&
+      `lithuania:unicode/1f1f1-1f1f9,` &&
+      `lizard:unicode/1f98e,` &&
+      `llama:unicode/1f999,` &&
+      `lobster:unicode/1f99e,` &&
+      `lock:unicode/1f512,` &&
+      `lock_with_ink_pen:unicode/1f50f,` &&
+      `lollipop:unicode/1f36d,` &&
+      `long_drum:unicode/1fa98,` &&
+      `loop:unicode/27bf,` &&
+      `lotion_bottle:unicode/1f9f4,` &&
+      `lotus:unicode/1fab7,` &&
+      `lotus_position:unicode/1f9d8,` &&
+      `lotus_position_man:unicode/1f9d8-2642,` &&
+      `lotus_position_woman:unicode/1f9d8-2640,` &&
+      `loud_sound:unicode/1f50a,` &&
+      `loudspeaker:unicode/1f4e2,` &&
+      `love_hotel:unicode/1f3e9,` &&
+      `love_letter:unicode/1f48c,` &&
+      `love_you_gesture:unicode/1f91f,` &&
+      `low_battery:unicode/1faab,` &&
+      `low_brightness:unicode/1f505,` &&
+      `luggage:unicode/1f9f3,` &&
+      `lungs:unicode/1fac1,` &&
+      `luxembourg:unicode/1f1f1-1f1fa,` &&
+      `lying_face:unicode/1f925,` &&
+      `m:unicode/24c2,` &&
+      `macau:unicode/1f1f2-1f1f4,` &&
+      `macedonia:unicode/1f1f2-1f1f0,` &&
+      `madagascar:unicode/1f1f2-1f1ec,` &&
+      `mag:unicode/1f50d,` &&
+      `mag_right:unicode/1f50e,` &&
+      `mage:unicode/1f9d9,` &&
+      `mage_man:unicode/1f9d9-2642,` &&
+      `mage_woman:unicode/1f9d9-2640,` &&
+      `magic_wand:unicode/1fa84,` &&
+      `magnet:unicode/1f9f2,` &&
+      `mahjong:unicode/1f004,` &&
+      `mailbox:unicode/1f4eb,` &&
+      `mailbox_closed:unicode/1f4ea,` &&
+      `mailbox_with_mail:unicode/1f4ec,` &&
+      `mailbox_with_no_mail:unicode/1f4ed,` &&
+      `malawi:unicode/1f1f2-1f1fc,` &&
+      `malaysia:unicode/1f1f2-1f1fe,` &&
+      `maldives:unicode/1f1f2-1f1fb,` &&
+      `male_detective:unicode/1f575-2642,` &&
+      `male_sign:unicode/2642,` &&
+      `mali:unicode/1f1f2-1f1f1,` &&
+      `malta:unicode/1f1f2-1f1f9,` &&
+      `mammoth:unicode/1f9a3,` &&
+      `man:unicode/1f468,` &&
+      `man_artist:unicode/1f468-1f3a8,` &&
+      `man_astronaut:unicode/1f468-1f680,`.
+    list = list &&
+      `man_beard:unicode/1f9d4-2642,` &&
+      `man_cartwheeling:unicode/1f938-2642,` &&
+      `man_cook:unicode/1f468-1f373,` &&
+      `man_dancing:unicode/1f57a,` &&
+      `man_facepalming:unicode/1f926-2642,` &&
+      `man_factory_worker:unicode/1f468-1f3ed,` &&
+      `man_farmer:unicode/1f468-1f33e,` &&
+      `man_feeding_baby:unicode/1f468-1f37c,` &&
+      `man_firefighter:unicode/1f468-1f692,` &&
+      `man_health_worker:unicode/1f468-2695,` &&
+      `man_in_manual_wheelchair:unicode/1f468-1f9bd,` &&
+      `man_in_motorized_wheelchair:unicode/1f468-1f9bc,` &&
+      `man_in_tuxedo:unicode/1f935-2642,` &&
+      `man_judge:unicode/1f468-2696,` &&
+      `man_juggling:unicode/1f939-2642,` &&
+      `man_mechanic:unicode/1f468-1f527,` &&
+      `man_office_worker:unicode/1f468-1f4bc,` &&
+      `man_pilot:unicode/1f468-2708,` &&
+      `man_playing_handball:unicode/1f93e-2642,` &&
+      `man_playing_water_polo:unicode/1f93d-2642,` &&
+      `man_scientist:unicode/1f468-1f52c,` &&
+      `man_shrugging:unicode/1f937-2642,` &&
+      `man_singer:unicode/1f468-1f3a4,` &&
+      `man_student:unicode/1f468-1f393,` &&
+      `man_teacher:unicode/1f468-1f3eb,` &&
+      `man_technologist:unicode/1f468-1f4bb,` &&
+      `man_with_gua_pi_mao:unicode/1f472,` &&
+      `man_with_probing_cane:unicode/1f468-1f9af,` &&
+      `man_with_turban:unicode/1f473-2642,` &&
+      `man_with_veil:unicode/1f470-2642,` &&
+      `mandarin:unicode/1f34a,` &&
+      `mango:unicode/1f96d,` &&
+      `mans_shoe:unicode/1f45e,` &&
+      `mantelpiece_clock:unicode/1f570,` &&
+      `manual_wheelchair:unicode/1f9bd,` &&
+      `maple_leaf:unicode/1f341,` &&
+      `maracas:unicode/1fa87,` &&
+      `marshall_islands:unicode/1f1f2-1f1ed,` &&
+      `martial_arts_uniform:unicode/1f94b,` &&
+      `martinique:unicode/1f1f2-1f1f6,` &&
+      `mask:unicode/1f637,` &&
+      `massage:unicode/1f486,` &&
+      `massage_man:unicode/1f486-2642,` &&
+      `massage_woman:unicode/1f486-2640,` &&
+      `mate:unicode/1f9c9,` &&
+      `mauritania:unicode/1f1f2-1f1f7,` &&
+      `mauritius:unicode/1f1f2-1f1fa,` &&
+      `mayotte:unicode/1f1fe-1f1f9,` &&
+      `meat_on_bone:unicode/1f356,` &&
+      `mechanic:unicode/1f9d1-1f527,` &&
+      `mechanical_arm:unicode/1f9be,` &&
+      `mechanical_leg:unicode/1f9bf,` &&
+      `medal_military:unicode/1f396,` &&
+      `medal_sports:unicode/1f3c5,` &&
+      `medical_symbol:unicode/2695,` &&
+      `mega:unicode/1f4e3,` &&
+      `melon:unicode/1f348,` &&
+      `melting_face:unicode/1fae0,` &&
+      `memo:unicode/1f4dd,` &&
+      `men_wrestling:unicode/1f93c-2642,` &&
+      `mending_heart:unicode/2764-1fa79,` &&
+      `menorah:unicode/1f54e,` &&
+      `mens:unicode/1f6b9,` &&
+      `mermaid:unicode/1f9dc-2640,` &&
+      `merman:unicode/1f9dc-2642,` &&
+      `merperson:unicode/1f9dc,` &&
+      `metal:unicode/1f918,` &&
+      `metro:unicode/1f687,` &&
+      `mexico:unicode/1f1f2-1f1fd,` &&
+      `microbe:unicode/1f9a0,` &&
+      `micronesia:unicode/1f1eb-1f1f2,` &&
+      `microphone:unicode/1f3a4,` &&
+      `microscope:unicode/1f52c,` &&
+      `middle_finger:unicode/1f595,` &&
+      `military_helmet:unicode/1fa96,` &&
+      `milk_glass:unicode/1f95b,` &&
+      `milky_way:unicode/1f30c,` &&
+      `minibus:unicode/1f690,` &&
+      `minidisc:unicode/1f4bd,` &&
+      `mirror:unicode/1fa9e,` &&
+      `mirror_ball:unicode/1faa9,` &&
+      `mobile_phone_off:unicode/1f4f4,` &&
+      `moldova:unicode/1f1f2-1f1e9,` &&
+      `monaco:unicode/1f1f2-1f1e8,` &&
+      `money_mouth_face:unicode/1f911,` &&
+      `money_with_wings:unicode/1f4b8,` &&
+      `moneybag:unicode/1f4b0,` &&
+      `mongolia:unicode/1f1f2-1f1f3,` &&
+      `monkey:unicode/1f412,` &&
+      `monkey_face:unicode/1f435,` &&
+      `monocle_face:unicode/1f9d0,` &&
+      `monorail:unicode/1f69d,` &&
+      `montenegro:unicode/1f1f2-1f1ea,` &&
+      `montserrat:unicode/1f1f2-1f1f8,` &&
+      `moon:unicode/1f314,` &&
+      `moon_cake:unicode/1f96e,` &&
+      `moose:unicode/1face,` &&
+      `morocco:unicode/1f1f2-1f1e6,` &&
+      `mortar_board:unicode/1f393,` &&
+      `mosque:unicode/1f54c,` &&
+      `mosquito:unicode/1f99f,` &&
+      `motor_boat:unicode/1f6e5,` &&
+      `motor_scooter:unicode/1f6f5,` &&
+      `motorcycle:unicode/1f3cd,` &&
+      `motorized_wheelchair:unicode/1f9bc,` &&
+      `motorway:unicode/1f6e3,` &&
+      `mount_fuji:unicode/1f5fb,` &&
+      `mountain:unicode/26f0,` &&
+      `mountain_bicyclist:unicode/1f6b5,` &&
+      `mountain_biking_man:unicode/1f6b5-2642,` &&
+      `mountain_biking_woman:unicode/1f6b5-2640,` &&
+      `mountain_cableway:unicode/1f6a0,` &&
+      `mountain_railway:unicode/1f69e,` &&
+      `mountain_snow:unicode/1f3d4,` &&
+      `mouse:unicode/1f42d,` &&
+      `mouse2:unicode/1f401,` &&
+      `mouse_trap:unicode/1faa4,` &&
+      `movie_camera:unicode/1f3a5,` &&
+      `moyai:unicode/1f5ff,` &&
+      `mozambique:unicode/1f1f2-1f1ff,` &&
+      `mrs_claus:unicode/1f936,` &&
+      `muscle:unicode/1f4aa,` &&
+      `mushroom:unicode/1f344,` &&
+      `musical_keyboard:unicode/1f3b9,` &&
+      `musical_note:unicode/1f3b5,` &&
+      `musical_score:unicode/1f3bc,` &&
+      `mute:unicode/1f507,` &&
+      `mx_claus:unicode/1f9d1-1f384,` &&
+      `myanmar:unicode/1f1f2-1f1f2,` &&
+      `nail_care:unicode/1f485,` &&
+      `name_badge:unicode/1f4db,` &&
+      `namibia:unicode/1f1f3-1f1e6,` &&
+      `national_park:unicode/1f3de,` &&
+      `nauru:unicode/1f1f3-1f1f7,` &&
+      `nauseated_face:unicode/1f922,` &&
+      `nazar_amulet:unicode/1f9ff,` &&
+      `neckbeard:neckbeard,` &&
+      `necktie:unicode/1f454,` &&
+      `negative_squared_cross_mark:unicode/274e,` &&
+      `nepal:unicode/1f1f3-1f1f5,` &&
+      `nerd_face:unicode/1f913,` &&
+      `nest_with_eggs:unicode/1faba,` &&
+      `nesting_dolls:unicode/1fa86,` &&
+      `netherlands:unicode/1f1f3-1f1f1,` &&
+      `neutral_face:unicode/1f610,` &&
+      `new:unicode/1f195,` &&
+      `new_caledonia:unicode/1f1f3-1f1e8,` &&
+      `new_moon:unicode/1f311,` &&
+      `new_moon_with_face:unicode/1f31a,` &&
+      `new_zealand:unicode/1f1f3-1f1ff,` &&
+      `newspaper:unicode/1f4f0,` &&
+      `newspaper_roll:unicode/1f5de,` &&
+      `next_track_button:unicode/23ed,` &&
+      `ng:unicode/1f196,` &&
+      `ng_man:unicode/1f645-2642,` &&
+      `ng_woman:unicode/1f645-2640,` &&
+      `nicaragua:unicode/1f1f3-1f1ee,` &&
+      `niger:unicode/1f1f3-1f1ea,` &&
+      `nigeria:unicode/1f1f3-1f1ec,` &&
+      `night_with_stars:unicode/1f303,` &&
+      `nine:unicode/0039-20e3,` &&
+      `ninja:unicode/1f977,` &&
+      `niue:unicode/1f1f3-1f1fa,` &&
+      `no_bell:unicode/1f515,` &&
+      `no_bicycles:unicode/1f6b3,` &&
+      `no_entry:unicode/26d4,` &&
+      `no_entry_sign:unicode/1f6ab,` &&
+      `no_good:unicode/1f645,` &&
+      `no_good_man:unicode/1f645-2642,` &&
+      `no_good_woman:unicode/1f645-2640,` &&
+      `no_mobile_phones:unicode/1f4f5,` &&
+      `no_mouth:unicode/1f636,` &&
+      `no_pedestrians:unicode/1f6b7,` &&
+      `no_smoking:unicode/1f6ad,` &&
+      `non-potable_water:unicode/1f6b1,` &&
+      `norfolk_island:unicode/1f1f3-1f1eb,` &&
+      `north_korea:unicode/1f1f0-1f1f5,` &&
+      `northern_mariana_islands:unicode/1f1f2-1f1f5,` &&
+      `norway:unicode/1f1f3-1f1f4,` &&
+      `nose:unicode/1f443,` &&
+      `notebook:unicode/1f4d3,` &&
+      `notebook_with_decorative_cover:unicode/1f4d4,` &&
+      `notes:unicode/1f3b6,` &&
+      `nut_and_bolt:unicode/1f529,` &&
+      `o:unicode/2b55,` &&
+      `o2:unicode/1f17e,` &&
+      `ocean:unicode/1f30a,` &&
+      `octocat:octocat,` &&
+      `octopus:unicode/1f419,` &&
+      `oden:unicode/1f362,` &&
+      `office:unicode/1f3e2,` &&
+      `office_worker:unicode/1f9d1-1f4bc,` &&
+      `oil_drum:unicode/1f6e2,` &&
+      `ok:unicode/1f197,` &&
+      `ok_hand:unicode/1f44c,` &&
+      `ok_man:unicode/1f646-2642,` &&
+      `ok_person:unicode/1f646,` &&
+      `ok_woman:unicode/1f646-2640,` &&
+      `old_key:unicode/1f5dd,` &&
+      `older_adult:unicode/1f9d3,` &&
+      `older_man:unicode/1f474,` &&
+      `older_woman:unicode/1f475,` &&
+      `olive:unicode/1fad2,` &&
+      `om:unicode/1f549,` &&
+      `oman:unicode/1f1f4-1f1f2,` &&
+      `on:unicode/1f51b,` &&
+      `oncoming_automobile:unicode/1f698,` &&
+      `oncoming_bus:unicode/1f68d,` &&
+      `oncoming_police_car:unicode/1f694,` &&
+      `oncoming_taxi:unicode/1f696,` &&
+      `one:unicode/0031-20e3,` &&
+      `one_piece_swimsuit:unicode/1fa71,` &&
+      `onion:unicode/1f9c5,` &&
+      `open_book:unicode/1f4d6,` &&
+      `open_file_folder:unicode/1f4c2,` &&
+      `open_hands:unicode/1f450,` &&
+      `open_mouth:unicode/1f62e,` &&
+      `open_umbrella:unicode/2602,` &&
+      `ophiuchus:unicode/26ce,` &&
+      `orange:unicode/1f34a,` &&
+      `orange_book:unicode/1f4d9,` &&
+      `orange_circle:unicode/1f7e0,` &&
+      `orange_heart:unicode/1f9e1,` &&
+      `orange_square:unicode/1f7e7,` &&
+      `orangutan:unicode/1f9a7,` &&
+      `orthodox_cross:unicode/2626,` &&
+      `otter:unicode/1f9a6,` &&
+      `outbox_tray:unicode/1f4e4,` &&
+      `owl:unicode/1f989,` &&
+      `ox:unicode/1f402,` &&
+      `oyster:unicode/1f9aa,` &&
+      `package:unicode/1f4e6,` &&
+      `page_facing_up:unicode/1f4c4,` &&
+      `page_with_curl:unicode/1f4c3,` &&
+      `pager:unicode/1f4df,` &&
+      `paintbrush:unicode/1f58c,` &&
+      `pakistan:unicode/1f1f5-1f1f0,` &&
+      `palau:unicode/1f1f5-1f1fc,` &&
+      `palestinian_territories:unicode/1f1f5-1f1f8,` &&
+      `palm_down_hand:unicode/1faf3,` &&
+      `palm_tree:unicode/1f334,` &&
+      `palm_up_hand:unicode/1faf4,` &&
+      `palms_up_together:unicode/1f932,` &&
+      `panama:unicode/1f1f5-1f1e6,` &&
+      `pancakes:unicode/1f95e,` &&
+      `panda_face:unicode/1f43c,` &&
+      `paperclip:unicode/1f4ce,` &&
+      `paperclips:unicode/1f587,` &&
+      `papua_new_guinea:unicode/1f1f5-1f1ec,` &&
+      `parachute:unicode/1fa82,` &&
+      `paraguay:unicode/1f1f5-1f1fe,` &&
+      `parasol_on_ground:unicode/26f1,` &&
+      `parking:unicode/1f17f,` &&
+      `parrot:unicode/1f99c,` &&
+      `part_alternation_mark:unicode/303d,` &&
+      `partly_sunny:unicode/26c5,` &&
+      `partying_face:unicode/1f973,` &&
+      `passenger_ship:unicode/1f6f3,` &&
+      `passport_control:unicode/1f6c2,` &&
+      `pause_button:unicode/23f8,` &&
+      `paw_prints:unicode/1f43e,` &&
+      `pea_pod:unicode/1fadb,` &&
+      `peace_symbol:unicode/262e,` &&
+      `peach:unicode/1f351,` &&
+      `peacock:unicode/1f99a,` &&
+      `peanuts:unicode/1f95c,` &&
+      `pear:unicode/1f350,` &&
+      `pen:unicode/1f58a,` &&
+      `pencil:unicode/1f4dd,` &&
+      `pencil2:unicode/270f,` &&
+      `penguin:unicode/1f427,` &&
+      `pensive:unicode/1f614,` &&
+      `people_holding_hands:unicode/1f9d1-1f91d-1f9d1,` &&
+      `people_hugging:unicode/1fac2,` &&
+      `performing_arts:unicode/1f3ad,` &&
+      `persevere:unicode/1f623,` &&
+      `person_bald:unicode/1f9d1-1f9b2,` &&
+      `person_curly_hair:unicode/1f9d1-1f9b1,` &&
+      `person_feeding_baby:unicode/1f9d1-1f37c,` &&
+      `person_fencing:unicode/1f93a,` &&
+      `person_in_manual_wheelchair:unicode/1f9d1-1f9bd,` &&
+      `person_in_motorized_wheelchair:unicode/1f9d1-1f9bc,` &&
+      `person_in_tuxedo:unicode/1f935,` &&
+      `person_red_hair:unicode/1f9d1-1f9b0,` &&
+      `person_white_hair:unicode/1f9d1-1f9b3,` &&
+      `person_with_crown:unicode/1fac5,` &&
+      `person_with_probing_cane:unicode/1f9d1-1f9af,` &&
+      `person_with_turban:unicode/1f473,` &&
+      `person_with_veil:unicode/1f470,` &&
+      `peru:unicode/1f1f5-1f1ea,` &&
+      `petri_dish:unicode/1f9eb,` &&
+      `philippines:unicode/1f1f5-1f1ed,` &&
+      `phone:unicode/260e,` &&
+      `pick:unicode/26cf,` &&
+      `pickup_truck:unicode/1f6fb,` &&
+      `pie:unicode/1f967,` &&
+      `pig:unicode/1f437,` &&
+      `pig2:unicode/1f416,` &&
+      `pig_nose:unicode/1f43d,` &&
+      `pill:unicode/1f48a,` &&
+      `pilot:unicode/1f9d1-2708,` &&
+      `pinata:unicode/1fa85,` &&
+      `pinched_fingers:unicode/1f90c,` &&
+      `pinching_hand:unicode/1f90f,` &&
+      `pineapple:unicode/1f34d,` &&
+      `ping_pong:unicode/1f3d3,` &&
+      `pink_heart:unicode/1fa77,` &&
+      `pirate_flag:unicode/1f3f4-2620,` &&
+      `pisces:unicode/2653,` &&
+      `pitcairn_islands:unicode/1f1f5-1f1f3,` &&
+      `pizza:unicode/1f355,` &&
+      `placard:unicode/1faa7,` &&
+      `place_of_worship:unicode/1f6d0,` &&
+      `plate_with_cutlery:unicode/1f37d,` &&
+      `play_or_pause_button:unicode/23ef,` &&
+      `playground_slide:unicode/1f6dd,` &&
+      `pleading_face:unicode/1f97a,` &&
+      `plunger:unicode/1faa0,` &&
+      `point_down:unicode/1f447,` &&
+      `point_left:unicode/1f448,` &&
+      `point_right:unicode/1f449,` &&
+      `point_up:unicode/261d,` &&
+      `point_up_2:unicode/1f446,` &&
+      `poland:unicode/1f1f5-1f1f1,` &&
+      `polar_bear:unicode/1f43b-2744,` &&
+      `police_car:unicode/1f693,` &&
+      `police_officer:unicode/1f46e,` &&
+      `policeman:unicode/1f46e-2642,` &&
+      `policewoman:unicode/1f46e-2640,` &&
+      `poodle:unicode/1f429,` &&
+      `poop:unicode/1f4a9,` &&
+      `popcorn:unicode/1f37f,` &&
+      `portugal:unicode/1f1f5-1f1f9,` &&
+      `post_office:unicode/1f3e3,` &&
+      `postal_horn:unicode/1f4ef,` &&
+      `postbox:unicode/1f4ee,` &&
+      `potable_water:unicode/1f6b0,` &&
+      `potato:unicode/1f954,` &&
+      `potted_plant:unicode/1fab4,` &&
+      `pouch:unicode/1f45d,` &&
+      `poultry_leg:unicode/1f357,` &&
+      `pound:unicode/1f4b7,` &&
+      `pouring_liquid:unicode/1fad7,` &&
+      `pout:unicode/1f621,` &&
+      `pouting_cat:unicode/1f63e,` &&
+      `pouting_face:unicode/1f64e,` &&
+      `pouting_man:unicode/1f64e-2642,` &&
+      `pouting_woman:unicode/1f64e-2640,` &&
+      `pray:unicode/1f64f,` &&
+      `prayer_beads:unicode/1f4ff,` &&
+      `pregnant_man:unicode/1fac3,` &&
+      `pregnant_person:unicode/1fac4,` &&
+      `pregnant_woman:unicode/1f930,` &&
+      `pretzel:unicode/1f968,` &&
+      `previous_track_button:unicode/23ee,` &&
+      `prince:unicode/1f934,` &&
+      `princess:unicode/1f478,` &&
+      `printer:unicode/1f5a8,` &&
+      `probing_cane:unicode/1f9af,` &&
+      `puerto_rico:unicode/1f1f5-1f1f7,` &&
+      `punch:unicode/1f44a,` &&
+      `purple_circle:unicode/1f7e3,` &&
+      `purple_heart:unicode/1f49c,` &&
+      `purple_square:unicode/1f7ea,` &&
+      `purse:unicode/1f45b,` &&
+      `pushpin:unicode/1f4cc,` &&
+      `put_litter_in_its_place:unicode/1f6ae,` &&
+      `qatar:unicode/1f1f6-1f1e6,` &&
+      `question:unicode/2753,` &&
+      `rabbit:unicode/1f430,` &&
+      `rabbit2:unicode/1f407,` &&
+      `raccoon:unicode/1f99d,` &&
+      `racehorse:unicode/1f40e,` &&
+      `racing_car:unicode/1f3ce,` &&
+      `radio:unicode/1f4fb,` &&
+      `radio_button:unicode/1f518,` &&
+      `radioactive:unicode/2622,` &&
+      `rage:unicode/1f621,` &&
+      `rage1:rage1,` &&
+      `rage2:rage2,` &&
+      `rage3:rage3,` &&
+      `rage4:rage4,` &&
+      `railway_car:unicode/1f683,` &&
+      `railway_track:unicode/1f6e4,` &&
+      `rainbow:unicode/1f308,` &&
+      `rainbow_flag:unicode/1f3f3-1f308,` &&
+      `raised_back_of_hand:unicode/1f91a,` &&
+      `raised_eyebrow:unicode/1f928,` &&
+      `raised_hand:unicode/270b,` &&
+      `raised_hand_with_fingers_splayed:unicode/1f590,` &&
+      `raised_hands:unicode/1f64c,` &&
+      `raising_hand:unicode/1f64b,` &&
+      `raising_hand_man:unicode/1f64b-2642,` &&
+      `raising_hand_woman:unicode/1f64b-2640,` &&
+      `ram:unicode/1f40f,` &&
+      `ramen:unicode/1f35c,` &&
+      `rat:unicode/1f400,` &&
+      `razor:unicode/1fa92,` &&
+      `receipt:unicode/1f9fe,` &&
+      `record_button:unicode/23fa,` &&
+      `recycle:unicode/267b,` &&
+      `red_car:unicode/1f697,` &&
+      `red_circle:unicode/1f534,` &&
+      `red_envelope:unicode/1f9e7,` &&
+      `red_haired_man:unicode/1f468-1f9b0,` &&
+      `red_haired_woman:unicode/1f469-1f9b0,` &&
+      `red_square:unicode/1f7e5,` &&
+      `registered:unicode/00ae,` &&
+      `relaxed:unicode/263a,` &&
+      `relieved:unicode/1f60c,` &&
+      `reminder_ribbon:unicode/1f397,` &&
+      `repeat:unicode/1f501,` &&
+      `repeat_one:unicode/1f502,` &&
+      `rescue_worker_helmet:unicode/26d1,` &&
+      `restroom:unicode/1f6bb,` &&
+      `reunion:unicode/1f1f7-1f1ea,` &&
+      `revolving_hearts:unicode/1f49e,` &&
+      `rewind:unicode/23ea,` &&
+      `rhinoceros:unicode/1f98f,` &&
+      `ribbon:unicode/1f380,` &&
+      `rice:unicode/1f35a,` &&
+      `rice_ball:unicode/1f359,` &&
+      `rice_cracker:unicode/1f358,` &&
+      `rice_scene:unicode/1f391,` &&
+      `right_anger_bubble:unicode/1f5ef,` &&
+      `rightwards_hand:unicode/1faf1,` &&
+      `rightwards_pushing_hand:unicode/1faf8,` &&
+      `ring:unicode/1f48d,` &&
+      `ring_buoy:unicode/1f6df,` &&
+      `ringed_planet:unicode/1fa90,` &&
+      `robot:unicode/1f916,` &&
+      `rock:unicode/1faa8,` &&
+      `rocket:unicode/1f680,` &&
+      `rofl:unicode/1f923,` &&
+      `roll_eyes:unicode/1f644,` &&
+      `roll_of_paper:unicode/1f9fb,` &&
+      `roller_coaster:unicode/1f3a2,` &&
+      `roller_skate:unicode/1f6fc,` &&
+      `romania:unicode/1f1f7-1f1f4,` &&
+      `rooster:unicode/1f413,` &&
+      `rose:unicode/1f339,` &&
+      `rosette:unicode/1f3f5,` &&
+      `rotating_light:unicode/1f6a8,` &&
+      `round_pushpin:unicode/1f4cd,` &&
+      `rowboat:unicode/1f6a3,` &&
+      `rowing_man:unicode/1f6a3-2642,` &&
+      `rowing_woman:unicode/1f6a3-2640,` &&
+      `ru:unicode/1f1f7-1f1fa,` &&
+      `rugby_football:unicode/1f3c9,` &&
+      `runner:unicode/1f3c3,` &&
+      `running:unicode/1f3c3,` &&
+      `running_man:unicode/1f3c3-2642,` &&
+      `running_shirt_with_sash:unicode/1f3bd,` &&
+      `running_woman:unicode/1f3c3-2640,` &&
+      `rwanda:unicode/1f1f7-1f1fc,` &&
+      `sa:unicode/1f202,` &&
+      `safety_pin:unicode/1f9f7,` &&
+      `safety_vest:unicode/1f9ba,` &&
+      `sagittarius:unicode/2650,` &&
+      `sailboat:unicode/26f5,` &&
+      `sake:unicode/1f376,` &&
+      `salt:unicode/1f9c2,` &&
+      `saluting_face:unicode/1fae1,` &&
+      `samoa:unicode/1f1fc-1f1f8,` &&
+      `san_marino:unicode/1f1f8-1f1f2,` &&
+      `sandal:unicode/1f461,` &&
+      `sandwich:unicode/1f96a,` &&
+      `santa:unicode/1f385,` &&
+      `sao_tome_principe:unicode/1f1f8-1f1f9,` &&
+      `sari:unicode/1f97b,` &&
+      `sassy_man:unicode/1f481-2642,` &&
+      `sassy_woman:unicode/1f481-2640,` &&
+      `satellite:unicode/1f4e1,` &&
+      `satisfied:unicode/1f606,` &&
+      `saudi_arabia:unicode/1f1f8-1f1e6,` &&
+      `sauna_man:unicode/1f9d6-2642,` &&
+      `sauna_person:unicode/1f9d6,` &&
+      `sauna_woman:unicode/1f9d6-2640,` &&
+      `sauropod:unicode/1f995,` &&
+      `saxophone:unicode/1f3b7,` &&
+      `scarf:unicode/1f9e3,` &&
+      `school:unicode/1f3eb,` &&
+      `school_satchel:unicode/1f392,` &&
+      `scientist:unicode/1f9d1-1f52c,` &&
+      `scissors:unicode/2702,` &&
+      `scorpion:unicode/1f982,` &&
+      `scorpius:unicode/264f,` &&
+      `scotland:unicode/1f3f4-e0067-e0062-e0073-e0063-e0074-e007f,` &&
+      `scream:unicode/1f631,` &&
+      `scream_cat:unicode/1f640,` &&
+      `screwdriver:unicode/1fa9b,` &&
+      `scroll:unicode/1f4dc,` &&
+      `seal:unicode/1f9ad,` &&
+      `seat:unicode/1f4ba,` &&
+      `secret:unicode/3299,` &&
+      `see_no_evil:unicode/1f648,` &&
+      `seedling:unicode/1f331,` &&
+      `selfie:unicode/1f933,` &&
+      `senegal:unicode/1f1f8-1f1f3,`.
+    list = list &&
+      `serbia:unicode/1f1f7-1f1f8,` &&
+      `service_dog:unicode/1f415-1f9ba,` &&
+      `seven:unicode/0037-20e3,` &&
+      `sewing_needle:unicode/1faa1,` &&
+      `seychelles:unicode/1f1f8-1f1e8,` &&
+      `shaking_face:unicode/1fae8,` &&
+      `shallow_pan_of_food:unicode/1f958,` &&
+      `shamrock:unicode/2618,` &&
+      `shark:unicode/1f988,` &&
+      `shaved_ice:unicode/1f367,` &&
+      `sheep:unicode/1f411,` &&
+      `shell:unicode/1f41a,` &&
+      `shield:unicode/1f6e1,` &&
+      `shinto_shrine:unicode/26e9,` &&
+      `ship:unicode/1f6a2,` &&
+      `shipit:shipit,` &&
+      `shirt:unicode/1f455,` &&
+      `shit:unicode/1f4a9,` &&
+      `shoe:unicode/1f45e,` &&
+      `shopping:unicode/1f6cd,` &&
+      `shopping_cart:unicode/1f6d2,` &&
+      `shorts:unicode/1fa73,` &&
+      `shower:unicode/1f6bf,` &&
+      `shrimp:unicode/1f990,` &&
+      `shrug:unicode/1f937,` &&
+      `shushing_face:unicode/1f92b,` &&
+      `sierra_leone:unicode/1f1f8-1f1f1,` &&
+      `signal_strength:unicode/1f4f6,` &&
+      `singapore:unicode/1f1f8-1f1ec,` &&
+      `singer:unicode/1f9d1-1f3a4,` &&
+      `sint_maarten:unicode/1f1f8-1f1fd,` &&
+      `six:unicode/0036-20e3,` &&
+      `six_pointed_star:unicode/1f52f,` &&
+      `skateboard:unicode/1f6f9,` &&
+      `ski:unicode/1f3bf,` &&
+      `skier:unicode/26f7,` &&
+      `skull:unicode/1f480,` &&
+      `skull_and_crossbones:unicode/2620,` &&
+      `skunk:unicode/1f9a8,` &&
+      `sled:unicode/1f6f7,` &&
+      `sleeping:unicode/1f634,` &&
+      `sleeping_bed:unicode/1f6cc,` &&
+      `sleepy:unicode/1f62a,` &&
+      `slightly_frowning_face:unicode/1f641,` &&
+      `slightly_smiling_face:unicode/1f642,` &&
+      `slot_machine:unicode/1f3b0,` &&
+      `sloth:unicode/1f9a5,` &&
+      `slovakia:unicode/1f1f8-1f1f0,` &&
+      `slovenia:unicode/1f1f8-1f1ee,` &&
+      `small_airplane:unicode/1f6e9,` &&
+      `small_blue_diamond:unicode/1f539,` &&
+      `small_orange_diamond:unicode/1f538,` &&
+      `small_red_triangle:unicode/1f53a,` &&
+      `small_red_triangle_down:unicode/1f53b,` &&
+      `smile:unicode/1f604,` &&
+      `smile_cat:unicode/1f638,` &&
+      `smiley:unicode/1f603,` &&
+      `smiley_cat:unicode/1f63a,` &&
+      `smiling_face_with_tear:unicode/1f972,` &&
+      `smiling_face_with_three_hearts:unicode/1f970,` &&
+      `smiling_imp:unicode/1f608,` &&
+      `smirk:unicode/1f60f,` &&
+      `smirk_cat:unicode/1f63c,` &&
+      `smoking:unicode/1f6ac,` &&
+      `snail:unicode/1f40c,` &&
+      `snake:unicode/1f40d,` &&
+      `sneezing_face:unicode/1f927,` &&
+      `snowboarder:unicode/1f3c2,` &&
+      `snowflake:unicode/2744,` &&
+      `snowman:unicode/26c4,` &&
+      `snowman_with_snow:unicode/2603,` &&
+      `soap:unicode/1f9fc,` &&
+      `sob:unicode/1f62d,` &&
+      `soccer:unicode/26bd,` &&
+      `socks:unicode/1f9e6,` &&
+      `softball:unicode/1f94e,` &&
+      `solomon_islands:unicode/1f1f8-1f1e7,` &&
+      `somalia:unicode/1f1f8-1f1f4,` &&
+      `soon:unicode/1f51c,` &&
+      `sos:unicode/1f198,` &&
+      `sound:unicode/1f509,` &&
+      `south_africa:unicode/1f1ff-1f1e6,` &&
+      `south_georgia_south_sandwich_islands:unicode/1f1ec-1f1f8,` &&
+      `south_sudan:unicode/1f1f8-1f1f8,` &&
+      `space_invader:unicode/1f47e,` &&
+      `spades:unicode/2660,` &&
+      `spaghetti:unicode/1f35d,` &&
+      `sparkle:unicode/2747,` &&
+      `sparkler:unicode/1f387,` &&
+      `sparkles:unicode/2728,` &&
+      `sparkling_heart:unicode/1f496,` &&
+      `speak_no_evil:unicode/1f64a,` &&
+      `speaker:unicode/1f508,` &&
+      `speaking_head:unicode/1f5e3,` &&
+      `speech_balloon:unicode/1f4ac,` &&
+      `speedboat:unicode/1f6a4,` &&
+      `spider:unicode/1f577,` &&
+      `spider_web:unicode/1f578,` &&
+      `spiral_calendar:unicode/1f5d3,` &&
+      `spiral_notepad:unicode/1f5d2,` &&
+      `sponge:unicode/1f9fd,` &&
+      `spoon:unicode/1f944,` &&
+      `squid:unicode/1f991,` &&
+      `sri_lanka:unicode/1f1f1-1f1f0,` &&
+      `st_barthelemy:unicode/1f1e7-1f1f1,` &&
+      `st_helena:unicode/1f1f8-1f1ed,` &&
+      `st_kitts_nevis:unicode/1f1f0-1f1f3,` &&
+      `st_lucia:unicode/1f1f1-1f1e8,` &&
+      `st_martin:unicode/1f1f2-1f1eb,` &&
+      `st_pierre_miquelon:unicode/1f1f5-1f1f2,` &&
+      `st_vincent_grenadines:unicode/1f1fb-1f1e8,` &&
+      `stadium:unicode/1f3df,` &&
+      `standing_man:unicode/1f9cd-2642,` &&
+      `standing_person:unicode/1f9cd,` &&
+      `standing_woman:unicode/1f9cd-2640,` &&
+      `star:unicode/2b50,` &&
+      `star2:unicode/1f31f,` &&
+      `star_and_crescent:unicode/262a,` &&
+      `star_of_david:unicode/2721,` &&
+      `star_struck:unicode/1f929,` &&
+      `stars:unicode/1f320,` &&
+      `station:unicode/1f689,` &&
+      `statue_of_liberty:unicode/1f5fd,` &&
+      `steam_locomotive:unicode/1f682,` &&
+      `stethoscope:unicode/1fa7a,` &&
+      `stew:unicode/1f372,` &&
+      `stop_button:unicode/23f9,` &&
+      `stop_sign:unicode/1f6d1,` &&
+      `stopwatch:unicode/23f1,` &&
+      `straight_ruler:unicode/1f4cf,` &&
+      `strawberry:unicode/1f353,` &&
+      `stuck_out_tongue:unicode/1f61b,` &&
+      `stuck_out_tongue_closed_eyes:unicode/1f61d,` &&
+      `stuck_out_tongue_winking_eye:unicode/1f61c,` &&
+      `student:unicode/1f9d1-1f393,` &&
+      `studio_microphone:unicode/1f399,` &&
+      `stuffed_flatbread:unicode/1f959,` &&
+      `sudan:unicode/1f1f8-1f1e9,` &&
+      `sun_behind_large_cloud:unicode/1f325,` &&
+      `sun_behind_rain_cloud:unicode/1f326,` &&
+      `sun_behind_small_cloud:unicode/1f324,` &&
+      `sun_with_face:unicode/1f31e,` &&
+      `sunflower:unicode/1f33b,` &&
+      `sunglasses:unicode/1f60e,` &&
+      `sunny:unicode/2600,` &&
+      `sunrise:unicode/1f305,` &&
+      `sunrise_over_mountains:unicode/1f304,` &&
+      `superhero:unicode/1f9b8,` &&
+      `superhero_man:unicode/1f9b8-2642,` &&
+      `superhero_woman:unicode/1f9b8-2640,` &&
+      `supervillain:unicode/1f9b9,` &&
+      `supervillain_man:unicode/1f9b9-2642,` &&
+      `supervillain_woman:unicode/1f9b9-2640,` &&
+      `surfer:unicode/1f3c4,` &&
+      `surfing_man:unicode/1f3c4-2642,` &&
+      `surfing_woman:unicode/1f3c4-2640,` &&
+      `suriname:unicode/1f1f8-1f1f7,` &&
+      `sushi:unicode/1f363,` &&
+      `suspect:suspect,` &&
+      `suspension_railway:unicode/1f69f,` &&
+      `svalbard_jan_mayen:unicode/1f1f8-1f1ef,` &&
+      `swan:unicode/1f9a2,` &&
+      `swaziland:unicode/1f1f8-1f1ff,` &&
+      `sweat:unicode/1f613,` &&
+      `sweat_drops:unicode/1f4a6,` &&
+      `sweat_smile:unicode/1f605,` &&
+      `sweden:unicode/1f1f8-1f1ea,` &&
+      `sweet_potato:unicode/1f360,` &&
+      `swim_brief:unicode/1fa72,` &&
+      `swimmer:unicode/1f3ca,` &&
+      `swimming_man:unicode/1f3ca-2642,` &&
+      `swimming_woman:unicode/1f3ca-2640,` &&
+      `switzerland:unicode/1f1e8-1f1ed,` &&
+      `symbols:unicode/1f523,` &&
+      `synagogue:unicode/1f54d,` &&
+      `syria:unicode/1f1f8-1f1fe,` &&
+      `syringe:unicode/1f489,` &&
+      `t-rex:unicode/1f996,` &&
+      `taco:unicode/1f32e,` &&
+      `tada:unicode/1f389,` &&
+      `taiwan:unicode/1f1f9-1f1fc,` &&
+      `tajikistan:unicode/1f1f9-1f1ef,` &&
+      `takeout_box:unicode/1f961,` &&
+      `tamale:unicode/1fad4,` &&
+      `tanabata_tree:unicode/1f38b,` &&
+      `tangerine:unicode/1f34a,` &&
+      `tanzania:unicode/1f1f9-1f1ff,` &&
+      `taurus:unicode/2649,` &&
+      `taxi:unicode/1f695,` &&
+      `tea:unicode/1f375,` &&
+      `teacher:unicode/1f9d1-1f3eb,` &&
+      `teapot:unicode/1fad6,` &&
+      `technologist:unicode/1f9d1-1f4bb,` &&
+      `teddy_bear:unicode/1f9f8,` &&
+      `telephone:unicode/260e,` &&
+      `telephone_receiver:unicode/1f4de,` &&
+      `telescope:unicode/1f52d,` &&
+      `tennis:unicode/1f3be,` &&
+      `tent:unicode/26fa,` &&
+      `test_tube:unicode/1f9ea,` &&
+      `thailand:unicode/1f1f9-1f1ed,` &&
+      `thermometer:unicode/1f321,` &&
+      `thinking:unicode/1f914,` &&
+      `thong_sandal:unicode/1fa74,` &&
+      `thought_balloon:unicode/1f4ad,` &&
+      `thread:unicode/1f9f5,` &&
+      `three:unicode/0033-20e3,` &&
+      `thumbsdown:unicode/1f44e,` &&
+      `thumbsup:unicode/1f44d,` &&
+      `ticket:unicode/1f3ab,` &&
+      `tickets:unicode/1f39f,` &&
+      `tiger:unicode/1f42f,` &&
+      `tiger2:unicode/1f405,` &&
+      `timer_clock:unicode/23f2,` &&
+      `timor_leste:unicode/1f1f9-1f1f1,` &&
+      `tipping_hand_man:unicode/1f481-2642,` &&
+      `tipping_hand_person:unicode/1f481,` &&
+      `tipping_hand_woman:unicode/1f481-2640,` &&
+      `tired_face:unicode/1f62b,` &&
+      `tm:unicode/2122,` &&
+      `togo:unicode/1f1f9-1f1ec,` &&
+      `toilet:unicode/1f6bd,` &&
+      `tokelau:unicode/1f1f9-1f1f0,` &&
+      `tokyo_tower:unicode/1f5fc,` &&
+      `tomato:unicode/1f345,` &&
+      `tonga:unicode/1f1f9-1f1f4,` &&
+      `tongue:unicode/1f445,` &&
+      `toolbox:unicode/1f9f0,` &&
+      `tooth:unicode/1f9b7,` &&
+      `toothbrush:unicode/1faa5,` &&
+      `top:unicode/1f51d,` &&
+      `tophat:unicode/1f3a9,` &&
+      `tornado:unicode/1f32a,` &&
+      `tr:unicode/1f1f9-1f1f7,` &&
+      `trackball:unicode/1f5b2,` &&
+      `tractor:unicode/1f69c,` &&
+      `traffic_light:unicode/1f6a5,` &&
+      `train:unicode/1f68b,` &&
+      `train2:unicode/1f686,` &&
+      `tram:unicode/1f68a,` &&
+      `transgender_flag:unicode/1f3f3-26a7,` &&
+      `transgender_symbol:unicode/26a7,` &&
+      `triangular_flag_on_post:unicode/1f6a9,` &&
+      `triangular_ruler:unicode/1f4d0,` &&
+      `trident:unicode/1f531,` &&
+      `trinidad_tobago:unicode/1f1f9-1f1f9,` &&
+      `tristan_da_cunha:unicode/1f1f9-1f1e6,` &&
+      `triumph:unicode/1f624,` &&
+      `troll:unicode/1f9cc,` &&
+      `trolleybus:unicode/1f68e,` &&
+      `trollface:trollface,` &&
+      `trophy:unicode/1f3c6,` &&
+      `tropical_drink:unicode/1f379,` &&
+      `tropical_fish:unicode/1f420,` &&
+      `truck:unicode/1f69a,` &&
+      `trumpet:unicode/1f3ba,` &&
+      `tshirt:unicode/1f455,` &&
+      `tulip:unicode/1f337,` &&
+      `tumbler_glass:unicode/1f943,` &&
+      `tunisia:unicode/1f1f9-1f1f3,` &&
+      `turkey:unicode/1f983,` &&
+      `turkmenistan:unicode/1f1f9-1f1f2,` &&
+      `turks_caicos_islands:unicode/1f1f9-1f1e8,` &&
+      `turtle:unicode/1f422,` &&
+      `tuvalu:unicode/1f1f9-1f1fb,` &&
+      `tv:unicode/1f4fa,` &&
+      `twisted_rightwards_arrows:unicode/1f500,` &&
+      `two:unicode/0032-20e3,` &&
+      `two_hearts:unicode/1f495,` &&
+      `two_men_holding_hands:unicode/1f46c,` &&
+      `two_women_holding_hands:unicode/1f46d,` &&
+      `u5272:unicode/1f239,` &&
+      `u5408:unicode/1f234,` &&
+      `u55b6:unicode/1f23a,` &&
+      `u6307:unicode/1f22f,` &&
+      `u6708:unicode/1f237,` &&
+      `u6709:unicode/1f236,` &&
+      `u6e80:unicode/1f235,` &&
+      `u7121:unicode/1f21a,` &&
+      `u7533:unicode/1f238,` &&
+      `u7981:unicode/1f232,` &&
+      `u7a7a:unicode/1f233,` &&
+      `uganda:unicode/1f1fa-1f1ec,` &&
+      `uk:unicode/1f1ec-1f1e7,` &&
+      `ukraine:unicode/1f1fa-1f1e6,` &&
+      `umbrella:unicode/2614,` &&
+      `unamused:unicode/1f612,` &&
+      `underage:unicode/1f51e,` &&
+      `unicorn:unicode/1f984,` &&
+      `united_arab_emirates:unicode/1f1e6-1f1ea,` &&
+      `united_nations:unicode/1f1fa-1f1f3,` &&
+      `unlock:unicode/1f513,` &&
+      `up:unicode/1f199,` &&
+      `upside_down_face:unicode/1f643,` &&
+      `uruguay:unicode/1f1fa-1f1fe,` &&
+      `us:unicode/1f1fa-1f1f8,` &&
+      `us_outlying_islands:unicode/1f1fa-1f1f2,` &&
+      `us_virgin_islands:unicode/1f1fb-1f1ee,` &&
+      `uzbekistan:unicode/1f1fa-1f1ff,` &&
+      `v:unicode/270c,` &&
+      `vampire:unicode/1f9db,` &&
+      `vampire_man:unicode/1f9db-2642,` &&
+      `vampire_woman:unicode/1f9db-2640,` &&
+      `vanuatu:unicode/1f1fb-1f1fa,` &&
+      `vatican_city:unicode/1f1fb-1f1e6,` &&
+      `venezuela:unicode/1f1fb-1f1ea,` &&
+      `vertical_traffic_light:unicode/1f6a6,` &&
+      `vhs:unicode/1f4fc,` &&
+      `vibration_mode:unicode/1f4f3,` &&
+      `video_camera:unicode/1f4f9,` &&
+      `video_game:unicode/1f3ae,` &&
+      `vietnam:unicode/1f1fb-1f1f3,` &&
+      `violin:unicode/1f3bb,` &&
+      `virgo:unicode/264d,` &&
+      `volcano:unicode/1f30b,` &&
+      `volleyball:unicode/1f3d0,` &&
+      `vomiting_face:unicode/1f92e,` &&
+      `vs:unicode/1f19a,` &&
+      `vulcan_salute:unicode/1f596,` &&
+      `waffle:unicode/1f9c7,` &&
+      `wales:unicode/1f3f4-e0067-e0062-e0077-e006c-e0073-e007f,` &&
+      `walking:unicode/1f6b6,` &&
+      `walking_man:unicode/1f6b6-2642,` &&
+      `walking_woman:unicode/1f6b6-2640,` &&
+      `wallis_futuna:unicode/1f1fc-1f1eb,` &&
+      `waning_crescent_moon:unicode/1f318,` &&
+      `waning_gibbous_moon:unicode/1f316,` &&
+      `warning:unicode/26a0,` &&
+      `wastebasket:unicode/1f5d1,` &&
+      `watch:unicode/231a,` &&
+      `water_buffalo:unicode/1f403,` &&
+      `water_polo:unicode/1f93d,` &&
+      `watermelon:unicode/1f349,` &&
+      `wave:unicode/1f44b,` &&
+      `wavy_dash:unicode/3030,` &&
+      `waxing_crescent_moon:unicode/1f312,` &&
+      `waxing_gibbous_moon:unicode/1f314,` &&
+      `wc:unicode/1f6be,` &&
+      `weary:unicode/1f629,` &&
+      `wedding:unicode/1f492,` &&
+      `weight_lifting:unicode/1f3cb,` &&
+      `weight_lifting_man:unicode/1f3cb-2642,` &&
+      `weight_lifting_woman:unicode/1f3cb-2640,` &&
+      `western_sahara:unicode/1f1ea-1f1ed,` &&
+      `whale:unicode/1f433,` &&
+      `whale2:unicode/1f40b,` &&
+      `wheel:unicode/1f6de,` &&
+      `wheel_of_dharma:unicode/2638,` &&
+      `wheelchair:unicode/267f,` &&
+      `white_check_mark:unicode/2705,` &&
+      `white_circle:unicode/26aa,` &&
+      `white_flag:unicode/1f3f3,` &&
+      `white_flower:unicode/1f4ae,` &&
+      `white_haired_man:unicode/1f468-1f9b3,` &&
+      `white_haired_woman:unicode/1f469-1f9b3,` &&
+      `white_heart:unicode/1f90d,` &&
+      `white_large_square:unicode/2b1c,` &&
+      `white_medium_small_square:unicode/25fd,` &&
+      `white_medium_square:unicode/25fb,` &&
+      `white_small_square:unicode/25ab,` &&
+      `white_square_button:unicode/1f533,` &&
+      `wilted_flower:unicode/1f940,` &&
+      `wind_chime:unicode/1f390,` &&
+      `wind_face:unicode/1f32c,` &&
+      `window:unicode/1fa9f,` &&
+      `wine_glass:unicode/1f377,` &&
+      `wing:unicode/1fabd,` &&
+      `wink:unicode/1f609,` &&
+      `wireless:unicode/1f6dc,` &&
+      `wolf:unicode/1f43a,` &&
+      `woman:unicode/1f469,` &&
+      `woman_artist:unicode/1f469-1f3a8,` &&
+      `woman_astronaut:unicode/1f469-1f680,` &&
+      `woman_beard:unicode/1f9d4-2640,` &&
+      `woman_cartwheeling:unicode/1f938-2640,` &&
+      `woman_cook:unicode/1f469-1f373,` &&
+      `woman_dancing:unicode/1f483,` &&
+      `woman_facepalming:unicode/1f926-2640,` &&
+      `woman_factory_worker:unicode/1f469-1f3ed,` &&
+      `woman_farmer:unicode/1f469-1f33e,` &&
+      `woman_feeding_baby:unicode/1f469-1f37c,` &&
+      `woman_firefighter:unicode/1f469-1f692,` &&
+      `woman_health_worker:unicode/1f469-2695,` &&
+      `woman_in_manual_wheelchair:unicode/1f469-1f9bd,` &&
+      `woman_in_motorized_wheelchair:unicode/1f469-1f9bc,` &&
+      `woman_in_tuxedo:unicode/1f935-2640,` &&
+      `woman_judge:unicode/1f469-2696,` &&
+      `woman_juggling:unicode/1f939-2640,` &&
+      `woman_mechanic:unicode/1f469-1f527,` &&
+      `woman_office_worker:unicode/1f469-1f4bc,` &&
+      `woman_pilot:unicode/1f469-2708,` &&
+      `woman_playing_handball:unicode/1f93e-2640,` &&
+      `woman_playing_water_polo:unicode/1f93d-2640,` &&
+      `woman_scientist:unicode/1f469-1f52c,` &&
+      `woman_shrugging:unicode/1f937-2640,` &&
+      `woman_singer:unicode/1f469-1f3a4,` &&
+      `woman_student:unicode/1f469-1f393,` &&
+      `woman_teacher:unicode/1f469-1f3eb,` &&
+      `woman_technologist:unicode/1f469-1f4bb,` &&
+      `woman_with_headscarf:unicode/1f9d5,` &&
+      `woman_with_probing_cane:unicode/1f469-1f9af,` &&
+      `woman_with_turban:unicode/1f473-2640,` &&
+      `woman_with_veil:unicode/1f470-2640,` &&
+      `womans_clothes:unicode/1f45a,` &&
+      `womans_hat:unicode/1f452,` &&
+      `women_wrestling:unicode/1f93c-2640,` &&
+      `womens:unicode/1f6ba,` &&
+      `wood:unicode/1fab5,` &&
+      `woozy_face:unicode/1f974,` &&
+      `world_map:unicode/1f5fa,` &&
+      `worm:unicode/1fab1,` &&
+      `worried:unicode/1f61f,` &&
+      `wrench:unicode/1f527,` &&
+      `wrestling:unicode/1f93c,` &&
+      `writing_hand:unicode/270d,` &&
+      `x:unicode/274c,` &&
+      `x_ray:unicode/1fa7b,` &&
+      `yarn:unicode/1f9f6,` &&
+      `yawning_face:unicode/1f971,` &&
+      `yellow_circle:unicode/1f7e1,` &&
+      `yellow_heart:unicode/1f49b,` &&
+      `yellow_square:unicode/1f7e8,` &&
+      `yemen:unicode/1f1fe-1f1ea,` &&
+      `yen:unicode/1f4b4,` &&
+      `yin_yang:unicode/262f,` &&
+      `yo_yo:unicode/1fa80,` &&
+      `yum:unicode/1f60b,` &&
+      `zambia:unicode/1f1ff-1f1f2,` &&
+      `zany_face:unicode/1f92a,` &&
+      `zap:unicode/26a1,` &&
+      `zebra:unicode/1f993,` &&
+      `zero:unicode/0030-20e3,` &&
+      `zimbabwe:unicode/1f1ff-1f1fc,` &&
+      `zipper_mouth_face:unicode/1f910,` &&
+      `zombie:unicode/1f9df,` &&
+      `zombie_man:unicode/1f9df-2642,` &&
+      `zombie_woman:unicode/1f9df-2640,` &&
+      `zzz:unicode/1f4a4`.
+
+    SPLIT list AT ',' INTO TABLE result.
+
+  ENDMETHOD.
+ENDCLASS.
