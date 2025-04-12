@@ -340,7 +340,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
           mapping-old_object CP 'Z++_PACKAGE_JSON*' ).
 
         IF is_logging = abap_true.
-          WRITE 'Skipped' COLOR COL_TOTAL.
+          WRITE 'Skipped' COLOR COL_TOTAL INTENSIFIED OFF.
         ENDIF.
         CONTINUE.
       ENDIF.

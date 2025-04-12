@@ -562,21 +562,10 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD render_styles.
 
-    DATA emoji_styles TYPE string_table.
-
     " Emoji Styles
-    INSERT `.emoji {` INTO TABLE emoji_styles.
-    INSERT `  display: inline-block;` INTO TABLE emoji_styles.
-    INSERT `  min-width: 1ch;` INTO TABLE emoji_styles.
-    INSERT `  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";` INTO TABLE emoji_styles.
-    INSERT `  font-size: 1em;` INTO TABLE emoji_styles.
-    INSERT `  font-style: normal !important;` INTO TABLE emoji_styles.
-    INSERT `  font-weight: 400;` INTO TABLE emoji_styles.
-    INSERT `  height: 16px;` INTO TABLE emoji_styles.
-    INSERT `  width: 16px;` INTO TABLE emoji_styles.
-    INSERT `  line-height: 1;` INTO TABLE emoji_styles.
-    INSERT `  vertical-align: -0.1em;` INTO TABLE emoji_styles.
-    INSERT `}` INTO TABLE emoji_styles.
+    DATA(emoji_styles) = concat_lines_of(
+      table = zcl_abappm_emoji=>create( )->get_emoji_css( )
+      sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).
     html->add( emoji_styles ).
