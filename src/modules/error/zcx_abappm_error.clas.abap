@@ -17,12 +17,20 @@ CLASS zcx_abappm_error DEFINITION
       if_t100_dyn_msg,
       if_t100_message.
 
+    TYPES:
+      BEGIN OF ty_scr_info,
+        program TYPE progname,
+        include TYPE progname,
+        line    TYPE i,
+      END OF ty_scr_info.
+
     "! Black Hole
     "! Can be used for MESSAGE ... INTO null
     CLASS-DATA null TYPE string ##NEEDED.
 
     DATA longtext TYPE string READ-ONLY.
     DATA callstack TYPE abap_callstack READ-ONLY.
+    DATA src_info TYPE ty_scr_info READ-ONLY.
 
     METHODS constructor
       IMPORTING
@@ -125,6 +133,13 @@ CLASS zcx_abappm_error IMPLEMENTATION.
     me->longtext = longtext.
 
     save_callstack( ).
+
+    " Save for debugger
+    get_source_position(
+      IMPORTING
+        program_name = src_info-program
+        include_name = src_info-include
+        source_line  = src_info-line ).
 
   ENDMETHOD.
 
