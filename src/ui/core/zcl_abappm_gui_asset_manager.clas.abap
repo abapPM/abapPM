@@ -153,7 +153,11 @@ CLASS zcl_abappm_gui_asset_manager IMPLEMENTATION.
       zcx_abappm_error=>raise( |Wrong subtype ({ iv_assert_subtype }): { iv_url }| ).
     ENDIF.
 
-    rv_asset = zcl_abappm_convert=>xstring_to_string_utf8( ls_asset-content ).
+    TRY.
+        rv_asset = zcl_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
+      CATCH zcx_abapgit_exception INTO DATA(lx_error).
+        zcx_abappm_error=>raise_with_text( lx_error ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -166,11 +170,16 @@ CLASS zcl_abappm_gui_asset_manager IMPLEMENTATION.
     ls_asset-url          = iv_url.
     ls_asset-mime_name    = iv_mime_name.
     ls_asset-is_cacheable = iv_cacheable.
-    IF iv_base64 IS NOT INITIAL.
-      ls_asset-content = zcl_abappm_convert=>base64_to_xstring( iv_base64 ).
-    ELSEIF iv_inline IS NOT INITIAL.
-      ls_asset-content = zcl_abappm_convert=>string_to_xstring( iv_inline ).
-    ENDIF.
+
+    TRY.
+        IF iv_base64 IS NOT INITIAL.
+          ls_asset-content = zcl_abapgit_convert=>base64_to_xstring( iv_base64 ).
+        ELSEIF iv_inline IS NOT INITIAL.
+          ls_asset-content = zcl_abapgit_convert=>string_to_xstring( iv_inline ).
+        ENDIF.
+      CATCH zcx_abapgit_exception INTO DATA(lx_error).
+        zcx_abappm_error=>raise_with_text( lx_error ).
+    ENDTRY.
 
     DELETE mt_asset_register WHERE url = iv_url.
     " TODO: Maybe forbid overwriting cacheable assets as they were probably already cached ... arguable

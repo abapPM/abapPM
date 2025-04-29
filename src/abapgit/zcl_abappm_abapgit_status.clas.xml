@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ABAPPM_ABAPGIT_STATUS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>apm - Installer Status</DESCRIPT>
+    <DESCRIPT>apm - abapGit Status</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

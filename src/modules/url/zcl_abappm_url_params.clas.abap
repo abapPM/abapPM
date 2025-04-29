@@ -96,9 +96,7 @@ CLASS zcl_abappm_url_params IMPLEMENTATION.
 
 
   METHOD create.
-    CREATE OBJECT result
-      EXPORTING
-        params = params.
+    result = NEW #( params = params ).
   ENDMETHOD.
 
 
@@ -128,11 +126,11 @@ CLASS zcl_abappm_url_params IMPLEMENTATION.
 
   METHOD has.
     IF value IS SUPPLIED.
-      READ TABLE params WITH KEY key = key value = value TRANSPORTING NO FIELDS.
+      READ TABLE params WITH KEY key = key value = value TRANSPORTING NO FIELDS ##SUBRC_OK.
     ELSE.
       READ TABLE params WITH KEY key = key TRANSPORTING NO FIELDS.
     ENDIF.
-    result = boolc( sy-subrc = 0 ).
+    result = xsdbool( sy-subrc = 0 ).
   ENDMETHOD.
 
 
@@ -158,9 +156,7 @@ CLASS zcl_abappm_url_params IMPLEMENTATION.
       INSERT param INTO TABLE params.
     ENDLOOP.
 
-    CREATE OBJECT result
-      EXPORTING
-        params = params.
+    result = NEW #( params = params ).
 
   ENDMETHOD.
 

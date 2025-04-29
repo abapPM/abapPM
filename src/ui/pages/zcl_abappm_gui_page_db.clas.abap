@@ -153,16 +153,28 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
     LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
       DATA(filename) = to_lower( <data>-keys ) && '.json'.
 
+      TRY.
+          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( <data>-value ).
+        CATCH zcx_abapgit_exception INTO DATA(error).
+          zcx_abappm_error=>raise_with_text( error ).
+      ENDTRY.
+
       zip->add(
         name    = filename
-        content = zcl_abappm_convert=>string_to_xstring_utf8( <data>-value ) ).
+        content = content ).
 
       INSERT explain_key( <data>-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
+    TRY.
+        content = zcl_abapgit_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ).
+      CATCH zcx_abapgit_exception INTO error.
+        zcx_abappm_error=>raise_with_text( error ).
+    ENDTRY.
+
     zip->add(
       name    = c_toc_filename
-      content = zcl_abappm_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ) ).
+      content = content ).
 
     DATA(zip_content) = zip->save( ).
 
@@ -265,7 +277,12 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         zcx_abappm_error=>raise( |Error getting file { <file>-name } from ZIP| ).
       ENDIF.
 
-      db_entry-value = zcl_abappm_convert=>xstring_to_string_utf8( file_data ).
+      TRY.
+          db_entry-value = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
+        CATCH zcx_abapgit_exception INTO DATA(error).
+          zcx_abappm_error=>raise_with_text( error ).
+      ENDTRY.
+
       INSERT db_entry INTO TABLE db_entries.
     ENDLOOP.
 

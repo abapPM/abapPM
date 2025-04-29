@@ -73,18 +73,18 @@ CLASS zcl_abappm_gui DEFINITION
         bookmark TYPE abap_bool,
       END OF ty_page_stack.
 
-    DATA mv_rollback_on_error TYPE abap_bool.
-    DATA mi_cur_page TYPE REF TO zif_abappm_gui_renderable.
-    DATA mt_stack             TYPE STANDARD TABLE OF ty_page_stack.
-    DATA mt_event_handlers    TYPE STANDARD TABLE OF REF TO zif_abappm_gui_event_handler.
-    DATA mi_router TYPE REF TO zif_abappm_gui_event_handler.
-    DATA mi_asset_man TYPE REF TO zif_abappm_gui_asset_manager.
-    DATA mi_hotkey_ctl TYPE REF TO zif_abappm_gui_hotkey_ctl.
-    DATA mi_html_processor TYPE REF TO zif_abappm_gui_html_processor.
-    DATA mi_html_viewer TYPE REF TO zif_abappm_html_viewer.
-    DATA mo_html_parts TYPE REF TO zcl_abappm_html_parts.
-    DATA mi_common_log TYPE REF TO zif_abapgit_log.
-
+    DATA:
+      mv_rollback_on_error TYPE abap_bool,
+      mi_cur_page          TYPE REF TO zif_abappm_gui_renderable,
+      mt_stack             TYPE STANDARD TABLE OF ty_page_stack,
+      mt_event_handlers    TYPE STANDARD TABLE OF REF TO zif_abappm_gui_event_handler,
+      mi_router            TYPE REF TO zif_abappm_gui_event_handler,
+      mi_asset_man         TYPE REF TO zif_abappm_gui_asset_manager,
+      mi_hotkey_ctl        TYPE REF TO zif_abappm_gui_hotkey_ctl,
+      mi_html_processor    TYPE REF TO zif_abappm_gui_html_processor,
+      mi_html_viewer       TYPE REF TO zif_abappm_html_viewer,
+      mo_html_parts        TYPE REF TO zcl_abappm_html_parts,
+      mi_common_log        TYPE REF TO zif_abapgit_log.
 
     METHODS cache_html
       IMPORTING

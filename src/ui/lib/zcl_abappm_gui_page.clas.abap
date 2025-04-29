@@ -149,6 +149,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
 
 
   METHOD footer.
+
     DATA(html) = zcl_abappm_html=>create( ).
 
     html->add( '<div id="footer">' ).
@@ -177,6 +178,7 @@ CLASS zcl_abappm_gui_page IMPLEMENTATION.
     html->add( '</div>' ).
 
     result = html.
+
   ENDMETHOD.
 
 

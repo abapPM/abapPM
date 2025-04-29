@@ -147,9 +147,15 @@ CLASS zcl_abappm_gui_page_debuginfo IMPLEMENTATION.
           iv_extension        = 'html'
           iv_default_filename = filename ).
 
+        TRY.
+            DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( html_for_download ).
+          CATCH zcx_abapgit_exception INTO DATA(lx_error).
+            zcx_abappm_error=>raise_with_text( lx_error ).
+        ENDTRY.
+
         frontend_services->file_download(
           iv_path = path
-          iv_xstr = zcl_abappm_convert=>string_to_xstring_utf8( html_for_download ) ).
+          iv_xstr = content ).
 
         MESSAGE 'apm debug info successfully saved' TYPE 'S'.
 

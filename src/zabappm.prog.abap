@@ -54,6 +54,8 @@ REPORT zabappm LINE-SIZE 100.
 * @@require intf zif_abapgit_definitions
 * @@require clas zcl_abapgit_dot_abapgit
 * @@require intf zif_abapgit_dot_abapgit
+* @@require clas zcl_abapgit_env_factory
+* @@require clas zcl_abapgit_env_injector
 * @@require clas zcl_abapgit_environment
 * @@require intf zif_abapgit_environment
 * @@require clas zcx_abapgit_exception
@@ -75,7 +77,10 @@ REPORT zabappm LINE-SIZE 100.
 * @@require intf zif_abapgit_progress
 * @@require clas zcl_abapgit_string_buffer
 * @@require clas zcl_abapgit_timer
+* @@require clas zcx_abapgit_type_not_supported
 * @@require clas zcl_abapgit_url
+* @@require clas zcl_abapgit_user_record
+* @@require intf zif_abapgit_user_record
 * @@require clas zcl_abapgit_utils
 * @@require clas zcl_abapgit_version
 * @@require intf zif_abapgit_version

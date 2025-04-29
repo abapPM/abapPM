@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ABAPPM_ABAPGIT_OBJECTS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>apm - Installer Objects</DESCRIPT>
+    <DESCRIPT>apm - abapGit Objects</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
