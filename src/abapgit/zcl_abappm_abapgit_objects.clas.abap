@@ -149,22 +149,14 @@ CLASS zcl_abappm_abapgit_objects DEFINITION
       RAISING
         zcx_abapgit_exception.
 
-    CLASS-METHODS compare_remote_to_local
-      IMPORTING
-        !ii_object TYPE REF TO zif_abapgit_object
-        !it_remote TYPE zif_abapgit_git_definitions=>ty_files_tt
-        !is_result TYPE zif_abapgit_definitions=>ty_result
-        !ii_log    TYPE REF TO zif_abapgit_log
-      RAISING
-        zcx_abapgit_exception.
-
     CLASS-METHODS deserialize_steps
       IMPORTING
-        !it_steps     TYPE zif_abapgit_objects=>ty_step_data_tt
-        !ii_log       TYPE REF TO zif_abapgit_log
-        !iv_transport TYPE trkorr
+        !it_steps       TYPE zif_abapgit_objects=>ty_step_data_tt
+        !ii_log         TYPE REF TO zif_abapgit_log
+        !iv_transport   TYPE trkorr
+        !io_i18n_params TYPE REF TO zcl_abapgit_i18n_params
       CHANGING
-        !ct_files     TYPE zif_abapgit_git_definitions=>ty_file_signatures_tt
+        !ct_files       TYPE zif_abapgit_git_definitions=>ty_file_signatures_tt
       RAISING
         zcx_abapgit_exception.
 
@@ -175,6 +167,16 @@ CLASS zcl_abappm_abapgit_objects DEFINITION
         !iv_transport TYPE trkorr
       CHANGING
         !ct_files     TYPE zif_abapgit_git_definitions=>ty_file_signatures_tt
+      RAISING
+        zcx_abapgit_exception.
+
+    CLASS-METHODS deserialize_lxe
+      IMPORTING
+        !is_step        TYPE zif_abapgit_objects=>ty_step_data
+        !ii_log         TYPE REF TO zif_abapgit_log
+        !io_i18n_params TYPE REF TO zcl_abapgit_i18n_params
+      CHANGING
+        !ct_files       TYPE zif_abapgit_git_definitions=>ty_file_signatures_tt
       RAISING
         zcx_abapgit_exception.
 
@@ -340,85 +342,6 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
   METHOD class_name.
 
     CONCATENATE 'ZCL_ABAPGIT_OBJECT_' is_item-obj_type INTO rv_class_name.
-
-  ENDMETHOD.
-
-
-  METHOD compare_remote_to_local.
-* this method is used for comparing local with remote objects
-* before pull, this is useful eg. when overwriting a TABL object.
-* only the main XML file is used for comparison
-
-    DATA: ls_remote_file    TYPE zif_abapgit_git_definitions=>ty_file,
-          li_remote_version TYPE REF TO zif_abapgit_xml_input,
-          lv_count          TYPE i,
-          ls_result         TYPE zif_abapgit_comparator=>ty_result,
-          lv_answer         TYPE string,
-          li_comparator     TYPE REF TO zif_abapgit_comparator,
-          ls_item           TYPE zif_abapgit_definitions=>ty_item.
-
-    FIND ALL OCCURRENCES OF '.' IN is_result-filename MATCH COUNT lv_count.
-
-    IF is_result-filename CS '.XML' AND lv_count = 2.
-      IF ii_object->exists( ) = abap_false.
-        RETURN.
-      ENDIF.
-
-      READ TABLE it_remote WITH KEY file
-        COMPONENTS filename = is_result-filename INTO ls_remote_file.
-      IF sy-subrc <> 0. "if file does not exist in remote, we don't need to validate
-        RETURN.
-      ENDIF.
-
-      li_comparator = ii_object->get_comparator( ).
-      IF NOT li_comparator IS BOUND.
-        RETURN.
-      ENDIF.
-
-      CREATE OBJECT li_remote_version
-        TYPE zcl_abapgit_xml_input
-        EXPORTING
-          iv_xml      = zcl_abapgit_convert=>xstring_to_string_utf8( ls_remote_file-data )
-          iv_filename = ls_remote_file-filename.
-
-      ls_result = li_comparator->compare( ii_remote = li_remote_version
-                                          ii_log = ii_log ).
-      IF ls_result-text IS INITIAL.
-        RETURN.
-      ENDIF.
-
-      "log comparison result
-      ls_item-obj_type = is_result-obj_type.
-      ls_item-obj_name = is_result-obj_name.
-      ii_log->add_warning( iv_msg = ls_result-text
-                           is_item = ls_item ).
-
-      "continue or abort?
-      IF zcl_abapgit_ui_factory=>get_frontend_services( )->gui_is_available( ) = abap_true.
-        CALL FUNCTION 'POPUP_TO_CONFIRM'
-          EXPORTING
-            titlebar              = 'Warning'
-            text_question         = ls_result-text
-            text_button_1         = 'Abort'
-            icon_button_1         = 'ICON_CANCEL'
-            text_button_2         = 'Pull anyway'
-            icon_button_2         = 'ICON_OKAY'
-            default_button        = '2'
-            display_cancel_button = abap_false
-          IMPORTING
-            answer                = lv_answer
-          EXCEPTIONS
-            text_not_found        = 1
-            OTHERS                = 2.
-        IF sy-subrc <> 0 OR lv_answer = 1.
-          zcx_abapgit_exception=>raise( |Deserialization for object { is_result-obj_name } | &
-                                        |(type { is_result-obj_type }) aborted by user| ).
-        ENDIF.
-      ELSE.
-        zcx_abapgit_exception=>raise( |Deserialization for object { is_result-obj_name } | &
-                                      |(type { is_result-obj_type }) aborted, user descision required| ).
-      ENDIF.
-    ENDIF.
 
   ENDMETHOD.
 
@@ -735,12 +658,6 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
             io_files       = lo_files
             io_i18n_params = lo_i18n_params ).
 
-          compare_remote_to_local(
-            ii_object = li_obj
-            it_remote = it_remote
-            is_result = <ls_result>
-            ii_log    = ii_log ).
-
           "get required steps for deserialize the object
           lt_steps_id = li_obj->get_deserialize_steps( ).
 
@@ -754,13 +671,11 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
             ENDIF.
             APPEND INITIAL LINE TO <ls_step>-objects ASSIGNING <ls_deser>.
             <ls_deser>-item    = ls_item.
+            <ls_deser>-files   = lo_files.
             <ls_deser>-obj     = li_obj.
             <ls_deser>-xml     = lo_xml.
             <ls_deser>-package = lv_package.
           ENDLOOP.
-
-          " LXE, TODO refactor and move below activation
-          " LXE is not supported here
 
         CATCH zcx_abapgit_exception INTO lx_exc.
           ii_log->add_exception( ix_exc = lx_exc
@@ -778,13 +693,12 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
     "run deserialize for all steps and its objects
     deserialize_steps(
       EXPORTING
-        it_steps     = lt_steps
-        ii_log       = ii_log
-        iv_transport = iv_transport
+        it_steps       = lt_steps
+        ii_log         = ii_log
+        io_i18n_params = lo_i18n_params
+        iv_transport   = iv_transport
       CHANGING
-        ct_files     = rt_accessed_files ).
-
-    " TODO: LXE translations (objects has been activated by now)
+        ct_files       = rt_accessed_files ).
 
     update_package_tree( iv_package ).
 
@@ -798,6 +712,45 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
     zcl_abapgit_factory=>get_default_transport( )->reset( ).
 
     lo_timer->end( abap_true ).
+
+  ENDMETHOD.
+
+
+  METHOD deserialize_lxe.
+
+    DATA:
+      lo_base TYPE REF TO zcl_abapgit_objects_super,
+      lx_exc  TYPE REF TO zcx_abapgit_exception.
+
+    FIELD-SYMBOLS <ls_obj> LIKE LINE OF is_step-objects.
+
+    ii_log->add_success( |>> Step { is_step-order } - { is_step-descr }| ).
+
+    LOOP AT is_step-objects ASSIGNING <ls_obj>.
+
+      TRY.
+          zcl_abapgit_factory=>get_lxe_texts( )->deserialize(
+            iv_object_type = <ls_obj>-item-obj_type
+            iv_object_name = <ls_obj>-item-obj_name
+            iv_package     = <ls_obj>-item-devclass
+            ii_xml         = <ls_obj>-xml
+            io_files       = <ls_obj>-files
+            io_i18n_params = io_i18n_params ).
+
+          lo_base ?= <ls_obj>-obj.
+          APPEND LINES OF lo_base->get_accessed_files( ) TO ct_files.
+
+          ii_log->add_success( iv_msg  = |Translations for { <ls_obj>-item-obj_name } imported|
+                               is_item = <ls_obj>-item ).
+
+        CATCH zcx_abapgit_exception INTO lx_exc.
+          ii_log->add_exception( ix_exc  = lx_exc
+                                 is_item = <ls_obj>-item ).
+          ii_log->add_error( iv_msg  = |Import of translations for { <ls_obj>-item-obj_name } failed|
+                             is_item = <ls_obj>-item ).
+      ENDTRY.
+
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -878,13 +831,23 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
     FIELD-SYMBOLS <ls_step> LIKE LINE OF it_steps.
 
     LOOP AT it_steps ASSIGNING <ls_step>.
-      deserialize_step(
-        EXPORTING
-          is_step      = <ls_step>
-          ii_log       = ii_log
-          iv_transport = iv_transport
-        CHANGING
-          ct_files     = ct_files ).
+      IF <ls_step>-step_id <> zif_abapgit_object=>gc_step_id-lxe.
+        deserialize_step(
+          EXPORTING
+            is_step      = <ls_step>
+            ii_log       = ii_log
+            iv_transport = iv_transport
+          CHANGING
+            ct_files     = ct_files ).
+      ELSEIF io_i18n_params->is_lxe_applicable( ) = abap_true.
+        deserialize_lxe(
+          EXPORTING
+            is_step        = <ls_step>
+            ii_log         = ii_log
+            io_i18n_params = io_i18n_params
+          CHANGING
+            ct_files       = ct_files ).
+      ENDIF.
     ENDLOOP.
 
     SORT ct_files BY path ASCENDING filename ASCENDING.
