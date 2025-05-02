@@ -29,26 +29,10 @@ CLASS zcl_abappm_command_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS confirm_popup
-      IMPORTING
-        !package      TYPE devclass
-      RETURNING
-        VALUE(result) TYPE abap_bool
-      RAISING
-        zcx_abappm_error.
-
     CLASS-METHODS check_packument
       IMPORTING
         !packument    TYPE zif_abappm_types=>ty_packument
         !package_json TYPE zif_abappm_types=>ty_package_json
-      RAISING
-        zcx_abappm_error.
-
-    CLASS-METHODS get_agent
-      IMPORTING
-        !iv_url       TYPE string
-      RETURNING
-        VALUE(result) TYPE REF TO zif_abappm_http_agent
       RAISING
         zcx_abappm_error.
 
@@ -96,12 +80,6 @@ CLASS zcl_abappm_command_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
-    CLASS-METHODS get_abap_version
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        zcx_abappm_error.
-
 ENDCLASS.
 
 
@@ -136,7 +114,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       tarball-data         = cl_http_utility=>encode_x_base64( tarball )
       tarball-length       = xstrlen( tarball ) ).
 
-    INSERT attachment INTO TABLE packument-__attachments.
+    INSERT attachment INTO TABLE packument-_attachments.
 
   ENDMETHOD.
 
@@ -156,84 +134,6 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     IF line_exists( packument-versions[ key = package_json-version ] ).
       zcx_abappm_error=>raise( |Version { package_json-version } already published| ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD confirm_popup.
-
-    DATA answer TYPE c LENGTH 1.
-
-    DATA(question) = |This will PUBLISH all objects in package { package } | &&
-                     |including subpackages to the registry|.
-
-    CALL FUNCTION 'POPUP_TO_CONFIRM'
-      EXPORTING
-        titlebar              = 'Publish'
-        text_question         = question
-        text_button_1         = 'Publish'
-        icon_button_1         = 'ICON_EXPORT'
-        text_button_2         = 'Cancel'
-        icon_button_2         = 'ICON_CANCEL'
-        default_button        = '2'
-        display_cancel_button = abap_false
-        popup_type            = 'ICON_MESSAGE_WARNING'
-*       start_column          = ms_position-start_column
-*       start_row             = ms_position-start_row
-      IMPORTING
-        answer                = answer
-      EXCEPTIONS
-        text_not_found        = 1
-        OTHERS                = 2.
-    ASSERT sy-subrc = 0.
-
-    IF answer = '2'.
-      MESSAGE 'Publish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
-
-  ENDMETHOD.
-
-
-  METHOD get_abap_version.
-
-    TRY.
-        DATA(semver) = NEW zcl_abappm_semver_sap( ).
-        result = semver->sap_component_to_semver( 'SAP_BASIS' ).
-      CATCH cx_abap_invalid_value INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
-    ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD get_agent.
-
-    result = zcl_abappm_http_agent=>create( ).
-
-    " TODO: Do we need this for a PUT request?
-    result->global_headers( )->set(
-      iv_key = zif_abappm_http_agent=>c_header-accept
-      iv_val = zif_abappm_http_agent=>c_content_type-json ).
-
-    result->global_headers( )->set(
-      iv_key = zif_abappm_http_agent=>c_header-content_type
-      iv_val = zif_abappm_http_agent=>c_content_type-json ).
-
-    result->global_headers( )->set(
-      iv_key = zif_abappm_http_agent=>c_header-user_agent
-      iv_val = |apm/{ zif_abappm_version=>c_version } abap/{ get_abap_version( ) }| ).
-
-    DATA(urlc) = zcl_abappm_url=>parse( iv_url )->components.
-
-    " Get/set auth token
-    IF zcl_abappm_http_login_manager=>get( urlc-host ) IS NOT INITIAL.
-      result->global_headers( )->set(
-        iv_key = zif_abappm_http_agent=>c_header-authorization
-        iv_val = zcl_abappm_http_login_manager=>get( urlc-host ) ).
     ENDIF.
 
   ENDMETHOD.
@@ -260,10 +160,10 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
           ignore_subpackages = abap_false
           only_local_objects = abap_false ).
 
-        " TODO: Hardcoded to prefix
+        " TODO!: Hardcoded to prefix
         DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
         dot_abapgit->set_folder_logic( zif_abapgit_dot_abapgit=>c_folder_logic-prefix ).
-        dot_abapgit->set_starting_folder( 'src' ).
+        dot_abapgit->set_starting_folder( 'src/' ).
 
         DATA(serializer) = NEW zcl_abappm_abapgit_serialize(
           io_dot_abapgit    = dot_abapgit
@@ -330,7 +230,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     IF packument IS INITIAL.
       result      = CORRESPONDING #( package_json ).
-      result-__id = package_json-name.
+      result-_id = package_json-name.
     ELSE.
       result = packument.
     ENDIF.
@@ -348,9 +248,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     DATA(version) = VALUE zif_abappm_types=>ty_version( key = package_json-version ).
 
     version-version                = CORRESPONDING #( package_json ).
-    version-version-__id           = |{ package_json-name }@{ package_json-version }|.
-    version-version-__abap_version = get_abap_version( ).
-    version-version-__apm_version  = zif_abappm_version=>c_version.
+    version-version-_id           = |{ package_json-name }@{ package_json-version }|.
+    version-version-_abap_version = zcl_abappm_command_utils=>get_abap_version( ).
+    version-version-_apm_version  = zif_abappm_version=>c_version.
 
     INSERT version INTO TABLE result-versions.
 
@@ -361,13 +261,14 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(json) = zcl_abappm_pacote=>convert_packument_to_json( packument ).
 
-    DATA(response) = get_agent( registry )->request(
+    DATA(response) = zcl_abappm_command_utils=>get_agent( registry )->request(
       url     = |{ registry }/{ packument-name }|
       method  = zif_abappm_http_agent=>c_method-put
       payload = json ).
 
     IF response->is_ok( ) = abap_false.
-      result = |Error { response->code( ) } when publishing package|.
+      result = |Error { response->code( ) } when publishing package: |
+        && zcl_abappm_command_utils=>get_error( response->error( ) ).
     ENDIF.
 
   ENDMETHOD.
@@ -383,10 +284,6 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     IF package_json-private = abap_true.
       zcx_abappm_error=>raise( 'Private packages can not be published' ).
-    ENDIF.
-
-    IF confirm_popup( package ) = abap_false.
-      RETURN.
     ENDIF.
 
     " 3. Get packument from registry

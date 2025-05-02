@@ -92,7 +92,7 @@ CLASS zcl_abappm_gui_dlg_install IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = zcl_abappm_html_form_utils=>create( form ).
 
-        registry = zcl_abappm_settings=>factory( )->get( )-registry.
+    registry = zcl_abappm_settings=>factory( )->get( )-registry.
 
   ENDMETHOD.
 

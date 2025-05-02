@@ -159,9 +159,8 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
 
   METHOD command_dialogs.
 
-    DATA(package) = CONV devclass( event->query( )->get( 'PACKAGE' ) ).
+    DATA(package) = CONV devclass( event->query( )->get( 'KEY' ) ).
 
-    " TODO: Pass selected package, for example, from Package List
     CASE event->mv_action.
       WHEN zif_abappm_gui_router=>c_action-apm_init.
 
@@ -173,14 +172,19 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         result-page  = zcl_abappm_gui_dlg_install=>create( ).
         result-state = zcl_abappm_gui=>c_event_state-new_page.
 
+      WHEN zif_abappm_gui_router=>c_action-apm_uninstall.
+
+        result-page  = zcl_abappm_gui_dlg_uninstall=>create( package ).
+        result-state = zcl_abappm_gui=>c_event_state-new_page.
+
       WHEN zif_abappm_gui_router=>c_action-apm_publish.
 
         result-page  = zcl_abappm_gui_dlg_publish=>create( package ).
         result-state = zcl_abappm_gui=>c_event_state-new_page.
 
-      WHEN zif_abappm_gui_router=>c_action-apm_uninstall.
+      WHEN zif_abappm_gui_router=>c_action-apm_unpublish.
 
-        result-page  = zcl_abappm_gui_dlg_uninstall=>create( package ).
+        result-page  = zcl_abappm_gui_dlg_unpublish=>create( package ).
         result-state = zcl_abappm_gui=>c_event_state-new_page.
 
     ENDCASE.

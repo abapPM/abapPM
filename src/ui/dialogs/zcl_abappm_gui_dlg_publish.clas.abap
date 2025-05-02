@@ -88,11 +88,46 @@ CLASS zcl_abappm_gui_dlg_publish DEFINITION
       RAISING
         zcx_abappm_error.
 
+    METHODS confirm_popup
+      IMPORTING
+        !params       TYPE ty_params
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        zcx_abappm_error.
+
 ENDCLASS.
 
 
 
 CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
+
+
+  METHOD confirm_popup.
+
+    DATA(question) = |This will PUBLISH all objects in { params-package } | &&
+                     |including subpackages as { params-name } { params-version } | &&
+                     |to the registry|.
+
+    DATA(answer) = zcl_abappm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Publish'
+      iv_text_question         = question
+      iv_text_button_1         = 'Publish'
+      iv_icon_button_1         = 'ICON_EXPORT'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Publish cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
+
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -247,9 +282,11 @@ CLASS zcl_abappm_gui_dlg_publish IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          zcl_abappm_command_publish=>run(
-            registry     = registry
-            package      = params-package ).
+          IF confirm_popup( params ) = abap_true.
+            zcl_abappm_command_publish=>run(
+              registry     = registry
+              package      = params-package ).
+          ENDIF.
 
           rs_handled-state = zcl_abappm_gui=>c_event_state-go_back.
         ELSE.

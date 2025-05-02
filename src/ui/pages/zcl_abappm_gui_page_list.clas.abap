@@ -10,6 +10,8 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* CSS classes have to match repo-overview to allow JS to work properly
+************************************************************************
   PUBLIC SECTION.
 
     INTERFACES:
@@ -297,6 +299,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       add_tz         = abap_true
       allow_order_by = abap_true
     )->add_column(
+      tech_name      = 'KEY'
+      display_name   = 'Key'
+      css_class      = 'ro-detail nodisplay'
+      allow_order_by = abap_true
+    )->add_column(
       tech_name      = 'GO'
       css_class      = 'ro-go wmin'
       allow_order_by = abap_false ).
@@ -388,7 +395,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     DATA(html) = zcl_abappm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
-    html->add( 'var gHelper = new RepoOverViewHelper({ focusFilterKey: "f" });' ).
+    html->add( 'var gHelper = new RepoOverViewHelper({ focusFilterKey: "f", pageId: "apm-list" });' ).
 
     result = html.
 
@@ -629,7 +636,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
       fav_color = 'grey'.
     ENDIF.
 
-    html->add( |<tr data-key="{ package-package }{ fav_class }">| ).
+    html->add( |<tr data-key="{ package-package }"{ fav_class }">| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
@@ -693,6 +700,11 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     html->td(
       iv_class   = 'ro-detail'
       iv_content = |{ package-changed_at }| ).
+
+    " Details: key for navigation
+    html->td(
+      iv_class   = 'ro-detail nodisplay'
+      iv_content = |{ package-package }| ).
 
     " Go-to action
     html->td(
@@ -836,14 +848,19 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     hotkey_action-hotkey      = |i|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
+    hotkey_action-description = |Uninstall|.
+    hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_uninstall.
+    hotkey_action-hotkey      = |u|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
     hotkey_action-description = |Publish|.
     hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_publish.
     hotkey_action-hotkey      = |p|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Uninstall|.
-    hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_uninstall.
-    hotkey_action-hotkey      = |u|.
+    hotkey_action-description = |Unpublish|.
+    hotkey_action-action      = zif_abappm_gui_router=>c_action-apm_unpublish.
+    hotkey_action-hotkey      = |q|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
     " registered/handled in js
@@ -872,34 +889,58 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
   METHOD zif_abappm_gui_menu_provider~get_menu.
 
-    CONSTANTS c_dummy_key TYPE string VALUE `?key=#`.
+    CONSTANTS:
+      c_dummy_key    TYPE string VALUE `?key=#`,
+      c_action_class TYPE string VALUE `action_link`.
+
+    DATA(commands) = zcl_abappm_html_toolbar=>create( 'apm-package-list-commands' ).
+
+    commands->add(
+      iv_txt      = 'Unpublish'
+      iv_act      = |{ zif_abappm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
+    )->add(
+      iv_txt      = 'Danger'
+      iv_typ      = zif_abappm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = 'Uninstall'
+      iv_act      = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class ).
 
     DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-package-list' ).
 
     toolbar->add(
-      iv_txt = zcl_abappm_html=>icon( 'file' ) && ' Init'
-      iv_act = zif_abappm_gui_router=>c_action-apm_init
+      iv_txt      = zcl_abappm_html=>icon( 'file' ) && ' Init'
+      iv_act      = zif_abappm_gui_router=>c_action-apm_init
     )->add(
-      iv_txt = zcl_abappm_html=>icon( 'download-solid' ) && ' Install'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_install }{ c_dummy_key }|
+      iv_txt      = zcl_abappm_html=>icon( 'download-solid' ) && ' Install'
+      iv_act      = |{ zif_abappm_gui_router=>c_action-apm_install }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
     )->add(
-      iv_txt = zcl_abappm_html=>icon( 'upload-solid' ) && ' Publish'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
+      iv_txt      = zcl_abappm_html=>icon( 'upload-solid' ) && ' Publish'
+      iv_act      = |{ zif_abappm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
     )->add(
-      iv_txt = zcl_abappm_html=>icon( 'times-solid' ) && ' Uninstall'
-      iv_act = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
+      iv_txt      = zcl_abappm_html=>icon( 'chevron-right' ) && ' Commands'
+      io_sub      = commands
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
     )->add(
-      iv_txt = zcl_abappm_gui_buttons=>settings( )
-      io_sub = zcl_abappm_gui_menus=>settings( )
+      iv_txt      = zcl_abappm_gui_buttons=>settings( )
+      io_sub      = zcl_abappm_gui_menus=>settings( )
     )->add(
-      iv_txt = zcl_abappm_html=>icon( 'redo-alt-solid' )
-      iv_act = c_action-refresh
+      iv_txt      = zcl_abappm_html=>icon( 'redo-alt-solid' )
+      iv_act      = c_action-refresh
     )->add(
-      iv_txt = zcl_abappm_gui_buttons=>advanced( )
-      io_sub = zcl_abappm_gui_menus=>advanced( )
+      iv_txt      = zcl_abappm_gui_buttons=>advanced( )
+      io_sub      = zcl_abappm_gui_menus=>advanced( )
     )->add(
-      iv_txt = zcl_abappm_gui_buttons=>help( )
-      io_sub = zcl_abappm_gui_menus=>help( ) ).
+      iv_txt      = zcl_abappm_gui_buttons=>help( )
+      io_sub      = zcl_abappm_gui_menus=>help( ) ).
 
     ro_toolbar = toolbar.
 
