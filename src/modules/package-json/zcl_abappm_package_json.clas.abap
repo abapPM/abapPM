@@ -259,9 +259,9 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
         manifest-dist-file_count    = ajson->get( '/dist/fileCount' ).
         manifest-dist-unpacked_size = ajson->get( '/dist/unpackageSize' ).
-        manifest-__id               = ajson->get( '_id' ).
-        manifest-__abap_version     = ajson->get( '_abapVersion' ).
-        manifest-__apm_version      = ajson->get( '_apmVersion' ).
+        manifest-_id                = ajson->get( '_id' ).
+        manifest-_abap_version      = ajson->get( '_abapVersion' ).
+        manifest-_apm_version       = ajson->get( '_apmVersion' ).
 
         check_manifest( manifest ).
 

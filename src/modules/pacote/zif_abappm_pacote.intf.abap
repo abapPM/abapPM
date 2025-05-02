@@ -72,12 +72,15 @@ INTERFACE zif_abappm_pacote PUBLIC.
     IMPORTING
       version       TYPE string
       abbreviated   TYPE abap_bool DEFAULT abap_false
+      write         TYPE abap_bool DEFAULT abap_false
     RETURNING
       VALUE(result) TYPE string
     RAISING
       zcx_abappm_error.
 
   METHODS packument
+    IMPORTING
+      write         TYPE abap_bool DEFAULT abap_false
     RETURNING
       VALUE(result) TYPE string
     RAISING

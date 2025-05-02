@@ -117,11 +117,11 @@ INTERFACE zif_abappm_types PUBLIC.
   TYPES BEGIN OF ty_manifest.
   INCLUDE TYPE ty_package_json.
   TYPES:
-    dist           TYPE ty_dist,
-    deprecated     TYPE abap_bool,
-    __id           TYPE string, " external: _id
-    __abap_version TYPE string, " external: _abapVersion
-    __apm_version  TYPE string, " external: _apmVersion
+    dist          TYPE ty_dist,
+    deprecated    TYPE abap_bool,
+    _id           TYPE string,
+    _abap_version TYPE string,
+    _apm_version  TYPE string,
     END OF ty_manifest.
 
   TYPES:
@@ -167,31 +167,31 @@ INTERFACE zif_abappm_types PUBLIC.
     "! Full packument (as fetched from registry)
     "! Some fields are hoisted from latest version to root
     BEGIN OF ty_packument ##NEEDED,
-      name          TYPE string,
-      description   TYPE string,
-      dist_tags     TYPE STANDARD TABLE OF ty_generic WITH KEY key,
-      time          TYPE STANDARD TABLE OF ty_time WITH KEY key,
-      versions      TYPE STANDARD TABLE OF ty_version WITH KEY key,
-      maintainers   TYPE ty_persons,
-      readme        TYPE string,
-      users         TYPE STANDARD TABLE OF ty_user WITH KEY name,
-      homepage      TYPE string,
+      name         TYPE string,
+      description  TYPE string,
+      dist_tags    TYPE STANDARD TABLE OF ty_generic WITH KEY key,
+      time         TYPE STANDARD TABLE OF ty_time WITH KEY key,
+      versions     TYPE STANDARD TABLE OF ty_version WITH KEY key,
+      maintainers  TYPE ty_persons,
+      readme       TYPE string,
+      users        TYPE STANDARD TABLE OF ty_user WITH KEY name,
+      homepage     TYPE string,
       BEGIN OF bugs,
         url   TYPE ty_uri,
         email TYPE ty_email,
       END OF bugs,
-      license       TYPE string,
-      keywords      TYPE string_table,
-      author        TYPE ty_person,
+      license      TYPE string,
+      keywords     TYPE string_table,
+      author       TYPE ty_person,
       BEGIN OF repository,
         type      TYPE string,
         url       TYPE ty_uri,
         directory TYPE string,
       END OF repository,
-      __id          TYPE string,
-      __rev         TYPE string,
-      __attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key,
-      access        TYPE string,
+      _id          TYPE string,
+      _rev         TYPE string,
+      _attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key,
+      access       TYPE string,
     END OF ty_packument.
 
 

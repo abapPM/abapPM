@@ -118,6 +118,12 @@ CLASS zcl_abappm_pacote DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS write_request
+      IMPORTING
+        !write        TYPE abap_bool
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
@@ -246,7 +252,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
           attachment-tarball-content_type = ajson->get( '/_attachments/' && attachment-key && '/content_type' ).
           attachment-tarball-data         = ajson->get( '/_attachments/' && attachment-key && '/data' ).
           attachment-tarball-length       = ajson->get_integer( '/_attachments/' && attachment-key && '/length' ).
-          INSERT attachment INTO TABLE packument-__attachments.
+          INSERT attachment INTO TABLE packument-_attachments.
         ENDLOOP.
 
         LOOP AT ajson->members( '/versions' ) INTO version-key.
@@ -254,6 +260,10 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
           version-version = zcl_abappm_package_json=>convert_json_to_manifest( ajson_version->stringify( ) ).
           INSERT version INTO TABLE packument-versions.
         ENDLOOP.
+
+        " TODO: Do we need this?
+        packument-_id  = ajson->get( '/_id' ).
+        packument-_rev = ajson->get( '/_rev' ).
 
         " TODO: validation of packument
 
@@ -316,7 +326,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         ENDLOOP.
 
         ajson->setx( '/_attachments:{ }' ).
-        LOOP AT packument-__attachments INTO DATA(attachment).
+        LOOP AT packument-_attachments INTO DATA(attachment).
           ajson->set(
             iv_path = '_attachments/' && attachment-key && '/content_type'
             iv_val  = attachment-tarball-content_type ).
@@ -449,8 +459,17 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     SORT result-maintainers BY name.
     SORT result-users BY name.
     SORT result-versions BY key.
-    SORT result-__attachments BY key.
+    SORT result-_attachments BY key.
     SORT result-keywords.
+
+  ENDMETHOD.
+
+
+  METHOD write_request.
+
+    IF write = abap_true.
+      result = '?write=true'.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -508,7 +527,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
   METHOD zif_abappm_pacote~manifest.
 
     result = request(
-      url         = |{ registry }/{ pacote-name }/{ version }|
+      url         = |{ registry }/{ pacote-name }/{ version }{ write_request( write ) }|
       abbreviated = abbreviated )->cdata( ).
 
     check_result( result ).
@@ -518,7 +537,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
   METHOD zif_abappm_pacote~packument.
 
-    result = request( |{ registry }/{ pacote-name }| )->cdata( ).
+    result = request( |{ registry }/{ pacote-name }{ write_request( write ) }| )->cdata( ).
 
     check_result( result ).
     zif_abappm_pacote~set_json( result ).
@@ -557,8 +576,13 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
   METHOD zif_abappm_pacote~tarball.
 
-    " TODO: Error check (HTTP status)
-    result = request( filename )->data( ).
+    DATA(response) = request( filename ).
+
+    IF response->is_ok( ) = abap_false.
+      check_result( response->cdata( ) ).
+    ELSE.
+      result = response->data( ).
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
