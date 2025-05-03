@@ -29,13 +29,13 @@ CLASS zcl_abappm_markdown_syn DEFINITION
 
     CLASS-DATA:
       current_language TYPE string,
-      highlighter      TYPE REF TO zcl_highlighter.
+      highlighter      TYPE REF TO zcl_abappm_highlighter.
 
     CLASS-METHODS create
       IMPORTING
         !language     TYPE string
       RETURNING
-        VALUE(result) TYPE REF TO zcl_highlighter.
+        VALUE(result) TYPE REF TO zcl_abappm_highlighter.
 
 ENDCLASS.
 
@@ -45,10 +45,10 @@ CLASS zcl_abappm_markdown_syn IMPLEMENTATION.
 
 
   METHOD create.
-    result = zcl_highlighter_factory=>create( |.{ language }| ).
+    result = zcl_abappm_highlighter_factory=>create( |.{ language }| ).
 
     IF result IS INITIAL.
-      result = zcl_highlighter_factory=>create( |.txt| ).
+      result = zcl_abappm_highlighter_factory=>create( |.txt| ).
     ENDIF.
   ENDMETHOD.
 
