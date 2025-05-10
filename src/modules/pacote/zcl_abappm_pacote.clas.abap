@@ -61,6 +61,7 @@ CLASS zcl_abappm_pacote DEFINITION
     CLASS-METHODS convert_packument_to_json
       IMPORTING
         !packument    TYPE zif_abappm_types=>ty_packument
+        !is_complete  TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE string
       RAISING
@@ -110,6 +111,12 @@ CLASS zcl_abappm_pacote DEFINITION
       RAISING
         zcx_abappm_error.
 
+    CLASS-METHODS check_packument
+      IMPORTING
+        !packument TYPE zif_abappm_types=>ty_packument
+      RAISING
+        zcx_abappm_error.
+
     CLASS-METHODS sort_packument
       IMPORTING
         !packument    TYPE zif_abappm_types=>ty_packument
@@ -129,6 +136,26 @@ ENDCLASS.
 
 
 CLASS zcl_abappm_pacote IMPLEMENTATION.
+
+
+  METHOD check_packument.
+
+    " packument has a lot of hoisted fields but no version
+    DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( packument ).
+    manifest-version = '1.0.0'.
+
+    DATA(issues) = zcl_abappm_package_json_valid=>check( manifest ).
+
+    INSERT LINES OF lcl_validate=>validate_single_values( packument ) INTO TABLE issues.
+    INSERT LINES OF lcl_validate=>validate_dist_tags( packument ) INTO TABLE issues.
+    INSERT LINES OF lcl_validate=>validate_times( packument ) INTO TABLE issues.
+    INSERT LINES OF lcl_validate=>validate_users( packument ) INTO TABLE issues.
+
+    IF issues IS NOT INITIAL.
+      zcx_abappm_error=>raise( |Invalid packument:\n{ concat_lines_of( table = issues sep = |\n| ) }| ).
+    ENDIF.
+
+  ENDMETHOD.
 
 
   METHOD check_result.
@@ -188,12 +215,15 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         description TYPE string,
         readme      TYPE string,
         homepage    TYPE string,
+        icon        TYPE string,
         BEGIN OF bugs,
           url   TYPE zif_abappm_types=>ty_uri,
           email TYPE zif_abappm_types=>ty_email,
         END OF bugs,
         license     TYPE string,
         keywords    TYPE string_table,
+        main        TYPE string,
+        man         TYPE string_table,
         author      TYPE zif_abappm_types=>ty_person,
         BEGIN OF repository,
           type      TYPE string,
@@ -217,7 +247,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
     TRY.
         DATA(ajson) = zcl_abappm_ajson=>parse( json
-          )->map( zcl_abappm_ajson_mapping=>create_to_snake_case( )
+          )->map( zcl_abappm_ajson_extensions=>from_camel_case_underscore( )
           )->to_abap_corresponding_only( ).
 
         ajson->to_abap( IMPORTING ev_container = json_partial ).
@@ -257,15 +287,12 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
         LOOP AT ajson->members( '/versions' ) INTO version-key.
           DATA(ajson_version) = ajson->slice( '/versions/' && version-key ).
+          " this also validates the version manifest
           version-version = zcl_abappm_package_json=>convert_json_to_manifest( ajson_version->stringify( ) ).
           INSERT version INTO TABLE packument-versions.
         ENDLOOP.
 
-        " TODO: Do we need this?
-        packument-_id  = ajson->get( '/_id' ).
-        packument-_rev = ajson->get( '/_rev' ).
-
-        " TODO: validation of packument
+        check_packument( packument ).
 
         result = sort_packument( packument ).
 
@@ -284,10 +311,11 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
           )->set(
             iv_path = '/'
             iv_val  = packument
-          )->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
+          )->map( zcl_abappm_ajson_mapping=>create_compound_mapper(
+            ii_mapper1 = zcl_abappm_ajson_mapping=>create_rename( VALUE #( ( from = 'dist_tags' to = 'dist-tags' ) ) )
+            ii_mapper2 = zcl_abappm_ajson_extensions=>to_camel_case_underscore( ) ) ).
 
-        " Transpose dist-tags, times, users, versions...
-        ajson->delete( '/distTags' ). " created incorrectly due to underscope
+        " Transpose dist-tags, times, users, versions... from arrays to objects
         ajson->setx( '/dist-tags:{ }' ).
         LOOP AT packument-dist_tags INTO DATA(generic).
           ajson->set(
@@ -297,25 +325,10 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
         ajson->setx( '/time:{ }' ).
         LOOP AT packument-time INTO DATA(time).
+          " TODO: Replace with long timestamp
           ajson->set_timestamp(
             iv_path = 'time/' && time-key
-            iv_val  = time-timestamp ).
-        ENDLOOP.
-
-        ajson->setx( '/maintainers:{ }' ).
-        LOOP AT packument-maintainers INTO DATA(person).
-          ajson->set(
-            iv_path = 'maintainers/name'
-            iv_val  = person-name ).
-          ajson->set(
-            iv_path = 'maintainers/email'
-            iv_val  = person-email ).
-          ajson->set(
-            iv_path = 'maintainers/url'
-            iv_val  = person-url ).
-          ajson->set(
-            iv_path = 'maintainers/avatar'
-            iv_val  = person-avatar ).
+            iv_val  = cl_abap_tstmp=>move_to_short( time-timestamp ) ).
         ENDLOOP.
 
         ajson->setx( '/users:{ }' ).
@@ -340,14 +353,22 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
         ajson->setx( '/versions:{ }' ).
         LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
-          DATA(version_json) = zcl_abappm_package_json=>convert_manifest_to_json( <version>-version ).
+          DATA(version_json) = zcl_abappm_package_json=>convert_manifest_to_json(
+            manifest    = <version>-version
+            is_complete = is_complete ).
 
-          DATA(ajson_version) = zcl_abappm_ajson=>parse( version_json )->keep_item_order( ).
+          DATA(ajson_version) = zcl_abappm_ajson=>parse(
+            iv_json            = version_json
+            iv_keep_item_order = abap_true ).
 
           ajson->set(
             iv_path = 'versions/' && <version>-key
             iv_val  = ajson_version ).
         ENDLOOP.
+
+        IF is_complete = abap_false.
+          ajson = ajson->filter( zcl_abappm_ajson_extensions=>filter_empty_zero_null( ) ).
+        ENDIF.
 
         result = ajson->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
@@ -391,13 +412,13 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         iv_val = zif_abappm_http_agent=>c_content_type-json ).
     ENDIF.
 
-    DATA(urlc) = zcl_abappm_url=>parse( url )->components.
+    DATA(host) = zcl_abappm_url=>parse( url )->components-host.
 
     " Get/set auth token
-    IF zcl_abappm_http_login_manager=>get( urlc-host ) IS NOT INITIAL.
+    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
       result->global_headers( )->set(
         iv_key = zif_abappm_http_agent=>c_header-authorization
-        iv_val = zcl_abappm_http_login_manager=>get( urlc-host ) ).
+        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
     ENDIF.
 
   ENDMETHOD.
@@ -438,8 +459,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     IF abbreviated IS INITIAL.
       result = get_agent( registry )->request( url ).
     ELSE.
-      DATA(headers) = NEW zcl_abappm_string_map( ).
-      headers->set(
+      DATA(headers) = NEW zcl_abappm_string_map( )->set(
         iv_key = 'Accept'
         iv_val = 'application/vnd.npm.install-v1+json' ).
 
@@ -485,6 +505,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
     TRY.
         db_persist->load( pacote-key ).
+
         result = abap_true.
       CATCH zcx_abappm_error.
         result = abap_false.
@@ -540,6 +561,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     result = request( |{ registry }/{ pacote-name }{ write_request( write ) }| )->cdata( ).
 
     check_result( result ).
+
     zif_abappm_pacote~set_json( result ).
 
   ENDMETHOD.

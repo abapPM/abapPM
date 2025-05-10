@@ -54,6 +54,10 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Invalid private flag: { manifest-private }| INTO TABLE result.
     ENDIF.
 
+    IF manifest-deprecated <> abap_false AND manifest-deprecated <> abap_true.
+      INSERT |Invalid deprecated flag: { manifest-deprecated }| INTO TABLE result.
+    ENDIF.
+
     IF zcl_abappm_package_json_valid=>is_valid_url( manifest-homepage ) = abap_false.
       INSERT |Invalid homepage URL: { manifest-homepage }| INTO TABLE result.
     ENDIF.
@@ -159,12 +163,12 @@ CLASS lcl_validate IMPLEMENTATION.
 
     CLEAR values.
     LOOP AT manifest-engines INTO DATA(dependency).
-      COLLECT dependency-name INTO values.
-      IF zcl_abappm_package_json_valid=>is_valid_engine( dependency-name ) = abap_false.
-        INSERT |Invalid engine: { dependency-name }| INTO TABLE result.
+      COLLECT dependency-key INTO values.
+      IF zcl_abappm_package_json_valid=>is_valid_engine( dependency-key ) = abap_false.
+        INSERT |Invalid engine: { dependency-key }| INTO TABLE result.
       ENDIF.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
-        INSERT |Invalid engine version: { dependency-name } { dependency-range }| INTO TABLE result.
+        INSERT |Invalid engine version: { dependency-key } { dependency-range }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-engines ) <> lines( values ).
@@ -179,12 +183,12 @@ CLASS lcl_validate IMPLEMENTATION.
 
     CLEAR values.
     LOOP AT manifest-dependencies INTO DATA(dependency).
-      COLLECT dependency-name INTO values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-name ) = abap_false.
-        INSERT |Invalid dependency: { dependency-name }| INTO TABLE result.
+      COLLECT dependency-key INTO values.
+      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-key ) = abap_false.
+        INSERT |Invalid dependency: { dependency-key }| INTO TABLE result.
       ENDIF.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
-        INSERT |Invalid dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
+        INSERT |Invalid dependency version: { dependency-key } { dependency-range }| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-dependencies ) <> lines( values ).
@@ -193,15 +197,15 @@ CLASS lcl_validate IMPLEMENTATION.
 
     CLEAR values.
     LOOP AT manifest-dev_dependencies INTO dependency.
-      COLLECT dependency-name INTO values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-name ) = abap_false.
-        INSERT |Invalid dev dependency: { dependency-name }| INTO TABLE result.
+      COLLECT dependency-key INTO values.
+      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-key ) = abap_false.
+        INSERT |Invalid dev dependency: { dependency-key }| INTO TABLE result.
       ENDIF.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
-        INSERT |Invalid dev dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
+        INSERT |Invalid dev dependency version: { dependency-key } { dependency-range }| INTO TABLE result.
       ENDIF.
-      IF line_exists( manifest-dependencies[ name = dependency-name ] ).
-        INSERT |Dev dependency { dependency-name } already included in dependencies| INTO TABLE result.
+      IF line_exists( manifest-dependencies[ key = dependency-key ] ).
+        INSERT |Dev dependency { dependency-key } already included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-dev_dependencies ) <> lines( values ).
@@ -210,18 +214,18 @@ CLASS lcl_validate IMPLEMENTATION.
 
     CLEAR values.
     LOOP AT manifest-optional_dependencies INTO dependency.
-      COLLECT dependency-name INTO values.
-      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-name ) = abap_false.
-        INSERT |Invalid optional dependency: { dependency-name }| INTO TABLE result.
+      COLLECT dependency-key INTO values.
+      IF zcl_abappm_package_json_valid=>is_valid_name( dependency-key ) = abap_false.
+        INSERT |Invalid optional dependency: { dependency-key }| INTO TABLE result.
       ENDIF.
       IF zcl_abappm_package_json_valid=>is_valid_version_range( dependency-range ) = abap_false.
-        INSERT |Invalid optional dependency version: { dependency-name } { dependency-range }| INTO TABLE result.
+        INSERT |Invalid optional dependency version: { dependency-key } { dependency-range }| INTO TABLE result.
       ENDIF.
-      IF line_exists( manifest-dependencies[ name = dependency-name ] ).
-        INSERT |Optional dependency { dependency-name } already included in dependencies| INTO TABLE result.
+      IF line_exists( manifest-dependencies[ key = dependency-key ] ).
+        INSERT |Optional dependency { dependency-key } already included in dependencies| INTO TABLE result.
       ENDIF.
-      IF line_exists( manifest-dev_dependencies[ name = dependency-name ] ).
-        INSERT |Optional dependency { dependency-name } already included in dev dependencies| INTO TABLE result.
+      IF line_exists( manifest-dev_dependencies[ key = dependency-key ] ).
+        INSERT |Optional dependency { dependency-key } already included in dev dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-optional_dependencies ) <> lines( values ).
@@ -234,7 +238,7 @@ CLASS lcl_validate IMPLEMENTATION.
       IF zcl_abappm_package_json_valid=>is_valid_name( value ) = abap_false.
         INSERT |Invalid bundle dependency: { value }| INTO TABLE result.
       ENDIF.
-      IF NOT line_exists( manifest-dependencies[ name = value ] ).
+      IF NOT line_exists( manifest-dependencies[ key = value ] ).
         INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
       ENDIF.
     ENDLOOP.

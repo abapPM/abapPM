@@ -96,6 +96,8 @@ CLASS zcl_abappm_package_json DEFINITION
       END OF ty_instance,
       ty_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY package.
 
+    TYPES ty_package_list TYPE STANDARD TABLE OF devclass WITH KEY table_line.
+
     CLASS-DATA:
       db_persist TYPE REF TO zif_abappm_persist_apm,
       instances  TYPE ty_instances.
@@ -122,6 +124,12 @@ CLASS zcl_abappm_package_json DEFINITION
         !value        TYPE string
       RETURNING
         VALUE(result) TYPE string.
+
+    CLASS-METHODS get_super_packages
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE ty_package_list.
 
 ENDCLASS.
 
@@ -176,23 +184,24 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     TYPES:
       " Copy of schema but without dependencies (instead of array)
-      BEGIN OF ty_package_json_partial,
-        name                TYPE string,
-        version             TYPE string,
-        description         TYPE string,
-        keywords            TYPE string_table,
-        homepage            TYPE string,
+      BEGIN OF ty_manifest_partial,
+        name          TYPE string,
+        version       TYPE string,
+        description   TYPE string,
+        keywords      TYPE string_table,
+        homepage      TYPE string,
+        icon          TYPE string,
         BEGIN OF bugs,
           url   TYPE zif_abappm_types=>ty_uri,
           email TYPE zif_abappm_types=>ty_email,
         END OF bugs,
-        license             TYPE string,
-        author              TYPE zif_abappm_types=>ty_person,
-        contributors        TYPE STANDARD TABLE OF zif_abappm_types=>ty_person WITH KEY name,
-        maintainers         TYPE STANDARD TABLE OF zif_abappm_types=>ty_person WITH KEY name,
-        main                TYPE string,
-        man                 TYPE string_table,
-        type                TYPE string,
+        license       TYPE string,
+        author        TYPE zif_abappm_types=>ty_person,
+        contributors  TYPE STANDARD TABLE OF zif_abappm_types=>ty_person WITH KEY name,
+        maintainers   TYPE STANDARD TABLE OF zif_abappm_types=>ty_person WITH KEY name,
+        main          TYPE string,
+        man           TYPE string_table,
+        type          TYPE string,
         BEGIN OF repository,
           type      TYPE string,
           url       TYPE zif_abappm_types=>ty_uri,
@@ -202,66 +211,57 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
           type TYPE string,
           url  TYPE zif_abappm_types=>ty_uri,
         END OF funding,
-        bundle_dependencies TYPE string_table,
-        os                  TYPE string_table,
-        cpu                 TYPE string_table,
-        db                  TYPE string_table,
-        private             TYPE abap_bool,
-        deprecated          TYPE abap_bool,
-        BEGIN OF dist,
-          file_count    TYPE i,
-          integrity     TYPE string,
-          shasum        TYPE string,
-          signatures    TYPE STANDARD TABLE OF zif_abappm_types=>ty_signature WITH KEY keyid,
-          tarball       TYPE string,
-          unpacked_size TYPE i,
-        END OF dist,
-        readme              TYPE string,
-      END OF ty_package_json_partial.
+        os            TYPE string_table,
+        cpu           TYPE string_table,
+        db            TYPE string_table,
+        private       TYPE abap_bool,
+        deprecated    TYPE abap_bool,
+        dist          TYPE zif_abappm_types=>ty_dist,
+        readme        TYPE string,
+        _id           TYPE string,
+        _abap_version TYPE string,
+        _apm_version  TYPE string,
+      END OF ty_manifest_partial.
 
     DATA:
-      json_partial TYPE ty_package_json_partial,
-      dependency   TYPE zif_abappm_types=>ty_dependency.
+      manifest_partial TYPE ty_manifest_partial,
+      dependency       TYPE zif_abappm_types=>ty_dependency.
 
     TRY.
-        DATA(ajson) = zcl_abappm_ajson=>parse( json )->to_abap_corresponding_only( ).
+        DATA(ajson) = zcl_abappm_ajson=>parse( json
+          )->to_abap_corresponding_only(
+          )->map( zcl_abappm_ajson_extensions=>from_camel_case_underscore( ) ).
 
-        ajson->to_abap( IMPORTING ev_container = json_partial ).
+        ajson->to_abap( IMPORTING ev_container = manifest_partial ).
 
-        DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( json_partial ).
+        DATA(manifest) = CORRESPONDING zif_abappm_types=>ty_manifest( manifest_partial ).
 
         " Transpose dependencies
-        LOOP AT ajson->members( '/dependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/dependencies/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/dependencies' ) INTO dependency-key.
+          dependency-range = ajson->get( '/dependencies/' && replace_slash( dependency-key ) ).
           INSERT dependency INTO TABLE manifest-dependencies.
         ENDLOOP.
-        LOOP AT ajson->members( '/devDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/devDependencies/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/dev_Dependencies' ) INTO dependency-key.
+          dependency-range = ajson->get( '/dev_Dependencies/' && replace_slash( dependency-key ) ).
           INSERT dependency INTO TABLE manifest-dev_dependencies.
         ENDLOOP.
-        LOOP AT ajson->members( '/optionalDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/optionalDependencies/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/optional_Dependencies' ) INTO dependency-key.
+          dependency-range = ajson->get( '/optional_Dependencies/' && replace_slash( dependency-key ) ).
           INSERT dependency INTO TABLE manifest-optional_dependencies.
         ENDLOOP.
-        LOOP AT ajson->members( '/peerDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/peerDependencies/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/peer_Dependencies' ) INTO dependency-key.
+          dependency-range = ajson->get( '/peer_Dependencies/' && replace_slash( dependency-key ) ).
           INSERT dependency INTO TABLE manifest-peer_dependencies.
         ENDLOOP.
-        LOOP AT ajson->members( '/bundleDependencies' ) INTO dependency-name.
-          dependency-range = ajson->get( '/bundleDependencies/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/bundle_Dependencies' ) INTO dependency-key.
+          dependency-range = ajson->get( '/bundle_Dependencies/' && replace_slash( dependency-key ) ).
           " store just the range, which is the name of the bundle dependency
           INSERT dependency-range INTO TABLE manifest-bundle_dependencies.
         ENDLOOP.
-        LOOP AT ajson->members( '/engines' ) INTO dependency-name.
-          dependency-range = ajson->get( '/engines/' && replace_slash( dependency-name ) ).
+        LOOP AT ajson->members( '/engines' ) INTO dependency-key.
+          dependency-range = ajson->get( '/engines/' && replace_slash( dependency-key ) ).
           INSERT dependency INTO TABLE manifest-engines.
         ENDLOOP.
-
-        manifest-dist-file_count    = ajson->get( '/dist/fileCount' ).
-        manifest-dist-unpacked_size = ajson->get( '/dist/unpackageSize' ).
-        manifest-_id                = ajson->get( '_id' ).
-        manifest-_abap_version      = ajson->get( '_abapVersion' ).
-        manifest-_apm_version       = ajson->get( '_apmVersion' ).
 
         check_manifest( manifest ).
 
@@ -276,8 +276,8 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
   METHOD convert_json_to_manifest_abbr.
 
-    DATA(manifest) = convert_json_to_manifest( json ).
-    result = CORRESPONDING #( manifest ).
+    DATA(full_manifest) = convert_json_to_manifest( json ).
+    result = CORRESPONDING #( full_manifest ).
 
   ENDMETHOD.
 
@@ -292,46 +292,46 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
           )->set(
             iv_path = '/'
             iv_val  = manifest
-          )->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
+          )->map( zcl_abappm_ajson_extensions=>to_camel_case_underscore( ) ).
 
         " Transpose dependencies
         ajson->setx( '/dependencies:{ }' ).
         LOOP AT manifest-dependencies INTO DATA(dependency).
           ajson->set(
-            iv_path = '/dependencies/' && replace_slash( dependency-name )
+            iv_path = '/dependencies/' && dependency-key
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/devDependencies:{ }' ).
         LOOP AT manifest-dev_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/devDependencies/' && replace_slash( dependency-name )
+            iv_path = '/devDependencies/' && dependency-key
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/optionalDependencies:{ }' ).
         LOOP AT manifest-optional_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/optionalDependencies/' && replace_slash( dependency-name )
+            iv_path = '/optionalDependencies/' && dependency-key
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( 'peerDependencies:{ }' ).
         LOOP AT manifest-peer_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/peerDependencies/' && replace_slash( dependency-name )
+            iv_path = '/peerDependencies/' && dependency-key
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/engines:{ }' ).
         LOOP AT manifest-engines INTO dependency.
           ajson->set(
-            iv_path = '/engines/' && replace_slash( dependency-name )
+            iv_path = '/engines/' && dependency-key
             iv_val  = dependency-range ).
         ENDLOOP.
 
         IF is_complete = abap_false.
-          ajson = ajson->filter( lcl_ajson_filters_pack_json=>create_empty_filter( ) ).
+          ajson = ajson->filter( zcl_abappm_ajson_extensions=>filter_empty_zero_null( ) ).
           IF manifest-private = abap_false.
             INSERT `/private` INTO TABLE skip_paths.
           ENDIF.
@@ -402,6 +402,21 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_super_packages.
+
+    DATA(devclass) = package.
+    DO.
+      INSERT devclass INTO TABLE result.
+      SELECT SINGLE parentcl FROM tdevc INTO @DATA(parent) WHERE devclass = @devclass.
+      IF sy-subrc <> 0 OR parent IS INITIAL.
+        EXIT.
+      ENDIF.
+      devclass = parent.
+    ENDDO.
+
+  ENDMETHOD.
+
+
   METHOD injector.
 
     READ TABLE instances ASSIGNING FIELD-SYMBOL(<instance>) WITH TABLE KEY package = package.
@@ -423,12 +438,19 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
       && zif_abappm_persist_apm=>c_key_extra-package_json ).
 
     LOOP AT list ASSIGNING FIELD-SYMBOL(<list>).
+      CONVERT TIME STAMP <list>-timestamp
+        TIME ZONE 'UTC'
+        INTO DATE DATA(date)
+        TIME DATA(time).
+
+      DATA(changed_at) = |{ date DATE = ISO } { time TIME = ISO }|.
+
       DATA(result_item) = VALUE zif_abappm_package_json=>ty_package(
         key            = <list>-keys
         package        = get_package_from_key( <list>-keys )
         changed_by     = <list>-user
         changed_at_raw = <list>-timestamp
-        changed_at     = zcl_abapgit_gui_chunk_lib=>render_timestamp( <list>-timestamp ) ).
+        changed_at     = changed_at ).
 
       IF instanciate = abap_true.
         TRY.
@@ -448,19 +470,15 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     " Check package hierarchy to determine which packages are bundled
     LOOP AT result ASSIGNING FIELD-SYMBOL(<result_item>).
-      TRY.
-          DATA(super_packages) = zcl_abapgit_factory=>get_sap_package( <result_item>-package )->list_superpackages( ).
+      DATA(super_packages) = get_super_packages( <result_item>-package ).
 
-          LOOP AT super_packages ASSIGNING FIELD-SYMBOL(<super_package>) WHERE table_line <> <result_item>-package.
-            IF line_exists( result[ KEY package COMPONENTS package = <super_package> ] ).
-              <result_item>-bundle = abap_true.
-              <result_item>-parent = <super_package>.
-              EXIT.
-            ENDIF.
-          ENDLOOP.
-
-        CATCH zcx_abapgit_exception ##NO_HANDLER.
-      ENDTRY.
+      LOOP AT super_packages ASSIGNING FIELD-SYMBOL(<super_package>) WHERE table_line <> <result_item>-package.
+        IF line_exists( result[ KEY package COMPONENTS package = <super_package> ] ).
+          <result_item>-bundle = abap_true.
+          <result_item>-parent = <super_package>.
+          EXIT.
+        ENDIF.
+      ENDLOOP.
     ENDLOOP.
 
     CASE is_bundle.
@@ -490,12 +508,12 @@ CLASS zcl_abappm_package_json IMPLEMENTATION.
 
     " Keeping things in order avoid unnecessary diffs
     SORT:
-      result-dependencies BY name,
-      result-dev_dependencies BY name,
-      result-optional_dependencies BY name,
-      result-peer_dependencies BY name,
+      result-dependencies BY key,
+      result-dev_dependencies BY key,
+      result-optional_dependencies BY key,
+      result-peer_dependencies BY key,
       result-bundle_dependencies,
-      result-engines BY name,
+      result-engines BY key,
       result-contributors BY name,
       result-maintainers BY name,
       result-keywords,

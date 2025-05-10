@@ -266,7 +266,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
             IF compver->prerelease IS INITIAL.
               compver->inc( 'patch' ).
             ELSE.
-              compver->inc( release = 'prepush' identifier_base = '0' ).
+              compver->inc( release_type = 'prepush' identifier_base = '0' ).
             ENDIF.
 
             IF setmin IS INITIAL OR zcl_abappm_semver_functions=>gt( a = compver b = setmin ).

@@ -89,6 +89,12 @@ CLASS zcl_abappm_package_json_valid DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool.
 
+    CLASS-METHODS is_valid_timestamp
+      IMPORTING
+        !timestamp    TYPE string
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -242,6 +248,17 @@ CLASS zcl_abappm_package_json_valid IMPLEMENTATION.
     IF result = abap_true AND package CP '//*'.
       result = abap_false.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD is_valid_timestamp.
+
+    CONSTANTS c_regex TYPE string
+      VALUE `^(\d{4})-(\d{2})-(\d{2})(T)(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|$)` ##NO_TEXT.
+
+    FIND REGEX c_regex IN timestamp.
+    result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.
 

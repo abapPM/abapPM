@@ -121,7 +121,7 @@ CLASS zcl_abappm_semver_functions DEFINITION
     CLASS-METHODS inc
       IMPORTING
         version         TYPE any
-        release         TYPE string
+        release_type    TYPE string
         identifier      TYPE string OPTIONAL
         identifier_base TYPE string OPTIONAL
         loose           TYPE abap_bool DEFAULT abap_false
@@ -513,23 +513,15 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      " Otherwise it can be determined by checking the high version
-
-      IF high_version->patch IS NOT INITIAL.
-        " anything higher than a patch bump would result in the wrong version
+      " If the main part has no difference
+      IF low_version->compare_main( high_version ) = 0.
+        IF low_version->minor IS NOT INITIAL AND low_version->patch IS INITIAL.
+          result = 'minor'.
+          RETURN.
+        ENDIF.
         result = 'patch'.
         RETURN.
       ENDIF.
-
-      IF high_version->minor IS NOT INITIAL.
-        " anything higher than a minor bump would result in the wrong version
-        result = 'minor'.
-        RETURN.
-      ENDIF.
-
-      " bumping major/minor/patch all have same result
-      result = 'major'.
-      RETURN.
     ENDIF.
 
     " add the `pre` prefix if we are going to a prerelease version
@@ -616,7 +608,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
 
         CHECK result IS BOUND.
 
-        result->inc( release = release identifier = identifier identifier_base = identifier_base ).
+        result->inc( release_type = release_type identifier = identifier identifier_base = identifier_base ).
       CATCH zcx_abappm_error.
         CLEAR result.
     ENDTRY.

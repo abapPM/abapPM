@@ -7,14 +7,14 @@ INTERFACE zif_abappm_semver_constants PUBLIC.
 * Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
-* Based on node semver package v7.6.3 (July 2024)
-* https://github.com/npm/node-semver/releases/tag/v7.6.3
+* Based on node semver package v7.7.1 (February 2025)
+* https://github.com/npm/node-semver/releases/tag/v7.7.1
 * not included yet:
-* https://github.com/npm/node-semver/compare/v7.6.3...main
+* https://github.com/npm/node-semver/compare/v7.7.1...main
 ************************************************************************
 
   " Package version
-  CONSTANTS version TYPE string VALUE '7.6.3' ##NEEDED.
+  CONSTANTS version TYPE string VALUE '7.7.1' ##NEEDED.
 
   " Note: this is the semver.org version of the spec that it implements
   " Not necessarily the package version of this code.
@@ -39,6 +39,7 @@ INTERFACE zif_abappm_semver_constants PUBLIC.
       patch      TYPE string VALUE 'patch',
       prepatch   TYPE string VALUE 'prepatch',
       prerelease TYPE string VALUE 'prerelease',
+      release    TYPE string VALUE 'release',
     END OF release_types.
 
 ENDINTERFACE.

@@ -517,17 +517,17 @@ CLASS zcl_abappm_gui_page_package IMPLEMENTATION.
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
       html->add( '<tr>' ).
       html->td( get_package_boxed(
-        name  = <dependency>-name
+        name  = <dependency>-key
         value = <dependency>-range ) ).
 
       CLEAR installed_package.
-      IF line_exists( bundle_dependencies[ table_line = <dependency>-name ] ).
-        IF line_exists( list[ name = <dependency>-name parent = package bundle = abap_true ] ) ##PRIMKEY[NAME].
-          installed_package = list[ name = <dependency>-name parent = package bundle = abap_true ] ##PRIMKEY[NAME].
+      IF line_exists( bundle_dependencies[ table_line = <dependency>-key ] ).
+        IF line_exists( list[ name = <dependency>-key parent = package bundle = abap_true ] ) ##PRIMKEY[NAME].
+          installed_package = list[ name = <dependency>-key parent = package bundle = abap_true ] ##PRIMKEY[NAME].
         ENDIF.
         html->td( 'Bundled' ).
-      ELSEIF line_exists( list[ KEY name COMPONENTS name = <dependency>-name ] ).
-        installed_package = list[ KEY name COMPONENTS name = <dependency>-name ].
+      ELSEIF line_exists( list[ KEY name COMPONENTS name = <dependency>-key ] ).
+        installed_package = list[ KEY name COMPONENTS name = <dependency>-key ].
         html->td( 'Global' ).
       ENDIF.
 

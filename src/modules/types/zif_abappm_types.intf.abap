@@ -17,6 +17,7 @@ INTERFACE zif_abappm_types PUBLIC.
 
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
+
   TYPES:
     "! Email
     ty_email TYPE string,
@@ -33,21 +34,23 @@ INTERFACE zif_abappm_types PUBLIC.
     ty_persons TYPE STANDARD TABLE OF ty_person WITH KEY name url email,
     "! Dependency with semver range
     BEGIN OF ty_dependency,
-      name  TYPE string,
+      key   TYPE string,
       range TYPE string,
     END OF ty_dependency,
     "! List of Dependencies
-    ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY name,
+    ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY key,
     "! Generic key value pair
     BEGIN OF ty_generic,
       key   TYPE string,
       value TYPE string,
     END OF ty_generic,
+    ty_dist_tags TYPE STANDARD TABLE OF ty_generic WITH KEY key,
     "! Timestamp
     BEGIN OF ty_time,
       key       TYPE string,
-      timestamp TYPE timestamp,
+      timestamp TYPE timestampl,
     END OF ty_time,
+    ty_times TYPE STANDARD TABLE OF ty_time WITH KEY key,
     "! Signature
     BEGIN OF ty_signature,
       keyid TYPE string,
@@ -58,20 +61,38 @@ INTERFACE zif_abappm_types PUBLIC.
       name  TYPE string,
       stars TYPE i,
     END OF ty_user,
+    ty_users TYPE STANDARD TABLE OF ty_user WITH KEY name,
+    "! Bugs (Issues)
+    BEGIN OF ty_bugs,
+      url   TYPE ty_uri,
+      email TYPE ty_email,
+    END OF ty_bugs,
+    "! Repository
+    BEGIN OF ty_repository,
+      type      TYPE string,
+      url       TYPE ty_uri,
+      directory TYPE string,
+    END OF ty_repository,
+    "! Funding
+    BEGIN OF ty_funding,
+      type TYPE string,
+      url  TYPE ty_uri,
+    END OF ty_funding,
     "! Dist Details
     BEGIN OF ty_dist,
       file_count    TYPE i,
-      integrity     TYPE string,
       shasum        TYPE string,
-      signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
       tarball       TYPE string,
       unpacked_size TYPE i,
+      integrity     TYPE string,
+      signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
     END OF ty_dist.
 
   " *** PACKAGE.ABAP.JSON ***
 
   TYPES:
     "! Schema for package.abap.json
+    "! Everything but "icon" is also in regular npm package.json
     BEGIN OF ty_package_json,
       name                  TYPE string,
       version               TYPE string,
@@ -79,25 +100,16 @@ INTERFACE zif_abappm_types PUBLIC.
       type                  TYPE string,
       keywords              TYPE string_table,
       homepage              TYPE string,
-      BEGIN OF bugs,
-        url   TYPE ty_uri,
-        email TYPE ty_email,
-      END OF bugs,
+      icon                  TYPE string,
+      bugs                  TYPE ty_bugs,
       license               TYPE string,
       author                TYPE ty_person,
       contributors          TYPE ty_persons,
       maintainers           TYPE ty_persons,
       main                  TYPE string,
       man                   TYPE string_table,
-      BEGIN OF repository,
-        type      TYPE string,
-        url       TYPE ty_uri,
-        directory TYPE string,
-      END OF repository,
-      BEGIN OF funding,
-        type TYPE string,
-        url  TYPE ty_uri,
-      END OF funding,
+      repository            TYPE ty_repository,
+      funding               TYPE ty_funding,
       dependencies          TYPE ty_dependencies,
       dev_dependencies      TYPE ty_dependencies,
       optional_dependencies TYPE ty_dependencies,
@@ -113,7 +125,9 @@ INTERFACE zif_abappm_types PUBLIC.
 
   " *** MANIFEST ***
 
-  "! Full manifest (fetched with "accept: application/json" in HTTP headers)
+  "! Full manifest
+  "!
+  "! fetched with "accept: application/json" in HTTP headers
   TYPES BEGIN OF ty_manifest.
   INCLUDE TYPE ty_package_json.
   TYPES:
@@ -126,7 +140,8 @@ INTERFACE zif_abappm_types PUBLIC.
 
   TYPES:
     "! Abbreviated manifest
-    "! (fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers)
+    "!
+    "! fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers
     BEGIN OF ty_manifest_abbreviated ##NEEDED,
       name                  TYPE string,
       version               TYPE string,
@@ -150,7 +165,8 @@ INTERFACE zif_abappm_types PUBLIC.
     BEGIN OF ty_version,
       key     TYPE string,
       version TYPE ty_manifest,
-    END OF ty_version.
+    END OF ty_version,
+    ty_versions TYPE STANDARD TABLE OF ty_version WITH KEY key.
 
   TYPES:
     "! Tarball Attachment
@@ -161,7 +177,8 @@ INTERFACE zif_abappm_types PUBLIC.
         data         TYPE string,
         length       TYPE i,
       END OF tarball,
-    END OF ty_attachment.
+    END OF ty_attachment,
+    ty_attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key.
 
   TYPES:
     "! Full packument (as fetched from registry)
@@ -169,28 +186,22 @@ INTERFACE zif_abappm_types PUBLIC.
     BEGIN OF ty_packument ##NEEDED,
       name         TYPE string,
       description  TYPE string,
-      dist_tags    TYPE STANDARD TABLE OF ty_generic WITH KEY key,
-      time         TYPE STANDARD TABLE OF ty_time WITH KEY key,
-      versions     TYPE STANDARD TABLE OF ty_version WITH KEY key,
+      dist_tags    TYPE ty_dist_tags,
+      time         TYPE ty_times,
+      versions     TYPE ty_versions,
       maintainers  TYPE ty_persons,
       readme       TYPE string,
-      users        TYPE STANDARD TABLE OF ty_user WITH KEY name,
+      users        TYPE ty_users,
       homepage     TYPE string,
-      BEGIN OF bugs,
-        url   TYPE ty_uri,
-        email TYPE ty_email,
-      END OF bugs,
+      icon         TYPE string,
+      bugs         TYPE ty_bugs,
       license      TYPE string,
       keywords     TYPE string_table,
       author       TYPE ty_person,
-      BEGIN OF repository,
-        type      TYPE string,
-        url       TYPE ty_uri,
-        directory TYPE string,
-      END OF repository,
+      repository   TYPE ty_repository,
       _id          TYPE string,
       _rev         TYPE string,
-      _attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key,
+      _attachments TYPE ty_attachments,
       access       TYPE string,
     END OF ty_packument.
 

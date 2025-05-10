@@ -117,7 +117,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
         WHEN '-i' OR '--inc' OR '--increment'.
           val = VALUE #( argv[ idx + 1 ] OPTIONAL ).
           CASE val.
-            WHEN 'major' OR 'minor' OR 'patch' OR 'prerelease' OR 'premajor' OR 'preminor' OR 'prepatch'.
+            WHEN 'major' OR 'minor' OR 'patch' OR 'prerelease' OR 'premajor' OR 'preminor' OR 'prepatch' OR 'release'.
               idx = idx + 1.
               inc = VALUE #( argv[ idx ] OPTIONAL ).
             WHEN OTHERS.
@@ -175,7 +175,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
       ( `-i --increment [<level>]` )
       ( `        Increment a version by the specified level.  Level can` )
       ( `        be one of: major, minor, patch, premajor, preminor,` )
-      ( `        prepatch, or prerelease.  Default level is 'patch'.` )
+      ( `        prepatch, prerelease, or release.  Default level is 'patch'.` )
       ( `        Only one version may be specified.` )
       ( `` )
       ( `--preid <identifier>` )
@@ -228,7 +228,7 @@ CLASS zcl_abappm_semver_cli IMPLEMENTATION.
       LOOP AT versions ASSIGNING <version>.
         DATA(semver) = zcl_abappm_semver_functions=>inc(
           version         = <version>
-          release         = inc
+          release_type    = inc
           identifier      = identifier
           identifier_base = identifier_base
           loose           = loose

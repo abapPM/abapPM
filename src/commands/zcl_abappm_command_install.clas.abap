@@ -77,7 +77,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
     DATA(list) = zcl_abappm_package_json=>list( ).
 
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
-      IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-name ] ).
+      IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
         check_dependency(
           list       = list
           dependency = <dependency>
@@ -117,7 +117,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " TODO: Log the issues instead of failing
     READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
-      WITH KEY name COMPONENTS name = dependency-name.
+      WITH KEY name COMPONENTS name = dependency-key.
     IF sy-subrc = 0.
       DATA(satisfies) = zcl_abappm_semver_functions=>satisfies(
         version = <package>-version
@@ -128,7 +128,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
           " TODO: Log warning
         ELSE.
           zcx_abappm_error=>raise(
-            |{ category } { dependency-name } is installed in version { <package>-version } | &&
+            |{ category } { dependency-key } is installed in version { <package>-version } | &&
             |but does not satisfy { dependency-range }| ).
         ENDIF.
       ENDIF.
@@ -136,7 +136,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
       IF is_optional = abap_true.
         " TODO: Log warning
       ELSE.
-        zcx_abappm_error=>raise( |{ category } { dependency-name } is not installed| ).
+        zcx_abappm_error=>raise( |{ category } { dependency-key } is not installed| ).
       ENDIF.
     ENDIF.
 
@@ -166,7 +166,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " apm version
     READ TABLE manifest-engines ASSIGNING FIELD-SYMBOL(<dependency>)
-      WITH KEY name = 'apm'.
+      WITH KEY key = 'apm'.
     IF sy-subrc = 0.
       check_semver(
         name     = 'apm'
@@ -177,7 +177,7 @@ CLASS zcl_abappm_command_install IMPLEMENTATION.
 
     " abap release
     READ TABLE manifest-engines ASSIGNING <dependency>
-      WITH KEY name = 'abap'.
+      WITH KEY key = 'abap'.
     IF sy-subrc = 0.
       TRY.
           DATA(abap_version) = NEW zcl_abappm_semver_sap( )->sap_component_to_semver( 'SAP_BASIS' ).

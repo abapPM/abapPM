@@ -216,6 +216,7 @@ CLASS lcl_utils IMPLEMENTATION.
 
     rv_path_name-path = normalize_path( substring( val = iv_path len = lv_offs ) ).
     rv_path_name-name = substring( val = iv_path off = lv_offs len = lv_len - lv_offs - lv_trim_slash ).
+    " Replace tabs with slash to get original value
     rv_path_name-name = replace(
       val  = rv_path_name-name
       sub  = cl_abap_char_utilities=>horizontal_tab
@@ -475,7 +476,8 @@ CLASS lcl_json_parser IMPLEMENTATION.
           mv_stack_path = mv_stack_path && replace(
             val  = <item>-name
             sub  = '/'
-            with = cl_abap_char_utilities=>horizontal_tab )
+            with = cl_abap_char_utilities=>horizontal_tab
+            occ  = 0 )
             && '/'.
 
         WHEN if_sxml_node=>co_nt_element_close.
@@ -782,6 +784,14 @@ CLASS lcl_json_to_abap DEFINITION FINAL.
         VALUE(rv_result) TYPE timestamp
       RAISING
         zcx_abappm_ajson_error.
+
+*    methods to_timestampl
+*      importing
+*        iv_value         type zif_ajson_types=>ty_node-value
+*      returning
+*        value(rv_result) type timestampl
+*      raising
+*        zcx_ajson_error.
 
     METHODS to_date
       IMPORTING
@@ -1119,8 +1129,10 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
           ELSEIF is_node_type-type_kind = lif_kind=>time.
             <container> = to_time( is_node-value ).
           ELSEIF is_node_type-dd->absolute_name = '\TYPE=TIMESTAMP'
-            OR is_node_type-dd->absolute_name = '\TYPE=TIMESTAMPL'.
+              OR is_node_type-dd->absolute_name = '\TYPE=TIMESTAMPL'.
             <container> = to_timestamp( is_node-value ).
+*          elseif is_node_type-dd->absolute_name = '\TYPE=TIMESTAMPL'.
+*            <container> = to_timestampl( is_node-value ).
           ELSEIF is_node_type-type_kind = lif_kind=>packed. " Number as a string, but not a timestamp
             <container> = is_node-value.
           ELSE.
@@ -1151,13 +1163,17 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
 
   ENDMETHOD.
 
+*  method to_timestamp.
+*    rv_result = to_timestamp( iv_value ).
+*  endmethod.
+*
   METHOD to_timestamp.
 
     CONSTANTS lc_utc TYPE c LENGTH 6 VALUE 'UTC'.
     CONSTANTS lc_regex_ts_with_hour TYPE string
       VALUE `^(\d{4})-(\d{2})-(\d{2})(T)(\d{2}):(\d{2}):(\d{2})(\+)(\d{2}):(\d{2})`. "#EC NOTEXT
     CONSTANTS lc_regex_ts_utc TYPE string
-      VALUE `^(\d{4})-(\d{2})-(\d{2})(T)(\d{2}):(\d{2}):(\d{2})(Z|$)`. "#EC NOTEXT
+      VALUE `^(\d{4})-(\d{2})-(\d{2})(T)(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|$)`. "#EC NOTEXT
 
     DATA:
       BEGIN OF ls_timestamp,
@@ -1168,6 +1184,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
         hour         TYPE c LENGTH 2,
         minute       TYPE c LENGTH 2,
         second       TYPE c LENGTH 2,
+        frac         TYPE c LENGTH 8,
         local_sign   TYPE c LENGTH 1,
         local_hour   TYPE c LENGTH 2,
         local_minute TYPE c LENGTH 2,
@@ -1176,6 +1193,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
     DATA lv_date TYPE d.
     DATA lv_time TYPE t.
     DATA lv_seconds_conv TYPE i.
+    DATA lv_frac TYPE p LENGTH 10 DECIMALS 6.
     DATA lv_timestamp TYPE timestampl.
 
     FIND FIRST OCCURRENCE OF REGEX lc_regex_ts_with_hour
@@ -1193,7 +1211,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
       FIND FIRST OCCURRENCE OF REGEX lc_regex_ts_utc
         IN iv_value SUBMATCHES
           ls_timestamp-year ls_timestamp-month ls_timestamp-day ls_timestamp-t
-          ls_timestamp-hour ls_timestamp-minute ls_timestamp-second.
+          ls_timestamp-hour ls_timestamp-minute ls_timestamp-second ls_timestamp-frac.
 
       IF sy-subrc <> 0.
         zcx_abappm_ajson_error=>raise( 'Unexpected timestamp format' ).
@@ -1205,6 +1223,12 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
     CONCATENATE ls_timestamp-hour ls_timestamp-minute ls_timestamp-second INTO lv_time.
 
     CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lc_utc.
+
+    " add fraction
+    IF ls_timestamp-frac IS NOT INITIAL.
+      ls_timestamp-frac = '0' && ls_timestamp-frac.
+      lv_timestamp = lv_timestamp + ls_timestamp-frac.
+    ENDIF.
 
     TRY.
 

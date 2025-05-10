@@ -188,7 +188,7 @@ CLASS zcl_abappm_ajson IMPLEMENTATION.
     DATA lr_parent LIKE ir_parent.
 
     READ TABLE mt_json_tree INTO rs_top_node
-      WITH KEY
+      WITH TABLE KEY
         path = iv_path
         name = iv_name.
     IF sy-subrc <> 0.
@@ -275,7 +275,7 @@ CLASS zcl_abappm_ajson IMPLEMENTATION.
     DO.
       lr_node_parent = rr_end_node.
       READ TABLE mt_json_tree REFERENCE INTO rr_end_node
-        WITH KEY
+        WITH TABLE KEY
           path = lv_cur_path
           name = lv_cur_name.
       IF sy-subrc <> 0. " New node, assume it is always object as it has a named child, use touch_array to init array
@@ -848,6 +848,8 @@ CLASS zcl_abappm_ajson IMPLEMENTATION.
     DATA lv_path_pattern    TYPE string.
 
     CREATE OBJECT lo_section.
+    lo_section->mi_custom_mapping = mi_custom_mapping.
+
     lv_normalized_path = lcl_utils=>normalize_path( iv_path ).
     lv_path_len        = strlen( lv_normalized_path ).
     ls_path_parts      = lcl_utils=>split_path( lv_normalized_path ).

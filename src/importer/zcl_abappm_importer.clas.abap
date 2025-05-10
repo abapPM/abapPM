@@ -153,6 +153,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
   METHOD get_packages.
 
     DATA(list) = zcl_abappm_package_json=>list(
+*    DATA(list) = zcl_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
@@ -448,6 +449,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
 
       DATA(package_json_service) = zcl_abappm_package_json=>factory( <package>-target_package ).
+*      DATA(package_json_service) = zcl_package_json=>factory( <package>-target_package )
 
       IF package_json_service->exists( ).
         DATA(package_json) = package_json_service->load( )->get( ).
@@ -469,6 +471,7 @@ CLASS zcl_abappm_importer IMPLEMENTATION.
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = zif_abappm_importer=>c_action-remove.
 
       package_json_service = zcl_abappm_package_json=>factory( <dependency>-package ).
+*      package_json_service = zcl_package_json=>factory( <dependency>-package )
 
       IF package_json_service->exists( ).
         package_json_service->delete( ).

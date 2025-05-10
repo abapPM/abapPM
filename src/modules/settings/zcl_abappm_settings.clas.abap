@@ -264,13 +264,15 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD zif_abappm_settings~get_json.
 
     TRY.
-        DATA(ajson) = zcl_abappm_ajson=>new( )->keep_item_order( )->map(
-          zcl_abappm_ajson_mapping=>create_to_camel_case( ) )->set(
+        DATA(ajson) = zcl_abappm_ajson=>new(
+          )->keep_item_order(
+          )->set(
             iv_path = '/'
-            iv_val  = zif_abappm_settings~get( ) ).
+            iv_val  = zif_abappm_settings~get( )
+          )->map( zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
 
         IF is_complete = abap_false.
-          ajson = ajson->filter( lcl_ajson_filters_settings=>create_empty_filter( ) ).
+          ajson = ajson->filter( zcl_abappm_ajson_extensions=>filter_empty_zero_null( ) ).
         ENDIF.
 
         result = ajson->stringify( 2 ).

@@ -79,7 +79,7 @@ CLASS zcl_abappm_semver DEFINITION
 
     METHODS inc
       IMPORTING
-        release         TYPE string
+        release_type    TYPE string
         identifier      TYPE string OPTIONAL
         identifier_base TYPE string OPTIONAL
       RETURNING
@@ -90,9 +90,19 @@ CLASS zcl_abappm_semver DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CONSTANTS false TYPE string VALUE 'false'.
+
     DATA:
       raw     TYPE string,
       options TYPE zif_abappm_semver_options=>ty_options.
+
+    METHODS _inc_check
+      IMPORTING
+        release_type    TYPE string
+        identifier      TYPE string OPTIONAL
+        identifier_base TYPE string OPTIONAL
+      RAISING
+        zcx_abappm_error.
 
 ENDCLASS.
 
@@ -316,36 +326,44 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD inc.
 
-    CONSTANTS false TYPE string VALUE 'false'.
-
     DATA prerelease_tab LIKE prerelease.
 
-    CASE release.
+    _inc_check(
+      release_type    = release_type
+      identifier      = identifier
+      identifier_base = identifier_base ).
+
+    CASE release_type.
       WHEN 'premajor'.
         CLEAR prerelease.
         patch = 0.
         minor = 0.
         major = major + 1.
-        inc( release = 'pre' identifier = identifier identifier_base = identifier_base ).
+        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
       WHEN 'preminor'.
         CLEAR prerelease.
         patch = 0.
         minor = minor + 1.
-        inc( release = 'pre' identifier = identifier identifier_base = identifier_base ).
+        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
       WHEN 'prepatch'.
         " If this is already a prerelease, it will bump to the next version
         " drop any prereleases that might already exist, since they are not
         " relevant at this point.
         CLEAR prerelease.
-        inc( release = 'patch' identifier = identifier identifier_base = identifier_base ).
-        inc( release = 'pre' identifier = identifier identifier_base = identifier_base ).
+        inc( release_type = 'patch' identifier = identifier identifier_base = identifier_base ).
+        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
       WHEN 'prerelease'.
         " If the input is a non-prerelease version, this acts the same as
         " prepatch.
         IF prerelease IS INITIAL.
-          inc( release = 'patch' identifier = identifier identifier_base = identifier_base ).
+          inc( release_type = 'patch' identifier = identifier identifier_base = identifier_base ).
         ENDIF.
-        inc( release = 'pre' identifier = identifier identifier_base = identifier_base ).
+        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
+      WHEN 'release'.
+        IF prerelease IS INITIAL.
+          zcx_abappm_error=>raise( |Version { raw } is not a prerelease| ).
+        ENDIF.
+        CLEAR prerelease.
       WHEN 'major'.
         " If this is a pre-major version, bump up to the same major version.
         " Otherwise increment major.
@@ -383,10 +401,6 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
           DATA(base) = `0`.
         ELSE.
           base = COND #( WHEN zcl_abappm_semver_utils=>is_numeric( identifier_base ) THEN `1` ELSE `0` ).
-        ENDIF.
-
-        IF identifier IS INITIAL AND identifier_base = false.
-          zcx_abappm_error=>raise( 'Invalid increment argument: identifier is empty' ).
         ENDIF.
 
         IF prerelease IS INITIAL.
@@ -431,7 +445,7 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         " Used by zcl_semver_ranges->min_version
         INSERT identifier_base INTO TABLE prerelease.
       WHEN OTHERS.
-        zcx_abappm_error=>raise( |Invalid increment argument { release }| ).
+        zcx_abappm_error=>raise( |Invalid release type argument { release_type }| ).
     ENDCASE.
 
     format( ).
@@ -449,5 +463,35 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
   METHOD to_string.
     result = version.
+  ENDMETHOD.
+
+
+  METHOD _inc_check.
+
+    IF release_type CP 'pre*'.
+      IF identifier IS INITIAL AND identifier_base = false.
+        zcx_abappm_error=>raise( 'Invalid increment argument: identifier is empty' ).
+      ENDIF.
+
+      " Avoid an invalid semver results
+      IF identifier IS NOT INITIAL.
+        DATA(regex) = COND #(
+          WHEN options-loose = abap_true
+          THEN |^{ zcl_abappm_semver_re=>token-prereleaseloose-safe_src }$|
+          ELSE |^{ zcl_abappm_semver_re=>token-prerelease-safe_src }$| ).
+
+        TRY.
+            DATA(r) = NEW cl_abap_regex( pattern = regex ).
+            DATA(m) = r->create_matcher( text = |-{ identifier }| ).
+
+            IF NOT m->match( ) OR m->get_submatch( 1 ) <> identifier.
+              zcx_abappm_error=>raise( |Invalid identifier: { identifier }| ).
+            ENDIF.
+          CATCH cx_sy_matcher.
+            zcx_abappm_error=>raise( |Error evaluating regex for { identifier }| ).
+        ENDTRY.
+      ENDIF.
+    ENDIF.
+
   ENDMETHOD.
 ENDCLASS.

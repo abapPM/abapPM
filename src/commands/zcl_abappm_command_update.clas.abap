@@ -99,7 +99,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
       IF sy-subrc = 0.
         IF line_exists( manifest-bundle_dependencies[ table_line = <package_json>-name ] ).
           READ TABLE manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>)
-            WITH KEY name = <package_json>-name.
+            WITH KEY key = <package_json>-name.
           IF sy-subrc <> 0.
             zcx_abappm_error=>raise( 'Bundle dependency missing from dependencies' ).
           ENDIF.
@@ -125,7 +125,7 @@ CLASS zcl_abappm_command_update IMPLEMENTATION.
 
     LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
       IF NOT line_exists( result[ name = <bundle> ] ).
-        IF NOT line_exists( manifest-dependencies[ name = <bundle> ] ).
+        IF NOT line_exists( manifest-dependencies[ key = <bundle> ] ).
           zcx_abappm_error=>raise( 'Bundle dependency missing from dependencies' ).
         ENDIF.
         " New bundle dependency which will be added

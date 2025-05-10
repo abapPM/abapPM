@@ -23,4 +23,5 @@ IMPORT '*' TO 'url/z$1_abappm$2'                     FROM 'url'.
 
 * other modules
 IMPORT '*' TO 'ajson/z$1_abappm$2'                   FROM 'ajson'.
+IMPORT '*' TO 'ajson-ext/z$1_abappm$2'               FROM 'ajson-extensions'.
 IMPORT 'z(..)_abap(.*)' TO 'string-map/z$1_abappm$2' FROM 'string-map'.
