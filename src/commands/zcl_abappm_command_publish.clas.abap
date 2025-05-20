@@ -95,11 +95,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(tarball_name) = packument-name.
     IF tarball_name(1) = '@'.
-      tarball_name = replace(
-        val  = tarball_name
-        sub  = '/'
-        with = '-'
-        occ  = 1 ).
+      SPLIT tarball_name AT '/' INTO DATA(rest) tarball_name.
     ENDIF.
 
     dist-file_count    = tar->file_count( ).
@@ -160,10 +156,8 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
           ignore_subpackages = abap_false
           only_local_objects = abap_false ).
 
-        " TODO!: Hardcoded to prefix
+        " TODO!: Hardcoded to prefix and /src/ starting folder
         DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
-        dot_abapgit->set_folder_logic( zif_abapgit_dot_abapgit=>c_folder_logic-prefix ).
-        dot_abapgit->set_starting_folder( 'src/' ).
 
         DATA(serializer) = NEW zcl_abappm_abapgit_serialize(
           io_dot_abapgit    = dot_abapgit
@@ -185,7 +179,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       AT NEW file-path.
         IF <file>-file-path <> '/'.
           tar->append(
-            name     = <file>-file-path
+            name     = |{ <file>-file-path+1 }|
             content  = c_null
             typeflag = zcl_abappm_tar=>c_typeflag-directory ).
         ENDIF.
@@ -193,7 +187,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
       IF <file>-file-path = '/'.
         DATA(name) = <file>-file-filename.
       ELSE.
-        name = |{ <file>-file-path }/{ <file>-file-filename }|.
+        name = |{ <file>-file-path+1 }{ <file>-file-filename }|.
       ENDIF.
       tar->append(
         name    = name
@@ -219,6 +213,18 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
         zcx_abappm_error=>raise_with_text( error ).
     ENDTRY.
 
+    DATA(debug) = 'X'.
+    IF debug = abap_true.
+      TRY.
+          zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
+            EXPORTING
+              iv_path = 'C:\Temp\test.tar'
+              iv_xstr = tar->save( ) ).
+        CATCH zcx_abapgit_exception.
+          BREAK-POINT.
+      ENDTRY.
+    ENDIF.
+
     result = tar.
 
   ENDMETHOD.
@@ -229,8 +235,9 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     CONSTANTS c_latest TYPE string VALUE 'latest'.
 
     IF packument IS INITIAL.
-      result      = CORRESPONDING #( package_json ).
-      result-_id = package_json-name.
+      result        = CORRESPONDING #( package_json ).
+      result-_id    = package_json-name.
+      result-readme = ''. " sufficient to have it in version (below)
     ELSE.
       result = packument.
     ENDIF.
@@ -261,6 +268,18 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(json) = zcl_abappm_pacote=>convert_packument_to_json( packument ).
 
+    DATA(debug) = 'X'.
+    IF debug = abap_true.
+      TRY.
+          zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
+            EXPORTING
+              iv_path = 'C:\Temp\test.json'
+              iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
+        CATCH zcx_abapgit_exception.
+          BREAK-POINT.
+      ENDTRY.
+    ENDIF.
+
     DATA(response) = zcl_abappm_command_utils=>get_agent( registry )->request(
       url     = |{ registry }/{ packument-name }|
       method  = zif_abappm_http_agent=>c_method-put
@@ -287,11 +306,11 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     ENDIF.
 
     " 3. Get packument from registry
-    " TODO: This should include request parameter for writing to the registry (only if not anonymous?)
     TRY.
         DATA(packument) = zcl_abappm_command_utils=>get_packument_from_registry(
           registry = registry
-          name     = package_json-name ).
+          name     = package_json-name
+          write    = abap_true ).
       CATCH zcx_abappm_error ##NO_HANDLER.
         " ignore if not found
     ENDTRY.

@@ -153,7 +153,7 @@ CLASS zcl_abappm_emoji IMPLEMENTATION.
     INSERT |  height: { size_in_px }px;| INTO TABLE result.
     INSERT |  width: { size_in_px }px;| INTO TABLE result.
     INSERT `  line-height: 1;` INTO TABLE result.
-    INSERT `  vertical-align: -0.1em;` INTO TABLE result.
+    INSERT `  vertical-align: -3px;` INTO TABLE result.
     INSERT `}` INTO TABLE result.
   ENDMETHOD.
 

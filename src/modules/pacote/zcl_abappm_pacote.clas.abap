@@ -415,10 +415,10 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     DATA(host) = zcl_abappm_url=>parse( url )->components-host.
 
     " Get/set auth token
-    IF zcl_abappm_http_login_manager=>get( host ) IS NOT INITIAL.
+    IF zcl_abappm_http_login_manager=>get( |{ host }| ) IS NOT INITIAL.
       result->global_headers( )->set(
         iv_key = zif_abappm_http_agent=>c_header-authorization
-        iv_val = zcl_abappm_http_login_manager=>get( host ) ).
+        iv_val = zcl_abappm_http_login_manager=>get( |{ host }| ) ).
     ENDIF.
 
   ENDMETHOD.

@@ -194,8 +194,8 @@ CLASS zcl_abappm_command_utils IMPLEMENTATION.
     " https://www.npmjs.com/package/ssri
 
     result = VALUE #(
-      shasum        = shasum
-      integrity     = '' ).
+      shasum    = shasum
+      integrity = '' ).
 
   ENDMETHOD.
 
