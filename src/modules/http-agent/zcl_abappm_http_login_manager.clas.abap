@@ -13,22 +13,22 @@ CLASS zcl_abappm_http_login_manager DEFINITION
 
     CLASS-METHODS get
       IMPORTING
-        !host         TYPE string
+        !host         TYPE csequence
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS set
       IMPORTING
-        !host         TYPE string
-        !username     TYPE string
-        !password     TYPE string
+        !host         TYPE csequence
+        !username     TYPE csequence
+        !password     TYPE csequence
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS save
       IMPORTING
-        !host TYPE string
-        !auth TYPE string.
+        !host TYPE csequence
+        !auth TYPE csequence.
 
     CLASS-METHODS clear.
 

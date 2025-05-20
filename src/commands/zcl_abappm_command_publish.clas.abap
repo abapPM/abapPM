@@ -95,7 +95,7 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
 
     DATA(tarball_name) = packument-name.
     IF tarball_name(1) = '@'.
-      SPLIT tarball_name AT '/' INTO DATA(rest) tarball_name.
+      SPLIT tarball_name AT '/' INTO DATA(rest) tarball_name ##NEEDED.
     ENDIF.
 
     dist-file_count    = tar->file_count( ).
