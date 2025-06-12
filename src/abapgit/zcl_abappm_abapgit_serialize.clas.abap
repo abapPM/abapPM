@@ -2,6 +2,17 @@ CLASS zcl_abappm_abapgit_serialize DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
+************************************************************************
+* apm abapGit Serializer
+*
+* Copyright 2014 abapGit Contributors
+* SPDX-License-Identifier: MIT
+************************************************************************
+* This is a replacement for ZCL_ABAPGIT_SERIALIZE
+*
+* Using ZCL_ABAPGIT_SERIALIZE would include APACK and TABUs which are
+* not supported in apm
+************************************************************************
   PUBLIC SECTION.
 
     METHODS constructor

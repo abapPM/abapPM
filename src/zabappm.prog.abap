@@ -45,6 +45,7 @@ REPORT zabappm LINE-SIZE 100.
 * @@require devc $abapgit_xml
 
 * @@require clas zcl_abapgit_abap_language_vers
+* @@require clas zcl_abapgit_convert
 * @@require clas zcl_abapgit_cts_api
 * @@require intf zif_abapgit_cts_api
 * @@require intf zif_abapgit_data_config
@@ -71,8 +72,6 @@ REPORT zabappm LINE-SIZE 100.
 * @@require clas zcx_abapgit_not_found
 * @@require clas zcl_abapgit_path
 * @@require intf zif_abapgit_persistence
-* @@require clas zcl_abapgit_persistence_db
-* @@require clas zcl_abapgit_persist_packages
 * @@require clas zcl_abapgit_progress
 * @@require intf zif_abapgit_progress
 * @@require clas zcl_abapgit_string_buffer

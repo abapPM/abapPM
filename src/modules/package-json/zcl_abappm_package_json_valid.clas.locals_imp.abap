@@ -70,6 +70,8 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Invalid bugs URL: { manifest-bugs-url }| INTO TABLE result.
     ENDIF.
 
+    " This should not be a URL to an html project page that you put in your browser. It's for computers.
+    " Example: git+https://github.com/abapPM/abapPM.git
     IF zcl_abappm_package_json_valid=>is_valid_url( manifest-repository-url ) = abap_false.
       INSERT |Invalid repository URL: { manifest-repository-url }| INTO TABLE result.
     ENDIF.
