@@ -217,11 +217,10 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     IF debug = abap_true.
       TRY.
           zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
-            EXPORTING
-              iv_path = 'C:\Temp\test.tar'
-              iv_xstr = tar->save( ) ).
+            iv_path = 'C:\Temp\test.tar'
+            iv_xstr = tar->save( ) ).
         CATCH zcx_abapgit_exception.
-          BREAK-POINT.
+          ASSERT 0 = 0.
       ENDTRY.
     ENDIF.
 
@@ -272,11 +271,10 @@ CLASS zcl_abappm_command_publish IMPLEMENTATION.
     IF debug = abap_true.
       TRY.
           zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
-            EXPORTING
-              iv_path = 'C:\Temp\test.json'
-              iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
+            iv_path = 'C:\Temp\test.json'
+            iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
         CATCH zcx_abapgit_exception.
-          BREAK-POINT.
+          ASSERT 0 = 0.
       ENDTRY.
     ENDIF.
 

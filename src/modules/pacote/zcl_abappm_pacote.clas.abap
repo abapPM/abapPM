@@ -412,10 +412,10 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         iv_val = zif_abappm_http_agent=>c_content_type-json ).
     ENDIF.
 
-    DATA(host) = zcl_abappm_url=>parse( url )->components-host.
+    DATA(components) = zcl_abappm_url=>parse( url )->components.
 
     " Get/set auth token
-    DATA(auth) = zcl_abappm_http_login_manager=>get( host ).
+    DATA(auth) = zcl_abappm_http_login_manager=>get( components-host ).
 
     IF auth IS NOT INITIAL.
       result->global_headers( )->set(
