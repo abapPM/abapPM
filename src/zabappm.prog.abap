@@ -74,6 +74,8 @@ REPORT zabappm LINE-SIZE 100.
 * @@require intf zif_abapgit_persistence
 * @@require clas zcl_abapgit_progress
 * @@require intf zif_abapgit_progress
+* @@require clas zcl_abapgit_status_calc
+* @@require intf zif_abapgit_status_calc
 * @@require clas zcl_abapgit_string_buffer
 * @@require clas zcl_abapgit_timer
 * @@require clas zcx_abapgit_type_not_supported

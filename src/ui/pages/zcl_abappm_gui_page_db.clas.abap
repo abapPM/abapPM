@@ -333,6 +333,8 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
 
   METHOD prepare_list.
 
+    CONSTANTS indent TYPE string VALUE '&nbsp;&nbsp;&nbsp;'.
+
     DATA sorted_list TYPE ty_list.
 
     CLEAR list.
@@ -351,10 +353,18 @@ CLASS zcl_abappm_gui_page_db IMPLEMENTATION.
         INSERT list_entry INTO TABLE list.
       ENDAT.
       AT NEW key_name.
-        list_entry-show_key = |&nbsp;&nbsp;&nbsp;{ icon } { list_entry-key_name }|.
+        list_entry-show_key = |{ indent }{ icon } { list_entry-key_name }|.
         INSERT list_entry INTO TABLE list.
       ENDAT.
-      list_entry-show_key = |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ to_lower( list_entry-key_extra ) }|.
+      CASE list_entry-key_extra.
+        WHEN zif_abappm_persist_apm=>c_key_extra-package_json.
+          list_entry-show_key = 'package.abap.json'.
+        WHEN zif_abappm_persist_apm=>c_key_extra-package_readme.
+          list_entry-show_key = 'readme.md'.
+        WHEN OTHERS.
+          list_entry-show_key = to_lower( list_entry-key_extra ).
+      ENDCASE.
+      list_entry-show_key = |{ indent }{ indent }{ list_entry-show_key }|.
       INSERT list_entry INTO TABLE list.
     ENDLOOP.
 
