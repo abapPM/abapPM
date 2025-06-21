@@ -4,7 +4,7 @@ CLASS zcx_abappm_error DEFINITION
   CREATE PUBLIC.
 
 ************************************************************************
-* Error
+* General Error
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
