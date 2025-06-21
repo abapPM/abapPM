@@ -904,15 +904,18 @@ CLASS zcl_abappm_abapgit_objects IMPLEMENTATION.
 
   METHOD files_to_deserialize.
 
-    DATA lt_results TYPE zif_abapgit_definitions=>ty_results_tt.
+    DATA:
+      li_instance TYPE REF TO zif_abapgit_status_calc,
+      lt_results  TYPE zif_abapgit_definitions=>ty_results_tt.
 
-    lt_results = zcl_abappm_abapgit_status=>calculate(
-      iv_package         = iv_package
-      it_local           = it_local
-      it_local_checksums = it_local_checksums
-      it_remote          = it_remote
-      io_dot             = io_dot
-      ii_log             = ii_log ).
+    li_instance = zcl_abapgit_status_calc=>get_instance(
+      iv_root_package = iv_package
+      io_dot          = io_dot ).
+
+    lt_results = li_instance->calculate_status(
+      it_local     = it_local
+      it_remote    = it_remote
+      it_cur_state = it_local_checksums ).
 
     rt_results = prioritize_deser(
                    filter_files_to_deserialize(
