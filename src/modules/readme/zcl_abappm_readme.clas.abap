@@ -83,7 +83,7 @@ CLASS zcl_abappm_readme IMPLEMENTATION.
   METHOD constructor.
 
 *    IF zcl_readme_valid=>is_valid_sap_package( package ) = abap_false
-*      zcx_error=>raise( |Invalid package: { package }| )
+*      RAISE EXCEPTION TYPE zcx_error_text EXPORTING text = |Invalid package: { package }|
 *    ENDIF
 
     me->package     = package.

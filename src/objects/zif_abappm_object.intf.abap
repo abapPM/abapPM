@@ -10,8 +10,9 @@ INTERFACE zif_abappm_object PUBLIC.
 
   METHODS import
     IMPORTING
-      !new_package   TYPE devclass
-      !new_object    TYPE tadir-obj_name
+      !new_package   TYPE ty_item-package
+      !new_object    TYPE ty_item-obj_name
+      !language      TYPE ty_item-language
       !map           TYPE zif_abappm_importer=>ty_map
       !files         TYPE REF TO zif_abappm_file_importer OPTIONAL
       !is_dryrun     TYPE abap_bool DEFAULT abap_true

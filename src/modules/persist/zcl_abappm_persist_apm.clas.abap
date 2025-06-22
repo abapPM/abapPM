@@ -120,7 +120,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     DELETE FROM (zif_abappm_persist_apm=>c_tabname) WHERE keys = @key.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error deleting { key }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Error deleting { key }|.
     ENDIF.
 
   ENDMETHOD.
@@ -157,7 +157,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
 
     SELECT SINGLE * FROM (zif_abappm_persist_apm=>c_tabname) INTO @result WHERE keys = @key.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error loading { key }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Error loading { key }|.
     ENDIF.
 
   ENDMETHOD.
@@ -174,7 +174,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
         system_failure = 2
         OTHERS         = 3.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_t100.
     ENDIF.
 
     DATA(dummy_update_function) = lcl_persist_utils=>get_update_function( ).
@@ -188,7 +188,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
   METHOD zif_abappm_persist_apm~save.
 
     IF validate_key( key ) = abap_false.
-      zcx_abappm_error=>raise( |Invalid key { key }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Invalid key { key }|.
     ENDIF.
 
     DATA(db_entry) = VALUE zif_abappm_persist_apm=>ty_zabappm(
@@ -206,7 +206,7 @@ CLASS zcl_abappm_persist_apm IMPLEMENTATION.
     IF sy-subrc <> 0.
       INSERT (zif_abappm_persist_apm=>c_tabname) FROM @db_entry.
       IF sy-subrc <> 0.
-        zcx_abappm_error=>raise( |Error saving { key }| ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Error saving { key }|.
       ENDIF.
     ENDIF.
 

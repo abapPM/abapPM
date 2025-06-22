@@ -283,7 +283,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
             ASSERT 0 = 0.
 
           WHEN OTHERS.
-            zcx_abappm_error=>raise( |Unexpected operation: { <comparator>->operator }| ).
+            RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Unexpected operation: { <comparator>->operator }|.
         ENDCASE.
       ENDLOOP.
 
@@ -313,7 +313,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
 
     IF hilo NA '<>'.
-      zcx_abappm_error=>raise( 'Must provide a hilo val of "<" or ">"' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Must provide a hilo val of "<" or ">"'.
     ENDIF.
 
     DATA(comp)  = hilo.
@@ -438,7 +438,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     DATA ranges TYPE string_table.
 
     IF versions IS INITIAL.
-      zcx_abappm_error=>raise( 'Empty version list' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Empty version list'.
     ENDIF.
 
     DATA(semrange) = zcl_abappm_semver_range=>create( range = range loose = loose incpre = incpre ).
@@ -545,7 +545,7 @@ CLASS zcl_abappm_semver_ranges IMPLEMENTATION.
     " - Else return true
 
     " https://github.com/npm/node-semver/blob/main/ranges/subset.js
-    zcx_abappm_error=>raise( 'TODO' ).
+    RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'TODO'.
 
   ENDMETHOD.
 

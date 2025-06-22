@@ -339,7 +339,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
           loose  = loose
           incpre = incpre ).
       WHEN OTHERS.
-        zcx_abappm_error=>raise( |Invalid operator: { op }| ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Invalid operator: { op }|.
     ENDCASE.
 
   ENDMETHOD.
@@ -567,7 +567,7 @@ CLASS zcl_abappm_semver_functions IMPLEMENTATION.
       semver_b ?= b.
       result = xsdbool( semver_a->version = semver_b->version ).
     ELSE.
-      zcx_abappm_error=>raise( |Invalid parameter type| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid parameter type'.
     ENDIF.
 
   ENDMETHOD.

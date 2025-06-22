@@ -214,7 +214,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
   METHOD constructor.
 
     IF strlen( version ) > zif_abappm_semver_constants=>max_length.
-      zcx_abappm_error=>raise( |Version is longer than { zif_abappm_semver_constants=>max_length } characters| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Version is longer than { zif_abappm_semver_constants=>max_length } characters|.
     ENDIF.
 
     options-loose  = loose.
@@ -229,7 +231,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         DATA(m) = r->create_matcher( text = zcl_abappm_semver_utils=>version_trim( version ) ).
 
         IF NOT m->match( ).
-          zcx_abappm_error=>raise( |Invalid version: { version }| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text
+            EXPORTING
+              text = |Invalid version: { version }|.
         ENDIF.
 
         raw = version.
@@ -242,19 +246,25 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         IF major_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           major = major_num.
         ELSE.
-          zcx_abappm_error=>raise( |Invalid major version: { major_num }| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text
+            EXPORTING
+              text = |Invalid major version: { major_num }|.
         ENDIF.
 
         IF minor_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           minor = minor_num.
         ELSE.
-          zcx_abappm_error=>raise( |Invalid minor version: { minor_num }| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text
+            EXPORTING
+              text = |Invalid minor version: { minor_num }|.
         ENDIF.
 
         IF patch_num BETWEEN 0 AND zif_abappm_semver_constants=>max_safe_integer.
           patch = patch_num.
         ELSE.
-          zcx_abappm_error=>raise( |Invalid patch version: { patch_num }| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text
+            EXPORTING
+              text = |Invalid patch version: { patch_num }|.
         ENDIF.
 
         DATA(m4) = m->get_submatch( 4 ).
@@ -275,7 +285,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         ENDIF.
 
       CATCH cx_sy_matcher.
-        zcx_abappm_error=>raise( |Error evaluating regex for { version }| ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text
+          EXPORTING
+            text = |Error evaluating regex for { version }|.
     ENDTRY.
 
     format( ).
@@ -303,7 +315,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
       result = NEW zcl_abappm_semver( version = |{ version }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_error=>raise( |Invalid version. Must be a string or a semver. Got { descr->absolute_name }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Invalid version. Must be a string or a semver. Got { descr->absolute_name }|.
     ENDIF.
 
   ENDMETHOD.
@@ -361,7 +375,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
       WHEN 'release'.
         IF prerelease IS INITIAL.
-          zcx_abappm_error=>raise( |Version { raw } is not a prerelease| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text
+            EXPORTING
+              text = |Version { raw } is not a prerelease|.
         ENDIF.
         CLEAR prerelease.
       WHEN 'major'.
@@ -419,7 +435,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
             " didn't increment anything
             DATA(prerelease_string) = concat_lines_of( table = prerelease sep = '.' ).
             IF identifier = prerelease_string AND identifier_base = false.
-              zcx_abappm_error=>raise( 'Invalid increment argument: identifier already exists' ).
+              RAISE EXCEPTION TYPE zcx_abappm_error_text
+                EXPORTING
+                  text = 'Invalid increment argument: identifier already exists'.
             ENDIF.
 
             INSERT base INTO TABLE prerelease.
@@ -445,7 +463,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
         " Used by zcl_semver_ranges->min_version
         INSERT identifier_base INTO TABLE prerelease.
       WHEN OTHERS.
-        zcx_abappm_error=>raise( |Invalid release type argument { release_type }| ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text
+          EXPORTING
+            text = |Invalid release type argument { release_type }|.
     ENDCASE.
 
     format( ).
@@ -470,7 +490,9 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
 
     IF release_type CP 'pre*'.
       IF identifier IS INITIAL AND identifier_base = false.
-        zcx_abappm_error=>raise( 'Invalid increment argument: identifier is empty' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text
+          EXPORTING
+            text = 'Invalid increment argument: identifier is empty'.
       ENDIF.
 
       " Avoid an invalid semver results
@@ -485,10 +507,14 @@ CLASS zcl_abappm_semver IMPLEMENTATION.
             DATA(m) = r->create_matcher( text = |-{ identifier }| ).
 
             IF NOT m->match( ) OR m->get_submatch( 1 ) <> identifier.
-              zcx_abappm_error=>raise( |Invalid identifier: { identifier }| ).
+              RAISE EXCEPTION TYPE zcx_abappm_error_text
+                EXPORTING
+                  text = |Invalid identifier: { identifier }|.
             ENDIF.
           CATCH cx_sy_matcher.
-            zcx_abappm_error=>raise( |Error evaluating regex for { identifier }| ).
+            RAISE EXCEPTION TYPE zcx_abappm_error_text
+              EXPORTING
+                text = |Error evaluating regex for { identifier }|.
         ENDTRY.
       ENDIF.
     ENDIF.

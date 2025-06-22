@@ -124,9 +124,13 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
     ENDTRY.
 
     IF sy-subrc = 5.
-      zcx_abappm_error=>raise( |{ objtype } { objname } has dependencies and must be deleted manually| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |{ objtype } { objname } has dependencies and must be deleted manually|.
     ELSEIF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error deleting { objtype } { objname }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Error deleting { objtype } { objname }|.
     ENDIF.
 
   ENDMETHOD.
@@ -192,7 +196,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_t100.
     ENDIF.
 
     DATA(obj_name) = CONV sobj_name( zif_abappm_persist_apm=>c_lock ).
@@ -208,7 +212,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_t100.
     ENDIF.
 
     CALL FUNCTION 'DDIF_ENQU_ACTIVATE'
@@ -219,7 +223,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_lock }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Error activating { zif_abappm_persist_apm=>c_lock }|.
     ENDIF.
 
   ENDMETHOD.
@@ -385,7 +391,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_refused       = 5
         OTHERS            = 6.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_t100.
     ENDIF.
 
     DATA(obj_name) = CONV sobj_name( zif_abappm_persist_apm=>c_tabname ).
@@ -401,7 +407,7 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       EXCEPTIONS
         OTHERS            = 1.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise_t100( ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_t100.
     ENDIF.
 
     CALL FUNCTION 'DDIF_TABL_ACTIVATE'
@@ -415,7 +421,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
         put_failure = 2
         OTHERS      = 3.
     IF sy-subrc <> 0 OR subrc <> 0.
-      zcx_abappm_error=>raise( |Error activating { zif_abappm_persist_apm=>c_tabname }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Error activating { zif_abappm_persist_apm=>c_tabname }|.
     ENDIF.
 
   ENDMETHOD.
@@ -437,7 +445,9 @@ CLASS zcl_abappm_persist_apm_setup IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF @dd02l
       WHERE tabname = @zif_abappm_persist_apm=>c_tabname AND as4local = 'A' AND as4vers = '0000'.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( |Table { zif_abappm_persist_apm=>c_tabname } not found| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Table { zif_abappm_persist_apm=>c_tabname } not found|.
     ENDIF.
 
     CALL FUNCTION 'DD_EXISTS_DATA'

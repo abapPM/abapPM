@@ -196,7 +196,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     DATA components TYPE ty_url_components.
 
     IF url IS INITIAL.
-      zcx_abappm_error=>raise( 'No URL' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'No URL'.
     ENDIF.
 
     " Remove leading/trailing spaces
@@ -206,7 +206,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     " Parse scheme
     DATA(delimiter) = find( val = remaining sub = ':' ).
     IF delimiter < 0.
-      zcx_abappm_error=>raise( 'Invalid URL: no scheme found' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid URL: no scheme found'.
     ENDIF.
 
     components-scheme = to_lower( remaining(delimiter) ).
@@ -338,7 +338,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       " Find the closing bracket
       delimiter = find( val = temp sub = ']' ).
       IF delimiter < 0.
-        zcx_abappm_error=>raise( 'Invalid IPv6 address: missing closing bracket' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: missing closing bracket'.
       ENDIF.
 
       " Extract IPv6 address without brackets
@@ -368,21 +368,21 @@ CLASS zcl_abappm_url IMPLEMENTATION.
     " Validate port if present
     IF port IS NOT INITIAL.
       IF NOT matches( val = port regex = '^\d+$' ).
-        zcx_abappm_error=>raise( 'Invalid port number' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid port number'.
       ENDIF.
       IF port NOT BETWEEN 0 AND 65535.
-        zcx_abappm_error=>raise( 'Port number out of range' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Port number out of range'.
       ENDIF.
     ENDIF.
 
     " Validate host
     IF is_special_scheme( scheme ).
       IF host IS INITIAL.
-        zcx_abappm_error=>raise( 'Missing host' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Missing host'.
       ENDIF.
     ELSE.
       IF host CA | \n\t\r#/:<>?@[\\]^\||.
-        zcx_abappm_error=>raise( 'Host contain invalid code point' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Host contain invalid code point'.
       ENDIF.
     ENDIF.
 
@@ -498,12 +498,12 @@ CLASS zcl_abappm_url IMPLEMENTATION.
   METHOD validate_ipv4_address.
 
     IF address IS NOT INITIAL AND address(1) = '.'.
-      zcx_abappm_error=>raise( 'Invalid IPv4 address: initial segment is empty' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv4 address: initial segment is empty'.
     ENDIF.
 
     DATA(len) = strlen( address ) - 1.
     IF len >= 0 AND address+len(1) = '.'.
-      zcx_abappm_error=>raise( 'Invalid IPv4 address: last segment is empty' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv4 address: last segment is empty'.
     ENDIF.
 
     " Split by period
@@ -511,16 +511,16 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
     " Basic validation of IPv4 format
     IF lines( parts ) <> 4.
-      zcx_abappm_error=>raise( 'Invalid IPv4 address: not four segments' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv4 address: not four segments'.
     ENDIF.
 
     " Check each part
     LOOP AT parts INTO DATA(part).
       IF NOT matches( val = part regex = '^\d+$' ).
-        zcx_abappm_error=>raise( 'Invalid IPv4 address: non-numeric segment' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv4 address: non-numeric segment'.
       ENDIF.
       IF part NOT BETWEEN 0 AND 255.
-        zcx_abappm_error=>raise( 'Invalid IPv4 address: segment exceeds 255' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv4 address: segment exceeds 255'.
       ENDIF.
     ENDLOOP.
 
@@ -530,12 +530,12 @@ CLASS zcl_abappm_url IMPLEMENTATION.
   METHOD validate_ipv6_address.
 
     IF address(1) = ':'.
-      zcx_abappm_error=>raise( 'Invalid IPv6 address: initial piece is empty' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: initial piece is empty'.
     ENDIF.
 
     DATA(len) = strlen( address ) - 1.
     IF len >= 0 AND address+len(1) = ':'.
-      zcx_abappm_error=>raise( 'Invalid IPv6 address: last piece is empty' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: last piece is empty'.
     ENDIF.
 
     " Split by colons
@@ -543,12 +543,12 @@ CLASS zcl_abappm_url IMPLEMENTATION.
 
     " Basic validation of IPv6 format
     IF lines( parts ) > 8.
-      zcx_abappm_error=>raise( 'Invalid IPv6 address: too many pieces' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: too many pieces'.
     ENDIF.
 
     " Uncompressed addresses must have 8 parts
     IF address NS '::' AND lines( parts ) <> 8.
-      zcx_abappm_error=>raise( 'Invalid IPv6 address: too few pieces' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: too few pieces'.
     ENDIF.
 
     " Check each part
@@ -558,14 +558,14 @@ CLASS zcl_abappm_url IMPLEMENTATION.
       IF part IS INITIAL.
         count = count + 1.
         IF count > 1.
-          zcx_abappm_error=>raise( 'Invalid IPv6 address: multiple empty pieces' ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: multiple empty pieces'.
         ENDIF.
         CONTINUE.
       ENDIF.
 
       " Validate hexadecimal format and length
       IF NOT matches( val = part regex = '^[0-9A-Fa-f]{1,4}$' ).
-        zcx_abappm_error=>raise( 'Invalid IPv6 address: invalid hexadecimal piece' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid IPv6 address: invalid hexadecimal piece'.
       ENDIF.
     ENDLOOP.
 
@@ -575,7 +575,7 @@ CLASS zcl_abappm_url IMPLEMENTATION.
   METHOD validate_scheme.
 
     IF NOT matches( val = scheme regex = '^[A-Za-z][-A-Za-z0-9+.]*' ).
-      zcx_abappm_error=>raise( 'Invalid scheme' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid scheme'.
     ENDIF.
 
   ENDMETHOD.

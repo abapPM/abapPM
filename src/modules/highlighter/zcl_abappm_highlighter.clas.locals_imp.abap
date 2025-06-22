@@ -54,7 +54,7 @@ CLASS lcl_out IMPLEMENTATION.
             cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
   ENDMETHOD.
 

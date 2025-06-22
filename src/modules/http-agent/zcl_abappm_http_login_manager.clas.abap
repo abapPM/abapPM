@@ -22,6 +22,7 @@ CLASS zcl_abappm_http_login_manager DEFINITION
         !host         TYPE csequence
         !username     TYPE csequence
         !password     TYPE csequence
+        !is_basic     TYPE abap_bool DEFAULT abap_true
       RETURNING
         VALUE(result) TYPE string.
 
@@ -101,7 +102,13 @@ CLASS zcl_abappm_http_login_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    result = |Basic { cl_http_utility=>encode_base64( |{ username }:{ password }| ) }|.
+    result = cl_http_utility=>encode_base64( |{ username }:{ password }| ).
+
+    IF is_basic = abap_true.
+      result = |Basic { result }|.
+    ELSE.
+      result = |Bearer { result }|.
+    ENDIF.
 
     append( host = host
             auth = result ).

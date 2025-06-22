@@ -317,7 +317,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     " TODO: Support long filenames (pax)
     IF strlen( name ) > 100.
-      zcx_abappm_error=>raise( |Filename longer than 100 characters: { name }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Filename longer than 100 characters: { name }|.
     ENDIF.
 
     " List
@@ -346,7 +346,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     INSERT file INTO TABLE tar_files.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error adding file (list)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error adding file (list)'.
     ENDIF.
 
     " Data
@@ -355,7 +355,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       content = content ).
     INSERT item INTO TABLE tar_data.
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error adding file (data)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error adding file (data)'.
     ENDIF.
 
     result = me.
@@ -391,12 +391,12 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
     DELETE tar_files WHERE name = CONV string( name ).
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error deleting file (list)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error deleting file (list)'.
     ENDIF.
 
     DELETE tar_data WHERE name = CONV string( name ).
     IF sy-subrc <> 0.
-      zcx_abappm_error=>raise( 'Error deleting file (data)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error deleting file (data)'.
     ENDIF.
 
     result = me.
@@ -419,7 +419,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     IF sy-subrc = 0.
       result = <item>-content.
     ELSE.
-      zcx_abappm_error=>raise( 'Error getting file' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error getting file'.
     ENDIF.
 
   ENDMETHOD.
@@ -459,7 +459,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
     DATA(size) = xstrlen( tar ).
 
     IF size = 0 OR size MOD c_blocksize <> 0.
-      zcx_abappm_error=>raise( 'Error loading file (blocksize)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error loading file (blocksize)'.
     ENDIF.
 
     CLEAR tar_files.
@@ -502,9 +502,9 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
       IF force_ustar = abap_true.
         IF header-magic <> c_ustar_magic.
-          zcx_abappm_error=>raise( 'Error loading file (ustar)' ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error loading file (ustar)'.
         ELSEIF header-version <> c_ustar_version AND header-version <> ` `.
-          zcx_abappm_error=>raise( 'Error loading file (version)' ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error loading file (version)'.
         ENDIF.
       ENDIF.
 
@@ -587,9 +587,9 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       WHERE typeflag = c_typeflag-file OR typeflag = c_typeflag-directory.
 
       IF strlen( <file>-name ) > 255.
-        zcx_abappm_error=>raise( 'Error saving file (name)' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error saving file (name)'.
       ELSEIF <file>-name CA '\'.
-        zcx_abappm_error=>raise( 'Error saving file (path)' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error saving file (path)'.
       ENDIF.
 
       " Add extended header block for pax keywords
@@ -635,7 +635,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       " Data blocks
       READ TABLE tar_data ASSIGNING FIELD-SYMBOL(<item>) WITH TABLE KEY name = <file>-name.
       IF sy-subrc <> 0.
-        zcx_abappm_error=>raise( 'Error saving file (data)' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error saving file (data)'.
       ENDIF.
 
       DATA(offset) = 0.
@@ -714,7 +714,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
       " Shorten name by moving part of path to prefix
       SPLIT temp_name AT c_path_sep INTO DATA(temp_prefix) temp_name.
       IF sy-subrc <> 0.
-        zcx_abappm_error=>raise( 'Error file name too long' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error file name too long'.
       ENDIF.
 
       IF prefix IS INITIAL.
@@ -741,7 +741,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting from UNIX time' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error converting from UNIX time'.
     ENDTRY.
 
     CONVERT TIME STAMP timestamp TIME ZONE 'UTC' INTO DATE date TIME time.
@@ -806,7 +806,7 @@ CLASS zcl_abappm_tar IMPLEMENTATION.
 
       CATCH cx_parameter_invalid_range
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting to UNIX time' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error converting to UNIX time'.
     ENDTRY.
 
   ENDMETHOD.

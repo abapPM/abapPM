@@ -83,7 +83,7 @@ CLASS lcl_tar_helpers IMPLEMENTATION.
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting from xstring' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error converting from xstring'.
     ENDTRY.
 
   ENDMETHOD.
@@ -106,7 +106,7 @@ CLASS lcl_tar_helpers IMPLEMENTATION.
       CATCH cx_sy_codepage_converter_init
             cx_sy_conversion_codepage
             cx_parameter_invalid_type.
-        zcx_abappm_error=>raise( 'Error converting to xstring' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Error converting to xstring'.
     ENDTRY.
 
   ENDMETHOD.

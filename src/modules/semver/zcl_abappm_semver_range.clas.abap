@@ -266,7 +266,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
     DELETE set WHERE table_line IS INITIAL.
 
     IF set IS INITIAL.
-      zcx_abappm_error=>raise( |Invalid SemVer Range: { raw }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Invalid SemVer Range: { raw }|.
     ENDIF.
 
     " if we have any that are not the null set, throw out null sets.
@@ -328,7 +328,7 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
       result = NEW zcl_abappm_semver_range( range = |{ range }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_error=>raise( 'Invalid parameter type' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid parameter type'.
     ENDIF.
 
   ENDMETHOD.
@@ -631,9 +631,9 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_error=>raise( 'Overflow' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Overflow'.
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.
@@ -732,9 +732,9 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDIF.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_error=>raise( 'Overflow' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Overflow'.
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.
@@ -801,9 +801,9 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_error=>raise( 'Overflow' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Overflow'.
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.
@@ -914,9 +914,9 @@ CLASS zcl_abappm_semver_range IMPLEMENTATION.
           result = m->text.
         ENDWHILE.
       CATCH cx_sy_arithmetic_overflow.
-        zcx_abappm_error=>raise( 'Overflow' ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Overflow'.
       CATCH cx_sy_regex cx_sy_matcher INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.

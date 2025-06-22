@@ -107,7 +107,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD constructor.
 
     IF name IS INITIAL OR strlen( name ) > 12.
-      zcx_abappm_error=>raise( |Invalid name: { name }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Invalid name: { name }|.
     ENDIF.
 
     me->name = name.
@@ -242,7 +242,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD zif_abappm_settings~delete.
 
     IF name = zif_abappm_settings=>c_global.
-      zcx_abappm_error=>raise( 'Global settings can not be deleted' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Global settings can not be deleted'.
     ENDIF.
 
     db_persist->delete( key ).
@@ -277,7 +277,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
 
         result = ajson->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.
@@ -301,7 +301,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD zif_abappm_settings~save.
 
     IF zif_abappm_settings~is_valid( ) = abap_false.
-      zcx_abappm_error=>raise( 'Invalid settings' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid settings'.
     ENDIF.
 
     " Save complete JSON including empty values for easy editing
@@ -315,7 +315,7 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
   METHOD zif_abappm_settings~set.
 
     IF check_settings( settings ) IS NOT INITIAL.
-      zcx_abappm_error=>raise( 'Invalid settings' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid settings'.
     ENDIF.
 
     me->settings = CORRESPONDING #( settings ).
@@ -329,23 +329,19 @@ CLASS zcl_abappm_settings IMPLEMENTATION.
     DATA settings TYPE zif_abappm_settings=>ty_settings.
 
     TRY.
-        DATA(ajson) = zcl_abappm_ajson=>parse(
-          iv_json           = json
-          ii_custom_mapping = zcl_abappm_ajson_mapping=>create_to_camel_case( ) ).
+        DATA(ajson) = zcl_abappm_ajson=>parse( json
+          )->to_abap_corresponding_only(
+          )->map( zcl_abappm_ajson_extensions=>from_camel_case_underscore( ) ).
 
-        ajson->to_abap(
-          EXPORTING
-            iv_corresponding = abap_true
-          IMPORTING
-            ev_container     = settings ).
+        ajson->to_abap( IMPORTING ev_container = settings ).
 
         IF check_settings( settings ) IS NOT INITIAL.
-          zcx_abappm_error=>raise( 'Invalid settings' ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid settings'.
         ENDIF.
 
         me->settings = CORRESPONDING #( settings ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
     result = me.

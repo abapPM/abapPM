@@ -152,7 +152,9 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     INSERT LINES OF lcl_validate=>validate_users( packument ) INTO TABLE issues.
 
     IF issues IS NOT INITIAL.
-      zcx_abappm_error=>raise( |Invalid packument:\n{ concat_lines_of( table = issues sep = |\n| ) }| ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = |Invalid packument:\n{ concat_lines_of( table = issues sep = |\n| ) }|.
     ENDIF.
 
   ENDMETHOD.
@@ -163,11 +165,11 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
     TRY.
         DATA(error_message) = zcl_abappm_ajson=>parse( json )->get_string( '/error' ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
     IF error_message IS NOT INITIAL.
-      zcx_abappm_error=>raise( error_message ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = error_message.
     ENDIF.
 
   ENDMETHOD.
@@ -183,7 +185,9 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
   METHOD constructor.
 
     IF registry <> 'https://playground.abappm.com'.
-      zcx_abappm_error=>raise( 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text
+        EXPORTING
+          text = 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)'.
     ENDIF.
 
     me->registry = registry.
@@ -297,7 +301,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
         result = sort_packument( packument ).
 
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.
@@ -372,7 +376,7 @@ CLASS zcl_abappm_pacote IMPLEMENTATION.
 
         result = ajson->stringify( 2 ).
       CATCH zcx_abappm_ajson_error INTO DATA(error).
-        zcx_abappm_error=>raise_with_text( error ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_prev EXPORTING previous = error.
     ENDTRY.
 
   ENDMETHOD.

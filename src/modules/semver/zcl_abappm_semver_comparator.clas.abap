@@ -124,7 +124,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
       result = NEW zcl_abappm_semver_comparator( comp = |{ comp }| loose = loose incpre = incpre ).
 
     ELSE.
-      zcx_abappm_error=>raise( 'Invalid parameter type' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'Invalid parameter type'.
     ENDIF.
 
   ENDMETHOD.
@@ -133,7 +133,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
   METHOD intersects.
 
     IF comp IS INITIAL.
-      zcx_abappm_error=>raise( 'A comparator is required' ).
+      RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = 'A comparator is required'.
     ENDIF.
 
     DATA(semcomp) = create( comp ).
@@ -268,7 +268,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
         DATA(m) = r->create_matcher( text = comp ).
 
         IF NOT m->match( ).
-          zcx_abappm_error=>raise( |Invalid comparator: { comp }| ).
+          RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Invalid comparator: { comp }|.
         ENDIF.
 
         operator = m->get_submatch( 1 ).
@@ -288,7 +288,7 @@ CLASS zcl_abappm_semver_comparator IMPLEMENTATION.
         ENDIF.
 
       CATCH cx_sy_matcher.
-        zcx_abappm_error=>raise( |Error evaluating regex for { comp }| ).
+        RAISE EXCEPTION TYPE zcx_abappm_error_text EXPORTING text = |Error evaluating regex for { comp }|.
     ENDTRY.
 
   ENDMETHOD.
