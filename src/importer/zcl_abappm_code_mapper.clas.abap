@@ -81,6 +81,13 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
             val   = <tadir>-obj_name
             regex = <rule>-old_object
             with  = <rule>-new_object ).
+
+          " Remove first underscore after namespace:
+          " PROG Z_TEST becomes /NAMESPACE/TEST (instead of /NAMESPACE/_TEST)
+          map-new_object = replace(
+            val   = map-new_object
+            regex = '(/.+/)_'
+            with  = '$1' ).
         ENDIF.
         IF map-new_object <> <tadir>-obj_name AND strlen( map-new_object ) <= 30.
           found = abap_true.
@@ -123,7 +130,7 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
 
     " Only classes and interfaces
     " FUTURE: support other object types
-    DELETE result WHERE NOT ( object = 'CLAS' OR object = 'INTF' ).
+    DELETE result WHERE NOT ( object = 'CLAS' OR object = 'INTF' OR object = 'PROG' ).
 
     " Filter objects (for testing)
     DELETE result WHERE NOT ( object IN object_types AND obj_name IN object_names ).

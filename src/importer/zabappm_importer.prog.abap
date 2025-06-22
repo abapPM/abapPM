@@ -28,12 +28,16 @@ SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME.
 SELECTION-SCREEN END OF BLOCK b2.
 
 SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME.
+  PARAMETERS p_trkorr TYPE e070-trkorr.
+SELECTION-SCREEN END OF BLOCK b3.
+
+SELECTION-SCREEN BEGIN OF BLOCK b4 WITH FRAME.
   PARAMETERS:
     p_defrul TYPE string,
     p_prod   AS CHECKBOX DEFAULT 'X',
     p_log    AS CHECKBOX DEFAULT 'X',
     p_dryrun AS CHECKBOX DEFAULT 'X'.
-SELECTION-SCREEN END OF BLOCK b3.
+SELECTION-SCREEN END OF BLOCK b4.
 
 INITIALIZATION.
   p_defrul = zif_abappm_importer=>c_default_import_rule.
@@ -48,6 +52,7 @@ START-OF-SELECTION.
         package       = p_pack
         object_types  = s_type[]
         object_names  = s_name[]
+        transport     = p_trkorr
         default_rule  = p_defrul
         is_dryrun     = p_dryrun
         is_production = p_prod ).

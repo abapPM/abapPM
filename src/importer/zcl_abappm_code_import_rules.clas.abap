@@ -135,17 +135,28 @@ CLASS zcl_abappm_code_import_rules IMPLEMENTATION.
                   sub  = ''''
                   with = ''
                   occ  = 0 ) ).
-                IF rule-new_object CS '/'.
-                  SPLIT rule-new_object AT '/' INTO rule-target_package rule-new_object.
-                  " Install into a sub package of where the IMPORT was found
-                  " Note: new_package is the folder name, which is mapped to
-                  " an ABAP package based on prefix folder rules
-                  rule-parent_package = program-package.
-                  rule-target_package = |{ program-package }_{ rule-target_package }|.
-                  " FUTURE: support full and mixed folder modes
-                ELSE.
+
+                DATA(separator) = ''.
+                IF rule-new_object CS ':'.
+                  separator = ':'. " for namespaces
+                ELSEIF rule-new_object CS '/'.
+                  separator = '/'. " for sub-packages
+                ENDIF.
+
+                IF separator IS INITIAL.
                   " Install into the same package where the IMPORT was found
                   rule-target_package = program-package.
+                ELSE.
+                  SPLIT rule-new_object AT separator INTO rule-target_package rule-new_object.
+                  " Install into a sub package of where the IMPORT was found
+                  rule-parent_package = program-package.
+                  " For namespaced packages, keep the target_package as is (fixed folder mode)
+                  " Otherwise, target_package is the folder name, which is mapped to
+                  " an ABAP package based on prefix folder rules
+                  IF rule-target_package(1) <> '/'.
+                    rule-target_package = |{ program-package }_{ rule-target_package }|.
+                  ENDIF.
+                  " FUTURE: support full and mixed folder modes
                 ENDIF.
               WHEN OTHERS.
                 zcx_abappm_error=>raise( |Unknown identifier { <token>-str }. { pos }| ).

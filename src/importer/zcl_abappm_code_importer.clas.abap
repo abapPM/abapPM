@@ -152,7 +152,7 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
 
   METHOD import.
 
-    CONSTANTS c_token_types TYPE string VALUE 'HIlm34C'.
+    CONSTANTS c_token_types TYPE string VALUE 'HIlm34CA'.
 
     DATA:
       tokens         TYPE stokesx_tab,
@@ -178,6 +178,18 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
         " abapDoc comments
         READ TABLE map ASSIGNING FIELD-SYMBOL(<map>)
           WITH TABLE KEY old_object = get_object_name_from_abapdoc( <token>-str ).
+        IF sy-subrc = 0.
+          <token>-str = replace(
+            val  = <token>-str
+            sub  = <map>-old_object
+            with = to_lower( <map>-new_object )
+            case = abap_false ).
+          INSERT <token> INTO TABLE tokens_checked.
+        ENDIF.
+      ELSEIF <token>-type = 'A'.
+        " program name
+        READ TABLE map ASSIGNING <map>
+          WITH TABLE KEY old_object = <token>-str.
         IF sy-subrc = 0.
           <token>-str = replace(
             val  = <token>-str
@@ -299,6 +311,10 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
       RETURN.
       "zcx_abappm_error=>raise( |No code found in program { program_name }| )
     ENDIF.
+
+    " TODO: Preprocess source to allow IMPORT as comments or pargmas
+    " * @@import ...
+    " ##IMPORT ...
 
     SCAN ABAP-SOURCE source_code
       TOKENS INTO result

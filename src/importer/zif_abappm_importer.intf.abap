@@ -64,6 +64,8 @@ INTERFACE zif_abappm_importer PUBLIC.
     BEGIN OF ty_item,
       obj_type TYPE tadir-object,
       obj_name TYPE tadir-obj_name,
+      package  TYPE devclass,
+      language TYPE sy-langu,
     END OF ty_item.
 
   TYPES:
