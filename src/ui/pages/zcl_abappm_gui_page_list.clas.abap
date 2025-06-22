@@ -330,7 +330,6 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     super->constructor( ).
 
-    load_package_list( ).
     load_settings( ).
 
     " Overwrite setting
@@ -906,7 +905,7 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
     )->add(
       iv_txt      = 'Uninstall'
       iv_act      = |{ zif_abappm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
-      iv_class    = c_action_class
+      iv_class    = |{ c_action_class } red|
       iv_li_class = c_action_class ).
 
     DATA(toolbar) = zcl_abappm_html_toolbar=>create( 'apm-package-list' ).
@@ -953,8 +952,8 @@ CLASS zcl_abappm_gui_page_list IMPLEMENTATION.
 
     label_colors = zcl_abapgit_repo_labels=>split_colors_into_map( settings-gui_settings-label_colors ).
 
-    load_package_list( ).
     load_settings( ).
+    load_package_list( ).
 
     DATA(html) = zcl_abappm_html=>create( ).
 

@@ -19,6 +19,7 @@ INTERFACE zif_abappm_gui_router PUBLIC.
       clipboard            TYPE string VALUE 'clipboard',
       documentation        TYPE string VALUE 'documentation',
       favorite_package     TYPE string VALUE 'favorite_package',
+      feedback             TYPE string VALUE 'feedback',
       go_back              TYPE string VALUE 'go_back',
       go_db                TYPE string VALUE 'go_db',
       go_debuginfo         TYPE string VALUE 'go_debuginfo',

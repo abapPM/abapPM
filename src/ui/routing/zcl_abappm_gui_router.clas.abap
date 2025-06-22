@@ -122,6 +122,11 @@ CLASS zcl_abappm_gui_router IMPLEMENTATION.
         call_browser( zif_abappm_constants=>c_website ).
         result-state = zcl_abappm_gui=>c_event_state-no_more_act.
 
+      WHEN zif_abappm_gui_router=>c_action-feedback.
+
+        call_browser( zif_abappm_constants=>c_new_issue ).
+        result-state = zcl_abappm_gui=>c_event_state-no_more_act.
+
       WHEN zif_abappm_gui_router=>c_action-registry.
         TRY.
             DATA(registry) = zcl_abappm_settings=>factory( )->get( )-registry.

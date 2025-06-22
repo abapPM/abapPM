@@ -90,6 +90,10 @@ CLASS zcl_abappm_gui_menus IMPLEMENTATION.
     result = zcl_abappm_html_toolbar=>create( 'apm-toolbar-help' ).
 
     result->add(
+      iv_txt = 'Feedback'
+      iv_class = 'red'
+      iv_act = zif_abappm_gui_router=>c_action-feedback
+    )->add(
       iv_txt = 'Registry'
       iv_act = zif_abappm_gui_router=>c_action-registry
 * FUTURE
