@@ -174,53 +174,54 @@ CLASS zcl_abappm_code_importer IMPLEMENTATION.
     LOOP AT tokens ASSIGNING FIELD-SYMBOL(<token>) WHERE type CA c_token_types.
 
       " FIXME: this does not work if there are objects with different type but same name
-      IF <token>-type = 'C'.
-        " abapDoc comments
-        READ TABLE map ASSIGNING FIELD-SYMBOL(<map>)
-          WITH TABLE KEY old_object = get_object_name_from_abapdoc( <token>-str ).
-        IF sy-subrc = 0.
-          <token>-str = replace(
-            val  = <token>-str
-            sub  = <map>-old_object
-            with = to_lower( <map>-new_object )
-            case = abap_false ).
-          INSERT <token> INTO TABLE tokens_checked.
-        ENDIF.
-      ELSEIF <token>-type = 'A'.
-        " program name
-        READ TABLE map ASSIGNING <map>
-          WITH TABLE KEY old_object = <token>-str.
-        IF sy-subrc = 0.
-          <token>-str = replace(
-            val  = <token>-str
-            sub  = <map>-old_object
-            with = to_lower( <map>-new_object )
-            case = abap_false ).
-          INSERT <token> INTO TABLE tokens_checked.
-        ENDIF.
-      ELSE.
-        " Other statements
-        READ TABLE map ASSIGNING <map>
-          WITH TABLE KEY old_object = get_class_name_from_token( <token>-str ).
-        IF sy-subrc = 0.
-          <token>-str = replace(
-            val  = <token>-str
-            sub  = <map>-old_object
-            with = <map>-new_object
-            case = abap_false ).
-          INSERT <token> INTO TABLE tokens_checked.
-        ENDIF.
-        READ TABLE map ASSIGNING <map>
-          WITH TABLE KEY old_object = get_interface_name_from_token( <token>-str ).
-        IF sy-subrc = 0.
-          <token>-str = replace(
-            val  = <token>-str
-            sub  = <map>-old_object
-            with = <map>-new_object
-            case = abap_false ).
-          INSERT <token> INTO TABLE tokens_checked.
-        ENDIF.
-      ENDIF.
+      CASE <token>-type.
+        WHEN 'C'.
+          " abapDoc comments
+          READ TABLE map ASSIGNING FIELD-SYMBOL(<map>)
+            WITH TABLE KEY old_object = get_object_name_from_abapdoc( <token>-str ).
+          IF sy-subrc = 0.
+            <token>-str = replace(
+              val  = <token>-str
+              sub  = <map>-old_object
+              with = to_lower( <map>-new_object )
+              case = abap_false ).
+            INSERT <token> INTO TABLE tokens_checked.
+          ENDIF.
+        WHEN 'A'.
+          " program name
+          READ TABLE map ASSIGNING <map>
+            WITH TABLE KEY old_object = <token>-str.
+          IF sy-subrc = 0.
+            <token>-str = replace(
+              val  = <token>-str
+              sub  = <map>-old_object
+              with = to_lower( <map>-new_object )
+              case = abap_false ).
+            INSERT <token> INTO TABLE tokens_checked.
+          ENDIF.
+        WHEN OTHERS.
+          " Other statements
+          READ TABLE map ASSIGNING <map>
+            WITH TABLE KEY old_object = get_class_name_from_token( <token>-str ).
+          IF sy-subrc = 0.
+            <token>-str = replace(
+              val  = <token>-str
+              sub  = <map>-old_object
+              with = <map>-new_object
+              case = abap_false ).
+            INSERT <token> INTO TABLE tokens_checked.
+          ENDIF.
+          READ TABLE map ASSIGNING <map>
+            WITH TABLE KEY old_object = get_interface_name_from_token( <token>-str ).
+          IF sy-subrc = 0.
+            <token>-str = replace(
+              val  = <token>-str
+              sub  = <map>-old_object
+              with = <map>-new_object
+              case = abap_false ).
+            INSERT <token> INTO TABLE tokens_checked.
+          ENDIF.
+      ENDCASE.
 
     ENDLOOP.
 
