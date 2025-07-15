@@ -155,7 +155,7 @@ CLASS zcl_abappm_gui_page_list DEFINITION
 
     METHODS build_table_scheme
       RETURNING
-        VALUE(result) TYPE zif_abapgit_definitions=>ty_col_spec_tt.
+        VALUE(result) TYPE zcl_abappm_gui_chunk_lib=>ty_col_spec_tt.
 
     METHODS collect_all_labels
       IMPORTING
@@ -178,7 +178,6 @@ CLASS zcl_abappm_gui_page_list DEFINITION
     METHODS save_settings
       RAISING
         zcx_abappm_error.
-
 ENDCLASS.
 
 

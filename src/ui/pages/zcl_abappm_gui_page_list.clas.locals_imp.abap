@@ -2,7 +2,7 @@ CLASS lcl_table_scheme DEFINITION FINAL.
   " TODO: move to a global class, when table is separated as a component
   PUBLIC SECTION.
 
-    DATA columns TYPE zif_abapgit_definitions=>ty_col_spec_tt READ-ONLY.
+    DATA columns TYPE zcl_abappm_gui_chunk_lib=>ty_col_spec_tt READ-ONLY.
 
     METHODS add_column
       IMPORTING
