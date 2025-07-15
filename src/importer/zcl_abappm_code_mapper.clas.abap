@@ -89,7 +89,13 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
             regex = '(/.+/)_'
             with  = '$1' ).
         ENDIF.
-        IF map-new_object <> <tadir>-obj_name AND strlen( map-new_object ) <= 30.
+        IF map-new_object <> <tadir>-obj_name.
+          IF strlen( map-new_object ) > 30.
+            map-new_object = map-new_object(30).
+            IF is_logging = abap_true.
+              WRITE: / <tadir>-object, <tadir>-obj_name, map-new_object, 'object name was > 30 chars' COLOR COL_TOTAL.
+            ENDIF.
+          ENDIF.
           found = abap_true.
           EXIT.
         ENDIF.
@@ -100,7 +106,8 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
       ELSEIF import_all = abap_true.
         " With IMPORT '*' we expect all objects to be mapped
         " Most likely, the object name became too long requiring an additional rule
-        zcx_abappm_error=>raise( |No mapping rule found for { <tadir>-obj_name }| ).
+        WRITE: / <tadir>-object, <tadir>-obj_name, 'no mapping rule found' COLOR COL_TOTAL.
+        DATA(missing_rule) = abap_true.
       ENDIF.
     ENDLOOP.
 
@@ -114,6 +121,10 @@ CLASS zcl_abappm_code_mapper IMPLEMENTATION.
       ENDLOOP.
       FORMAT COLOR OFF.
       SKIP.
+    ENDIF.
+
+    IF missing_rule = abap_true.
+      zcx_abappm_error=>raise( 'No mapping rule for some objects' ).
     ENDIF.
 
   ENDMETHOD.
