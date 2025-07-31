@@ -90,6 +90,7 @@
     "dangerous_statement": {
       "exclude": [
         "#apmg#cl_apm_persist_apm",
+        "#apmg#cl_apm_object_prog",
         "#apmg#cl_apm_tap"
       ],
       "execSQL": true,
