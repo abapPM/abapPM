@@ -30,44 +30,44 @@ CLASS /apmg/cl_apm_object_prog DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     METHODS deserialize_program
       IMPORTING
-        !is_progdir TYPE zif_abapgit_sap_report=>ty_progdir
-        !it_source  TYPE /apmg/if_apm_importer=>ty_code
-        !it_tpool   TYPE textpool_table
-        !iv_package TYPE devclass
+        !progdir TYPE zif_abapgit_sap_report=>ty_progdir
+        !source  TYPE /apmg/if_apm_importer=>ty_code
+        !tpool   TYPE textpool_table
+        !package TYPE devclass
       RAISING
         /apmg/cx_apm_error.
 
     METHODS deserialize_textpool
       IMPORTING
-        !iv_program    TYPE syrepid
-        !it_tpool      TYPE textpool_table
-        !iv_language   TYPE sy-langu OPTIONAL
-        !iv_is_include TYPE abap_bool DEFAULT abap_false
+        !program  TYPE syrepid
+        !tpool    TYPE textpool_table
+        !language TYPE sy-langu OPTIONAL
+        !include  TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
     METHODS get_program_title
       IMPORTING
-        !it_tpool       TYPE textpool_table
+        !tpool          TYPE textpool_table
       RETURNING
         VALUE(rv_title) TYPE repti.
 
     METHODS insert_program
       IMPORTING
-        !is_progdir TYPE zif_abapgit_sap_report=>ty_progdir
-        !it_source  TYPE /apmg/if_apm_importer=>ty_code
-        !iv_title   TYPE repti
-        !iv_package TYPE devclass
-        !iv_state   TYPE progdir-state DEFAULT c_state-inactive
+        !progdir TYPE zif_abapgit_sap_report=>ty_progdir
+        !source  TYPE /apmg/if_apm_importer=>ty_code
+        !title   TYPE repti
+        !package TYPE devclass
+        !state   TYPE progdir-state DEFAULT c_state-inactive
       RAISING
         /apmg/cx_apm_error.
 
     METHODS update_program
       IMPORTING
-        !is_progdir TYPE zif_abapgit_sap_report=>ty_progdir
-        !it_source  TYPE /apmg/if_apm_importer=>ty_code
-        !iv_title   TYPE repti
-        !iv_state   TYPE progdir-state DEFAULT c_state-inactive
+        !progdir TYPE zif_abapgit_sap_report=>ty_progdir
+        !source  TYPE /apmg/if_apm_importer=>ty_code
+        !title   TYPE repti
+        !state   TYPE progdir-state DEFAULT c_state-inactive
       RAISING
         /apmg/cx_apm_error.
 
@@ -107,10 +107,14 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
           program_dir-name = new_object.
 
           deserialize_program(
-            is_progdir = program_dir
-            it_source  = program_code
-            it_tpool   = program_texts
-            iv_package = new_package ).
+            progdir = program_dir
+            source  = program_code
+            tpool   = program_texts
+            package = new_package ).
+
+          deserialize_textpool(
+            program = new_object
+            tpool   = program_texts ).
         ENDIF.
 
       CATCH zcx_abapgit_exception INTO DATA(error).
@@ -130,43 +134,43 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
   METHOD deserialize_program.
 
     DATA:
-      lv_progname TYPE reposrc-progname,
-      lv_title    TYPE rglif-title.
+      progname TYPE reposrc-progname,
+      title    TYPE rglif-title.
 
     TRY.
         zcl_abapgit_factory=>get_cts_api( )->insert_transport_object(
           iv_object   = 'ABAP'
-          iv_obj_name = is_progdir-name
-          iv_package  = iv_package
+          iv_obj_name = progdir-name
+          iv_package  = package
           iv_language = sy-langu ).
 
-        lv_title = get_program_title( it_tpool ).
+        title = get_program_title( tpool ).
 
         " Check if program already exists
-        SELECT SINGLE progname FROM reposrc INTO lv_progname
-          WHERE progname = is_progdir-name
+        SELECT SINGLE progname FROM reposrc INTO progname
+          WHERE progname = progdir-name
           AND r3state = c_state-active.
 
         IF sy-subrc = 0.
           update_program(
-            is_progdir = is_progdir
-            it_source  = it_source
-            iv_title   = lv_title ).
+            progdir = progdir
+            source  = source
+            title   = title ).
         ELSE.
           insert_program(
-            is_progdir = is_progdir
-            it_source  = it_source
-            iv_title   = lv_title
-            iv_package = iv_package ).
+            progdir = progdir
+            source  = source
+            title   = title
+            package = package ).
         ENDIF.
 
         zcl_abapgit_factory=>get_sap_report( )->update_progdir(
-          is_progdir = is_progdir
-          iv_package = iv_package ).
+          is_progdir = progdir
+          iv_package = package ).
 
         zcl_abapgit_objects_activation=>add(
           iv_type = 'REPS'
-          iv_name = is_progdir-name ).
+          iv_name = progdir-name ).
 
       CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
@@ -177,52 +181,53 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD deserialize_textpool.
 
-    DATA lv_language TYPE sy-langu.
-    DATA lv_state    TYPE c.
-    DATA lv_delete   TYPE abap_bool.
+    DATA:
+      _language TYPE sy-langu,
+      state     TYPE c,
+      delete    TYPE abap_bool.
 
-    IF iv_language IS INITIAL.
-      lv_language = sy-langu.
+    IF _language IS INITIAL.
+      _language = sy-langu.
     ELSE.
-      lv_language = iv_language.
+      _language = language.
     ENDIF.
 
-    IF lv_language = sy-langu.
-      lv_state = c_state-inactive. "Textpool in main language needs to be activated
+    IF _language = sy-langu.
+      state = c_state-inactive. "Textpool in main language needs to be activated
     ELSE.
-      lv_state = c_state-active. "Translations are always active
+      state = c_state-active. "Translations are always active
     ENDIF.
 
-    IF it_tpool IS INITIAL.
-      IF iv_is_include = abap_false OR lv_state = c_state-active.
-        DELETE TEXTPOOL iv_program "Remove initial description from textpool if
-          LANGUAGE lv_language     "original program does not have a textpool
-          STATE lv_state.
+    IF tpool IS INITIAL.
+      IF include = abap_false OR state = c_state-active.
+        DELETE TEXTPOOL program "Remove initial description from textpool if
+          LANGUAGE _language     "original program does not have a textpool
+          STATE state.
 
-        lv_delete = abap_true.
+        delete = abap_true.
       ELSE.
-        INSERT TEXTPOOL iv_program "In case of includes: Deletion of textpool in
-          FROM it_tpool            "main language cannot be activated because
-          LANGUAGE lv_language     "this would activate the deletion of the textpool
-          STATE lv_state.          "of the mail program -> insert empty textpool
+        INSERT TEXTPOOL program "In case of includes: Deletion of textpool in
+          FROM tpool            "main language cannot be activated because
+          LANGUAGE _language     "this would activate the deletion of the textpool
+          STATE state.          "of the mail program -> insert empty textpool
       ENDIF.
     ELSE.
-      INSERT TEXTPOOL iv_program
-        FROM it_tpool
-        LANGUAGE lv_language
-        STATE lv_state.
+      INSERT TEXTPOOL program
+        FROM tpool
+        LANGUAGE _language
+        STATE state.
       IF sy-subrc <> 0.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text ='Error from INSERT TEXTPOOL'.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Error from INSERT TEXTPOOL'.
       ENDIF.
     ENDIF.
 
     " Textpool in main language needs to be activated
-    IF lv_state = c_state-inactive.
+    IF state = c_state-inactive.
       TRY.
           zcl_abapgit_objects_activation=>add(
             iv_type   = 'REPT'
-            iv_name   = iv_program
-            iv_delete = lv_delete ).
+            iv_name   = program
+            iv_delete = delete ).
 
         CATCH zcx_abapgit_exception INTO DATA(error).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
@@ -234,20 +239,18 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD get_program_title.
 
-    DATA ls_tpool LIKE LINE OF it_tpool.
+    FIELD-SYMBOLS <any> TYPE any.
 
-    FIELD-SYMBOLS <lg_any> TYPE any.
-
-    READ TABLE it_tpool INTO ls_tpool WITH KEY id = 'R'.
+    READ TABLE tpool INTO DATA(tpool_line) WITH KEY id = 'R'.
     IF sy-subrc = 0.
       " there is a bug in RPY_PROGRAM_UPDATE, the header line of TTAB is not
       " cleared, so the title length might be inherited from a different program.
-      ASSIGN ('(SAPLSIFP)TTAB') TO <lg_any>.
+      ASSIGN ('(SAPLSIFP)TTAB') TO <any>.
       IF sy-subrc = 0.
-        CLEAR <lg_any>.
+        CLEAR <any>.
       ENDIF.
 
-      rv_title = ls_tpool-entry.
+      rv_title = tpool_line-entry.
     ENDIF.
 
   ENDMETHOD.
@@ -255,22 +258,22 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD insert_program.
 
-    DATA lt_source TYPE abaptxt255_tab.
+    DATA _source TYPE abaptxt255_tab.
 
-    lt_source = it_source.
+    _source = source.
 
     TRY.
         CALL FUNCTION 'RPY_PROGRAM_INSERT'
           EXPORTING
-            development_class = iv_package
-            program_name      = is_progdir-name
-            program_type      = is_progdir-subc
-            title_string      = iv_title
-            save_inactive     = iv_state
+            development_class = package
+            program_name      = progdir-name
+            program_type      = progdir-subc
+            title_string      = title
+            save_inactive     = state
             suppress_dialog   = abap_true
-            uccheck           = is_progdir-uccheck " does not exist on lower releases
+            uccheck           = progdir-uccheck " does not exist on lower releases
           TABLES
-            source_extended   = lt_source
+            source_extended   = _source
           EXCEPTIONS
             already_exists    = 1
             cancelled         = 2
@@ -280,14 +283,14 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
       CATCH cx_sy_dyn_call_param_not_found.
         CALL FUNCTION 'RPY_PROGRAM_INSERT'
           EXPORTING
-            development_class = iv_package
-            program_name      = is_progdir-name
-            program_type      = is_progdir-subc
-            title_string      = iv_title
-            save_inactive     = iv_state
+            development_class = package
+            program_name      = progdir-name
+            program_type      = progdir-subc
+            title_string      = title
+            save_inactive     = state
             suppress_dialog   = abap_true
           TABLES
-            source_extended   = lt_source
+            source_extended   = _source
           EXCEPTIONS
             already_exists    = 1
             cancelled         = 2
@@ -302,20 +305,20 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
           " we save active and inactive version of source with the given PROGRAM TYPE.
           " Without the active version, the code will not be visible in case of activation errors.
           zcl_abapgit_factory=>get_sap_report( )->insert_report(
-            iv_name         = is_progdir-name
-            iv_package      = iv_package
-            it_source       = it_source
+            iv_name         = progdir-name
+            iv_package      = package
+            it_source       = source
             iv_state        = c_state-active
-            iv_version      = is_progdir-uccheck
-            iv_program_type = is_progdir-subc ).
+            iv_version      = progdir-uccheck
+            iv_program_type = progdir-subc ).
 
           zcl_abapgit_factory=>get_sap_report( )->insert_report(
-            iv_name         = is_progdir-name
-            iv_package      = iv_package
-            it_source       = it_source
+            iv_name         = progdir-name
+            iv_package      = package
+            it_source       = source
             iv_state        = c_state-inactive
-            iv_version      = is_progdir-uccheck
-            iv_program_type = is_progdir-subc ).
+            iv_version      = progdir-uccheck
+            iv_program_type = progdir-subc ).
 
         CATCH zcx_abapgit_exception INTO DATA(error).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
@@ -329,19 +332,19 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD update_program.
 
-    DATA lt_source TYPE abaptxt255_tab.
+    DATA _source TYPE abaptxt255_tab.
 
-    lt_source = it_source.
+    _source = source.
 
     zcl_abapgit_language=>set_current_language( sy-langu ).
 
     CALL FUNCTION 'RPY_PROGRAM_UPDATE'
       EXPORTING
-        program_name     = is_progdir-name
-        title_string     = iv_title
-        save_inactive    = iv_state
+        program_name     = progdir-name
+        title_string     = title
+        save_inactive    = state
       TABLES
-        source_extended  = lt_source
+        source_extended  = _source
       EXCEPTIONS
         cancelled        = 1
         permission_error = 2
@@ -352,7 +355,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
       zcl_abapgit_language=>restore_login_language( ).
 
       IF sy-msgid = 'EU' AND sy-msgno = '510'.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text ='User is currently editing program'.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'User is currently editing program'.
       ELSEIF sy-msgid = 'EU' AND sy-msgno = '522'.
         " for generated table maintenance function groups, the author is set to SAP* instead of the user which
         " generates the function group. This hits some standard checks, pulling new code again sets the author
