@@ -59,12 +59,13 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CLASS-METHODS get_map
       IMPORTING
-        !rules        TYPE /apmg/if_apm_importer=>ty_rules
-        !packages     TYPE /apmg/if_apm_importer=>ty_packages
-        !object_types TYPE /apmg/if_apm_importer=>ty_object_types
-        !object_names TYPE /apmg/if_apm_importer=>ty_object_names
+        !rules         TYPE /apmg/if_apm_importer=>ty_rules
+        !packages      TYPE /apmg/if_apm_importer=>ty_packages
+        !object_types  TYPE /apmg/if_apm_importer=>ty_object_types
+        !object_names  TYPE /apmg/if_apm_importer=>ty_object_names
+        !is_production TYPE abap_bool DEFAULT abap_true
       RETURNING
-        VALUE(result) TYPE /apmg/if_apm_importer=>ty_map
+        VALUE(result)  TYPE /apmg/if_apm_importer=>ty_map
       RAISING
         /apmg/cx_apm_error.
 
@@ -144,7 +145,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         rules          = rules
         object_types   = object_types
         object_names   = object_names
-        is_logging     = is_logging ).
+        is_logging     = is_logging
+        is_production  = is_production ).
 
       INSERT LINES OF map INTO TABLE result.
     ENDLOOP.
@@ -369,12 +371,13 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
       ASSERT new_item-obj_name IS NOT INITIAL AND new_item-obj_name <> old_item-obj_name.
 
+      " XXX: Switch for apm self-update
       " Some modules are used by the importer and don't support self-update
       " If these items are changed, it would dump, so we skip them
       IF new_item-package CP '/APMG/APM*' AND
-        ( old_item-obj_name = 'ZCX_ERROR' OR
+        ( old_item-obj_name CP '/APMG/CX_ERROR*' OR
           old_item-obj_name CP 'Z++_AJSON*' OR
-          old_item-obj_name CP 'Z++_PACKAGE_JSON*' ).
+          old_item-obj_name CP '/APMG/++_PACKAGE_JSON*' ).
 
         IF is_logging = abap_true.
           WRITE 'Skipped' COLOR COL_TOTAL INTENSIFIED OFF.
@@ -391,8 +394,9 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
               item = old_item.
 
         CATCH cx_sy_create_object_error.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING
-            text = |Unsupported object type { old_item-obj_type }|.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+            EXPORTING
+              text = |Unsupported object type { old_item-obj_type }|.
       ENDTRY.
 
       TRY.
@@ -509,7 +513,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
 
-      " Switch for self-update
+      " XXX: Switch for apm self-update
       DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( <package>-target_package ).
       " DATA(package_json_service) = /apmg/cl_package_json=>factory( <package>-target_package )
 
@@ -534,7 +538,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     " Remove dependencies
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
-      " Switch for self-update
+      " XXX: Switch for apm self-update
       package_json_service = /apmg/cl_apm_package_json=>factory( <dependency>-package ).
       " package_json_service = /apmg/cl_package_json=>factory( <dependency>-package )
 

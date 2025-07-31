@@ -290,7 +290,9 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
 
   METHOD prepare.
 
-    LOOP AT program_source ASSIGNING FIELD-SYMBOL(<code>).
+    result = program_source.
+
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<code>).
       <code> = replace(
         val   = <code>
         sub  = '* @@IMPORT'

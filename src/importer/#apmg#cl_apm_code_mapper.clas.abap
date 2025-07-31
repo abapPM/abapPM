@@ -18,6 +18,7 @@ CLASS /apmg/cl_apm_code_mapper DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !object_types   TYPE /apmg/if_apm_importer=>ty_object_types
         !object_names   TYPE /apmg/if_apm_importer=>ty_object_names
         !is_logging     TYPE abap_bool DEFAULT abap_false
+        !is_production  TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)   TYPE /apmg/if_apm_importer=>ty_map
       RAISING
@@ -57,6 +58,11 @@ CLASS /apmg/cl_apm_code_mapper IMPLEMENTATION.
 
     " Process all objects and apply rules
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>).
+      " No programs for production (just classes and interfaces)
+      IF is_production = abap_true AND <tadir>-object = 'PROG'.
+        CONTINUE.
+      ENDIF.
+
       DATA(map) = VALUE /apmg/if_apm_importer=>ty_map_item(
         source_package = source_package
         target_package = target_package
