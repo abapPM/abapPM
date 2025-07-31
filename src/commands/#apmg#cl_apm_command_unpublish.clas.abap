@@ -81,7 +81,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
       url      = |{ tarball }/rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-delete ).
 
-    /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_command_utils=>check_response(
       response = response
       text     = 'Error deleting tarball' ).
 

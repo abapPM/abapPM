@@ -253,7 +253,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
 
     /apmg/cl_apm_trace=>cdata( |{ method } { url }\n\n{ payload }| ).
 
-    result = /apmg/cl_apm_command_utils=>get_agent( registry )->request(
+    result = get_agent( registry )->request(
       url     = url
       headers = headers
       method  = method

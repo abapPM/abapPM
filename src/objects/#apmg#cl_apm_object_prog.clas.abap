@@ -48,7 +48,7 @@ CLASS /apmg/cl_apm_object_prog DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     METHODS get_program_title
       IMPORTING
-        !tpool          TYPE textpool_table
+        !tpool        TYPE textpool_table
       RETURNING
         VALUE(result) TYPE repti.
 

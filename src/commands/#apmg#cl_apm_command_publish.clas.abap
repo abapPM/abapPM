@@ -208,7 +208,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
   METHOD get_package_json.
 
-    COMPUTE result = /apmg/cl_apm_package_json=>factory( package )->load( )->get( ).
+    result = /apmg/cl_apm_package_json=>factory( package )->load( )->get( ).
     result-readme = /apmg/cl_apm_readme=>factory( package )->load( )->get( ).
 
   ENDMETHOD.
