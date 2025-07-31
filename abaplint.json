@@ -19,8 +19,16 @@
       "/src/modules/markdown/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
-      "zcl_abappm_installer_objects*",
-      "zcl_abappm_html_*"
+      "#apmg#cl_apm_abapgit_*",
+      "#apmg#cl_apm_exception_viewer*",
+      "#apmg#cl_apm_frontend_services*",
+      "#apmg#if_apm_frontend_services*",
+      "#apmg#cl_apm_gui*",
+      "#apmg#if_apm_gui*",
+      "#apmg#cl_apm_html_*",
+      "#apmg#if_apm_html_*",
+      "#apmg#cl_apm_popups*",
+      "#apmg#if_apm_popups*",
     ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
@@ -40,7 +48,14 @@
     "align_type_expressions": true,
     "allowed_object_naming": true,
     "allowed_object_types": {
-      "allowed": ["CLAS", "DEVC", "INTF", "PROG", "TRAN", "W3MI"]
+      "allowed": [
+        "CLAS",
+        "DEVC",
+        "INTF",
+        "NSPC",
+        "PROG",
+        "TRAN",
+        "W3MI"]
     },
     "ambiguous_statement": true,
     "avoid_use": true,
@@ -73,7 +88,11 @@
     "cyclic_oo": true,
     "cyclomatic_complexity": true,
     "dangerous_statement": {
-      "exclude": ["zcl_abappm_persist_apm", "zcl_abappm_tap"],
+      "exclude": [
+        "#apmg#cl_apm_persist_apm",
+        "#apmg#cl_apm_object_prog",
+        "#apmg#cl_apm_tap"
+      ],
       "execSQL": true,
       "kernelCall": true,
       "systemCall": true,
@@ -145,7 +164,7 @@
     },
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
-      "allow": ["zcl_abappm_string_map"]
+      "allow": ["#apmg#cl_apm_string_map"]
     },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
@@ -155,7 +174,7 @@
     },
     "line_break_style": true,
     "line_length": {
-      "exclude": ["zcl_abappm_emoji.clas.macros"]
+      "exclude": ["#apmg#cl_apm_emoji.clas.macros"]
     },
     "line_only_punc": true,
     "local_class_naming": true,
@@ -175,24 +194,24 @@
       "checkForms": true
     },
     "method_overwrites_builtin": {
-      "exclude": ["zcl_abappm_tap"]
+      "exclude": ["#apmg#cl_apm_tap"]
     },
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
-      "ownTables": "^[ZABAPPM|CLMCUS]|SOTR_.*|OBJ*",
+      "ownTables": "^[Z|CLMCUS]|SOTR_.*|OBJ*",
       "reportDynamic": false
     },
     "msag_consistency": true,
     "names_no_dash": true,
     "nesting": {
-      "exclude": ["zcl_abappm_semver"]
+      "exclude": ["#apmg#cl_apm_semver"]
     },
     "newline_between_methods": true,
     "no_aliases": true,
     "no_chained_assignment": true,
     "no_external_form_calls": {
-      "exclude": ["ZABAPPM_FORMS"]
+      "exclude": ["#apmg#apm_forms"]
     },
     "no_inline_in_optional_branches": false,
     "no_prefixes": {
@@ -211,41 +230,41 @@
     "no_yoda_conditions": true,
     "nrob_consistency": true,
     "object_naming": {
-      "aqbg": "^ZABAPPM",
-      "aqqu": "^ZABAPPM",
-      "aqsg": "^ZABAPPM",
-      "auth": "^ZABAPPM",
-      "clas": "^ZC(L|X)\\_ABAPPM",
-      "cmod": "^ZABAPPM",
-      "doma": "^ZABAPPM",
-      "dtel": "^ZABAPPM",
-      "enho": "^ZABAPPM",
-      "enhs": "^ZABAPPM",
-      "enqu": "^EZABAPPM",
-      "form": "^ZABAPPM",
-      "fugr": "^ZABAPPM",
-      "idoc": "^ZABAPPM",
+      "aqbg": "^Z",
+      "aqqu": "^Z",
+      "aqsg": "^Z",
+      "auth": "^Z",
+      "clas": "^/APMG/C(L|X)_APM",
+      "cmod": "^Z",
+      "doma": "^Z",
+      "dtel": "^Z",
+      "enho": "^Z",
+      "enhs": "^Z",
+      "enqu": "^EZ",
+      "form": "^Z",
+      "fugr": "^Z",
+      "idoc": "^Z",
       "ignoreNames": [],
       "ignorePatterns": [],
-      "intf": "^ZIF\\_ABAPPM",
-      "msag": "^ZABAPPM",
+      "intf": "^/APMG/IF_APM",
+      "msag": "^Z",
       "patternKind": "required",
-      "pinf": "^ZABAPPM",
-      "prog": "^ZABAPPM",
-      "sfpf": "^ZABAPPM",
-      "sfpi": "^ZABAPPM",
-      "shlp": "^ZABAPPM",
-      "ssfo": "^ZABAPPM",
-      "ssst": "^ZABAPPM",
-      "sucu": "^ZABAPPM",
-      "suso": "^ZABAPPM",
-      "sxci": "^ZABAPPM",
-      "tabl": "^ZABAPPM",
-      "tran": "^ZABAPPM",
-      "ttyp": "^ZABAPPM",
-      "wdya": "^ZABAPPM",
-      "wdyn": "^ZABAPPM",
-      "xslt": "^ZABAPPM"
+      "pinf": "^Z",
+      "prog": "^/APMG/APM",
+      "sfpf": "^Z",
+      "sfpi": "^Z",
+      "shlp": "^Z",
+      "ssfo": "^Z",
+      "ssst": "^Z",
+      "sucu": "^Z",
+      "suso": "^Z",
+      "sxci": "^Z",
+      "tabl": "^Z",
+      "tran": "^/APMG/APM",
+      "ttyp": "^Z",
+      "wdya": "^Z",
+      "wdyn": "^Z",
+      "xslt": "^Z"
     },
     "obsolete_statement": true,
     "omit_parameter_name": true,
@@ -274,8 +293,8 @@
     "select_add_order_by": false,
     "select_performance": {
       "exclude": [
-        "zcl_abappm_installer",
-        "zcl_abappm_persist_apm"
+        "#apmg#cl_apm_installer",
+        "#apmg#cl_apm_persist_apm"
       ],
       "endSelect": true,
       "selectStar": true,
@@ -298,7 +317,7 @@
     "superclass_final": true,
     "superfluous_value": true,
     "sy_modification": {
-      "exclude": ["zcl_abappm_tap"]
+      "exclude": ["#apmg#cl_apm_tap"]
     },
     "tabl_enhancement_category": true,
     "tables_declared_locally": true,
@@ -326,7 +345,7 @@
     "xml_consistency": true
   },
   "syntax": {
-    "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)",
+    "errorNamespace": "^(/APMG/|LCL_|TY_|LIF_)",
     "globalConstants": [],
     "globalMacros": [],
     "version": "v750"
