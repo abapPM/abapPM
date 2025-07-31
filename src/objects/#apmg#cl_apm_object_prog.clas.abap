@@ -50,7 +50,7 @@ CLASS /apmg/cl_apm_object_prog DEFINITION PUBLIC FINAL CREATE PUBLIC.
       IMPORTING
         !tpool          TYPE textpool_table
       RETURNING
-        VALUE(rv_title) TYPE repti.
+        VALUE(result) TYPE repti.
 
     METHODS insert_program
       IMPORTING
@@ -70,7 +70,6 @@ CLASS /apmg/cl_apm_object_prog DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !state   TYPE progdir-state DEFAULT c_state-inactive
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -80,7 +79,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD /apmg/if_apm_object~import.
 
-    DATA program_texts TYPE STANDARD TABLE OF textpool WITH DEFAULT KEY.
+    DATA program_texts TYPE textpool_table.
 
     DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
 
@@ -147,9 +146,9 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
         title = get_program_title( tpool ).
 
         " Check if program already exists
-        SELECT SINGLE progname FROM reposrc INTO progname
-          WHERE progname = progdir-name
-          AND r3state = c_state-active.
+        SELECT SINGLE progname FROM reposrc INTO @progname
+          WHERE progname = @progdir-name
+            AND r3state = @c_state-active.
 
         IF sy-subrc = 0.
           update_program(
@@ -181,19 +180,14 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
   METHOD deserialize_textpool.
 
-    DATA:
-      _language TYPE sy-langu,
-      state     TYPE c,
-      delete    TYPE abap_bool.
-
-    IF _language IS INITIAL.
-      _language = sy-langu.
+    IF language IS INITIAL.
+      DATA(_language) = sy-langu.
     ELSE.
       _language = language.
     ENDIF.
 
     IF _language = sy-langu.
-      state = c_state-inactive. "Textpool in main language needs to be activated
+      DATA(state) = c_state-inactive. "Textpool in main language needs to be activated
     ELSE.
       state = c_state-active. "Translations are always active
     ENDIF.
@@ -204,7 +198,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
           LANGUAGE _language     "original program does not have a textpool
           STATE state.
 
-        delete = abap_true.
+        DATA(delete) = abap_true.
       ELSE.
         INSERT TEXTPOOL program "In case of includes: Deletion of textpool in
           FROM tpool            "main language cannot be activated because
@@ -250,7 +244,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
         CLEAR <any>.
       ENDIF.
 
-      rv_title = tpool_line-entry.
+      result = tpool_line-entry.
     ENDIF.
 
   ENDMETHOD.

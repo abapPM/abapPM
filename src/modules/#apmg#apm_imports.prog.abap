@@ -24,4 +24,4 @@ IMPORT '*' TO 'url:/apmg/$1_apm$2'                     FROM 'url'.
 
 * modules from Alexander Tsybulsky
 IMPORT '*' TO 'ajson:/apmg/$1_apm$2'                   FROM 'ajson'.
-IMPORT 'z(..)_abap(.*)' TO 'string_map:/apmg/$1_apm$2' FROM 'string-map'.
+IMPORT 'z(..)_abap(.*)' TO 'string-map:/apmg/$1_apm$2' FROM 'string-map'.
