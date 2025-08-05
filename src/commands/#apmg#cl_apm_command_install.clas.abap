@@ -111,9 +111,9 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
       check_dependency(
-        list       = list
-        dependency = <dependency>
-        category   = 'peerDependency'
+        list        = list
+        dependency  = <dependency>
+        category    = 'peerDependency'
         is_optional = abap_true ).
     ENDLOOP.
 

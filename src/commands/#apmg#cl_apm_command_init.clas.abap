@@ -59,10 +59,10 @@ CLASS /apmg/cl_apm_command_init IMPLEMENTATION.
     ELSE.
       markdown = package_json-readme.
       markdown = replace(
-        val   = markdown
-        sub   = '\n'
-        with  = cl_abap_char_utilities=>newline
-        occ   = 0 ).
+        val  = markdown
+        sub  = '\n'
+        with = cl_abap_char_utilities=>newline
+        occ  = 0 ).
     ENDIF.
 
     DATA(readme_service) = /apmg/cl_apm_readme=>factory(

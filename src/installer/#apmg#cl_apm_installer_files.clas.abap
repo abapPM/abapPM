@@ -314,9 +314,9 @@ CLASS /apmg/cl_apm_installer_files IMPLEMENTATION.
 
       file-path = '/' && file-path.
       file-path = replace(
-        val   = file-path
-        sub   = '/package/'
-        with  = '/' ). " packaged with npm
+        val  = file-path
+        sub  = '/package/'
+        with = '/' ). " packaged with npm
       file-data = tar->get( <file>-name ).
 
       TRY.

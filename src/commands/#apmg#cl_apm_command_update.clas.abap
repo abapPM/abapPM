@@ -193,9 +193,9 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
         ENDIF.
         " New bundle dependency which will be added
         dependency = VALUE /apmg/if_apm_importer=>ty_dependency(
-          name    = <bundle>
-          range   = <dependency>-range
-          action  = /apmg/if_apm_importer=>c_action-add ).
+          name   = <bundle>
+          range  = <dependency>-range
+          action = /apmg/if_apm_importer=>c_action-add ).
         INSERT dependency INTO TABLE result.
       ENDIF.
     ENDLOOP.
