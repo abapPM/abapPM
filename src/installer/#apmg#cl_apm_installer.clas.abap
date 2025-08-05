@@ -277,24 +277,24 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     DATA tadir_list LIKE tadir.
 
-    IF tadir IS NOT INITIAL.
-      SELECT pgmid, object, obj_name FROM tadir INTO TABLE @tadir_list
-        FOR ALL ENTRIES IN @tadir
-        WHERE pgmid    = @tadir-pgmid
-          AND object   = @tadir-object
-          AND obj_name = @tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
+    CHECK tadir IS NOT INITIAL.
+
+    SELECT pgmid, object, obj_name FROM tadir INTO TABLE @tadir_list
+      FOR ALL ENTRIES IN @tadir
+      WHERE pgmid    = @tadir-pgmid
+        AND object   = @tadir-object
+        AND obj_name = @tadir-obj_name ##TOO_MANY_ITAB_FIELDS.
+    IF sy-subrc = 0.
+      LOOP AT tadir_list TRANSPORTING NO FIELDS WHERE object <> 'DEVC' AND object <> 'NSPC'.
+        EXIT.
+      ENDLOOP.
       IF sy-subrc = 0.
-        LOOP AT tadir_list TRANSPORTING NO FIELDS WHERE object <> 'DEVC' AND object <> 'NSPC'.
-          EXIT.
-        ENDLOOP.
-        IF sy-subrc = 0.
-          DATA(msg) = |Some objects could not be uninstalled. Uninstall the remaining objects |
-                   && |of pacakge { package } manually|.
-        ELSE.
-          msg = |Release the transport and deleted the remaining pacakge { package } manually|.
-        ENDIF.
-        MESSAGE msg TYPE 'I'.
+        DATA(msg) = |Some objects could not be uninstalled. Uninstall the remaining objects |
+                 && |of pacakge { package } manually|.
+      ELSE.
+        msg = |Release the transport and deleted the remaining pacakge { package } manually|.
       ENDIF.
+      MESSAGE msg TYPE 'I'.
     ENDIF.
 
   ENDMETHOD.

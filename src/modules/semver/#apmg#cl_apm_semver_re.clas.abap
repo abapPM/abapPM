@@ -116,8 +116,8 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
     " value = |[v=\\s]*| ) " PCRE
 
     create_token(
-      name  = 'VTRIM'
-      value = |([v=]+)\\s+(\\d)|
+      name   = 'VTRIM'
+      value  = |([v=]+)\\s+(\\d)|
       global = abap_true ).
 
     " ## Numeric Identifier
@@ -283,12 +283,12 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
               |(?:{ token-build-src })?| &&
               |(?:$\|[^\\d])| ).
     create_token(
-      name  = 'COERCERTL'
-      value = token-coerce-src
+      name   = 'COERCERTL'
+      value  = token-coerce-src
       global = abap_true ).
     create_token(
-      name  = 'COERCERTLFULL'
-      value = token-coercefull-src
+      name   = 'COERCERTLFULL'
+      value  = token-coercefull-src
       global = abap_true ).
 
     " Tilde ranges.
@@ -299,8 +299,8 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
       value = |(?:~>?)| ).
 
     create_token(
-      name  = 'TILDETRIM'
-      value = |(\\s*){ token-lonetilde-src }\\s+|
+      name   = 'TILDETRIM'
+      value  = |(\\s*){ token-lonetilde-src }\\s+|
       global = abap_true ).
 
     create_token(
@@ -318,8 +318,8 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
       value = |(?:\\^)| ).
 
     create_token(
-      name  = 'CARETTRIM'
-      value = |(\\s*){ token-lonecaret-src }\\s+|
+      name   = 'CARETTRIM'
+      value  = |(\\s*){ token-lonecaret-src }\\s+|
       global = abap_true ).
 
     create_token(
@@ -342,9 +342,9 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
     " it modifies, so that `> 1.2.3` ==> `>1.2.3`
 
     create_token(
-      name  = 'COMPARATORTRIM'
-      value = |(\\s*){ token-gtlt-src }\\s*({ token-looseplain-src }\|| &&
-              |{ token-xrangeplain-src })|
+      name   = 'COMPARATORTRIM'
+      value  = |(\\s*){ token-gtlt-src }\\s*({ token-looseplain-src }\|| &&
+               |{ token-xrangeplain-src })|
       global = abap_true ).
 
     " Something like `1.2.3 - 1.2.4`

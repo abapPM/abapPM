@@ -107,8 +107,8 @@ CLASS /apmg/cl_apm_highlighter IMPLEMENTATION.
   METHOD add_rule.
 
     DATA(rule) = VALUE ty_rule(
-      token         = token
-      style         = style
+      token             = token
+      style             = style
       relevant_submatch = submatch ).
 
     IF regex IS NOT INITIAL.
@@ -177,8 +177,8 @@ CLASS /apmg/cl_apm_highlighter IMPLEMENTATION.
     TRY.
         LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
           DATA(chunk) = substring( val = line
-                                off = <match>-offset
-                                len = <match>-length ).
+                                   off = <match>-offset
+                                   len = <match>-length ).
 
           " Failed read equals no style
           READ TABLE rules INTO DATA(rule) WITH KEY token = <match>-token.
