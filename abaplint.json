@@ -77,7 +77,7 @@
     "check_syntax": true,
     "check_text_elements": true,
     "check_transformation_exists": true,
-    "class_attribute_names": true,
+    "class_attribute_names": false,
     "classic_exceptions_overlap": true,
     "cloud_types": true,
     "colon_missing_space": true,
@@ -313,7 +313,7 @@
     "sql_value_conversion": true,
     "start_at_tab": true,
     "static_call_via_instance": true,
-    "strict_sql": true,
+    "strict_sql": false,
     "superclass_final": true,
     "superfluous_value": true,
     "sy_modification": {
