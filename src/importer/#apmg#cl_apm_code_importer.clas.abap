@@ -294,13 +294,13 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
 
     LOOP AT result ASSIGNING FIELD-SYMBOL(<code>).
       <code> = replace(
-        val   = <code>
+        val  = <code>
         sub  = '* @@IMPORT'
         with = 'IMPORT'
         case = abap_false
         occ  = 1 ).
       <code> = replace(
-        val   = <code>
+        val  = <code>
         sub  = '##IMPORT'
         with = 'IMPORT'
         case = abap_false
@@ -313,8 +313,8 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
   METHOD read.
 
     IF program_source IS INITIAL.
-      SELECT SINGLE name FROM trdir INTO @DATA(program) WHERE name = @program_name.
-      IF sy-subrc = 0.
+      SELECT COUNT(*) FROM trdir INTO @DATA(program) WHERE name = @program_name.
+      IF program = 1.
         READ REPORT program_name INTO result.
         IF sy-subrc <> 0.
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Error reading program { program_name }|.
@@ -333,8 +333,8 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
       WITH KEY level struc from to number.
 
     DATA(source_code) = read(
-      program_name    = program_name
-      program_source  = program_source ).
+      program_name   = program_name
+      program_source = program_source ).
 
     IF source_code IS INITIAL.
       RETURN.

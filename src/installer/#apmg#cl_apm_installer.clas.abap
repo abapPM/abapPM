@@ -171,9 +171,9 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
         _system_check( ).
 
         _files(
-          enum_source       = enum_source
-          name           = name
-          data           = data ).
+          enum_source = enum_source
+          name        = name
+          data        = data ).
 
         _packaging( ).
 

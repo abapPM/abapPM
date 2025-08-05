@@ -43,7 +43,7 @@
     "7bit_ascii": true,
     "abapdoc": false,
     "add_test_attributes": true,
-    "align_parameters": false,
+    "align_parameters": true,
     "align_pseudo_comments": true,
     "align_type_expressions": true,
     "allowed_object_naming": true,
@@ -164,7 +164,7 @@
     },
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
-      "allow": ["#apmg#cl_apm_string_map"]
+      "allow": ["/APMG/CL_APM_STRING_MAP"]
     },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
@@ -189,7 +189,7 @@
     "method_implemented_twice": true,
     "method_length": {
       "statements": 100,
-      "errorWhenEmpty": false,
+      "errorWhenEmpty": true,
       "ignoreTestClasses": false,
       "checkForms": true
     },
@@ -199,7 +199,7 @@
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
-      "ownTables": "^[Z|CLMCUS]|SOTR_.*|OBJ*",
+      "ownTables": "^[Z|CLMCUS|SOTR_.*|OBJ*]",
       "reportDynamic": false
     },
     "msag_consistency": true,
@@ -330,7 +330,9 @@
     "unnecessary_pragma": true,
     "unnecessary_return": true,
     "unreachable_code": true,
-    "unsecure_fae": false,
+    "unsecure_fae": {
+      "exclude": ["#apmg#cl_apm_installer"]
+    },      
     "unused_ddic": true,
     "unused_macros": true,
     "unused_methods": true,
