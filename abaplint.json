@@ -28,7 +28,7 @@
       "#apmg#cl_apm_html_*",
       "#apmg#if_apm_html_*",
       "#apmg#cl_apm_popups*",
-      "#apmg#if_apm_popups*",
+      "#apmg#if_apm_popups*"
     ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
