@@ -43,7 +43,7 @@
     "7bit_ascii": true,
     "abapdoc": false,
     "add_test_attributes": true,
-    "align_parameters": false,
+    "align_parameters": true,
     "align_pseudo_comments": true,
     "align_type_expressions": true,
     "allowed_object_naming": true,
@@ -77,7 +77,7 @@
     "check_syntax": true,
     "check_text_elements": true,
     "check_transformation_exists": true,
-    "class_attribute_names": false,
+    "class_attribute_names": true,
     "classic_exceptions_overlap": true,
     "cloud_types": true,
     "colon_missing_space": true,
@@ -117,7 +117,7 @@
     "empty_event": true,
     "empty_line_in_statement": true,
     "empty_statement": true,
-    "empty_structure": false,
+    "empty_structure": true,
     "exit_or_check": {
       "allowCheck": true,
       "allowExit": false
@@ -189,7 +189,7 @@
     "method_implemented_twice": true,
     "method_length": {
       "statements": 100,
-      "errorWhenEmpty": false,
+      "errorWhenEmpty": true,
       "ignoreTestClasses": false,
       "checkForms": true
     },
@@ -199,7 +199,7 @@
     "method_parameter_names": false,
     "mix_returning": true,
     "modify_only_own_db_tables": {
-      "ownTables": "^[Z|CLMCUS]|SOTR_.*|OBJ*",
+      "ownTables": "^[Z|CLMCUS|SOTR_.*|OBJ*]",
       "reportDynamic": false
     },
     "msag_consistency": true,
@@ -313,7 +313,7 @@
     "sql_value_conversion": true,
     "start_at_tab": true,
     "static_call_via_instance": true,
-    "strict_sql": false,
+    "strict_sql": true,
     "superclass_final": true,
     "superfluous_value": true,
     "sy_modification": {
@@ -330,7 +330,7 @@
     "unnecessary_pragma": true,
     "unnecessary_return": true,
     "unreachable_code": true,
-    "unsecure_fae": false,
+    "unsecure_fae": true,
     "unused_ddic": true,
     "unused_macros": true,
     "unused_methods": true,
