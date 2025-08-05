@@ -164,11 +164,7 @@
     },
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
-      "allow": [
-        "#apmg#if_apm_http_agent",
-        "#apmg#if_apm_http_response",
-        "#apmg#if_apm_string_map"
-      ]
+      "allow": ["/APMG/CL_APM_STRING_MAP"]
     },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
