@@ -164,7 +164,11 @@
     },
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
-      "allow": ["#apmg#if_apm_string_map"]
+      "allow": [
+        "#apmg#if_apm_http_agent",
+        "#apmg#if_apm_http_response",
+        "#apmg#if_apm_string_map"
+      ]
     },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
@@ -330,7 +334,9 @@
     "unnecessary_pragma": true,
     "unnecessary_return": true,
     "unreachable_code": true,
-    "unsecure_fae": true,
+    "unsecure_fae": {
+      "exclude": ["#apmg#cl_apm_installer"]
+    },      
     "unused_ddic": true,
     "unused_macros": true,
     "unused_methods": true,
