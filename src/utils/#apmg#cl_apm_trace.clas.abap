@@ -41,7 +41,7 @@ CLASS /apmg/cl_apm_trace IMPLEMENTATION.
         zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
           iv_path = |{ dir }/apm-trace-{ timestamp }.log|
           iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( cdata ) ).
-      CATCH zcx_abapgit_exception.
+      CATCH zcx_abapgit_exception /apmg/cx_apm_error.
         ASSERT 0 = 0.
     ENDTRY.
 
@@ -60,7 +60,7 @@ CLASS /apmg/cl_apm_trace IMPLEMENTATION.
         zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
           iv_path = |{ dir }/apm-trace-{ timestamp }.bin|
           iv_xstr = xdata ).
-      CATCH zcx_abapgit_exception.
+      CATCH zcx_abapgit_exception /apmg/cx_apm_error.
         ASSERT 0 = 0.
     ENDTRY.
 

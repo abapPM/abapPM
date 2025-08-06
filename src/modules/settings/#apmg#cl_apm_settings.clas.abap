@@ -200,11 +200,9 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
         IF is_settings-registry IS NOT INITIAL.
           DATA(url) = /apmg/cl_apm_url=>parse( is_settings-registry ).
 
-          IF url->components-path IS INITIAL.
-            INSERT |Registry URL must include trailing slash: { is_settings-registry }| INTO TABLE result.
-          ENDIF.
-          IF url->components-path <> '/'.
-            INSERT |Registry URL must not include any path: { is_settings-registry }| INTO TABLE result.
+          IF url->components-path IS NOT INITIAL.
+            INSERT |Registry URL must not include any trailing slash or path: { is_settings-registry }|
+              INTO TABLE result.
           ENDIF.
           IF url->components-query IS NOT INITIAL.
             INSERT |Registry URL must not include any query: { is_settings-registry }| INTO TABLE result.

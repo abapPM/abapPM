@@ -27,7 +27,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 * SOFTWARE.
 ********************************************************************************
 
-* @@require devc /apmg/apm_abapgit*
+* @@require devc /apmg/apm_abapgit
 * @@require devc /apmg/apm_commands*
 * @@require devc /apmg/apm_importer
 * @@require devc /apmg/apm_installer
@@ -35,6 +35,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 * @@require devc /apmg/apm_modules*
 * @@require devc /apmg/apm_objects
 * @@require devc /apmg/apm_ui*
+* @@require devc /apmg/apm_utils
 
 * From abapGit Objects
 * @@require devc $abapgit_objects*

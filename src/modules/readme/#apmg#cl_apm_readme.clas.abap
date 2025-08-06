@@ -73,6 +73,57 @@ ENDCLASS.
 CLASS /apmg/cl_apm_readme IMPLEMENTATION.
 
 
+  METHOD /apmg/if_apm_readme~delete.
+
+    db_persist->delete( readme-key ).
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_readme~exists.
+
+    TRY.
+        db_persist->load( readme-key ).
+        result = abap_true.
+      CATCH /apmg/cx_apm_error.
+        result = abap_false.
+    ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_readme~get.
+
+    result = readme-markdown.
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_readme~load.
+
+    readme-markdown = db_persist->load( readme-key )-value.
+    result = me.
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_readme~save.
+
+    db_persist->save(
+      key   = readme-key
+      value = /apmg/if_apm_readme~get( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_readme~set.
+
+    readme-markdown = markdown.
+    result = me.
+
+  ENDMETHOD.
+
+
   METHOD class_constructor.
 
     db_persist = /apmg/cl_apm_persist_apm=>get_instance( ).
@@ -82,8 +133,8 @@ CLASS /apmg/cl_apm_readme IMPLEMENTATION.
 
   METHOD constructor.
 
-*    IF zcl_readme_valid=>is_valid_sap_package( package ) = abap_false
-*      RAISE EXCEPTION TYPE zcx_error_text EXPORTING text = |Invalid package: { package }|
+*    IF /apmg/cl_readme_valid=>is_valid_sap_package( package ) = abap_false
+*      RAISE EXCEPTION TYPE /apmg/cx_error_text EXPORTING text = |Invalid package: { package }|
 *    ENDIF
 
     me->package     = package.
@@ -148,57 +199,6 @@ CLASS /apmg/cl_apm_readme IMPLEMENTATION.
 
       INSERT instance INTO TABLE instances.
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~delete.
-
-    db_persist->delete( readme-key ).
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~exists.
-
-    TRY.
-        db_persist->load( readme-key ).
-        result = abap_true.
-      CATCH /apmg/cx_apm_error.
-        result = abap_false.
-    ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~get.
-
-    result = readme-markdown.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~load.
-
-    readme-markdown = db_persist->load( readme-key )-value.
-    result = me.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~save.
-
-    db_persist->save(
-      key   = readme-key
-      value = /apmg/if_apm_readme~get( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_readme~set.
-
-    readme-markdown = markdown.
-    result = me.
 
   ENDMETHOD.
 ENDCLASS.
