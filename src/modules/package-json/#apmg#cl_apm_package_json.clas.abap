@@ -387,35 +387,35 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         ajson->setx( '/dependencies:{ }' ).
         LOOP AT manifest-dependencies INTO DATA(dependency).
           ajson->set(
-            iv_path = '/dependencies/' && dependency-key
+            iv_path = '/dependencies/' && replace_slash( dependency-key )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/devDependencies:{ }' ).
         LOOP AT manifest-dev_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/devDependencies/' && dependency-key
+            iv_path = '/devDependencies/' && replace_slash( dependency-key )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/optionalDependencies:{ }' ).
         LOOP AT manifest-optional_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/optionalDependencies/' && dependency-key
+            iv_path = '/optionalDependencies/' && replace_slash( dependency-key )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( 'peerDependencies:{ }' ).
         LOOP AT manifest-peer_dependencies INTO dependency.
           ajson->set(
-            iv_path = '/peerDependencies/' && dependency-key
+            iv_path = '/peerDependencies/' && replace_slash( dependency-key )
             iv_val  = dependency-range ).
         ENDLOOP.
 
         ajson->setx( '/engines:{ }' ).
         LOOP AT manifest-engines INTO dependency.
           ajson->set(
-            iv_path = '/engines/' && dependency-key
+            iv_path = '/engines/' && replace_slash( dependency-key )
             iv_val  = dependency-range ).
         ENDLOOP.
 

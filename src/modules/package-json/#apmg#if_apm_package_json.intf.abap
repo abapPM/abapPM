@@ -17,22 +17,23 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
 
   TYPES:
     BEGIN OF ty_package,
-      key             TYPE /apmg/if_apm_persist_apm=>ty_key,
-      package         TYPE devclass,
-      name            TYPE string,
-      version         TYPE string,
-      description     TYPE string,
-      type            TYPE string,
-      private         TYPE abap_bool,
-      changed_by      TYPE as4user,
-      changed_at      TYPE string,
-      changed_at_raw  TYPE timestampl,
-      bundle          TYPE abap_bool,
-      parent          TYPE devclass,
-      favorite        TYPE abap_bool, " settings
-      write_protected TYPE abap_bool, " settings
-      labels          TYPE string_table, " settings
-      instance        TYPE REF TO /apmg/if_apm_package_json,
+      key                   TYPE /apmg/if_apm_persist_apm=>ty_key,
+      package               TYPE devclass,
+      name                  TYPE string,
+      version               TYPE string,
+      description           TYPE string,
+      type                  TYPE string,
+      private               TYPE abap_bool,
+      changed_by            TYPE as4user,
+      changed_at            TYPE string,
+      changed_at_raw        TYPE timestampl,
+      bundle                TYPE abap_bool,
+      parent                TYPE devclass,
+      abap_language_version TYPE uccheck,
+      favorite              TYPE abap_bool, " settings
+      write_protected       TYPE abap_bool, " settings
+      labels                TYPE string_table, " settings
+      instance              TYPE REF TO /apmg/if_apm_package_json,
     END OF ty_package,
     ty_packages TYPE STANDARD TABLE OF ty_package
       WITH NON-UNIQUE KEY primary_key COMPONENTS key

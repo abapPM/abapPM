@@ -32,6 +32,12 @@ CLASS lcl_validate DEFINITION.
       RETURNING
         VALUE(result) TYPE string_table.
 
+    CLASS-METHODS validate_devclass
+      IMPORTING
+        !manifest     TYPE /apmg/if_apm_types=>ty_manifest
+      RETURNING
+        VALUE(result) TYPE string_table.
+
 ENDCLASS.
 
 CLASS lcl_validate IMPLEMENTATION.
@@ -246,6 +252,24 @@ CLASS lcl_validate IMPLEMENTATION.
     ENDLOOP.
     IF lines( manifest-bundle_dependencies ) <> lines( values ).
       INSERT |Duplicate bundle dependencies| INTO TABLE result.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD validate_devclass.
+
+    IF manifest-devclass-default IS NOT INITIAL AND
+      /apmg/cl_apm_package_json_vali=>is_valid_sap_package( manifest-devclass-default ) = abap_false.
+      INSERT |Invalid default SAP package: { manifest-devclass-default }| INTO TABLE result.
+    ENDIF.
+
+    IF manifest-devclass-abap_language_version IS NOT INITIAL AND
+       manifest-devclass-abap_language_version <> zif_abapgit_dot_abapgit=>c_abap_language_version-undefined AND
+       manifest-devclass-abap_language_version <> zif_abapgit_dot_abapgit=>c_abap_language_version-ignore AND
+       manifest-devclass-abap_language_version <> zif_abapgit_dot_abapgit=>c_abap_language_version-standard AND
+       manifest-devclass-abap_language_version <> zif_abapgit_dot_abapgit=>c_abap_language_version-key_user AND
+       manifest-devclass-abap_language_version <> zif_abapgit_dot_abapgit=>c_abap_language_version-cloud_development.
+      INSERT |Invalid ABAP language version: { manifest-devclass-abap_language_version }| INTO TABLE result.
     ENDIF.
 
   ENDMETHOD.

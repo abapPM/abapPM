@@ -17,7 +17,6 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
-
   TYPES:
     "! Email
     ty_email TYPE string,
@@ -86,7 +85,12 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       unpacked_size TYPE i,
       integrity     TYPE string,
       signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
-    END OF ty_dist.
+    END OF ty_dist,
+    "! SAP Package
+    BEGIN OF ty_devclass,
+      default               TYPE devclass,
+      abap_language_version TYPE uccheck,
+    END OF ty_devclass.
 
   " *** PACKAGE.ABAP.JSON ***
 
@@ -121,6 +125,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       db                    TYPE string_table,
       private               TYPE abap_bool,
       readme                TYPE string,
+      devclass              TYPE ty_devclass,
     END OF ty_package_json.
 
   " *** MANIFEST ***
@@ -181,6 +186,15 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     ty_attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key.
 
   TYPES:
+    "! Object (TADIR)
+    BEGIN OF ty_tadir_object,
+      pgmid    TYPE tadir-pgmid,
+      object   TYPE tadir-object,
+      obj_name TYPE tadir-obj_name,
+    END OF ty_tadir_object,
+    ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH KEY pgmid object obj_name.
+
+  TYPES:
     "! Full packument (as fetched from registry)
     "! Some fields are hoisted from latest version to root
     BEGIN OF ty_packument ##NEEDED,
@@ -202,6 +216,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       _id          TYPE string,
       _rev         TYPE string,
       _attachments TYPE ty_attachments,
+      _objects     TYPE ty_tadir_objects,
       access       TYPE string,
     END OF ty_packument.
 

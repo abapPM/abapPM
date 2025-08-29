@@ -183,7 +183,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
 
     " Integrity Checksum (sha512)
     " https://www.npmjs.com/package/ssri
-    " Note: It's not clear which kernel version is required for this
+    " Note: It's not clear which ABAP kernel version is required for this
 
     TRY.
         cl_abap_hmac=>calculate_hmac_for_raw(
