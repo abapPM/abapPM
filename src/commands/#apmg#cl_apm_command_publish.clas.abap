@@ -67,7 +67,6 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 
     METHODS get_tar
       IMPORTING
-        !package      TYPE devclass
         !package_json TYPE /apmg/if_apm_types=>ty_package_json
         !files        TYPE zif_abapgit_definitions=>ty_files_item_tt
       RETURNING
@@ -225,7 +224,6 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     " 8. Get tarball
     DATA(tar) = get_tar(
-      package      = package
       package_json = package_json
       files        = files ).
 
@@ -404,7 +402,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
           io_dot_abapgit    = dot_abapgit
           is_local_settings = local_settings ).
 
-        DATA(files) = serializer->files_local(
+        result = serializer->files_local(
           iv_package = package
           ii_log     = logger ).
 
