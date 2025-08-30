@@ -49,10 +49,26 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS get_tar
+    METHODS serialize_package
       IMPORTING
         !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE zif_abapgit_definitions=>ty_files_item_tt
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS attach_object_list
+      IMPORTING
+        !files     TYPE zif_abapgit_definitions=>ty_files_item_tt
+      CHANGING
+        !packument TYPE /apmg/if_apm_types=>ty_packument
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS get_tar
+      IMPORTING
         !package_json TYPE /apmg/if_apm_types=>ty_package_json
+        !files        TYPE zif_abapgit_definitions=>ty_files_item_tt
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_tar
       RAISING
@@ -91,6 +107,24 @@ ENDCLASS.
 
 
 CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
+
+
+  METHOD attach_object_list.
+
+    " Include a list of all objects which the registry will compare against the global object
+    " directory (GTADIR) to avoid name conflicts with other packages
+    LOOP AT files ASSIGNING FIELD-SYMBOL(<file>).
+      DATA(item) = VALUE /apmg/if_apm_types=>ty_tadir_object(
+        pgmid    = 'R3TR'
+        object   = <file>-item-obj_type
+        obj_name = <file>-item-obj_name ).
+
+      COLLECT item INTO packument-_objects.
+    ENDLOOP.
+
+    SORT packument-_objects.
+
+  ENDMETHOD.
 
 
   METHOD attach_tarball.
@@ -178,12 +212,22 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       packument    = packument
       package_json = package_json ).
 
-    " 6. Get tarball
-    DATA(tar) = get_tar(
-      package      = package
-      package_json = package_json ).
+    " 6. Serialize all objects of package
+    DATA(files) = serialize_package( package ).
 
-    " 7. Attach tarball to packument
+    " 7. Attach object list to packument
+    attach_object_list(
+      EXPORTING
+        files     = files
+      CHANGING
+        packument = packument_publish ).
+
+    " 8. Get tarball
+    DATA(tar) = get_tar(
+      package_json = package_json
+      files        = files ).
+
+    " 9. Attach tarball to packument
     attach_tarball(
       EXPORTING
         registry  = registry
@@ -192,7 +236,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       CHANGING
         packument = packument_publish ).
 
-    " 8. Publish package to registry
+    " 10. Publish package to registry
     DATA(message) = publish_package(
       registry  = registry
       packument = packument_publish ).
@@ -218,31 +262,6 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     " TODO: Move this and all called methods to local part of class
     CONSTANTS c_null TYPE xstring VALUE ''.
-
-    " 1. Serialize local objects
-    TRY.
-        DATA(logger) = NEW zcl_abapgit_log( ).
-
-        DATA(local_settings) = VALUE zif_abapgit_persistence=>ty_local_settings(
-          ignore_subpackages = abap_false
-          only_local_objects = abap_false ).
-
-        " Hardcoded to prefix folder logic and /src/ starting folder
-        " TODO!: Support full and mixed folder logic
-        DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
-
-        DATA(serializer) = NEW /apmg/cl_apm_abapgit_serialize(
-          io_dot_abapgit    = dot_abapgit
-          is_local_settings = local_settings ).
-
-        DATA(files) = serializer->files_local(
-          iv_package = package
-          ii_log     = logger ).
-
-        SORT files BY file-path file-filename.
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
 
     " 2. Tar and gzip files
     DATA(tar) = /apmg/cl_apm_tar=>new( ).
@@ -281,7 +300,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
         tar->append(
           name    = /apmg/if_apm_types=>c_readme_file
           content = zcl_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
-      CATCH zcx_abapgit_exception INTO error.
+      CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
 
@@ -362,6 +381,35 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     command->execute(
       registry = registry
       package  = package ).
+
+  ENDMETHOD.
+
+
+  METHOD serialize_package.
+
+    TRY.
+        DATA(logger) = NEW zcl_abapgit_log( ).
+
+        DATA(local_settings) = VALUE zif_abapgit_persistence=>ty_local_settings(
+          ignore_subpackages = abap_false
+          only_local_objects = abap_false ).
+
+        " Hardcoded to prefix folder logic and /src/ starting folder
+        " TODO!: Support full and mixed folder logic
+        DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
+
+        DATA(serializer) = NEW /apmg/cl_apm_abapgit_serialize(
+          io_dot_abapgit    = dot_abapgit
+          is_local_settings = local_settings ).
+
+        result = serializer->files_local(
+          iv_package = package
+          ii_log     = logger ).
+
+        SORT result BY file-path file-filename.
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
 
   ENDMETHOD.
 ENDCLASS.
