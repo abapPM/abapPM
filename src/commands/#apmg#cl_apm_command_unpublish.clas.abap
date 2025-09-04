@@ -139,7 +139,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
           text = |Version { version } does not exist in package { packument-name }|.
     ENDIF.
 
-    result = <version>-version-dist-tarball.
+    result = <version>-manifest-dist-tarball.
 
   ENDMETHOD.
 

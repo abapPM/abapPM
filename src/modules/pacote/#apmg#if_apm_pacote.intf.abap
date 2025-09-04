@@ -32,7 +32,7 @@ INTERFACE /apmg/if_apm_pacote PUBLIC.
     IMPORTING
       !version      TYPE string
     RETURNING
-      VALUE(result) TYPE /apmg/if_apm_types=>ty_version.
+      VALUE(result) TYPE /apmg/if_apm_types=>ty_manifest.
 
   METHODS set
     IMPORTING

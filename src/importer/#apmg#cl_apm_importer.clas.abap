@@ -156,9 +156,9 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    " Switch for self-update
-    " DATA(list) = zcl_package_json=>list(
+    " XXX: Switch for self-update
     DATA(list) = /apmg/cl_apm_package_json=>list(
+    "DATA(list) = /apmg/cl_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
@@ -526,7 +526,9 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         ENDIF.
         package_json-version = <package>-version.
       ELSE.
+        "XXX: Switch for apm self-update
         package_json = VALUE /apmg/if_apm_types=>ty_package_json(
+        " package_json = VALUE /apmg/if_types=>ty_package_json(
           name    = <package>-name
           version = <package>-version ).
       ENDIF.

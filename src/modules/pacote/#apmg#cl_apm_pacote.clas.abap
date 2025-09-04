@@ -174,7 +174,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD /apmg/if_apm_pacote~get_version.
 
-    result = pacote-packument-versions[ key = version ].
+    result = pacote-packument-versions[ key = version ]-manifest.
 
   ENDMETHOD.
 
@@ -330,25 +330,18 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
     TYPES:
       " Copy of schema but without object attributes (which need to be converted to tables)
       BEGIN OF ty_packument_partial,
-        name        TYPE string,
+        name        TYPE /apmg/if_apm_types=>ty_name,
         description TYPE string,
         readme      TYPE string,
         homepage    TYPE string,
         icon        TYPE string,
-        BEGIN OF bugs,
-          url   TYPE /apmg/if_apm_types=>ty_uri,
-          email TYPE /apmg/if_apm_types=>ty_email,
-        END OF bugs,
+        bugs        TYPE /apmg/if_apm_types=>ty_bugs,
         license     TYPE string,
         keywords    TYPE string_table,
         main        TYPE string,
         man         TYPE string_table,
         author      TYPE /apmg/if_apm_types=>ty_person,
-        BEGIN OF repository,
-          type      TYPE string,
-          url       TYPE /apmg/if_apm_types=>ty_uri,
-          directory TYPE string,
-        END OF repository,
+        repository  TYPE /apmg/if_apm_types=>ty_repository,
         _id         TYPE string,
         _rev        TYPE string,
         access      TYPE string,
@@ -360,7 +353,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
       time         TYPE /apmg/if_apm_types=>ty_time,
       person       TYPE /apmg/if_apm_types=>ty_person,
       user         TYPE /apmg/if_apm_types=>ty_user,
-      version      TYPE /apmg/if_apm_types=>ty_version,
+      version      TYPE /apmg/if_apm_types=>ty_version_manifest,
       attachment   TYPE /apmg/if_apm_types=>ty_attachment,
       packument    TYPE /apmg/if_apm_types=>ty_packument.
 
@@ -380,7 +373,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         ENDLOOP.
 
         LOOP AT ajson->members( '/time' ) INTO time-key.
-          time-timestamp = ajson->get_timestamp( '/time/' && time-key ).
+          time-timestamp = ajson->get_timestampl( '/time/' && time-key ).
           INSERT time INTO TABLE packument-time.
         ENDLOOP.
 
@@ -407,7 +400,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         LOOP AT ajson->members( '/versions' ) INTO version-key.
           DATA(ajson_version) = ajson->slice( '/versions/' && version-key ).
           " this also validates the version manifest
-          version-version = /apmg/cl_apm_package_json=>convert_json_to_manifest( ajson_version->stringify( ) ).
+          version-manifest = /apmg/cl_apm_package_json=>convert_json_to_manifest( ajson_version->stringify( ) ).
           INSERT version INTO TABLE packument-versions.
         ENDLOOP.
 
@@ -445,10 +438,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
         ajson->setx( '/time:{ }' ).
         LOOP AT packument-time INTO DATA(time).
-          " TODO: Replace with long timestamp
-          ajson->set_timestamp(
+          ajson->set_timestampl(
             iv_path = 'time/' && time-key
-            iv_val  = cl_abap_tstmp=>move_to_short( time-timestamp ) ).
+            iv_val  = time-timestamp ).
         ENDLOOP.
 
         ajson->setx( '/users:{ }' ).
@@ -474,7 +466,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         ajson->setx( '/versions:{ }' ).
         LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
           DATA(version_json) = /apmg/cl_apm_package_json=>convert_manifest_to_json(
-            manifest    = <version>-version
+            manifest    = <version>-manifest
             is_complete = is_complete ).
 
           DATA(ajson_version) = /apmg/cl_apm_ajson=>parse(

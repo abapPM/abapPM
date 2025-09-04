@@ -122,8 +122,6 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       COLLECT item INTO packument-_objects.
     ENDLOOP.
 
-    SORT packument-_objects.
-
   ENDMETHOD.
 
 
@@ -143,7 +141,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     dist-unpacked_size = tar->unpacked_size( ).
     dist-tarball       = |{ registry }/{ name }/-/{ filename }|.
 
-    packument-versions[ key = version ]-version-dist = dist.
+    packument-versions[ key = version ]-manifest-dist = dist.
 
     DATA(attachment) = VALUE /apmg/if_apm_types=>ty_attachment(
       key                  = filename
@@ -345,12 +343,12 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     INSERT dist_tag INTO TABLE result-dist_tags.
 
     " Add new version
-    DATA(version) = VALUE /apmg/if_apm_types=>ty_version( key = package_json-version ).
+    DATA(version) = VALUE /apmg/if_apm_types=>ty_version_manifest( key = package_json-version ).
 
-    version-version               = CORRESPONDING #( package_json ).
-    version-version-_id           = |{ package_json-name }@{ package_json-version }|.
-    version-version-_abap_version = /apmg/cl_apm_command_utils=>get_abap_version( ).
-    version-version-_apm_version  = /apmg/if_apm_version=>c_version.
+    version-manifest               = CORRESPONDING #( package_json ).
+    version-manifest-_id           = |{ package_json-name }@{ package_json-version }|.
+    version-manifest-_abap_version = /apmg/cl_apm_command_utils=>get_abap_version( ).
+    version-manifest-_apm_version  = /apmg/if_apm_version=>c_version.
 
     INSERT version INTO TABLE result-versions.
 

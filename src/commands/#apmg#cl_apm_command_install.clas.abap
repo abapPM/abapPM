@@ -23,6 +23,16 @@ CLASS /apmg/cl_apm_command_install DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    TYPES:
+      BEGIN OF ty_action,
+        install TYPE /apmg/if_apm_types=>ty_dependency,
+        update  TYPE /apmg/if_apm_types=>ty_dependency,
+      END OF ty_action,
+      BEGIN OF ty_actions,
+        install TYPE /apmg/if_apm_types=>ty_dependencies,
+        update  TYPE /apmg/if_apm_types=>ty_dependencies,
+      END OF ty_actions.
+
     METHODS execute
       IMPORTING
         !registry      TYPE string
@@ -49,15 +59,19 @@ CLASS /apmg/cl_apm_command_install DEFINITION
       IMPORTING
         !manifest      TYPE /apmg/if_apm_types=>ty_manifest
         !is_production TYPE abap_bool DEFAULT abap_false
+      RETURNING
+        VALUE(result)  TYPE ty_actions
       RAISING
         /apmg/cx_apm_error.
 
     METHODS check_dependency
       IMPORTING
-        !list        TYPE /apmg/if_apm_package_json=>ty_packages
-        !dependency  TYPE /apmg/if_apm_types=>ty_dependency
-        !category    TYPE string
-        !is_optional TYPE abap_bool DEFAULT abap_false
+        !list         TYPE /apmg/if_apm_package_json=>ty_packages
+        !dependency   TYPE /apmg/if_apm_types=>ty_dependency
+        !category     TYPE string
+        !is_optional  TYPE abap_bool DEFAULT abap_false
+      RETURNING
+        VALUE(result) TYPE ty_action
       RAISING
         /apmg/cx_apm_error.
 
@@ -85,36 +99,64 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
       IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
-        check_dependency(
+        DATA(action) = check_dependency(
           list       = list
           dependency = <dependency>
           category   = 'Dependency' ).
+
+        IF action-install IS NOT INITIAL.
+          INSERT action-install INTO TABLE result-install.
+        ENDIF.
+        IF action-update IS NOT INITIAL.
+          INSERT action-update INTO TABLE result-update.
+        ENDIF.
       ENDIF.
     ENDLOOP.
 
     IF is_production = abap_false.
       LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
-        check_dependency(
+        action = check_dependency(
           list       = list
           dependency = <dependency>
           category   = 'devDependency' ).
+
+        IF action-install IS NOT INITIAL.
+          INSERT action-install INTO TABLE result-install.
+        ENDIF.
+        IF action-update IS NOT INITIAL.
+          INSERT action-update INTO TABLE result-update.
+        ENDIF.
       ENDLOOP.
     ENDIF.
 
     LOOP AT manifest-optional_dependencies ASSIGNING <dependency>.
-      check_dependency(
+      action = check_dependency(
         list        = list
         dependency  = <dependency>
         category    = 'optionalDependency'
         is_optional = abap_true ).
+
+      IF action-install IS NOT INITIAL.
+        INSERT action-install INTO TABLE result-install.
+      ENDIF.
+      IF action-update IS NOT INITIAL.
+        INSERT action-update INTO TABLE result-update.
+      ENDIF.
     ENDLOOP.
 
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
-      check_dependency(
+      action = check_dependency(
         list        = list
         dependency  = <dependency>
         category    = 'peerDependency'
         is_optional = abap_true ).
+
+      IF action-install IS NOT INITIAL.
+        INSERT action-install INTO TABLE result-install.
+      ENDIF.
+      IF action-update IS NOT INITIAL.
+        INSERT action-update INTO TABLE result-update.
+      ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
@@ -122,7 +164,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_dependency.
 
-    " TODO: Log the issues instead of failing
     READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
       WITH KEY name COMPONENTS name = dependency-key.
     IF sy-subrc = 0.
@@ -134,19 +175,19 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         IF is_optional = abap_true.
           " TODO: Log warning
         ELSE.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-            EXPORTING
-              text = |{ category } { dependency-key } is installed in version { <package>-version } | &&
-                     |but does not satisfy { dependency-range }|.
+          " TODO: Log info
+          DATA(text) = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+                       |but does not satisfy { dependency-range }|.
+          result-update = dependency.
         ENDIF.
       ENDIF.
     ELSE.
       IF is_optional = abap_true.
         " TODO: Log warning
       ELSE.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |{ category } { dependency-key } is not installed|.
+        " TODO: Log info
+        text = |{ category } { dependency-key } is not installed|.
+        result-install = dependency.
       ENDIF.
     ENDIF.
 
@@ -159,10 +200,12 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     IF package_json_service->exists( ) = abap_true.
       DATA(existing_name) = package_json_service->get( )-name.
-      IF existing_name <> name.
+      IF existing_name = name.
+        " TODO: log warning
+      ELSE.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
           EXPORTING
-            text = |{ package } already contains a package { existing_name }|.
+            text = |{ package } already contains package "{ existing_name }"|.
       ENDIF.
     ENDIF.
 
@@ -254,7 +297,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     " This needs to include the target SAP package for each dependency :-)
 
     " 4. Check dependencies
-    check_dependencies( manifest ).
+    DATA(actions) = check_dependencies( manifest ).
 
     " TODO: 4. Get dependencies
     " TODO: 5. Install dependencies

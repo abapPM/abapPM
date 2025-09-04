@@ -18,20 +18,20 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
   TYPES:
     BEGIN OF ty_package,
       key                   TYPE /apmg/if_apm_persist_apm=>ty_key,
-      package               TYPE devclass,
-      name                  TYPE string,
-      version               TYPE string,
-      description           TYPE string,
-      type                  TYPE string,
-      private               TYPE abap_bool,
+      package               TYPE /apmg/if_apm_types=>ty_devclass,
+      name                  TYPE /apmg/if_apm_types=>ty_package_json-name,
+      version               TYPE /apmg/if_apm_types=>ty_package_json-version,
+      description           TYPE /apmg/if_apm_types=>ty_package_json-description,
+      type                  TYPE /apmg/if_apm_types=>ty_package_json-type,
+      private               TYPE /apmg/if_apm_types=>ty_package_json-private,
       changed_by            TYPE as4user,
       changed_at            TYPE string,
       changed_at_raw        TYPE timestampl,
       bundle                TYPE abap_bool,
-      parent                TYPE devclass,
-      abap_language_version TYPE uccheck,
-      favorite              TYPE abap_bool, " settings
-      write_protected       TYPE abap_bool, " settings
+      parent                TYPE /apmg/if_apm_types=>ty_devclass,
+      abap_language_version TYPE string,
+      favorite              TYPE abap_bool,    " settings
+      write_protected       TYPE abap_bool,    " settings
       labels                TYPE string_table, " settings
       instance              TYPE REF TO /apmg/if_apm_package_json,
     END OF ty_package,

@@ -18,10 +18,18 @@ INTERFACE /apmg/if_apm_types PUBLIC.
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
   TYPES:
+    "! SAP Package (always upper case)
+    ty_devclass TYPE devclass,
+    "! Name of package in registry (always lower case)
+    ty_name     TYPE string,
+    "! Semantic version of package
+    ty_version  TYPE string,
+    "! Package specification (version, range, tag name, git url, or tarball URL)
+    ty_spec     TYPE string,
     "! Email
-    ty_email TYPE string,
+    ty_email    TYPE string,
     "! URI
-    ty_uri   TYPE string,
+    ty_uri      TYPE string,
     "! Person
     BEGIN OF ty_person,
       name   TYPE string,
@@ -87,19 +95,20 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
     END OF ty_dist,
     "! SAP Package
-    BEGIN OF ty_devclass,
-      default               TYPE devclass,
-      abap_language_version TYPE uccheck,
-    END OF ty_devclass.
+    BEGIN OF ty_sap_package,
+      default               TYPE ty_devclass,
+      software_component    TYPE dlvunit,
+      abap_language_version TYPE string,
+    END OF ty_sap_package.
 
   " *** PACKAGE.ABAP.JSON ***
 
   TYPES:
     "! Schema for package.abap.json
-    "! Everything but "icon" is also in regular npm package.json
+    "! Everything but "icon" and "devclass" is also in regular npm package.json
     BEGIN OF ty_package_json,
-      name                  TYPE string,
-      version               TYPE string,
+      name                  TYPE ty_name,
+      version               TYPE ty_version,
       description           TYPE string,
       type                  TYPE string,
       keywords              TYPE string_table,
@@ -125,7 +134,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       db                    TYPE string_table,
       private               TYPE abap_bool,
       readme                TYPE string,
-      devclass              TYPE ty_devclass,
+      sap_package           TYPE ty_sap_package,
     END OF ty_package_json.
 
   " *** MANIFEST ***
@@ -148,8 +157,8 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     "!
     "! fetched with "accept: application/vnd.npm.install-v1+json" in the HTTP headers
     BEGIN OF ty_manifest_abbreviated ##NEEDED,
-      name                  TYPE string,
-      version               TYPE string,
+      name                  TYPE ty_name,
+      version               TYPE ty_version,
       dependencies          TYPE ty_dependencies,
       dev_dependencies      TYPE ty_dependencies,
       optional_dependencies TYPE ty_dependencies,
@@ -167,11 +176,11 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 
   TYPES:
     "! Version Manifest
-    BEGIN OF ty_version,
-      key     TYPE string,
-      version TYPE ty_manifest,
-    END OF ty_version,
-    ty_versions TYPE STANDARD TABLE OF ty_version WITH KEY key.
+    BEGIN OF ty_version_manifest,
+      key      TYPE string,
+      manifest TYPE ty_manifest,
+    END OF ty_version_manifest,
+    ty_version_manifests TYPE STANDARD TABLE OF ty_version_manifest WITH KEY key.
 
   TYPES:
     "! Tarball Attachment
@@ -186,23 +195,23 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     ty_attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key.
 
   TYPES:
-    "! Object (TADIR)
+    "! List of Objects for Global Directory (GTADIR)
     BEGIN OF ty_tadir_object,
       pgmid    TYPE tadir-pgmid,
       object   TYPE tadir-object,
       obj_name TYPE tadir-obj_name,
     END OF ty_tadir_object,
-    ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH KEY pgmid object obj_name.
+    ty_tadir_objects TYPE SORTED TABLE OF ty_tadir_object WITH UNIQUE KEY pgmid object obj_name.
 
   TYPES:
     "! Full packument (as fetched from registry)
     "! Some fields are hoisted from latest version to root
     BEGIN OF ty_packument ##NEEDED,
-      name         TYPE string,
+      name         TYPE ty_name,
       description  TYPE string,
       dist_tags    TYPE ty_dist_tags,
       time         TYPE ty_times,
-      versions     TYPE ty_versions,
+      versions     TYPE ty_version_manifests,
       maintainers  TYPE ty_persons,
       readme       TYPE string,
       users        TYPE ty_users,
@@ -219,7 +228,6 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       _objects     TYPE ty_tadir_objects,
       access       TYPE string,
     END OF ty_packument.
-
 
   CONSTANTS:
     "! Package Name Specs
@@ -319,5 +327,15 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       sap_db   TYPE string VALUE 'sap-db',
       sybase   TYPE string VALUE 'sybase',
     END OF c_db.
+
+  CONSTANTS:
+    "! ABAP Language Version (same as zif_abapgit_dot_abapgit)
+    BEGIN OF c_abap_language_version,
+      standard          TYPE string VALUE 'standard',
+      key_user          TYPE string VALUE 'keyUser',
+      cloud_development TYPE string VALUE 'cloudDevelopment',
+      ignore            TYPE string VALUE 'ignore',
+      undefined         TYPE string VALUE 'undefined', " any
+    END OF c_abap_language_version.
 
 ENDINTERFACE.

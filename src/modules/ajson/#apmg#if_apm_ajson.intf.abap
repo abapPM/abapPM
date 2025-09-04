@@ -119,6 +119,12 @@ INTERFACE /apmg/if_apm_ajson
     RETURNING
       VALUE(rv_value) TYPE timestamp.
 
+  METHODS get_timestampl
+    IMPORTING
+      iv_path         TYPE string
+    RETURNING
+      VALUE(rv_value) TYPE timestampl.
+
   METHODS get_string
     IMPORTING
       iv_path         TYPE string
