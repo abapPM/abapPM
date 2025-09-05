@@ -25,7 +25,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     "! Semantic version of package
     ty_version  TYPE string,
     "! Package specification (version, range, tag name, git url, or tarball URL)
-    ty_spec     TYPE string,
+    ty_spec     TYPE string ##NEEDED,
     "! Email
     ty_email    TYPE string,
     "! URI

@@ -25,12 +25,16 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 
     TYPES:
       BEGIN OF ty_action,
-        install TYPE /apmg/if_apm_types=>ty_dependency,
-        update  TYPE /apmg/if_apm_types=>ty_dependency,
+        missing TYPE /apmg/if_apm_types=>ty_dependency,
+        invalid TYPE /apmg/if_apm_types=>ty_dependency,
+        error   TYPE string,
+        warning TYPE string,
       END OF ty_action,
       BEGIN OF ty_actions,
-        install TYPE /apmg/if_apm_types=>ty_dependencies,
-        update  TYPE /apmg/if_apm_types=>ty_dependencies,
+        missing  TYPE /apmg/if_apm_types=>ty_dependencies,
+        invalid  TYPE /apmg/if_apm_types=>ty_dependencies,
+        errors   TYPE string_table,
+        warnings TYPE string_table,
       END OF ty_actions.
 
     METHODS execute
@@ -52,6 +56,18 @@ CLASS /apmg/cl_apm_command_install DEFINITION
     METHODS check_prerequisites
       IMPORTING
         !manifest TYPE /apmg/if_apm_types=>ty_manifest
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS collect_actions
+      IMPORTING
+        !action TYPE ty_action
+      CHANGING
+        result  TYPE ty_actions.
+
+    METHODS check_actions
+      IMPORTING
+        !actions TYPE ty_actions
       RAISING
         /apmg/cx_apm_error.
 
@@ -84,12 +100,22 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
 
 CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
+
+
+  METHOD check_actions.
+
+    " TODO: log all warnings and errors
+    IF actions-errors IS NOT INITIAL.
+      DATA(text) = concat_lines_of( table = actions-errors sep = |\n| ).
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = text.
+    ENDIF.
+
+  ENDMETHOD.
 
 
   METHOD check_dependencies.
@@ -104,12 +130,11 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
           dependency = <dependency>
           category   = 'Dependency' ).
 
-        IF action-install IS NOT INITIAL.
-          INSERT action-install INTO TABLE result-install.
-        ENDIF.
-        IF action-update IS NOT INITIAL.
-          INSERT action-update INTO TABLE result-update.
-        ENDIF.
+        collect_actions(
+          EXPORTING
+            action = action
+          CHANGING
+            result = result ).
       ENDIF.
     ENDLOOP.
 
@@ -120,12 +145,11 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
           dependency = <dependency>
           category   = 'devDependency' ).
 
-        IF action-install IS NOT INITIAL.
-          INSERT action-install INTO TABLE result-install.
-        ENDIF.
-        IF action-update IS NOT INITIAL.
-          INSERT action-update INTO TABLE result-update.
-        ENDIF.
+        collect_actions(
+          EXPORTING
+            action = action
+          CHANGING
+            result = result ).
       ENDLOOP.
     ENDIF.
 
@@ -136,12 +160,11 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         category    = 'optionalDependency'
         is_optional = abap_true ).
 
-      IF action-install IS NOT INITIAL.
-        INSERT action-install INTO TABLE result-install.
-      ENDIF.
-      IF action-update IS NOT INITIAL.
-        INSERT action-update INTO TABLE result-update.
-      ENDIF.
+      collect_actions(
+        EXPORTING
+          action = action
+        CHANGING
+          result = result ).
     ENDLOOP.
 
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
@@ -151,12 +174,11 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         category    = 'peerDependency'
         is_optional = abap_true ).
 
-      IF action-install IS NOT INITIAL.
-        INSERT action-install INTO TABLE result-install.
-      ENDIF.
-      IF action-update IS NOT INITIAL.
-        INSERT action-update INTO TABLE result-update.
-      ENDIF.
+      collect_actions(
+        EXPORTING
+          action = action
+        CHANGING
+          result = result ).
     ENDLOOP.
 
   ENDMETHOD.
@@ -173,21 +195,20 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
       IF satisfies = abap_false.
         IF is_optional = abap_true.
-          " TODO: Log warning
+          result-warning = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+                           |and does not satisfy { dependency-range } but is optional|.
         ELSE.
-          " TODO: Log info
-          DATA(text) = |{ category } { dependency-key } is installed in version { <package>-version } | &&
-                       |but does not satisfy { dependency-range }|.
-          result-update = dependency.
+          result-invalid = dependency.
+          result-error   = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+                           |but does not satisfy { dependency-range }|.
         ENDIF.
       ENDIF.
     ELSE.
       IF is_optional = abap_true.
-        " TODO: Log warning
+        result-warning = |{ category } { dependency-key } is not installed but optional|.
       ELSE.
-        " TODO: Log info
-        text = |{ category } { dependency-key } is not installed|.
-        result-install = dependency.
+        result-missing = dependency.
+        result-error   = |{ category } { dependency-key } is not installed|.
       ENDIF.
     ENDIF.
 
@@ -274,6 +295,24 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD collect_actions.
+
+    IF action-missing IS NOT INITIAL.
+      INSERT action-missing INTO TABLE result-missing.
+    ENDIF.
+    IF action-invalid IS NOT INITIAL.
+      INSERT action-invalid INTO TABLE result-invalid.
+    ENDIF.
+    IF action-error IS NOT INITIAL.
+      INSERT action-error INTO TABLE result-errors.
+    ENDIF.
+    IF action-warning IS NOT INITIAL.
+      INSERT action-warning INTO TABLE result-warnings.
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD execute.
 
     DATA package_json_init TYPE /apmg/if_apm_types=>ty_package_json.
@@ -296,8 +335,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     " For that to happen, we need arborist to build the dependency tree and pass it here.
     " This needs to include the target SAP package for each dependency :-)
 
-    " 4. Check dependencies
+    " 4. Check dependencies (not recursive!)
     DATA(actions) = check_dependencies( manifest ).
+
+    check_actions( actions ).
 
     " TODO: 4. Get dependencies
     " TODO: 5. Install dependencies
