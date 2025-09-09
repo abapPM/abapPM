@@ -6,7 +6,7 @@
 </div>
 
 ![Version](https://img.shields.io/endpoint?url=https://shield.abappm.com/github/abapPM/abapPM/src/main/%2523apmg%2523if_apm_version.intf.abap/c_version&label=Version&color=blue)
-[![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://github.com/abapPM/abapPM/build/zabappm_standalone.prog.abap)
+[![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://raw.githubusercontent.com/abapPM/abapPM/main/build/zabappm_standalone.prog.abap)
 
 [![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=success)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?color=success)](https://github.com/abapPM/.github/blob/main/CODE_OF_CONDUCT.md)
@@ -16,7 +16,7 @@
 
 apm is a *package manager* 📦 for ABAP applications and modules, a *website* 🌐, and a *registry* 📑.
 
-This repository contains the source code of the *package manager*, i.e., the developer version of apm. 
+This repository contains the **source code** of the *package manager*, i.e., the developer version of apm. 
 
 You can find the *website* at https://abappm.com and the *registry* at https://registry.abappm.com.
 
@@ -30,14 +30,18 @@ SAP Basis 7.50 or higher
 
 ## Installation
 
-1. Download the standalone version of apm from [zabappm_standalone](https://github.com/abapPM/abapPM/build/zabappm_standalone.prog.abap)
+1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://raw.githubusercontent.com/abapPM/abapPM/main/build/zabappm_standalone.prog.abap)
 1. Create SAP package `$ZAPM` in your system
 1. Create the program `ZABAPPM_STANDALONE` in package `$ZAPM`, upload the code, and activate
 1. Create transaction `ZAPM` in package `$ZAPM` for the program `ZABAPPM_STANDALONE`
 
 ## Usage
 
-Start apm using transaction `ZAPM`.
+Start apm using transaction `ZAPM`. The start screen shows a list of installed packages, which on your first run will be empty. On the top right, it shows the current registry which by default is `playground.abappm.com`. You can install from or publish any package to this playground registry (see [Playground Rules (t.b.d.)](https://docs.abappm.com/user-guide/playground.html)).
+
+To use the productive apm Registry, sign up at https://abappm.com/sign-up. Switch the registry in your apm settings from `playground.abappm.com` to `registry.abappm.com`, and you will be able to plublish your own packages or download and install any other package you find in the registry. 
+
+Now build awesome things with ABAP packages and share them with your fellow ABAPers!
 
 ## Contributions
 
@@ -51,7 +55,7 @@ Recommended SAP Package: `/APMG/APM`
 > Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on [apm GitHub](https://github.com/abapPM) or the [apm Website](https://abappm.com) and contribute to its repository.
 
 > [!NOTE]
-> Unlike other projects, a build process is required to create the standalone version. This process is not automated or documented!
+> Unlike other projects, a build process is required to create the standalone version. This process is not automated or documented, yet!
 
 ## Attribution
 
