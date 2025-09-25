@@ -28,6 +28,16 @@ SAP Basis 7.50 or higher
 
 (A downport to lower releases is on the roadmap)
 
+## Limitations
+
+- Only "prefix" folder logic
+- Only local packages (no transports)
+- No parallel processing (for serializing package)
+- Always all languages (no "main language only")
+- Always complete package hierarchy (no "ignore sub-packages")
+
+These limitations are planned to be removed in future releases.
+
 ## Installation
 
 1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://raw.githubusercontent.com/abapPM/abapPM/main/build/zabappm_standalone.prog.abap)
