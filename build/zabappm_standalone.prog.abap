@@ -1366,11 +1366,15 @@ CLASS /apmg/cl_apm_ajson_filter_lib DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_ajson_mapping DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_ajson_refs_init_l DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_ajson_utilities DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_auth DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_code_import_rules DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_code_importer DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_code_mapper DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_command_deprecate DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_command_init DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_command_install DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_command_installer DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_command_integrity DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_command_login DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_command_publish DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_command_uninstall DEFINITION DEFERRED.
@@ -1387,9 +1391,11 @@ CLASS /apmg/cl_apm_gui_buttons DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_component DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_css_processor DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_dlg_init DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_dlg_install DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION DEFERRED.
+CLASS /apmg/cl_apm_gui_dlg_undepreca DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_dlg_uninstall DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_gui_event DEFINITION DEFERRED.
@@ -3436,7 +3442,7 @@ INTERFACE /apmg/if_apm_types .
     "! Semantic version of package
     ty_version  TYPE string,
     "! Package specification (version, range, tag name, git url, or tarball URL)
-    ty_spec     TYPE string,
+    ty_spec     TYPE string ##NEEDED,
     "! Email
     ty_email    TYPE string,
     "! URI
@@ -3557,7 +3563,7 @@ INTERFACE /apmg/if_apm_types .
   INCLUDE TYPE ty_package_json.
   TYPES:
     dist          TYPE ty_dist,
-    deprecated    TYPE abap_bool,
+    deprecated    TYPE string,
     _id           TYPE string,
     _abap_version TYPE string,
     _apm_version  TYPE string,
@@ -3580,7 +3586,7 @@ INTERFACE /apmg/if_apm_types .
       cpu                   TYPE string_table,
       db                    TYPE string_table,
       dist                  TYPE ty_dist,
-      deprecated            TYPE abap_bool,
+      deprecated            TYPE string,
     END OF ty_manifest_abbreviated.
 
   " *** PACKUMENT ***
@@ -3881,6 +3887,7 @@ INTERFACE /apmg/if_apm_package_json .
   INTERFACES /apmg/if_apm_types.
 
   TYPES:
+    ty_package_id TYPE n LENGTH 40, " numeric hash
     BEGIN OF ty_package,
       key                   TYPE /apmg/if_apm_persist_apm=>ty_key,
       package               TYPE /apmg/if_apm_types=>ty_devclass,
@@ -3899,6 +3906,7 @@ INTERFACE /apmg/if_apm_package_json .
       write_protected       TYPE abap_bool,    " settings
       labels                TYPE string_table, " settings
       instance              TYPE REF TO /apmg/if_apm_package_json,
+      id                    TYPE ty_package_id,
     END OF ty_package,
     ty_packages TYPE STANDARD TABLE OF ty_package
       WITH NON-UNIQUE KEY primary_key COMPONENTS key
@@ -4541,6 +4549,16 @@ INTERFACE /apmg/if_apm_gui_asset_manager .
 
 ENDINTERFACE.
 
+INTERFACE /apmg/if_apm_gui_renderable .
+
+  METHODS render
+    RETURNING
+      VALUE(ri_html) TYPE REF TO /apmg/if_apm_html
+    RAISING
+      /apmg/cx_apm_error.
+
+ENDINTERFACE.
+
 INTERFACE /apmg/if_apm_gui_hotkeys .
 
   TYPES:
@@ -4579,16 +4597,6 @@ INTERFACE /apmg/if_apm_gui_hotkey_ctl .
   METHODS set_visible
     IMPORTING
       !iv_visible TYPE abap_bool.
-
-ENDINTERFACE.
-
-INTERFACE /apmg/if_apm_gui_renderable .
-
-  METHODS render
-    RETURNING
-      VALUE(ri_html) TYPE REF TO /apmg/if_apm_html
-    RAISING
-      /apmg/cx_apm_error.
 
 ENDINTERFACE.
 
@@ -6523,11 +6531,13 @@ INTERFACE /apmg/if_apm_gui_router .
 ************************************************************************
   CONSTANTS:
     BEGIN OF c_action,
+      apm_deprecate        TYPE string VALUE 'apm_deprecate',
       apm_home             TYPE string VALUE 'apm_home',
       apm_init             TYPE string VALUE 'apm_init',
       apm_install          TYPE string VALUE 'apm_install',
       apm_uninstall        TYPE string VALUE 'apm_uninstall',
       apm_publish          TYPE string VALUE 'apm_publish',
+      apm_undeprecate      TYPE string VALUE 'apm_undeprecate',
       apm_unpublish        TYPE string VALUE 'apm_unpublish',
       apm_update           TYPE string VALUE 'apm_update',
       change_order_by      TYPE string VALUE 'change_order_by',
@@ -7360,6 +7370,11 @@ CLASS /apmg/cl_apm_ajson_extensions DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_ajson_filter.
 
+    "! Like filter_empty_zero_null but keep "deprecated" value
+    CLASS-METHODS filter_deprecated
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_filter.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -7692,6 +7707,29 @@ CLASS /apmg/cl_apm_ajson_utilities DEFINITION
         /apmg/cx_apm_ajson_error .
 ENDCLASS.
 
+CLASS /apmg/cl_apm_auth DEFINITION
+
+  FINAL
+  CREATE PUBLIC.
+
+************************************************************************
+* apm Auth
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+  PUBLIC SECTION.
+
+    CLASS-METHODS is_package_allowed
+      IMPORTING
+        package       TYPE devclass
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
 CLASS /apmg/cl_apm_code_importer DEFINITION  FINAL CREATE PUBLIC.
 
 ************************************************************************
@@ -7842,6 +7880,63 @@ CLASS /apmg/cl_apm_code_mapper DEFINITION  FINAL CREATE PUBLIC.
 
 ENDCLASS.
 
+CLASS /apmg/cl_apm_command_deprecate DEFINITION
+
+  FINAL
+  CREATE PRIVATE.
+
+************************************************************************
+* apm Deprecate
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: Use empty message to undeprecate package or version
+************************************************************************
+  PUBLIC SECTION.
+
+    CLASS-METHODS run
+      IMPORTING
+        !registry     TYPE string
+        !name         TYPE string
+        !range        TYPE string OPTIONAL
+        !message_text TYPE string OPTIONAL
+      RAISING
+        /apmg/cx_apm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    METHODS execute
+      IMPORTING
+        !registry     TYPE string
+        !name         TYPE string
+        !range        TYPE string
+        !message_text TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS update_deprecate_message
+      IMPORTING
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+        !range        TYPE string
+        !message_text TYPE string
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS deprecate_package_version
+      IMPORTING
+        !registry     TYPE string
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+ENDCLASS.
+
 CLASS /apmg/cl_apm_command_init DEFINITION
 
   FINAL
@@ -7893,6 +7988,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
         !is_production TYPE abap_bool DEFAULT abap_false
+        !is_force      TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -7901,12 +7997,16 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 
     TYPES:
       BEGIN OF ty_action,
-        install TYPE /apmg/if_apm_types=>ty_dependency,
-        update  TYPE /apmg/if_apm_types=>ty_dependency,
+        missing TYPE /apmg/if_apm_types=>ty_dependency,
+        invalid TYPE /apmg/if_apm_types=>ty_dependency,
+        error   TYPE string,
+        warning TYPE string,
       END OF ty_action,
       BEGIN OF ty_actions,
-        install TYPE /apmg/if_apm_types=>ty_dependencies,
-        update  TYPE /apmg/if_apm_types=>ty_dependencies,
+        missing  TYPE /apmg/if_apm_types=>ty_dependencies,
+        invalid  TYPE /apmg/if_apm_types=>ty_dependencies,
+        errors   TYPE string_table,
+        warnings TYPE string_table,
       END OF ty_actions.
 
     METHODS execute
@@ -7914,7 +8014,8 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !registry      TYPE string
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
-        !is_production TYPE abap_bool DEFAULT abap_false
+        !is_production TYPE abap_bool
+        !is_force      TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -7928,12 +8029,26 @@ CLASS /apmg/cl_apm_command_install DEFINITION
     METHODS check_prerequisites
       IMPORTING
         !manifest TYPE /apmg/if_apm_types=>ty_manifest
+        !is_force TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS collect_actions
+      IMPORTING
+        !action TYPE ty_action
+      CHANGING
+        result  TYPE ty_actions.
+
+    METHODS check_actions
+      IMPORTING
+        !actions TYPE ty_actions
       RAISING
         /apmg/cx_apm_error.
 
     METHODS check_dependencies
       IMPORTING
         !manifest      TYPE /apmg/if_apm_types=>ty_manifest
+        !is_force      TYPE abap_bool DEFAULT abap_false
         !is_production TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)  TYPE ty_actions
@@ -7945,6 +8060,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !list         TYPE /apmg/if_apm_package_json=>ty_packages
         !dependency   TYPE /apmg/if_apm_types=>ty_dependency
         !category     TYPE string
+        !is_force     TYPE abap_bool DEFAULT abap_false
         !is_optional  TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE ty_action
@@ -7957,7 +8073,100 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !version     TYPE string
         !range       TYPE string
         !category    TYPE string
+        !is_force    TYPE abap_bool DEFAULT abap_false
         !is_optional TYPE abap_bool DEFAULT abap_false
+      RAISING
+        /apmg/cx_apm_error.
+
+ENDCLASS.
+
+CLASS /apmg/cl_apm_command_installer DEFINITION
+
+  FINAL
+  CREATE PUBLIC.
+
+************************************************************************
+* apm Command Installer
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+  PUBLIC SECTION.
+
+    CLASS-METHODS install_package
+      IMPORTING
+        !registry      TYPE string
+        !manifest      TYPE /apmg/if_apm_types=>ty_manifest
+        !package       TYPE devclass
+        !name          TYPE string
+        !version       TYPE string
+        !is_production TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS uninstall_package
+      IMPORTING
+        !name    TYPE string
+        !version TYPE string
+        !package TYPE devclass
+      RAISING
+        /apmg/cx_apm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+CLASS /apmg/cl_apm_command_integrity DEFINITION
+
+  FINAL
+  CREATE PUBLIC.
+
+************************************************************************
+* apm Command Integrity Checks
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+* Note: This is a stateless class. Do not add any attributes!
+************************************************************************
+  PUBLIC SECTION.
+
+    CLASS-METHODS check_integrity
+      IMPORTING
+        !tarball TYPE xstring
+        !dist    TYPE /apmg/if_apm_types=>ty_dist
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS get_integrity
+      IMPORTING
+        !tarball      TYPE xstring
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_dist
+      RAISING
+        /apmg/cx_apm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    CONSTANTS c_initial_key TYPE xstring VALUE ''.
+
+    CLASS-METHODS calc_sha1
+      IMPORTING
+        !data         TYPE xstring
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS calc_sha512
+      IMPORTING
+        !data         TYPE xstring
+      RETURNING
+        VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
 
@@ -8022,6 +8231,9 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* TODO: Support dist-tags
+************************************************************************
+
   PUBLIC SECTION.
 
     CLASS-METHODS run
@@ -8172,7 +8384,7 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       IMPORTING
         !registry TYPE string
         !name     TYPE string
-        !version  TYPE string
+        !version  TYPE string OPTIONAL
       RAISING
         /apmg/cx_apm_error.
 
@@ -8200,6 +8412,16 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       IMPORTING
         !packument    TYPE /apmg/if_apm_types=>ty_packument
         !version      TYPE string
+        !tarball      TYPE string
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS update_dist_tags
+      IMPORTING
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+        !version      TYPE string
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
       RAISING
@@ -8215,7 +8437,16 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS unpublish_package
+    METHODS unpublish_complete_package
+      IMPORTING
+        !registry     TYPE string
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS unpublish_package_version
       IMPORTING
         !registry     TYPE string
         !packument    TYPE /apmg/if_apm_types=>ty_packument
@@ -8375,37 +8606,11 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS install_package
+    CLASS-METHODS get_versions_from_packument
       IMPORTING
-        !registry      TYPE string
-        !manifest      TYPE /apmg/if_apm_types=>ty_manifest
-        !package       TYPE devclass
-        !name          TYPE string
-        !version       TYPE string
-        !is_production TYPE abap_bool
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS uninstall_package
-      IMPORTING
-        !name    TYPE string
-        !version TYPE string
-        !package TYPE devclass
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS check_integrity
-      IMPORTING
-        !tarball TYPE xstring
-        !dist    TYPE /apmg/if_apm_types=>ty_dist
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS get_integrity
-      IMPORTING
-        !tarball      TYPE xstring
+        packument     TYPE /apmg/if_apm_types=>ty_packument
       RETURNING
-        VALUE(result) TYPE /apmg/if_apm_types=>ty_dist
+        VALUE(result) TYPE string_table
       RAISING
         /apmg/cx_apm_error.
 
@@ -8435,8 +8640,6 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CONSTANTS c_initial_key TYPE xstring VALUE ''.
-
     CONSTANTS:
       BEGIN OF c_header,
         apm_command   TYPE string VALUE 'apm-command',
@@ -8446,22 +8649,6 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
     CLASS-METHODS get_error
       IMPORTING
         !response     TYPE string
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS calc_sha1
-      IMPORTING
-        !data         TYPE xstring
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS calc_sha512
-      IMPORTING
-        !data         TYPE xstring
       RETURNING
         VALUE(result) TYPE string
       RAISING
@@ -9270,6 +9457,107 @@ CLASS /apmg/cl_apm_gui_css_processor DEFINITION
 
 ENDCLASS.
 
+CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
+
+  INHERITING FROM /apmg/cl_apm_gui_component
+  FINAL
+  CREATE PRIVATE.
+
+************************************************************************
+* apm GUI Dialog for Deprecate Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+  PUBLIC SECTION.
+
+    INTERFACES /apmg/if_apm_gui_event_handler.
+    INTERFACES /apmg/if_apm_gui_renderable.
+
+    CLASS-METHODS create
+      IMPORTING
+        !package      TYPE devclass OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_gui_renderable
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS constructor
+      IMPORTING
+        !package TYPE devclass
+      RAISING
+        /apmg/cx_apm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    TYPES:
+      BEGIN OF ty_params,
+        package TYPE devclass,
+        name    TYPE string,
+        version TYPE string,
+        message TYPE string,
+      END OF ty_params.
+
+    CONSTANTS:
+      BEGIN OF c_id,
+        package TYPE string VALUE 'package',
+        name    TYPE string VALUE 'name',
+        version TYPE string VALUE 'version',
+        message TYPE string VALUE 'message',
+      END OF c_id.
+
+    CONSTANTS:
+      BEGIN OF c_action,
+        choose_package TYPE string VALUE 'choose-package',
+        deprecate      TYPE string VALUE 'deprecate',
+        refresh        TYPE string VALUE 'refresh',
+      END OF c_action.
+
+    DATA:
+      registry          TYPE string,
+      deprecate_package TYPE devclass,
+      form              TYPE REF TO /apmg/cl_apm_html_form,
+      form_data         TYPE REF TO /apmg/cl_apm_string_map,
+      form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log    TYPE REF TO /apmg/cl_apm_string_map.
+
+    METHODS get_form_schema
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_html_form.
+
+    METHODS get_parameters
+      IMPORTING
+        !form_data    TYPE REF TO /apmg/cl_apm_string_map
+      RETURNING
+        VALUE(result) TYPE ty_params.
+
+    METHODS validate_form
+      IMPORTING
+        !form_data    TYPE REF TO /apmg/cl_apm_string_map
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS read_package
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS confirm_popup_version
+      IMPORTING
+        !params       TYPE ty_params
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+ENDCLASS.
+
 CLASS /apmg/cl_apm_gui_dlg_init DEFINITION
 
   INHERITING FROM /apmg/cl_apm_gui_component
@@ -9540,6 +9828,104 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
 
 ENDCLASS.
 
+CLASS /apmg/cl_apm_gui_dlg_undepreca DEFINITION
+
+  INHERITING FROM /apmg/cl_apm_gui_component
+  FINAL
+  CREATE PRIVATE.
+
+************************************************************************
+* apm GUI Dialog for Undeprecate Command
+*
+* Copyright 2024 apm.to Inc. <https://apm.to>
+* SPDX-License-Identifier: MIT
+************************************************************************
+  PUBLIC SECTION.
+
+    INTERFACES /apmg/if_apm_gui_event_handler.
+    INTERFACES /apmg/if_apm_gui_renderable.
+
+    CLASS-METHODS create
+      IMPORTING
+        !package      TYPE devclass OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_gui_renderable
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS constructor
+      IMPORTING
+        !package TYPE devclass
+      RAISING
+        /apmg/cx_apm_error.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    TYPES:
+      BEGIN OF ty_params,
+        package TYPE devclass,
+        name    TYPE string,
+        version TYPE string,
+      END OF ty_params.
+
+    CONSTANTS:
+      BEGIN OF c_id,
+        package TYPE string VALUE 'package',
+        name    TYPE string VALUE 'name',
+        version TYPE string VALUE 'version',
+      END OF c_id.
+
+    CONSTANTS:
+      BEGIN OF c_action,
+        choose_package TYPE string VALUE 'choose-package',
+        undeprecate    TYPE string VALUE 'undeprecate',
+      END OF c_action.
+
+    DATA:
+      registry            TYPE string,
+      undeprecate_package TYPE devclass,
+      form                TYPE REF TO /apmg/cl_apm_html_form,
+      form_data           TYPE REF TO /apmg/cl_apm_string_map,
+      form_util           TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log      TYPE REF TO /apmg/cl_apm_string_map.
+
+    METHODS get_form_schema
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_html_form.
+
+    METHODS get_parameters
+      IMPORTING
+        !form_data    TYPE REF TO /apmg/cl_apm_string_map
+      RETURNING
+        VALUE(result) TYPE ty_params.
+
+    METHODS validate_form
+      IMPORTING
+        !form_data    TYPE REF TO /apmg/cl_apm_string_map
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS read_package
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS confirm_popup_version
+      IMPORTING
+        !params       TYPE ty_params
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+ENDCLASS.
+
 CLASS /apmg/cl_apm_gui_dlg_uninstall DEFINITION
 
   INHERITING FROM /apmg/cl_apm_gui_component
@@ -9693,16 +10079,17 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       BEGIN OF c_action,
         choose_package    TYPE string VALUE 'choose-package',
         unpublish_package TYPE string VALUE 'unpublish-package',
+        unpublish_version TYPE string VALUE 'unpublish-version',
         refresh           TYPE string VALUE 'refresh',
       END OF c_action.
 
     DATA:
-      registry         TYPE string,
-      unpubish_package TYPE devclass,
-      form             TYPE REF TO /apmg/cl_apm_html_form,
-      form_data        TYPE REF TO /apmg/cl_apm_string_map,
-      form_util        TYPE REF TO /apmg/cl_apm_html_form_utils,
-      validation_log   TYPE REF TO /apmg/cl_apm_string_map.
+      registry          TYPE string,
+      unpublish_package TYPE devclass,
+      form              TYPE REF TO /apmg/cl_apm_html_form,
+      form_data         TYPE REF TO /apmg/cl_apm_string_map,
+      form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log    TYPE REF TO /apmg/cl_apm_string_map.
 
     METHODS get_form_schema
       RETURNING
@@ -9730,7 +10117,15 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup
+    METHODS confirm_popup_version
+      IMPORTING
+        !params       TYPE ty_params
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS confirm_popup_package
       IMPORTING
         !params       TYPE ty_params
       RETURNING
@@ -10778,17 +11173,16 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* Markdown Extension for abapGit
+* apm GUI Package View
 *
-* https://github.com/Marc-Bernard-Tools/ABAP-Markdown-Ext-for-abapGit
-*
-* Copyright 2023 Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 
     INTERFACES:
       /apmg/if_apm_gui_event_handler,
+      /apmg/if_apm_gui_hotkeys,
       /apmg/if_apm_gui_renderable,
       /apmg/if_apm_gui_menu_provider.
 
@@ -10970,6 +11364,7 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
         !html TYPE REF TO /apmg/if_apm_html
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_utils DEFINITION
@@ -14152,6 +14547,18 @@ CLASS /apmg/cl_apm_package_json DEFINITION
       RETURNING
         VALUE(result) TYPE devclass.
 
+    CLASS-METHODS get_package_from_id
+      IMPORTING
+        !id           TYPE /apmg/if_apm_package_json=>ty_package_id
+      RETURNING
+        VALUE(result) TYPE devclass.
+
+    CLASS-METHODS get_id_from_package
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_package_json=>ty_package_id.
+
     CLASS-METHODS convert_json_to_manifest
       IMPORTING
         !json         TYPE string
@@ -14173,6 +14580,7 @@ CLASS /apmg/cl_apm_package_json DEFINITION
         !manifest        TYPE /apmg/if_apm_types=>ty_manifest
         !is_package_json TYPE abap_bool DEFAULT abap_false
         !is_complete     TYPE abap_bool DEFAULT abap_false
+        !is_deprecated   TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)    TYPE string
       RAISING
@@ -14394,10 +14802,11 @@ CLASS /apmg/cl_apm_pacote DEFINITION
 
     CLASS-METHODS convert_packument_to_json
       IMPORTING
-        !packument    TYPE /apmg/if_apm_types=>ty_packument
-        !is_complete  TYPE abap_bool DEFAULT abap_false
+        !packument     TYPE /apmg/if_apm_types=>ty_packument
+        !is_complete   TYPE abap_bool DEFAULT abap_false
+        !is_deprecated TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE string
+        VALUE(result)  TYPE string
       RAISING
         /apmg/cx_apm_error.
 
@@ -31838,7 +32247,32 @@ CLASS lcl_empty_zero_null IMPLEMENTATION.
 
 ENDCLASS.
 
+CLASS lcl_deprecated DEFINITION FINAL.
+  PUBLIC SECTION.
+    INTERFACES /apmg/if_apm_ajson_filter.
+ENDCLASS.
+
+CLASS lcl_deprecated IMPLEMENTATION.
+
+  METHOD /apmg/if_apm_ajson_filter~keep_node.
+
+    rv_keep = boolc(
+      ( iv_visit = /apmg/if_apm_ajson_filter=>visit_type-value AND
+        ( is_node-type = /apmg/if_apm_ajson_types=>node_type-string AND is_node-value IS NOT INITIAL OR
+          is_node-type = /apmg/if_apm_ajson_types=>node_type-boolean OR
+          is_node-type = /apmg/if_apm_ajson_types=>node_type-number AND is_node-value <> 0 OR
+          is_node-name = 'deprecated' ) ) OR
+      ( iv_visit <> /apmg/if_apm_ajson_filter=>visit_type-value AND is_node-children > 0 ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS /apmg/cl_apm_ajson_extensions IMPLEMENTATION.
+
+  METHOD filter_deprecated.
+    CREATE OBJECT result TYPE lcl_deprecated.
+  ENDMETHOD.
 
   METHOD filter_empty_zero_null.
     CREATE OBJECT result TYPE lcl_empty_zero_null.
@@ -32739,6 +33173,19 @@ CLASS /apmg/cl_apm_ajson_utilities IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS /apmg/cl_apm_auth IMPLEMENTATION.
+
+  METHOD is_package_allowed.
+
+    " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
+    DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
+
+    " TODO: This uses abapGit exit. Replace with apm logic
+    result = xsdbool( username <> 'SAP' OR zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_true ).
+
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
 
   METHOD get_class_name_from_token.
@@ -33355,6 +33802,85 @@ CLASS /apmg/cl_apm_code_mapper IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS /apmg/cl_apm_command_deprecate IMPLEMENTATION.
+
+  METHOD deprecate_package_version.
+
+    DATA(payload) = /apmg/cl_apm_pacote=>convert_packument_to_json(
+      packument     = packument
+      is_deprecated = abap_true ).
+
+    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+      registry = registry
+      url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
+      method   = /apmg/if_apm_http_agent=>c_method-put
+      payload  = payload ).
+
+    result = /apmg/cl_apm_command_utils=>check_response(
+      response = response
+      text     = 'Error deprecating package version' ).
+
+  ENDMETHOD.
+
+  METHOD execute.
+
+    " 1. Get packument from registry
+    DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
+      registry = registry
+      name     = name
+      write    = abap_true ).
+
+    packument = update_deprecate_message(
+      packument    = packument
+      range        = range
+      message_text = message_text ).
+
+    DATA(message) = deprecate_package_version(
+      registry  = registry
+      packument = packument ).
+
+    IF message IS NOT INITIAL.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+    ENDIF.
+
+    MESSAGE 'Package version(s) deprecated successfully' TYPE 'S'.
+
+  ENDMETHOD.
+
+  METHOD run.
+
+    DATA(command) = NEW /apmg/cl_apm_command_deprecate( ).
+
+    command->execute(
+      registry     = registry
+      name         = name
+      range        = range
+      message_text = message_text ).
+
+  ENDMETHOD.
+
+  METHOD update_deprecate_message.
+
+    result = packument.
+
+    " TODO: Log all deprecated versions
+    LOOP AT result-versions ASSIGNING FIELD-SYMBOL(<version>).
+      DATA(satisfies) = /apmg/cl_apm_semver_functions=>satisfies(
+        version = <version>-key
+        range   = range ).
+
+      IF satisfies = abap_true.
+        " Note: Empty text will undeprecate
+        <version>-manifest-deprecated = message_text.
+      ENDIF.
+    ENDLOOP.
+
+    " Remove attachments which distinguishes this update from publishing a package
+    DELETE result-_attachments WHERE key IS NOT INITIAL.
+
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS /apmg/cl_apm_command_init IMPLEMENTATION.
 
   METHOD execute.
@@ -33410,6 +33936,16 @@ ENDCLASS.
 
 CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
+  METHOD check_actions.
+
+    " TODO: log all warnings and errors
+    IF actions-errors IS NOT INITIAL.
+      DATA(text) = concat_lines_of( table = actions-errors sep = |\n| ).
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = text.
+    ENDIF.
+
+  ENDMETHOD.
+
   METHOD check_dependencies.
 
     " Get all installed packages
@@ -33420,14 +33956,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         DATA(action) = check_dependency(
           list       = list
           dependency = <dependency>
-          category   = 'Dependency' ).
+          category   = 'Dependency'
+          is_force   = is_force ).
 
-        IF action-install IS NOT INITIAL.
-          INSERT action-install INTO TABLE result-install.
-        ENDIF.
-        IF action-update IS NOT INITIAL.
-          INSERT action-update INTO TABLE result-update.
-        ENDIF.
+        collect_actions(
+          EXPORTING
+            action = action
+          CHANGING
+            result = result ).
       ENDIF.
     ENDLOOP.
 
@@ -33436,14 +33972,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         action = check_dependency(
           list       = list
           dependency = <dependency>
-          category   = 'devDependency' ).
+          category   = 'devDependency'
+          is_force   = is_force ).
 
-        IF action-install IS NOT INITIAL.
-          INSERT action-install INTO TABLE result-install.
-        ENDIF.
-        IF action-update IS NOT INITIAL.
-          INSERT action-update INTO TABLE result-update.
-        ENDIF.
+        collect_actions(
+          EXPORTING
+            action = action
+          CHANGING
+            result = result ).
       ENDLOOP.
     ENDIF.
 
@@ -33452,14 +33988,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         list        = list
         dependency  = <dependency>
         category    = 'optionalDependency'
+        is_force    = is_force
         is_optional = abap_true ).
 
-      IF action-install IS NOT INITIAL.
-        INSERT action-install INTO TABLE result-install.
-      ENDIF.
-      IF action-update IS NOT INITIAL.
-        INSERT action-update INTO TABLE result-update.
-      ENDIF.
+      collect_actions(
+        EXPORTING
+          action = action
+        CHANGING
+          result = result ).
     ENDLOOP.
 
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
@@ -33467,14 +34003,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         list        = list
         dependency  = <dependency>
         category    = 'peerDependency'
+        is_force    = is_force
         is_optional = abap_true ).
 
-      IF action-install IS NOT INITIAL.
-        INSERT action-install INTO TABLE result-install.
-      ENDIF.
-      IF action-update IS NOT INITIAL.
-        INSERT action-update INTO TABLE result-update.
-      ENDIF.
+      collect_actions(
+        EXPORTING
+          action = action
+        CHANGING
+          result = result ).
     ENDLOOP.
 
   ENDMETHOD.
@@ -33489,22 +34025,21 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         range   = dependency-range ).
 
       IF satisfies = abap_false.
-        IF is_optional = abap_true.
-          " TODO: Log warning
+        IF is_optional = abap_true OR is_force = abap_true.
+          result-warning = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+                           |and does not satisfy { dependency-range } but is optional|.
         ELSE.
-          " TODO: Log info
-          DATA(text) = |{ category } { dependency-key } is installed in version { <package>-version } | &&
-                       |but does not satisfy { dependency-range }|.
-          result-update = dependency.
+          result-invalid = dependency.
+          result-error   = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+                           |but does not satisfy { dependency-range }|.
         ENDIF.
       ENDIF.
     ELSE.
-      IF is_optional = abap_true.
-        " TODO: Log warning
+      IF is_optional = abap_true OR is_force = abap_true.
+        result-warning = |{ category } { dependency-key } is not installed but optional|.
       ELSE.
-        " TODO: Log info
-        text = |{ category } { dependency-key } is not installed|.
-        result-install = dependency.
+        result-missing = dependency.
+        result-error   = |{ category } { dependency-key } is not installed|.
       ENDIF.
     ENDIF.
 
@@ -33544,24 +34079,22 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         name     = 'apm'
         version  = /apmg/if_apm_version=>c_version
         range    = <dependency>-range
-        category = 'Engine' ).
+        category = 'Engine'
+        is_force = is_force ).
     ENDIF.
 
     " abap release
     READ TABLE manifest-engines ASSIGNING <dependency>
       WITH KEY key = 'abap'.
     IF sy-subrc = 0.
-      TRY.
-          DATA(abap_version) = NEW /apmg/cl_apm_semver_sap( )->sap_component_to_semver( 'SAP_BASIS' ).
-        CATCH cx_abap_invalid_value INTO DATA(error).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-      ENDTRY.
+      DATA(abap_version) = /apmg/cl_apm_command_utils=>get_abap_version( ).
 
       check_semver(
         name     = 'ABAP'
         version  = abap_version
         range    = <dependency>-range
-        category = 'Engine' ).
+        category = 'Engine'
+        is_force = is_force ).
     ENDIF.
 
     " TODO: Check os & cpu (requires "env" package which is =WIP=)
@@ -33575,7 +34108,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       range   = range ).
 
     IF satisfies = abap_false.
-      IF is_optional = abap_true.
+      IF is_optional = abap_true OR is_force = abap_true.
         " TODO: Log warning
       ELSE.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
@@ -33583,6 +34116,23 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
             text = |{ category } { name } is installed in version { version } | &&
                    |but does not satisfy { range }|.
       ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD collect_actions.
+
+    IF action-missing IS NOT INITIAL.
+      INSERT action-missing INTO TABLE result-missing.
+    ENDIF.
+    IF action-invalid IS NOT INITIAL.
+      INSERT action-invalid INTO TABLE result-invalid.
+    ENDIF.
+    IF action-error IS NOT INITIAL.
+      INSERT action-error INTO TABLE result-errors.
+    ENDIF.
+    IF action-warning IS NOT INITIAL.
+      INSERT action-warning INTO TABLE result-warnings.
     ENDIF.
 
   ENDMETHOD.
@@ -33603,20 +34153,26 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       version  = package_json-version ).
 
     " 3. Check prerequisites (os, cpu, engines)
-    check_prerequisites( manifest ).
+    check_prerequisites(
+      manifest = manifest
+      is_force = is_force ).
 
     " TODO!: Instead of just checking if dependencies are installed, it should install them.
     " For that to happen, we need arborist to build the dependency tree and pass it here.
     " This needs to include the target SAP package for each dependency :-)
 
-    " 4. Check dependencies
-    DATA(actions) = check_dependencies( manifest ).
+    " 4. Check dependencies (not recursive!)
+    DATA(actions) = check_dependencies(
+      manifest = manifest
+      is_force = is_force ).
+
+    check_actions( actions ).
 
     " TODO: 4. Get dependencies
     " TODO: 5. Install dependencies
 
     " 6. Get tarball from registry and install it into package
-    /apmg/cl_apm_command_utils=>install_package(
+    /apmg/cl_apm_command_installer=>install_package(
       registry      = registry
       manifest      = manifest
       package       = package
@@ -33643,7 +34199,117 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       registry      = registry
       package       = package
       package_json  = package_json
-      is_production = is_production ).
+      is_production = is_production
+      is_force      = is_force ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS /apmg/cl_apm_command_installer IMPLEMENTATION.
+
+  METHOD install_package.
+
+    " TODO: Currently hardcoded to local packages (no transport)
+    DATA transport TYPE trkorr.
+
+    DATA(tarball) = /apmg/cl_apm_command_utils=>get_tarball_from_registry(
+      registry = registry
+      name     = name
+      tarball  = manifest-dist-tarball ).
+
+    /apmg/cl_apm_command_integrity=>check_integrity(
+      tarball = tarball
+      dist    = manifest-dist ).
+
+    " FUTURE: Allow other folder logic than prefix
+    /apmg/cl_apm_installer=>install(
+      name              = name
+      version           = version
+      data              = tarball
+      package           = package
+      transport         = transport
+      enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
+      enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix
+      is_production     = is_production ).
+
+  ENDMETHOD.
+
+  METHOD uninstall_package.
+
+    /apmg/cl_apm_installer=>uninstall(
+      name    = name
+      version = version
+      package = package ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS /apmg/cl_apm_command_integrity IMPLEMENTATION.
+
+  METHOD calc_sha1.
+
+    TRY.
+        " Simple Shasum
+        cl_abap_hmac=>calculate_hmac_for_raw(
+          EXPORTING
+            if_algorithm  = 'SHA1'
+            if_key        = c_initial_key
+            if_data       = data
+          IMPORTING
+            ef_hmacstring = DATA(sha1) ).
+
+        result = to_lower( sha1 ).
+
+      CATCH cx_abap_message_digest INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD calc_sha512.
+
+    " Integrity Checksum (sha512)
+    " https://www.npmjs.com/package/ssri
+    " Note: It's not clear which ABAP kernel version is required for this
+
+    TRY.
+        cl_abap_hmac=>calculate_hmac_for_raw(
+          EXPORTING
+            if_algorithm     = 'SHA512'
+            if_key           = c_initial_key
+            if_data          = data
+          IMPORTING
+            ef_hmacb64string = DATA(sha512) ).
+
+        result = |sha512-{ sha512 }|.
+
+      CATCH cx_abap_message_digest INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD check_integrity.
+
+    DATA(shasum) = calc_sha1( tarball ).
+
+    IF shasum <> dist-shasum.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha1)'.
+    ENDIF.
+
+    DATA(integrity) = calc_sha512( tarball ).
+
+    IF integrity <> dist-integrity.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha512)'.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_integrity.
+
+    result = VALUE #(
+      shasum    = calc_sha1( tarball )
+      integrity = calc_sha512( tarball ) ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -33730,7 +34396,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     DATA(tarball) = tar->gzip( tar->save( ) ).
 
-    DATA(dist) = /apmg/cl_apm_command_utils=>get_integrity( tarball ).
+    DATA(dist) = /apmg/cl_apm_command_integrity=>get_integrity( tarball ).
 
     DATA(name) = packument-name.
     IF name(1) = '@'.
@@ -34022,7 +34688,7 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
 
     DATA(package_json) = check_package( package ).
 
-    /apmg/cl_apm_command_utils=>uninstall_package(
+    /apmg/cl_apm_command_installer=>uninstall_package(
       name    = package_json-name
       version = package_json-version
       package = package ).
@@ -34046,7 +34712,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
     DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
       registry = registry
-      url      = |{ tarball }/rev/{ packument-_rev }|
+      url      = |{ tarball }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-delete ).
 
     result = /apmg/cl_apm_command_utils=>check_response(
@@ -34063,35 +34729,57 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
       name     = name
       write    = abap_true ).
 
-    " 2. Get tarball name
-    DATA(tarball) = get_tarball(
-      packument = packument
-      version   = version ).
+    IF version IS INITIAL.
 
-    " 3. Remove version from packument
-    packument = remove_version(
-      packument = packument
-      version   = version ).
+      " 2a. Delete complete package
+      DATA(message) = unpublish_complete_package(
+        registry  = registry
+        packument = packument ).
 
-    " 4. Unpublish package from registry
-    DATA(message) = unpublish_package(
-      registry  = registry
-      packument = packument ).
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
 
-    IF message IS NOT INITIAL.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
-    ENDIF.
+      MESSAGE 'Complete package unpublished successfully' TYPE 'S'.
 
-    " 5. Delete tarball from registry
-    message = delete_tarball(
-      registry  = registry
-      packument = packument
-      tarball   = tarball ).
-
-    IF message IS INITIAL.
-      MESSAGE 'Package version successfully unpublished' TYPE 'S'.
     ELSE.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+
+      " 2b. Get tarball name
+      DATA(tarball) = get_tarball(
+        packument = packument
+        version   = version ).
+
+      " 3. Remove version from packument
+      packument = remove_version(
+        packument = packument
+        version   = version
+        tarball   = tarball ).
+
+      " 4. Update LATEST dist-tag (and others)
+      packument = update_dist_tags(
+        packument = packument
+        version   = version ).
+
+      " 5. Unpublish package from registry
+      message = unpublish_package_version(
+        registry  = registry
+        packument = packument ).
+
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
+
+      " 6. Delete tarball from registry
+      message = delete_tarball(
+        registry  = registry
+        packument = packument
+        tarball   = tarball ).
+
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
+
+      MESSAGE 'Package version unpublished successfully' TYPE 'S'.
     ENDIF.
 
   ENDMETHOD.
@@ -34120,7 +34808,15 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
           text = |Version { version } does not exist in package { packument-name }|.
     ENDIF.
 
+    IF lines( result-versions ) = 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |Version { version } is the last version of package { packument-name }. You may unpublish the complete package, instead|.
+    ENDIF.
+
     DELETE result-time WHERE key = version ##SUBRC_OK.
+
+    DELETE result-_attachments WHERE key = tarball.
 
   ENDMETHOD.
 
@@ -34135,19 +34831,38 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD unpublish_package.
+  METHOD unpublish_complete_package.
+
+    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+      registry = registry
+      url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
+      method   = /apmg/if_apm_http_agent=>c_method-delete ).
+
+    result = /apmg/cl_apm_command_utils=>check_response(
+      response = response
+      text     = 'Error unpublishing complete package' ).
+
+  ENDMETHOD.
+
+  METHOD unpublish_package_version.
 
     DATA(payload) = /apmg/cl_apm_pacote=>convert_packument_to_json( packument ).
 
     DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
       registry = registry
-      url      = |{ registry }/{ packument-name }/rev/{ packument-_rev }|
+      url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-put
       payload  = payload ).
 
     result = /apmg/cl_apm_command_utils=>check_response(
       response = response
-      text     = 'Error unpublishing package' ).
+      text     = 'Error unpublishing package version' ).
+
+  ENDMETHOD.
+
+  METHOD update_dist_tags.
+
+    result = packument.
 
   ENDMETHOD.
 ENDCLASS.
@@ -34170,7 +34885,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
       version_installed = package_json-version
       version_next      = manifest-version ).
 
-    " 4. Get dependencies
+    " 4. Get vendored dependencies
     DATA(dependencies) = get_bundle_dependencies(
       package  = package
       manifest = manifest ).
@@ -34189,7 +34904,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 
     " 7. Update package
     IF is_newer = abap_true.
-      /apmg/cl_apm_command_utils=>install_package(
+      /apmg/cl_apm_command_installer=>install_package(
         registry      = registry
         manifest      = manifest
         package       = package
@@ -34226,7 +34941,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
           IF sy-subrc <> 0.
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
               EXPORTING
-                text = 'Bundle dependency missing from dependencies'.
+                text = |Bundle dependency { <package_json>-name } missing from dependencies|.
           ENDIF.
           " Installed bundle dependency which will be updated (if available)
           DATA(dependency) = VALUE /apmg/if_apm_importer=>ty_dependency(
@@ -34251,7 +34966,9 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
       IF NOT line_exists( result[ name = <bundle> ] ).
         IF NOT line_exists( manifest-dependencies[ key = <bundle> ] ).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Bundle dependency missing from dependencies'.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+            EXPORTING
+                text = |Bundle dependency { <bundle> } missing from dependencies|.
         ENDIF.
         " New bundle dependency which will be added
         dependency = VALUE /apmg/if_apm_importer=>ty_dependency(
@@ -34344,7 +35061,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     LOOP AT dependencies ASSIGNING <dependency>
       WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
-      /apmg/cl_apm_command_utils=>uninstall_package(
+      /apmg/cl_apm_command_installer=>uninstall_package(
         name    = <dependency>-name
         version = <dependency>-version
         package = <dependency>-package ).
@@ -34375,65 +35092,6 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
-
-  METHOD calc_sha1.
-
-    TRY.
-        " Simple Shasum
-        cl_abap_hmac=>calculate_hmac_for_raw(
-          EXPORTING
-            if_algorithm  = 'SHA1'
-            if_key        = c_initial_key
-            if_data       = data
-          IMPORTING
-            ef_hmacstring = DATA(sha1) ).
-
-        result = to_lower( sha1 ).
-
-      CATCH cx_abap_message_digest INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
-
-  ENDMETHOD.
-
-  METHOD calc_sha512.
-
-    " Integrity Checksum (sha512)
-    " https://www.npmjs.com/package/ssri
-    " Note: It's not clear which ABAP kernel version is required for this
-
-    TRY.
-        cl_abap_hmac=>calculate_hmac_for_raw(
-          EXPORTING
-            if_algorithm     = 'SHA512'
-            if_key           = c_initial_key
-            if_data          = data
-          IMPORTING
-            ef_hmacb64string = DATA(sha512) ).
-
-        result = |sha512-{ sha512 }|.
-
-      CATCH cx_abap_message_digest INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
-
-  ENDMETHOD.
-
-  METHOD check_integrity.
-
-    DATA(shasum) = calc_sha1( tarball ).
-
-    IF shasum <> dist-shasum.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha1)'.
-    ENDIF.
-
-    DATA(integrity) = calc_sha512( tarball ).
-
-    IF integrity <> dist-integrity.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha512)'.
-    ENDIF.
-
-  ENDMETHOD.
 
   METHOD check_response.
 
@@ -34480,8 +35138,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
   METHOD get_abap_version.
 
     TRY.
-        DATA(semver) = NEW /apmg/cl_apm_semver_sap( ).
-        result = semver->sap_component_to_semver( 'SAP_BASIS' ).
+        result = NEW /apmg/cl_apm_semver_sap( )->sap_component_to_semver( 'SAP_BASIS' ).
       CATCH cx_abap_invalid_value INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
@@ -34536,26 +35193,19 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_integrity.
-
-    result = VALUE #(
-      shasum    = calc_sha1( tarball )
-      integrity = calc_sha512( tarball ) ).
-
-  ENDMETHOD.
-
   METHOD get_manifest_from_registry.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    DATA(manifest) = /apmg/cl_apm_pacote=>factory(
+    DATA(pacote) = /apmg/cl_apm_pacote=>factory(
       registry = registry
-      name     = name
-    )->manifest(
+      name     = name ).
+
+    DATA(json) = pacote->manifest(
       version = version
       write   = write ).
 
-    result = /apmg/cl_apm_package_json=>convert_json_to_manifest( manifest ).
+    result = /apmg/cl_apm_package_json=>convert_json_to_manifest( json ).
 
   ENDMETHOD.
 
@@ -34581,39 +35231,15 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD install_package.
+  METHOD get_versions_from_packument.
 
-    " TODO: Currently hardcoded to local packages (no transport)
-    DATA transport TYPE trkorr.
+    LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
+      INSERT <version>-key INTO TABLE result.
+    ENDLOOP.
 
-    DATA(tarball) = get_tarball_from_registry(
-      registry = registry
-      name     = name
-      tarball  = manifest-dist-tarball ).
+    DATA(semver) = NEW /apmg/cl_apm_semver_functions( ).
 
-    check_integrity(
-      tarball = tarball
-      dist    = manifest-dist ).
-
-    " FUTURE: Allow other folder logic than prefix
-    /apmg/cl_apm_installer=>install(
-      name              = name
-      version           = version
-      data              = tarball
-      package           = package
-      transport         = transport
-      enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
-      enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix
-      is_production     = is_production ).
-
-  ENDMETHOD.
-
-  METHOD uninstall_package.
-
-    /apmg/cl_apm_installer=>uninstall(
-      name    = name
-      version = version
-      package = package ).
+    result = semver->sort( result ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -39352,6 +39978,211 @@ CLASS /apmg/cl_apm_gui_css_processor IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
+
+  METHOD /apmg/if_apm_gui_event_handler~on_event.
+
+    form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
+
+    CASE ii_event->mv_action.
+      WHEN c_action-choose_package.
+
+        form_data->set(
+          iv_key = c_id-package
+          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
+        IF form_data->get( c_id-package ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+        ELSE.
+          form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+        ENDIF.
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-refresh.
+
+        form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-deprecate.
+
+        validation_log = validate_form( form_data ).
+
+        IF validation_log->is_empty( ) = abap_true.
+          DATA(params) = get_parameters( form_data ).
+
+          IF confirm_popup_version( params ) = abap_true.
+            /apmg/cl_apm_command_deprecate=>run(
+              registry     = registry
+              name         = params-name
+              range        = params-version
+              message_text = params-message ).
+          ENDIF.
+
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+        ENDIF.
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD /apmg/if_apm_gui_renderable~render.
+
+    register_handlers( ).
+
+    DATA(html) = /apmg/cl_apm_html=>create( ).
+
+    html->add( '<div class="form-container">' ).
+    html->add( form->render(
+      io_values         = form_data
+      io_validation_log = validation_log ) ).
+    html->add( '</div>' ).
+
+    ri_html = html.
+
+  ENDMETHOD.
+
+  METHOD confirm_popup_version.
+
+    DATA(question) = |This will DEPRECATE { params-name } { params-version }|.
+
+    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Deprecate Version'
+      iv_text_question         = question
+      iv_text_button_1         = 'Deprecate'
+      iv_icon_button_1         = 'ICON_REJECT'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Deprecate cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
+
+  ENDMETHOD.
+
+  METHOD constructor.
+
+    super->constructor( ).
+
+    validation_log = NEW #( ).
+    form_data      = NEW #( ).
+    form           = get_form_schema( ).
+    form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
+
+    deprecate_package = package.
+    IF deprecate_package IS NOT INITIAL.
+      form_data = read_package( deprecate_package ).
+    ENDIF.
+
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+  ENDMETHOD.
+
+  METHOD create.
+
+    DATA(component) = NEW /apmg/cl_apm_gui_dlg_deprecate( package ).
+
+    result = /apmg/cl_apm_gui_page_hoc=>create(
+      page_title      = 'Deprecate Package'
+      child_component = component ).
+
+  ENDMETHOD.
+
+  METHOD get_form_schema.
+
+    result = /apmg/cl_apm_html_form=>create(
+      iv_form_id   = 'deprecate-package-form'
+      iv_help_page = 'https://docs.abappm.com/' ). " TODO
+
+    result->text(
+      iv_name     = c_id-name
+      iv_label    = 'Name'
+    )->text(
+      iv_name     = c_id-version
+      iv_label    = 'Version or Range of Versions'
+    )->textarea(
+      iv_name     = c_id-message
+      iv_label    = 'Message'
+      iv_rows     = 3
+      iv_required = abap_true ).
+
+    result->command(
+      iv_label    = 'Deprecate'
+      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-deprecate
+    )->command(
+      iv_label    = 'Back'
+      iv_action   = /apmg/if_apm_gui_router=>c_action-go_back ).
+
+  ENDMETHOD.
+
+  METHOD get_parameters.
+
+    form_data->to_struc( CHANGING cs_container = result ).
+
+  ENDMETHOD.
+
+  METHOD read_package.
+
+    DATA(package_json) = /apmg/cl_apm_package_json=>factory( package )->get( ).
+
+    result = NEW #( ).
+
+    result->set(
+      iv_key = c_id-package
+      iv_val = package
+    )->set(
+      iv_key = c_id-name
+      iv_val = package_json-name
+    )->set(
+      iv_key = c_id-version
+      iv_val = package_json-version ).
+
+  ENDMETHOD.
+
+  METHOD validate_form.
+
+    result = form_util->validate( form_data ).
+
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
+    IF package IS NOT INITIAL.
+      TRY.
+          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+        CATCH zcx_abapgit_exception INTO DATA(error).
+          result->set(
+            iv_key = c_id-package
+            iv_val = error->get_text( ) ).
+      ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF /apmg/cl_apm_semver_ranges=>valid_range( form_data->get( c_id-version ) ) = abap_false.
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version or range' ).
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS /apmg/cl_apm_gui_dlg_init IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
@@ -39958,11 +40789,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD validate_form.
 
-    DATA package TYPE devclass.
-
     result = form_util->validate( form_data ).
 
-    package = form_data->get( c_id-package ).
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
@@ -39979,6 +40808,201 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
+
+  METHOD /apmg/if_apm_gui_event_handler~on_event.
+
+    form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
+
+    CASE ii_event->mv_action.
+      WHEN c_action-choose_package.
+
+        form_data->set(
+          iv_key = c_id-package
+          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
+        IF form_data->get( c_id-package ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+        ELSE.
+          form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+        ENDIF.
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-undeprecate.
+
+        validation_log = validate_form( form_data ).
+
+        IF validation_log->is_empty( ) = abap_true.
+          DATA(params) = get_parameters( form_data ).
+
+          IF confirm_popup_version( params ) = abap_true.
+            /apmg/cl_apm_command_deprecate=>run(
+              registry     = registry
+              name         = params-name
+              range        = params-version
+              message_text = '' ).
+          ENDIF.
+
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+        ENDIF.
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD /apmg/if_apm_gui_renderable~render.
+
+    register_handlers( ).
+
+    DATA(html) = /apmg/cl_apm_html=>create( ).
+
+    html->add( '<div class="form-container">' ).
+    html->add( form->render(
+      io_values         = form_data
+      io_validation_log = validation_log ) ).
+    html->add( '</div>' ).
+
+    ri_html = html.
+
+  ENDMETHOD.
+
+  METHOD confirm_popup_version.
+
+    DATA(question) = |This will UNDEPRECATE { params-name } { params-version }|.
+
+    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Undeprecate Version'
+      iv_text_question         = question
+      iv_text_button_1         = 'Undeprecate'
+      iv_icon_button_1         = 'ICON_ALLOW'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Undeprecate cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
+
+  ENDMETHOD.
+
+  METHOD constructor.
+
+    super->constructor( ).
+
+    validation_log = NEW #( ).
+    form_data      = NEW #( ).
+    form           = get_form_schema( ).
+    form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
+
+    undeprecate_package = package.
+    IF undeprecate_package IS NOT INITIAL.
+      form_data = read_package( undeprecate_package ).
+    ENDIF.
+
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+  ENDMETHOD.
+
+  METHOD create.
+
+    DATA(component) = NEW /apmg/cl_apm_gui_dlg_undepreca( package ).
+
+    result = /apmg/cl_apm_gui_page_hoc=>create(
+      page_title      = 'Undeprecate Package'
+      child_component = component ).
+
+  ENDMETHOD.
+
+  METHOD get_form_schema.
+
+    result = /apmg/cl_apm_html_form=>create(
+      iv_form_id   = 'undeprecate-package-form'
+      iv_help_page = 'https://docs.abappm.com/' ). " TODO
+
+    result->text(
+      iv_name  = c_id-name
+      iv_label = 'Name'
+    )->text(
+      iv_name  = c_id-version
+      iv_label = 'Version or Range of Versions' ).
+
+    result->command(
+      iv_label    = 'Undeprecate'
+      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-undeprecate
+    )->command(
+      iv_label    = 'Back'
+      iv_action   = /apmg/if_apm_gui_router=>c_action-go_back ).
+
+  ENDMETHOD.
+
+  METHOD get_parameters.
+
+    form_data->to_struc( CHANGING cs_container = result ).
+
+  ENDMETHOD.
+
+  METHOD read_package.
+
+    DATA(package_json) = /apmg/cl_apm_package_json=>factory( package )->get( ).
+
+    result = NEW #( ).
+
+    result->set(
+      iv_key = c_id-package
+      iv_val = package
+    )->set(
+      iv_key = c_id-name
+      iv_val = package_json-name
+    )->set(
+      iv_key = c_id-version
+      iv_val = package_json-version ).
+
+  ENDMETHOD.
+
+  METHOD validate_form.
+
+    result = form_util->validate( form_data ).
+
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
+    IF package IS NOT INITIAL.
+      TRY.
+          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+        CATCH zcx_abapgit_exception INTO DATA(error).
+          result->set(
+            iv_key = c_id-package
+            iv_val = error->get_text( ) ).
+      ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF /apmg/cl_apm_semver_ranges=>valid_range( form_data->get( c_id-version ) ) = abap_false.
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version or range' ).
     ENDIF.
 
   ENDMETHOD.
@@ -40167,19 +41191,17 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.
@@ -40217,7 +41239,25 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          IF confirm_popup( params ) = abap_true.
+          IF confirm_popup_package( params ) = abap_true.
+            /apmg/cl_apm_command_unpublish=>run(
+              registry = registry
+              name     = params-name ).
+          ENDIF.
+
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+        ENDIF.
+
+      WHEN c_action-unpublish_version.
+
+        validation_log = validate_form( form_data ).
+
+        IF validation_log->is_empty( ) = abap_true.
+          params = get_parameters( form_data ).
+
+          IF confirm_popup_version( params ) = abap_true.
             /apmg/cl_apm_command_unpublish=>run(
               registry = registry
               name     = params-name
@@ -40249,13 +41289,38 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD confirm_popup.
+  METHOD confirm_popup_package.
+
+    DATA(question) = |This will UNPUBLISH the COMPLETE { params-name } package | &&
+                     |from the registry (Note: Terms will apply)|.
+
+    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Unpublish Package'
+      iv_text_question         = question
+      iv_text_button_1         = 'Unpublish'
+      iv_icon_button_1         = 'ICON_EXPORT'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Unpublish cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
+
+  ENDMETHOD.
+
+  METHOD confirm_popup_version.
 
     DATA(question) = |This will UNPUBLISH { params-name } { params-version } | &&
                      |from the registry (Note: Terms will apply)|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish'
+      iv_titlebar              = 'Unpublish Version'
       iv_text_question         = question
       iv_text_button_1         = 'Unpublish'
       iv_icon_button_1         = 'ICON_EXPORT'
@@ -40283,9 +41348,9 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
-    unpubish_package = package.
-    IF unpubish_package IS NOT INITIAL.
-      form_data = read_package( unpubish_package ).
+    unpublish_package = package.
+    IF unpublish_package IS NOT INITIAL.
+      form_data = read_package( unpublish_package ).
     ENDIF.
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
@@ -40316,8 +41381,11 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
       iv_label = 'Version' ).
 
     result->command(
-      iv_label    = 'Unpublish Package'
+      iv_label    = 'Unpublish Version'
       iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-unpublish_version
+    )->command(
+      iv_label    = 'Unpublish Complete Package'
       iv_action   = c_action-unpublish_package
     )->command(
       iv_label    = 'Back'
@@ -40351,27 +41419,35 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD validate_form.
 
-    DATA package TYPE devclass.
-
     result = form_util->validate( form_data ).
 
-    package = form_data->get( c_id-package ).
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version' ).
     ENDIF.
 
   ENDMETHOD.
@@ -40458,7 +41534,9 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
   METHOD command_dialogs.
 
-    DATA(package) = CONV devclass( event->query( )->get( 'KEY' ) ).
+    DATA(id) = CONV /apmg/if_apm_package_json=>ty_package_id( event->query( )->get( 'KEY' ) ).
+
+    DATA(package) = /apmg/cl_apm_package_json=>get_package_from_id( id ).
 
     CASE event->mv_action.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_init.
@@ -40484,6 +41562,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_unpublish.
 
         result-page  = /apmg/cl_apm_gui_dlg_unpublish=>create( package ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_deprecate.
+
+        result-page  = /apmg/cl_apm_gui_dlg_deprecate=>create( package ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_undeprecate.
+
+        result-page  = /apmg/cl_apm_gui_dlg_undepreca=>create( package ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
     ENDCASE.
@@ -43206,6 +44294,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-refresh.
+
+        load_package_list( ).
+
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-select.
@@ -43333,13 +44424,23 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-list-commands' ).
 
     commands->add(
-      iv_txt      = 'Unpublish'
-      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
+      iv_txt      = 'Deprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
+    )->add(
+      iv_txt      = 'Undeprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_undeprecate }{ c_dummy_key }|
       iv_class    = c_action_class
       iv_li_class = c_action_class
     )->add(
       iv_txt      = 'Danger'
       iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = 'Unpublish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
+      iv_class    = |{ c_action_class } red|
+      iv_li_class = c_action_class
     )->add(
       iv_txt      = 'Uninstall'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
@@ -43839,7 +44940,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       fav_color = 'grey'.
     ENDIF.
 
-    html->add( |<tr data-key="{ package-package }"{ fav_class }">| ).
+    html->add( |<tr data-key="{ package-id }"{ fav_class }">| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
@@ -44018,20 +45119,94 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD /apmg/if_apm_gui_hotkeys~get_hotkey_actions.
+
+    DATA hotkey_action LIKE LINE OF rt_hotkey_actions.
+
+    hotkey_action-ui_component = 'Package View'.
+
+    hotkey_action-description = |Readme|.
+    hotkey_action-action      = c_action-view_readme.
+    hotkey_action-hotkey      = |r|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Dependencies|.
+    hotkey_action-action      = c_action-view_dependencies.
+    hotkey_action-hotkey      = |d|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Manifest|.
+    hotkey_action-action      = c_action-view_json.
+    hotkey_action-hotkey      = |m|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    " Commands
+    hotkey_action-description = |Publish|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_publish.
+    hotkey_action-hotkey      = |p|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Unpublish|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_unpublish.
+    hotkey_action-hotkey      = |q|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Uninstall|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_uninstall.
+    hotkey_action-hotkey      = |u|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+  ENDMETHOD.
+
   METHOD /apmg/if_apm_gui_menu_provider~get_menu.
 
-    ro_toolbar = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view' )->add(
-      iv_txt = 'Readme'
-      iv_act = c_action-view_readme
+    CONSTANTS:
+      c_key          TYPE string VALUE `?key=`,
+      c_action_class TYPE string VALUE `action_link`.
+
+    DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view-commands' ).
+
+    DATA(id) = /apmg/cl_apm_package_json=>get_id_from_package( package ).
+
+    commands->add(
+      iv_txt      = 'Publish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Dependencies'
-      iv_act = c_action-view_dependencies
+      iv_txt      = 'Deprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Manifest'
-      iv_act = c_action-view_json
+      iv_txt      = 'Undeprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_undeprecate }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Back'
-      iv_act = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_txt      = 'Danger'
+      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = 'Unpublish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_key }{ id }|
+      iv_class    = 'red'
+    )->add(
+      iv_txt      = 'Uninstall'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_uninstall }{ c_key }{ id }|
+      iv_class    = 'red' ).
+
+    DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view' )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'markdown' ) && ' Readme'
+      iv_act      = c_action-view_readme
+    )->add(
+      " TODO: Replace with dependencies icon
+      iv_txt      = /apmg/cl_apm_html=>icon( 'code-fork-solid' ) && ' Dependencies'
+      iv_act      = c_action-view_dependencies
+    )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'code-solid' ) && ' Manifest'
+      iv_act      = c_action-view_json
+    )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
+      io_sub      = commands
+    )->add(
+      iv_txt      = 'Back'
+      iv_act      = /apmg/if_apm_gui_router=>c_action-go_back ).
+
+    ro_toolbar = toolbar.
 
   ENDMETHOD.
 
@@ -44426,10 +45601,10 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_dependencies.
 
-        " TODO: Replace with "chain-link" icon
+        " TODO: Replace with dependencies icon
         render_header_content(
           html   = html
-          image = /apmg/cl_apm_html=>icon( 'file-alt' )
+          image = /apmg/cl_apm_html=>icon( 'code-fork-solid' )
           text  = 'Dependencies' ).
 
       WHEN c_action-view_json.
@@ -55404,7 +56579,7 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         cpu           TYPE string_table,
         db            TYPE string_table,
         private       TYPE abap_bool,
-        deprecated    TYPE abap_bool,
+        deprecated    TYPE string,
         dist          TYPE /apmg/if_apm_types=>ty_dist,
         readme        TYPE string,
         sap_package   TYPE /apmg/if_apm_types=>ty_sap_package,
@@ -55518,13 +56693,12 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
             iv_val  = dependency-range ).
         ENDLOOP.
 
-        IF is_complete = abap_false.
+        IF is_deprecated = abap_true.
+          ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_deprecated( ) ).
+        ELSEIF is_complete = abap_false.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
           IF manifest-private = abap_false.
             INSERT `/private` INTO TABLE skip_paths.
-          ENDIF.
-          IF manifest-deprecated = abap_false.
-            INSERT `/deprecated` INTO TABLE skip_paths.
           ENDIF.
         ENDIF.
 
@@ -55568,6 +56742,41 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         package  = package
         instance = result ).
       INSERT instance INTO TABLE instances.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_id_from_package.
+
+    CONSTANTS c_initial_key TYPE xstring VALUE ''.
+
+    " Get a numeric hash for package name (used in package list, action_link)
+    TRY.
+        cl_abap_hmac=>calculate_hmac_for_char(
+          EXPORTING
+            if_algorithm  = 'SHA1'
+            if_key        = c_initial_key
+            if_data       = |{ package }|
+          IMPORTING
+            ef_hmacstring = DATA(sha1) ).
+
+        TRANSLATE sha1 USING 'A0B1C2D3E4F5'.
+
+        result = sha1.
+
+      CATCH cx_abap_message_digest INTO DATA(error).
+        ASSERT 0 = 1. " open an issue
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD get_package_from_id.
+
+    DATA(list) = list( ).
+
+    READ TABLE list ASSIGNING FIELD-SYMBOL(<list>) WITH KEY id = id.
+    IF sy-subrc = 0.
+      result = <list>-package.
     ENDIF.
 
   ENDMETHOD.
@@ -55620,6 +56829,8 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
       && /apmg/if_apm_persist_apm=>c_key_extra-package_json ).
 
     LOOP AT list ASSIGNING FIELD-SYMBOL(<list>).
+      DATA(list_package) = get_package_from_key( <list>-keys ).
+
       CONVERT TIME STAMP <list>-timestamp
         TIME ZONE 'UTC'
         INTO DATE DATA(date)
@@ -55629,10 +56840,11 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
 
       DATA(result_item) = VALUE /apmg/if_apm_package_json=>ty_package(
         key            = <list>-keys
-        package        = get_package_from_key( <list>-keys )
+        package        = list_package
         changed_by     = <list>-user
         changed_at_raw = <list>-timestamp
-        changed_at     = changed_at ).
+        changed_at     = changed_at
+        id             = get_id_from_package( list_package ) ).
 
       IF instanciate = abap_true.
         TRY.
@@ -55765,10 +56977,6 @@ CLASS lcl_validate IMPLEMENTATION.
 
     IF manifest-private <> abap_false AND manifest-private <> abap_true.
       INSERT |Invalid private flag: { manifest-private }| INTO TABLE result.
-    ENDIF.
-
-    IF manifest-deprecated <> abap_false AND manifest-deprecated <> abap_true.
-      INSERT |Invalid deprecated flag: { manifest-deprecated }| INTO TABLE result.
     ENDIF.
 
     IF /apmg/cl_apm_package_json_vali=>is_valid_url( manifest-homepage ) = abap_false.
@@ -56162,12 +57370,7 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
   METHOD is_valid_version.
 
     " Check if it is a semantic version
-    TRY.
-        /apmg/cl_apm_semver=>create( version ).
-        result = abap_true.
-      CATCH /apmg/cx_apm_error.
-        result = abap_false.
-    ENDTRY.
+    result = /apmg/cl_apm_semver_functions=>valid( version ).
 
   ENDMETHOD.
 
@@ -56600,8 +57803,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         ajson->setx( '/versions:{ }' ).
         LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
           DATA(version_json) = /apmg/cl_apm_package_json=>convert_manifest_to_json(
-            manifest    = <version>-manifest
-            is_complete = is_complete ).
+            manifest      = <version>-manifest
+            is_complete   = is_complete
+            is_deprecated = is_deprecated ).
 
           DATA(ajson_version) = /apmg/cl_apm_ajson=>parse(
             iv_json            = version_json
@@ -56612,7 +57816,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
             iv_val  = ajson_version ).
         ENDLOOP.
 
-        IF is_complete = abap_false.
+        IF is_deprecated = abap_true.
+          ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_deprecated( ) ).
+        ELSEIF is_complete = abap_false.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
         ENDIF.
 
@@ -73463,7 +74669,7 @@ CLASS lcl_json_path IMPLEMENTATION.
           lx_ajson                  TYPE REF TO /apmg/cx_apm_ajson_error.
 
     TRY.
-        lo_merged = /apmg/cl_apm_ajson=>parse( `` ).
+        lo_merged = /apmg/cl_apm_ajson=>parse( `{}` ).
       CATCH /apmg/cx_apm_ajson_error INTO lx_ajson.
         zcx_abapgit_exception=>raise_with_text( lx_ajson ).
     ENDTRY.
@@ -126401,7 +127607,7 @@ AT SELECTION-SCREEN.
 
 **********************************************************************
 INTERFACE lif_abapmerge_marker.
-  CONSTANTS c_merge_timestamp TYPE string VALUE `2025-09-04T20:22:48Z`.
+  CONSTANTS c_merge_timestamp TYPE string VALUE `2025-09-25T14:35:47Z`.
   CONSTANTS c_abapinst_version TYPE string VALUE `1.2.0`.
 ENDINTERFACE.
 **********************************************************************
