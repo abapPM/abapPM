@@ -91,3 +91,24 @@ CLASS lcl_empty_zero_null IMPLEMENTATION.
   ENDMETHOD.
 
 ENDCLASS.
+
+CLASS lcl_deprecated DEFINITION FINAL.
+  PUBLIC SECTION.
+    INTERFACES /apmg/if_apm_ajson_filter.
+ENDCLASS.
+
+CLASS lcl_deprecated IMPLEMENTATION.
+
+  METHOD /apmg/if_apm_ajson_filter~keep_node.
+
+    rv_keep = boolc(
+      ( iv_visit = /apmg/if_apm_ajson_filter=>visit_type-value AND
+        ( is_node-type = /apmg/if_apm_ajson_types=>node_type-string AND is_node-value IS NOT INITIAL OR
+          is_node-type = /apmg/if_apm_ajson_types=>node_type-boolean OR
+          is_node-type = /apmg/if_apm_ajson_types=>node_type-number AND is_node-value <> 0 OR
+          is_node-name = 'deprecated' ) ) OR
+      ( iv_visit <> /apmg/if_apm_ajson_filter=>visit_type-value AND is_node-children > 0 ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.

@@ -9,12 +9,16 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* TODO: Support dist-tags
+************************************************************************
+
   PUBLIC SECTION.
 
     CLASS-METHODS run
       IMPORTING
-        !registry TYPE string
-        !package  TYPE devclass
+        !registry   TYPE string
+        !package    TYPE devclass
+        !is_dry_run TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -23,8 +27,9 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 
     METHODS execute
       IMPORTING
-        !registry TYPE string
-        !package  TYPE devclass
+        !registry   TYPE string
+        !package    TYPE devclass
+        !is_dry_run TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -129,7 +134,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     DATA(tarball) = tar->gzip( tar->save( ) ).
 
-    DATA(dist) = /apmg/cl_apm_command_utils=>get_integrity( tarball ).
+    DATA(dist) = /apmg/cl_apm_command_integrity=>get_integrity( tarball ).
 
     DATA(name) = packument-name.
     IF name(1) = '@'.
@@ -377,8 +382,9 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_publish( ).
 
     command->execute(
-      registry = registry
-      package  = package ).
+      registry   = registry
+      package    = package
+      is_dry_run = is_dry_run ).
 
   ENDMETHOD.
 

@@ -81,7 +81,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
     DATA program_texts TYPE textpool_table.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old program
@@ -102,7 +102,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
         READ TEXTPOOL program_name INTO program_texts.
 
-        IF is_dryrun IS INITIAL AND program_code <> orig_program_code.
+        IF is_dry_run IS INITIAL AND program_code <> orig_program_code.
           program_dir-name = new_object.
 
           deserialize_program(

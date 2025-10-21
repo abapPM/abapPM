@@ -15,7 +15,7 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
-        !is_dryrun     TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool DEFAULT abap_false
         !is_production TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
@@ -27,8 +27,8 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
-        !is_dryrun     TYPE abap_bool DEFAULT abap_false
-        !is_production TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool
+        !is_production TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -107,7 +107,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
       version_installed = package_json-version
       version_next      = manifest-version ).
 
-    " 4. Get dependencies
+    " 4. Get vendored dependencies
     DATA(dependencies) = get_bundle_dependencies(
       package  = package
       manifest = manifest ).
@@ -121,12 +121,12 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     /apmg/cl_apm_importer=>run(
       package       = package
       dependencies  = import_dependencies
-      is_dryrun     = is_dryrun
+      is_dry_run    = is_dry_run
       is_production = is_production ).
 
     " 7. Update package
     IF is_newer = abap_true.
-      /apmg/cl_apm_command_utils=>install_package(
+      /apmg/cl_apm_command_installer=>install_package(
         registry      = registry
         manifest      = manifest
         package       = package
@@ -164,7 +164,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
           IF sy-subrc <> 0.
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
               EXPORTING
-                text = 'Bundle dependency missing from dependencies'.
+                text = |Bundle dependency { <package_json>-name } missing from dependencies|.
           ENDIF.
           " Installed bundle dependency which will be updated (if available)
           DATA(dependency) = VALUE /apmg/if_apm_importer=>ty_dependency(
@@ -189,7 +189,9 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle>).
       IF NOT line_exists( result[ name = <bundle> ] ).
         IF NOT line_exists( manifest-dependencies[ key = <bundle> ] ).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Bundle dependency missing from dependencies'.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+            EXPORTING
+              text = |Bundle dependency { <bundle> } missing from dependencies|.
         ENDIF.
         " New bundle dependency which will be added
         dependency = VALUE /apmg/if_apm_importer=>ty_dependency(
@@ -286,7 +288,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     LOOP AT dependencies ASSIGNING <dependency>
       WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
-      /apmg/cl_apm_command_utils=>uninstall_package(
+      /apmg/cl_apm_command_installer=>uninstall_package(
         name    = <dependency>-name
         version = <dependency>-version
         package = <dependency>-package ).
@@ -302,7 +304,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     command->execute(
       registry      = registry
       package       = package
-      is_dryrun     = is_dryrun
+      is_dry_run     = is_dry_run
       is_production = is_production ).
 
   ENDMETHOD.

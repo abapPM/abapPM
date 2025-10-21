@@ -17,6 +17,8 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
         !is_production TYPE abap_bool DEFAULT abap_false
+        !is_force      TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -42,7 +44,9 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !registry      TYPE string
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
-        !is_production TYPE abap_bool DEFAULT abap_false
+        !is_production TYPE abap_bool
+        !is_force      TYPE abap_bool
+        !is_dry_run    TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -56,6 +60,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
     METHODS check_prerequisites
       IMPORTING
         !manifest TYPE /apmg/if_apm_types=>ty_manifest
+        !is_force TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -74,6 +79,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
     METHODS check_dependencies
       IMPORTING
         !manifest      TYPE /apmg/if_apm_types=>ty_manifest
+        !is_force      TYPE abap_bool DEFAULT abap_false
         !is_production TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)  TYPE ty_actions
@@ -85,6 +91,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !list         TYPE /apmg/if_apm_package_json=>ty_packages
         !dependency   TYPE /apmg/if_apm_types=>ty_dependency
         !category     TYPE string
+        !is_force     TYPE abap_bool DEFAULT abap_false
         !is_optional  TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE ty_action
@@ -97,9 +104,11 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !version     TYPE string
         !range       TYPE string
         !category    TYPE string
+        !is_force    TYPE abap_bool DEFAULT abap_false
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -128,7 +137,8 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         DATA(action) = check_dependency(
           list       = list
           dependency = <dependency>
-          category   = 'Dependency' ).
+          category   = 'Dependency'
+          is_force   = is_force ).
 
         collect_actions(
           EXPORTING
@@ -143,7 +153,8 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         action = check_dependency(
           list       = list
           dependency = <dependency>
-          category   = 'devDependency' ).
+          category   = 'devDependency'
+          is_force   = is_force ).
 
         collect_actions(
           EXPORTING
@@ -158,6 +169,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         list        = list
         dependency  = <dependency>
         category    = 'optionalDependency'
+        is_force    = is_force
         is_optional = abap_true ).
 
       collect_actions(
@@ -172,6 +184,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         list        = list
         dependency  = <dependency>
         category    = 'peerDependency'
+        is_force    = is_force
         is_optional = abap_true ).
 
       collect_actions(
@@ -194,7 +207,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         range   = dependency-range ).
 
       IF satisfies = abap_false.
-        IF is_optional = abap_true.
+        IF is_optional = abap_true OR is_force = abap_true.
           result-warning = |{ category } { dependency-key } is installed in version { <package>-version } | &&
                            |and does not satisfy { dependency-range } but is optional|.
         ELSE.
@@ -204,7 +217,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         ENDIF.
       ENDIF.
     ELSE.
-      IF is_optional = abap_true.
+      IF is_optional = abap_true OR is_force = abap_true.
         result-warning = |{ category } { dependency-key } is not installed but optional|.
       ELSE.
         result-missing = dependency.
@@ -250,24 +263,22 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         name     = 'apm'
         version  = /apmg/if_apm_version=>c_version
         range    = <dependency>-range
-        category = 'Engine' ).
+        category = 'Engine'
+        is_force = is_force ).
     ENDIF.
 
     " abap release
     READ TABLE manifest-engines ASSIGNING <dependency>
       WITH KEY key = 'abap'.
     IF sy-subrc = 0.
-      TRY.
-          DATA(abap_version) = NEW /apmg/cl_apm_semver_sap( )->sap_component_to_semver( 'SAP_BASIS' ).
-        CATCH cx_abap_invalid_value INTO DATA(error).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-      ENDTRY.
+      DATA(abap_version) = /apmg/cl_apm_command_utils=>get_abap_version( ).
 
       check_semver(
         name     = 'ABAP'
         version  = abap_version
         range    = <dependency>-range
-        category = 'Engine' ).
+        category = 'Engine'
+        is_force = is_force ).
     ENDIF.
 
     " TODO: Check os & cpu (requires "env" package which is =WIP=)
@@ -282,7 +293,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       range   = range ).
 
     IF satisfies = abap_false.
-      IF is_optional = abap_true.
+      IF is_optional = abap_true OR is_force = abap_true.
         " TODO: Log warning
       ELSE.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
@@ -329,14 +340,18 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       version  = package_json-version ).
 
     " 3. Check prerequisites (os, cpu, engines)
-    check_prerequisites( manifest ).
+    check_prerequisites(
+      manifest = manifest
+      is_force = is_force ).
 
     " TODO!: Instead of just checking if dependencies are installed, it should install them.
     " For that to happen, we need arborist to build the dependency tree and pass it here.
     " This needs to include the target SAP package for each dependency :-)
 
     " 4. Check dependencies (not recursive!)
-    DATA(actions) = check_dependencies( manifest ).
+    DATA(actions) = check_dependencies(
+      manifest = manifest
+      is_force = is_force ).
 
     check_actions( actions ).
 
@@ -344,7 +359,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     " TODO: 5. Install dependencies
 
     " 6. Get tarball from registry and install it into package
-    /apmg/cl_apm_command_utils=>install_package(
+    /apmg/cl_apm_command_installer=>install_package(
       registry      = registry
       manifest      = manifest
       package       = package
@@ -372,7 +387,9 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       registry      = registry
       package       = package
       package_json  = package_json
-      is_production = is_production ).
+      is_production = is_production
+      is_force      = is_force
+      is_dry_run    = is_dry_run ).
 
   ENDMETHOD.
 ENDCLASS.

@@ -146,7 +146,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
   INCLUDE TYPE ty_package_json.
   TYPES:
     dist          TYPE ty_dist,
-    deprecated    TYPE abap_bool,
+    deprecated    TYPE string,
     _id           TYPE string,
     _abap_version TYPE string,
     _apm_version  TYPE string,
@@ -169,7 +169,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       cpu                   TYPE string_table,
       db                    TYPE string_table,
       dist                  TYPE ty_dist,
-      deprecated            TYPE abap_bool,
+      deprecated            TYPE string,
     END OF ty_manifest_abbreviated.
 
   " *** PACKUMENT ***

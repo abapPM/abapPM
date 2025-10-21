@@ -304,12 +304,7 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
   METHOD is_valid_version.
 
     " Check if it is a semantic version
-    TRY.
-        /apmg/cl_apm_semver=>create( version ).
-        result = abap_true.
-      CATCH /apmg/cx_apm_error.
-        result = abap_false.
-    ENDTRY.
+    result = /apmg/cl_apm_semver_functions=>valid( version ).
 
   ENDMETHOD.
 

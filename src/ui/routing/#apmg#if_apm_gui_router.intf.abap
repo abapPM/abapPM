@@ -8,11 +8,13 @@ INTERFACE /apmg/if_apm_gui_router PUBLIC.
 ************************************************************************
   CONSTANTS:
     BEGIN OF c_action,
+      apm_deprecate        TYPE string VALUE 'apm_deprecate',
       apm_home             TYPE string VALUE 'apm_home',
       apm_init             TYPE string VALUE 'apm_init',
       apm_install          TYPE string VALUE 'apm_install',
       apm_uninstall        TYPE string VALUE 'apm_uninstall',
       apm_publish          TYPE string VALUE 'apm_publish',
+      apm_undeprecate      TYPE string VALUE 'apm_undeprecate',
       apm_unpublish        TYPE string VALUE 'apm_unpublish',
       apm_update           TYPE string VALUE 'apm_update',
       change_order_by      TYPE string VALUE 'change_order_by',

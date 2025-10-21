@@ -39,6 +39,11 @@ CLASS /apmg/cl_apm_ajson_extensions DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_ajson_filter.
 
+    "! Like filter_empty_zero_null but keep "deprecated" value
+    CLASS-METHODS filter_deprecated
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_filter.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -46,6 +51,11 @@ ENDCLASS.
 
 
 CLASS /apmg/cl_apm_ajson_extensions IMPLEMENTATION.
+
+
+  METHOD filter_deprecated.
+    CREATE OBJECT result TYPE lcl_deprecated.
+  ENDMETHOD.
 
 
   METHOD filter_empty_zero_null.

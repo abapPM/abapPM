@@ -35,7 +35,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
 
   METHOD /apmg/if_apm_object~import.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old class
@@ -68,7 +68,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_dryrun IS INITIAL AND class_code <> orig_code.
+        IF is_dry_run IS INITIAL AND class_code <> orig_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
@@ -120,7 +120,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
         ENDIF.
 
 
-        IF is_dryrun IS INITIAL.
+        IF is_dry_run IS INITIAL.
           zif_abapgit_oo_object_fnc~generate_locals(
             iv_package               = new_package
             iv_version               = class_metadata-unicode

@@ -1,20 +1,19 @@
-CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
+CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
   PUBLIC
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
 
 ************************************************************************
-* apm GUI Dialog for Publish Command
+* apm GUI Dialog for Deprecate Command
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES:
-      /apmg/if_apm_gui_event_handler,
-      /apmg/if_apm_gui_renderable.
+    INTERFACES /apmg/if_apm_gui_event_handler.
+    INTERFACES /apmg/if_apm_gui_renderable.
 
     CLASS-METHODS create
       IMPORTING
@@ -38,6 +37,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         package TYPE devclass,
         name    TYPE string,
         version TYPE string,
+        message TYPE string,
       END OF ty_params.
 
     CONSTANTS:
@@ -45,22 +45,23 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         package TYPE string VALUE 'package',
         name    TYPE string VALUE 'name',
         version TYPE string VALUE 'version',
+        message TYPE string VALUE 'message',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
-        choose_package  TYPE string VALUE 'choose-package',
-        publish_package TYPE string VALUE 'publish-package',
-        refresh         TYPE string VALUE 'refresh',
+        choose_package TYPE string VALUE 'choose-package',
+        deprecate      TYPE string VALUE 'deprecate',
+        refresh        TYPE string VALUE 'refresh',
       END OF c_action.
 
     DATA:
-      registry       TYPE string,
-      pubish_package TYPE devclass,
-      form           TYPE REF TO /apmg/cl_apm_html_form,
-      form_data      TYPE REF TO /apmg/cl_apm_string_map,
-      form_util      TYPE REF TO /apmg/cl_apm_html_form_utils,
-      validation_log TYPE REF TO /apmg/cl_apm_string_map.
+      registry          TYPE string,
+      deprecate_package TYPE devclass,
+      form              TYPE REF TO /apmg/cl_apm_html_form,
+      form_data         TYPE REF TO /apmg/cl_apm_string_map,
+      form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log    TYPE REF TO /apmg/cl_apm_string_map.
 
     METHODS get_form_schema
       RETURNING
@@ -88,7 +89,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup
+    METHODS confirm_popup_version
       IMPORTING
         !params       TYPE ty_params
       RETURNING
@@ -100,7 +101,7 @@ ENDCLASS.
 
 
 
-CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
+CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
@@ -126,17 +127,19 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
         form_data = read_package( |{ form_data->get( c_id-package ) }| ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
-      WHEN c_action-publish_package.
+      WHEN c_action-deprecate.
 
         validation_log = validate_form( form_data ).
 
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          IF confirm_popup( params ) = abap_true.
-            /apmg/cl_apm_command_publish=>run(
+          IF confirm_popup_version( params ) = abap_true.
+            /apmg/cl_apm_command_deprecate=>run(
               registry     = registry
-              package      = params-package ).
+              name         = params-name
+              range        = params-version
+              message_text = params-message ).
           ENDIF.
 
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
@@ -166,17 +169,15 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD confirm_popup.
+  METHOD confirm_popup_version.
 
-    DATA(question) = |This will PUBLISH all objects in { params-package } | &&
-                     |including subpackages as { params-name } { params-version } | &&
-                     |to the registry|.
+    DATA(question) = |This will DEPRECATE { params-name } { params-version }|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Publish'
+      iv_titlebar              = 'Deprecate Version'
       iv_text_question         = question
-      iv_text_button_1         = 'Publish'
-      iv_icon_button_1         = 'ICON_EXPORT'
+      iv_text_button_1         = 'Deprecate'
+      iv_icon_button_1         = 'ICON_REJECT'
       iv_text_button_2         = 'Cancel'
       iv_icon_button_2         = 'ICON_CANCEL'
       iv_default_button        = '2'
@@ -184,7 +185,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
 
     IF answer = '2'.
-      MESSAGE 'Publish cancelled' TYPE 'S'.
+      MESSAGE 'Deprecate cancelled' TYPE 'S'.
       RETURN.
     ENDIF.
 
@@ -202,9 +203,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
-    pubish_package = package.
-    IF pubish_package IS NOT INITIAL.
-      form_data = read_package( pubish_package ).
+    deprecate_package = package.
+    IF deprecate_package IS NOT INITIAL.
+      form_data = read_package( deprecate_package ).
     ENDIF.
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
@@ -214,10 +215,10 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD create.
 
-    DATA(component) = NEW /apmg/cl_apm_gui_dlg_publish( package ).
+    DATA(component) = NEW /apmg/cl_apm_gui_dlg_deprecate( package ).
 
     result = /apmg/cl_apm_gui_page_hoc=>create(
-      page_title      = 'Publish Package'
+      page_title      = 'Deprecate Package'
       child_component = component ).
 
   ENDMETHOD.
@@ -226,37 +227,28 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   METHOD get_form_schema.
 
     result = /apmg/cl_apm_html_form=>create(
-      iv_form_id   = 'publish-package-form'
+      iv_form_id   = 'deprecate-package-form'
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
-      iv_name        = c_id-package
-      iv_side_action = c_action-choose_package
-      iv_required    = abap_true
-      iv_upper_case  = abap_true
-      iv_label       = 'Package'
-      iv_hint        = 'SAP package'
-      iv_placeholder = 'Z... / $...'
-      iv_max         = 30
+      iv_name     = c_id-name
+      iv_label    = 'Name'
     )->text(
-      iv_name        = c_id-name
-      iv_label       = 'Name'
-      iv_readonly    = abap_true
-    )->text(
-      iv_name        = c_id-version
-      iv_label       = 'Version'
-      iv_readonly    = abap_true ).
+      iv_name     = c_id-version
+      iv_label    = 'Version or Range of Versions'
+    )->textarea(
+      iv_name     = c_id-message
+      iv_label    = 'Message'
+      iv_rows     = 3
+      iv_required = abap_true ).
 
     result->command(
-      iv_label       = 'Publish Package'
-      iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-publish_package
+      iv_label    = 'Deprecate'
+      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-deprecate
     )->command(
-      iv_label       = 'Refresh'
-      iv_action      = c_action-refresh
-    )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label    = 'Back'
+      iv_action   = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 
@@ -295,19 +287,29 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF /apmg/cl_apm_semver_ranges=>valid_range( form_data->get( c_id-version ) ) = abap_false.
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version or range' ).
     ENDIF.
 
   ENDMETHOD.

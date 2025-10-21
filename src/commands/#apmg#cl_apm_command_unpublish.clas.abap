@@ -15,7 +15,7 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       IMPORTING
         !registry TYPE string
         !name     TYPE string
-        !version  TYPE string
+        !version  TYPE string OPTIONAL
       RAISING
         /apmg/cx_apm_error.
 
@@ -43,6 +43,16 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       IMPORTING
         !packument    TYPE /apmg/if_apm_types=>ty_packument
         !version      TYPE string
+        !tarball      TYPE string
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS update_dist_tags
+      IMPORTING
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+        !version      TYPE string
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
       RAISING
@@ -58,7 +68,16 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS unpublish_package
+    METHODS unpublish_complete_package
+      IMPORTING
+        !registry     TYPE string
+        !packument    TYPE /apmg/if_apm_types=>ty_packument
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS unpublish_package_version
       IMPORTING
         !registry     TYPE string
         !packument    TYPE /apmg/if_apm_types=>ty_packument
@@ -78,7 +97,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
     DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
       registry = registry
-      url      = |{ tarball }/rev/{ packument-_rev }|
+      url      = |{ tarball }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-delete ).
 
     result = /apmg/cl_apm_command_utils=>check_response(
@@ -96,35 +115,57 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
       name     = name
       write    = abap_true ).
 
-    " 2. Get tarball name
-    DATA(tarball) = get_tarball(
-      packument = packument
-      version   = version ).
+    IF version IS INITIAL.
 
-    " 3. Remove version from packument
-    packument = remove_version(
-      packument = packument
-      version   = version ).
+      " 2a. Delete complete package
+      DATA(message) = unpublish_complete_package(
+        registry  = registry
+        packument = packument ).
 
-    " 4. Unpublish package from registry
-    DATA(message) = unpublish_package(
-      registry  = registry
-      packument = packument ).
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
 
-    IF message IS NOT INITIAL.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
-    ENDIF.
+      MESSAGE 'Complete package unpublished successfully' TYPE 'S'.
 
-    " 5. Delete tarball from registry
-    message = delete_tarball(
-      registry  = registry
-      packument = packument
-      tarball   = tarball ).
-
-    IF message IS INITIAL.
-      MESSAGE 'Package version successfully unpublished' TYPE 'S'.
     ELSE.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+
+      " 2b. Get tarball name
+      DATA(tarball) = get_tarball(
+        packument = packument
+        version   = version ).
+
+      " 3. Remove version from packument
+      packument = remove_version(
+        packument = packument
+        version   = version
+        tarball   = tarball ).
+
+      " 4. Update LATEST dist-tag (and others)
+      packument = update_dist_tags(
+        packument = packument
+        version   = version ).
+
+      " 5. Unpublish package from registry
+      message = unpublish_package_version(
+        registry  = registry
+        packument = packument ).
+
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
+
+      " 6. Delete tarball from registry
+      message = delete_tarball(
+        registry  = registry
+        packument = packument
+        tarball   = tarball ).
+
+      IF message IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+      ENDIF.
+
+      MESSAGE 'Package version unpublished successfully' TYPE 'S'.
     ENDIF.
 
   ENDMETHOD.
@@ -155,7 +196,15 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
           text = |Version { version } does not exist in package { packument-name }|.
     ENDIF.
 
+    IF lines( result-versions ) = 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |Version { version } is the last version of package { packument-name }. You may unpublish the complete package, instead|.
+    ENDIF.
+
     DELETE result-time WHERE key = version ##SUBRC_OK.
+
+    DELETE result-_attachments WHERE key = tarball.
 
   ENDMETHOD.
 
@@ -172,19 +221,41 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD unpublish_package.
+  METHOD unpublish_complete_package.
+
+    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+      registry = registry
+      url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
+      method   = /apmg/if_apm_http_agent=>c_method-delete ).
+
+    result = /apmg/cl_apm_command_utils=>check_response(
+      response = response
+      text     = 'Error unpublishing complete package' ).
+
+  ENDMETHOD.
+
+
+  METHOD unpublish_package_version.
 
     DATA(payload) = /apmg/cl_apm_pacote=>convert_packument_to_json( packument ).
 
     DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
       registry = registry
-      url      = |{ registry }/{ packument-name }/rev/{ packument-_rev }|
+      url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-put
       payload  = payload ).
 
     result = /apmg/cl_apm_command_utils=>check_response(
       response = response
-      text     = 'Error unpublishing package' ).
+      text     = 'Error unpublishing package version' ).
+
+  ENDMETHOD.
+
+
+  METHOD update_dist_tags.
+
+    result = packument.
+
 
   ENDMETHOD.
 ENDCLASS.

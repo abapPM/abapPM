@@ -60,10 +60,6 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Invalid private flag: { manifest-private }| INTO TABLE result.
     ENDIF.
 
-    IF manifest-deprecated <> abap_false AND manifest-deprecated <> abap_true.
-      INSERT |Invalid deprecated flag: { manifest-deprecated }| INTO TABLE result.
-    ENDIF.
-
     IF /apmg/cl_apm_package_json_vali=>is_valid_url( manifest-homepage ) = abap_false.
       INSERT |Invalid homepage URL: { manifest-homepage }| INTO TABLE result.
     ENDIF.

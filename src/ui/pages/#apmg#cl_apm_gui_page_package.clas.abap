@@ -5,17 +5,16 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* Markdown Extension for abapGit
+* apm GUI Package View
 *
-* https://github.com/Marc-Bernard-Tools/ABAP-Markdown-Ext-for-abapGit
-*
-* Copyright 2023 Marc Bernard <https://marcbernardtools.com/>
+* Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 
     INTERFACES:
       /apmg/if_apm_gui_event_handler,
+      /apmg/if_apm_gui_hotkeys,
       /apmg/if_apm_gui_renderable,
       /apmg/if_apm_gui_menu_provider.
 
@@ -197,6 +196,7 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
         !html TYPE REF TO /apmg/if_apm_html
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -261,20 +261,95 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD /apmg/if_apm_gui_hotkeys~get_hotkey_actions.
+
+    DATA hotkey_action LIKE LINE OF rt_hotkey_actions.
+
+    hotkey_action-ui_component = 'Package View'.
+
+    hotkey_action-description = |Readme|.
+    hotkey_action-action      = c_action-view_readme.
+    hotkey_action-hotkey      = |r|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Dependencies|.
+    hotkey_action-action      = c_action-view_dependencies.
+    hotkey_action-hotkey      = |d|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Manifest|.
+    hotkey_action-action      = c_action-view_json.
+    hotkey_action-hotkey      = |m|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    " Commands
+    hotkey_action-description = |Publish|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_publish.
+    hotkey_action-hotkey      = |p|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Unpublish|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_unpublish.
+    hotkey_action-hotkey      = |q|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Uninstall|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_uninstall.
+    hotkey_action-hotkey      = |u|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_gui_menu_provider~get_menu.
 
-    ro_toolbar = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view' )->add(
-      iv_txt = 'Readme'
-      iv_act = c_action-view_readme
+    CONSTANTS:
+      c_key          TYPE string VALUE `?key=`,
+      c_action_class TYPE string VALUE `action_link`.
+
+    DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view-commands' ).
+
+    DATA(id) = /apmg/cl_apm_package_json=>get_id_from_package( package ).
+
+    commands->add(
+      iv_txt      = 'Publish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Dependencies'
-      iv_act = c_action-view_dependencies
+      iv_txt      = 'Deprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Manifest'
-      iv_act = c_action-view_json
+      iv_txt      = 'Undeprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_undeprecate }{ c_key }{ id }|
     )->add(
-      iv_txt = 'Back'
-      iv_act = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_txt      = 'Danger'
+      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = 'Unpublish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_key }{ id }|
+      iv_class    = 'red'
+    )->add(
+      iv_txt      = 'Uninstall'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_uninstall }{ c_key }{ id }|
+      iv_class    = 'red' ).
+
+    DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view' )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'markdown' ) && ' Readme'
+      iv_act      = c_action-view_readme
+    )->add(
+      " TODO: Replace with dependencies icon
+      iv_txt      = /apmg/cl_apm_html=>icon( 'code-fork-solid' ) && ' Dependencies'
+      iv_act      = c_action-view_dependencies
+    )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'code-solid' ) && ' Manifest'
+      iv_act      = c_action-view_json
+    )->add(
+      iv_txt      = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
+      io_sub      = commands
+    )->add(
+      iv_txt      = 'Back'
+      iv_act      = /apmg/if_apm_gui_router=>c_action-go_back ).
+
+    ro_toolbar = toolbar.
 
   ENDMETHOD.
 
@@ -686,10 +761,10 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-view_dependencies.
 
-        " TODO: Replace with "chain-link" icon
+        " TODO: Replace with dependencies icon
         render_header_content(
           html   = html
-          image = /apmg/cl_apm_html=>icon( 'file-alt' )
+          image = /apmg/cl_apm_html=>icon( 'code-fork-solid' )
           text  = 'Dependencies' ).
 
       WHEN c_action-view_json.

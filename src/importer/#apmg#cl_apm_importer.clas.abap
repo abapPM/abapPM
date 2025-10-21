@@ -19,7 +19,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !object_names  TYPE /apmg/if_apm_importer=>ty_object_names OPTIONAL
         !transport     TYPE trkorr OPTIONAL
         !default_rule  TYPE string DEFAULT /apmg/if_apm_importer=>c_default_import_rule
-        !is_dryrun     TYPE abap_bool DEFAULT abap_true
+        !is_dry_run    TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
@@ -71,8 +71,8 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CLASS-METHODS create_packages
       IMPORTING
-        !packages  TYPE /apmg/if_apm_importer=>ty_packages
-        !is_dryrun TYPE abap_bool DEFAULT abap_true
+        !packages   TYPE /apmg/if_apm_importer=>ty_packages
+        !is_dry_run TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
@@ -80,7 +80,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       IMPORTING
         !map           TYPE /apmg/if_apm_importer=>ty_map
         !transport     TYPE trkorr
-        !is_dryrun     TYPE abap_bool DEFAULT abap_true
+        !is_dry_run    TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
@@ -116,7 +116,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             IF <package>-target_package(1) = '$'.
               package-dlvunit = 'LOCAL'.
             ENDIF.
-            IF is_dryrun = abap_false.
+            IF is_dry_run = abap_false.
               target->create( package ).
             ENDIF.
           ENDIF.
@@ -373,7 +373,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
       " XXX: Switch for apm self-update
       " Some modules are used by the importer and don't support self-update
-      " If these items are changed, it would dump, so we skip them
+      " If these items are changed, it would dump, so we skip them (requires manual update)
       IF new_item-package CP '/APMG/APM*' AND
         ( old_item-obj_name CP '/APMG/CX_ERROR*' OR
           old_item-obj_name CP 'Z++_AJSON*' OR
@@ -400,7 +400,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       ENDTRY.
 
       TRY.
-          IF is_dryrun = abap_false.
+          IF is_dry_run = abap_false.
             zcl_abapgit_factory=>get_cts_api( )->insert_transport_object(
               iv_object   = new_item-obj_type
               iv_obj_name = new_item-obj_name
@@ -423,11 +423,11 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             new_package   = new_item-package
             language      = new_item-language
             map           = map
-            is_dryrun     = is_dryrun
+            is_dry_run    = is_dry_run
             is_production = is_production ).
 
           IF is_logging = abap_true.
-            IF is_dryrun = abap_true.
+            IF is_dry_run = abap_true.
               WRITE 'Dry run' COLOR COL_TOTAL.
             ELSE.
               WRITE 'Success' COLOR COL_POSITIVE.
@@ -489,14 +489,14 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     " 6. Create packages (if necessary)
     create_packages(
-      packages  = packages
-      is_dryrun = is_dryrun ).
+      packages   = packages
+      is_dry_run = is_dry_run ).
 
     " 7. Import the tarballs using the mapping
     import_objects(
       map           = map
       transport     = transport
-      is_dryrun     = is_dryrun
+      is_dry_run    = is_dry_run
       is_production = is_production ).
 
     " 8. Save packages to apm

@@ -62,6 +62,18 @@ CLASS /apmg/cl_apm_package_json DEFINITION
       RETURNING
         VALUE(result) TYPE devclass.
 
+    CLASS-METHODS get_package_from_id
+      IMPORTING
+        !id           TYPE /apmg/if_apm_package_json=>ty_package_id
+      RETURNING
+        VALUE(result) TYPE devclass.
+
+    CLASS-METHODS get_id_from_package
+      IMPORTING
+        !package      TYPE devclass
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_package_json=>ty_package_id.
+
     CLASS-METHODS convert_json_to_manifest
       IMPORTING
         !json         TYPE string
@@ -83,6 +95,7 @@ CLASS /apmg/cl_apm_package_json DEFINITION
         !manifest        TYPE /apmg/if_apm_types=>ty_manifest
         !is_package_json TYPE abap_bool DEFAULT abap_false
         !is_complete     TYPE abap_bool DEFAULT abap_false
+        !is_deprecated   TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result)    TYPE string
       RAISING
@@ -294,7 +307,7 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         cpu           TYPE string_table,
         db            TYPE string_table,
         private       TYPE abap_bool,
-        deprecated    TYPE abap_bool,
+        deprecated    TYPE string,
         dist          TYPE /apmg/if_apm_types=>ty_dist,
         readme        TYPE string,
         sap_package   TYPE /apmg/if_apm_types=>ty_sap_package,
@@ -410,13 +423,12 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
             iv_val  = dependency-range ).
         ENDLOOP.
 
-        IF is_complete = abap_false.
+        IF is_deprecated = abap_true.
+          ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_deprecated( ) ).
+        ELSEIF is_complete = abap_false.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
           IF manifest-private = abap_false.
             INSERT `/private` INTO TABLE skip_paths.
-          ENDIF.
-          IF manifest-deprecated = abap_false.
-            INSERT `/deprecated` INTO TABLE skip_paths.
           ENDIF.
         ENDIF.
 
@@ -461,6 +473,43 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         package  = package
         instance = result ).
       INSERT instance INTO TABLE instances.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_id_from_package.
+
+    CONSTANTS c_initial_key TYPE xstring VALUE ''.
+
+    " Get a numeric hash for package name (used in package list, action_link)
+    TRY.
+        cl_abap_hmac=>calculate_hmac_for_char(
+          EXPORTING
+            if_algorithm  = 'SHA1'
+            if_key        = c_initial_key
+            if_data       = |{ package }|
+          IMPORTING
+            ef_hmacstring = DATA(sha1) ).
+
+        TRANSLATE sha1 USING 'A0B1C2D3E4F5'.
+
+        result = sha1.
+
+      CATCH cx_abap_message_digest INTO DATA(error).
+        ASSERT 0 = 1. " open an issue
+    ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD get_package_from_id.
+
+    DATA(list) = list( ).
+
+    READ TABLE list ASSIGNING FIELD-SYMBOL(<list>) WITH KEY id = id.
+    IF sy-subrc = 0.
+      result = <list>-package.
     ENDIF.
 
   ENDMETHOD.
@@ -518,6 +567,8 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
       && /apmg/if_apm_persist_apm=>c_key_extra-package_json ).
 
     LOOP AT list ASSIGNING FIELD-SYMBOL(<list>).
+      DATA(list_package) = get_package_from_key( <list>-keys ).
+
       CONVERT TIME STAMP <list>-timestamp
         TIME ZONE 'UTC'
         INTO DATE DATA(date)
@@ -527,10 +578,11 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
 
       DATA(result_item) = VALUE /apmg/if_apm_package_json=>ty_package(
         key            = <list>-keys
-        package        = get_package_from_key( <list>-keys )
+        package        = list_package
         changed_by     = <list>-user
         changed_at_raw = <list>-timestamp
-        changed_at     = changed_at ).
+        changed_at     = changed_at
+        id             = get_id_from_package( list_package ) ).
 
       IF instanciate = abap_true.
         TRY.

@@ -29,7 +29,7 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
 
   METHOD /apmg/if_apm_object~import.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old interface
@@ -59,7 +59,7 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_dryrun IS INITIAL AND interface_code <> orig_interface_code.
+        IF is_dry_run IS INITIAL AND interface_code <> orig_interface_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false

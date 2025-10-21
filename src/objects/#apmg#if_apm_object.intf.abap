@@ -15,7 +15,7 @@ INTERFACE /apmg/if_apm_object PUBLIC.
       !language      TYPE ty_item-language
       !map           TYPE /apmg/if_apm_importer=>ty_map
       !files         TYPE REF TO /apmg/if_apm_file_importer OPTIONAL
-      !is_dryrun     TYPE abap_bool DEFAULT abap_true
+      !is_dry_run    TYPE abap_bool DEFAULT abap_true
       !is_production TYPE abap_bool DEFAULT abap_true
     RAISING
       /apmg/cx_apm_error.

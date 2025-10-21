@@ -58,7 +58,7 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
 
     DATA(package_json) = check_package( package ).
 
-    /apmg/cl_apm_command_utils=>uninstall_package(
+    /apmg/cl_apm_command_installer=>uninstall_package(
       name    = package_json-name
       version = package_json-version
       package = package ).

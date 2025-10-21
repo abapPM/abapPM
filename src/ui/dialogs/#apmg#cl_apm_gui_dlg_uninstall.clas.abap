@@ -292,19 +292,17 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.

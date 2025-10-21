@@ -16,6 +16,7 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
   INTERFACES /apmg/if_apm_types.
 
   TYPES:
+    ty_package_id TYPE n LENGTH 40, " numeric hash
     BEGIN OF ty_package,
       key                   TYPE /apmg/if_apm_persist_apm=>ty_key,
       package               TYPE /apmg/if_apm_types=>ty_devclass,
@@ -34,6 +35,7 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
       write_protected       TYPE abap_bool,    " settings
       labels                TYPE string_table, " settings
       instance              TYPE REF TO /apmg/if_apm_package_json,
+      id                    TYPE ty_package_id,
     END OF ty_package,
     ty_packages TYPE STANDARD TABLE OF ty_package
       WITH NON-UNIQUE KEY primary_key COMPONENTS key

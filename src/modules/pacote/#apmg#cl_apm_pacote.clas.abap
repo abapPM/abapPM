@@ -60,10 +60,11 @@ CLASS /apmg/cl_apm_pacote DEFINITION
 
     CLASS-METHODS convert_packument_to_json
       IMPORTING
-        !packument    TYPE /apmg/if_apm_types=>ty_packument
-        !is_complete  TYPE abap_bool DEFAULT abap_false
+        !packument     TYPE /apmg/if_apm_types=>ty_packument
+        !is_complete   TYPE abap_bool DEFAULT abap_false
+        !is_deprecated TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE string
+        VALUE(result)  TYPE string
       RAISING
         /apmg/cx_apm_error.
 
@@ -299,12 +300,6 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF registry <> 'https://playground.abappm.com'.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-        EXPORTING
-          text = 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)'.
-    ENDIF.
-
     me->registry = registry.
 
     pacote-key  = get_packument_key( name ).
@@ -466,8 +461,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         ajson->setx( '/versions:{ }' ).
         LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
           DATA(version_json) = /apmg/cl_apm_package_json=>convert_manifest_to_json(
-            manifest    = <version>-manifest
-            is_complete = is_complete ).
+            manifest      = <version>-manifest
+            is_complete   = is_complete
+            is_deprecated = is_deprecated ).
 
           DATA(ajson_version) = /apmg/cl_apm_ajson=>parse(
             iv_json            = version_json
@@ -478,7 +474,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
             iv_val  = ajson_version ).
         ENDLOOP.
 
-        IF is_complete = abap_false.
+        IF is_deprecated = abap_true.
+          ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_deprecated( ) ).
+        ELSEIF is_complete = abap_false.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
         ENDIF.
 

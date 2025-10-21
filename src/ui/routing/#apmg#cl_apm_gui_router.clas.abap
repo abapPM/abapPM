@@ -196,7 +196,9 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
   METHOD command_dialogs.
 
-    DATA(package) = CONV devclass( event->query( )->get( 'KEY' ) ).
+    DATA(id) = CONV /apmg/if_apm_package_json=>ty_package_id( event->query( )->get( 'KEY' ) ).
+
+    DATA(package) = /apmg/cl_apm_package_json=>get_package_from_id( id ).
 
     CASE event->mv_action.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_init.
@@ -222,6 +224,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_unpublish.
 
         result-page  = /apmg/cl_apm_gui_dlg_unpublish=>create( package ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_deprecate.
+
+        result-page  = /apmg/cl_apm_gui_dlg_deprecate=>create( package ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_undeprecate.
+
+        result-page  = /apmg/cl_apm_gui_dlg_undepreca=>create( package ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
     ENDCASE.

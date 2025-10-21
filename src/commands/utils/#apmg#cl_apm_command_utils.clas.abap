@@ -59,37 +59,11 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS install_package
+    CLASS-METHODS get_versions_from_packument
       IMPORTING
-        !registry      TYPE string
-        !manifest      TYPE /apmg/if_apm_types=>ty_manifest
-        !package       TYPE devclass
-        !name          TYPE string
-        !version       TYPE string
-        !is_production TYPE abap_bool
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS uninstall_package
-      IMPORTING
-        !name    TYPE string
-        !version TYPE string
-        !package TYPE devclass
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS check_integrity
-      IMPORTING
-        !tarball TYPE xstring
-        !dist    TYPE /apmg/if_apm_types=>ty_dist
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS get_integrity
-      IMPORTING
-        !tarball      TYPE xstring
+        packument     TYPE /apmg/if_apm_types=>ty_packument
       RETURNING
-        VALUE(result) TYPE /apmg/if_apm_types=>ty_dist
+        VALUE(result) TYPE string_table
       RAISING
         /apmg/cx_apm_error.
 
@@ -119,8 +93,6 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CONSTANTS c_initial_key TYPE xstring VALUE ''.
-
     CONSTANTS:
       BEGIN OF c_header,
         apm_command   TYPE string VALUE 'apm-command',
@@ -135,89 +107,11 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS calc_sha1
-      IMPORTING
-        !data         TYPE xstring
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        /apmg/cx_apm_error.
-
-    CLASS-METHODS calc_sha512
-      IMPORTING
-        !data         TYPE xstring
-      RETURNING
-        VALUE(result) TYPE string
-      RAISING
-        /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
 
 CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
-
-
-  METHOD calc_sha1.
-
-    TRY.
-        " Simple Shasum
-        cl_abap_hmac=>calculate_hmac_for_raw(
-          EXPORTING
-            if_algorithm  = 'SHA1'
-            if_key        = c_initial_key
-            if_data       = data
-          IMPORTING
-            ef_hmacstring = DATA(sha1) ).
-
-        result = to_lower( sha1 ).
-
-      CATCH cx_abap_message_digest INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD calc_sha512.
-
-    " Integrity Checksum (sha512)
-    " https://www.npmjs.com/package/ssri
-    " Note: It's not clear which ABAP kernel version is required for this
-
-    TRY.
-        cl_abap_hmac=>calculate_hmac_for_raw(
-          EXPORTING
-            if_algorithm     = 'SHA512'
-            if_key           = c_initial_key
-            if_data          = data
-          IMPORTING
-            ef_hmacb64string = DATA(sha512) ).
-
-        result = |sha512-{ sha512 }|.
-
-      CATCH cx_abap_message_digest INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
-
-  ENDMETHOD.
-
-
-  METHOD check_integrity.
-
-    DATA(shasum) = calc_sha1( tarball ).
-
-    IF shasum <> dist-shasum.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha1)'.
-    ENDIF.
-
-    DATA(integrity) = calc_sha512( tarball ).
-
-    IF integrity <> dist-integrity.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Checksum error for tarball (sha512)'.
-    ENDIF.
-
-  ENDMETHOD.
 
 
   METHOD check_response.
@@ -267,8 +161,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
   METHOD get_abap_version.
 
     TRY.
-        DATA(semver) = NEW /apmg/cl_apm_semver_sap( ).
-        result = semver->sap_component_to_semver( 'SAP_BASIS' ).
+        result = NEW /apmg/cl_apm_semver_sap( )->sap_component_to_semver( 'SAP_BASIS' ).
       CATCH cx_abap_invalid_value INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
@@ -326,27 +219,19 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_integrity.
-
-    result = VALUE #(
-      shasum    = calc_sha1( tarball )
-      integrity = calc_sha512( tarball ) ).
-
-  ENDMETHOD.
-
-
   METHOD get_manifest_from_registry.
 
     " The abbreviated manifest would be sufficient for installer
     " however we also want to get the description and readme
-    DATA(manifest) = /apmg/cl_apm_pacote=>factory(
+    DATA(pacote) = /apmg/cl_apm_pacote=>factory(
       registry = registry
-      name     = name
-    )->manifest(
+      name     = name ).
+
+    DATA(json) = pacote->manifest(
       version = version
       write   = write ).
 
-    result = /apmg/cl_apm_package_json=>convert_json_to_manifest( manifest ).
+    result = /apmg/cl_apm_package_json=>convert_json_to_manifest( json ).
 
   ENDMETHOD.
 
@@ -375,40 +260,15 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD install_package.
+  METHOD get_versions_from_packument.
 
-    " TODO: Currently hardcoded to local packages (no transport)
-    DATA transport TYPE trkorr.
+    LOOP AT packument-versions ASSIGNING FIELD-SYMBOL(<version>).
+      INSERT <version>-key INTO TABLE result.
+    ENDLOOP.
 
-    DATA(tarball) = get_tarball_from_registry(
-      registry = registry
-      name     = name
-      tarball  = manifest-dist-tarball ).
+    DATA(semver) = NEW /apmg/cl_apm_semver_functions( ).
 
-    check_integrity(
-      tarball = tarball
-      dist    = manifest-dist ).
-
-    " FUTURE: Allow other folder logic than prefix
-    /apmg/cl_apm_installer=>install(
-      name              = name
-      version           = version
-      data              = tarball
-      package           = package
-      transport         = transport
-      enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
-      enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix
-      is_production     = is_production ).
-
-  ENDMETHOD.
-
-
-  METHOD uninstall_package.
-
-    /apmg/cl_apm_installer=>uninstall(
-      name    = name
-      version = version
-      package = package ).
+    result = semver->sort( result ).
 
   ENDMETHOD.
 ENDCLASS.

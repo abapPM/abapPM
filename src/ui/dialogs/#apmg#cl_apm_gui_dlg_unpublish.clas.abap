@@ -51,16 +51,17 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       BEGIN OF c_action,
         choose_package    TYPE string VALUE 'choose-package',
         unpublish_package TYPE string VALUE 'unpublish-package',
+        unpublish_version TYPE string VALUE 'unpublish-version',
         refresh           TYPE string VALUE 'refresh',
       END OF c_action.
 
     DATA:
-      registry         TYPE string,
-      unpubish_package TYPE devclass,
-      form             TYPE REF TO /apmg/cl_apm_html_form,
-      form_data        TYPE REF TO /apmg/cl_apm_string_map,
-      form_util        TYPE REF TO /apmg/cl_apm_html_form_utils,
-      validation_log   TYPE REF TO /apmg/cl_apm_string_map.
+      registry          TYPE string,
+      unpublish_package TYPE devclass,
+      form              TYPE REF TO /apmg/cl_apm_html_form,
+      form_data         TYPE REF TO /apmg/cl_apm_string_map,
+      form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log    TYPE REF TO /apmg/cl_apm_string_map.
 
     METHODS get_form_schema
       RETURNING
@@ -88,7 +89,15 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup
+    METHODS confirm_popup_version
+      IMPORTING
+        !params       TYPE ty_params
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS confirm_popup_package
       IMPORTING
         !params       TYPE ty_params
       RETURNING
@@ -133,7 +142,25 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          IF confirm_popup( params ) = abap_true.
+          IF confirm_popup_package( params ) = abap_true.
+            /apmg/cl_apm_command_unpublish=>run(
+              registry = registry
+              name     = params-name ).
+          ENDIF.
+
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+        ENDIF.
+
+      WHEN c_action-unpublish_version.
+
+        validation_log = validate_form( form_data ).
+
+        IF validation_log->is_empty( ) = abap_true.
+          params = get_parameters( form_data ).
+
+          IF confirm_popup_version( params ) = abap_true.
             /apmg/cl_apm_command_unpublish=>run(
               registry = registry
               name     = params-name
@@ -167,13 +194,39 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD confirm_popup.
+  METHOD confirm_popup_package.
+
+    DATA(question) = |This will UNPUBLISH the COMPLETE { params-name } package | &&
+                     |from the registry (Note: Terms will apply)|.
+
+    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Unpublish Package'
+      iv_text_question         = question
+      iv_text_button_1         = 'Unpublish'
+      iv_icon_button_1         = 'ICON_EXPORT'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Unpublish cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
+
+  ENDMETHOD.
+
+
+  METHOD confirm_popup_version.
 
     DATA(question) = |This will UNPUBLISH { params-name } { params-version } | &&
                      |from the registry (Note: Terms will apply)|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish'
+      iv_titlebar              = 'Unpublish Version'
       iv_text_question         = question
       iv_text_button_1         = 'Unpublish'
       iv_icon_button_1         = 'ICON_EXPORT'
@@ -202,9 +255,9 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
-    unpubish_package = package.
-    IF unpubish_package IS NOT INITIAL.
-      form_data = read_package( unpubish_package ).
+    unpublish_package = package.
+    IF unpublish_package IS NOT INITIAL.
+      form_data = read_package( unpublish_package ).
     ENDIF.
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
@@ -237,8 +290,11 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
       iv_label = 'Version' ).
 
     result->command(
-      iv_label    = 'Unpublish Package'
+      iv_label    = 'Unpublish Version'
       iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-unpublish_version
+    )->command(
+      iv_label    = 'Unpublish Complete Package'
       iv_action   = c_action-unpublish_package
     )->command(
       iv_label    = 'Back'
@@ -275,27 +331,35 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD validate_form.
 
-    DATA package TYPE devclass.
-
     result = form_util->validate( form_data ).
 
-    package = form_data->get( c_id-package ).
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
     IF package IS NOT INITIAL.
       TRY.
           zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
         CATCH zcx_abapgit_exception INTO DATA(error).
           result->set(
             iv_key = c_id-package
             iv_val = error->get_text( ) ).
       ENDTRY.
+
+      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+        result->set(
+          iv_key = c_id-package
+          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+      ENDIF.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version' ).
     ENDIF.
 
   ENDMETHOD.

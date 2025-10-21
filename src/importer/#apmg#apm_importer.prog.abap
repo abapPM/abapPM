@@ -54,7 +54,7 @@ START-OF-SELECTION.
         object_names  = s_name[]
         transport     = p_trkorr
         default_rule  = p_defrul
-        is_dryrun     = p_dryrun
+        is_dry_run    = p_dryrun
         is_production = p_prod ).
 
     CATCH /apmg/cx_apm_error INTO DATA(error).

@@ -192,6 +192,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-refresh.
+
+        load_package_list( ).
+
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-select.
@@ -321,13 +324,23 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-list-commands' ).
 
     commands->add(
-      iv_txt      = 'Unpublish'
-      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
+      iv_txt      = 'Deprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
+    )->add(
+      iv_txt      = 'Undeprecate'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_undeprecate }{ c_dummy_key }|
       iv_class    = c_action_class
       iv_li_class = c_action_class
     )->add(
       iv_txt      = 'Danger'
       iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = 'Unpublish'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
+      iv_class    = |{ c_action_class } red|
+      iv_li_class = c_action_class
     )->add(
       iv_txt      = 'Uninstall'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_uninstall }{ c_dummy_key }|
@@ -851,7 +864,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       fav_color = 'grey'.
     ENDIF.
 
-    html->add( |<tr data-key="{ package-package }"{ fav_class }">| ).
+    html->add( |<tr data-key="{ package-id }"{ fav_class }">| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
