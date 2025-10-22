@@ -254,8 +254,8 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD update_dist_tags.
 
+    " TODO
     result = packument.
-
 
   ENDMETHOD.
 ENDCLASS.

@@ -48,7 +48,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !is_force      TYPE abap_bool
         !is_dry_run    TYPE abap_bool
       RAISING
-        /apmg/cx_apm_error.
+        /apmg/cx_apm_error ##NEEDED.
 
     METHODS check_package
       IMPORTING
@@ -108,7 +108,6 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 

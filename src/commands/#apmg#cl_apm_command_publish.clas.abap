@@ -31,7 +31,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         !package    TYPE devclass
         !is_dry_run TYPE abap_bool
       RAISING
-        /apmg/cx_apm_error.
+        /apmg/cx_apm_error ##NEEDED.
 
     METHODS check_package
       IMPORTING
@@ -106,7 +106,6 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 

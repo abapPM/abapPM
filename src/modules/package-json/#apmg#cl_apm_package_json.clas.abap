@@ -496,7 +496,7 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
 
         result = sha1.
 
-      CATCH cx_abap_message_digest INTO DATA(error).
+      CATCH cx_abap_message_digest.
         ASSERT 0 = 1. " open an issue
     ENDTRY.
 

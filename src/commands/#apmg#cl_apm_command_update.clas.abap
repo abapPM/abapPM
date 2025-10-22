@@ -304,7 +304,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     command->execute(
       registry      = registry
       package       = package
-      is_dry_run     = is_dry_run
+      is_dry_run    = is_dry_run
       is_production = is_production ).
 
   ENDMETHOD.

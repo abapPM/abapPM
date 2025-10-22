@@ -231,7 +231,7 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
 
     result->command(
       iv_label    = 'Undeprecate'
-      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action   = c_action-undeprecate
     )->command(
       iv_label    = 'Back'

@@ -11,11 +11,12 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
 
   TYPES:
     BEGIN OF ty_gui_settings,
-      adt_jump_enabled TYPE abap_bool,
-      max_lines        TYPE i,
-      icon_scaling     TYPE c LENGTH 1,
-      ui_theme         TYPE string,
-      label_colors     TYPE string,
+      adt_jump_enabled  TYPE abap_bool,
+      activate_wo_popup TYPE abap_bool,
+      max_lines         TYPE i,
+      icon_scaling      TYPE c LENGTH 1,
+      ui_theme          TYPE string,
+      label_colors      TYPE string,
     END OF ty_gui_settings,
     BEGIN OF ty_keyboard_settings,
       link_hints_enabled TYPE abap_bool,

@@ -43,11 +43,11 @@ REPORT /apmg/apm LINE-SIZE 100.
 * - zcl_abapgit_objects
 * - zcl_abapgit_objects_bridge
 * - zcl_abapgit_objects_check
-* - zcl_abapgit_objects_injector
 * @@require devc $abapgit_xml
 
 * @@require clas zcl_abapgit_abap_language_vers
 * @@require clas zcl_abapgit_adt_link
+* @@require intf zif_abapgit_apack_definitions
 * @@require clas zcl_abapgit_convert
 * @@require clas zcl_abapgit_cts_api
 * @@require intf zif_abapgit_cts_api
@@ -66,6 +66,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 * @@require clas zcl_abapgit_exit
 * @@require intf zif_abapgit_exit
 * @@require clas zcl_abapgit_factory
+* @@require clas zcl_abapgit_feature
 * @@require clas zcl_abapgit_injector
 * @@require intf zif_abapgit_git_definitions
 * @@require clas zcl_abapgit_hash
@@ -104,9 +105,6 @@ INITIALIZATION.
   PERFORM adjust_toolbar USING '1001'.
   lcl_password_dialog=>on_screen_init( ).
 
-START-OF-SELECTION.
-  PERFORM run.
-
 * Hide Execute button from screen
 AT SELECTION-SCREEN OUTPUT.
   IF sy-dynnr = lcl_password_dialog=>c_dynnr.
@@ -123,3 +121,6 @@ AT SELECTION-SCREEN.
   IF sy-dynnr = lcl_password_dialog=>c_dynnr.
     lcl_password_dialog=>on_screen_event( sscrfields-ucomm ).
   ENDIF.
+
+START-OF-SELECTION.
+  PERFORM run.

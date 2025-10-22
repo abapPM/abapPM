@@ -266,9 +266,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
       INSERT <version>-key INTO TABLE result.
     ENDLOOP.
 
-    DATA(semver) = NEW /apmg/cl_apm_semver_functions( ).
-
-    result = semver->sort( result ).
+    result = /apmg/cl_apm_semver_functions=>sort( result ).
 
   ENDMETHOD.
 ENDCLASS.

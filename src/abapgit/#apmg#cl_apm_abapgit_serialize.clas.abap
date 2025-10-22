@@ -123,7 +123,7 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
 
   METHOD add_objects.
 
-    DATA: lo_filter TYPE REF TO zcl_abapgit_repo_filter,
+    DATA: " lo_filter TYPE REF TO zcl_abapgit_repo_filter,
           lv_force  TYPE abap_bool,
           lt_found  LIKE ct_files,
           lt_tadir  TYPE zif_abapgit_definitions=>ty_tadir_tt.
@@ -136,10 +136,10 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
       ii_log                = ii_log
       it_filter             = it_filter ).
 
-    CREATE OBJECT lo_filter.
-
-    lo_filter->apply( EXPORTING it_filter = it_filter
-                      CHANGING  ct_tadir  = lt_tadir ).
+*    CREATE OBJECT lo_filter.
+*
+*    lo_filter->apply( EXPORTING it_filter = it_filter
+*                      CHANGING  ct_tadir  = lt_tadir ).
 
 * if there are less than 10 objects run in single thread
 * this helps a lot when debugging, plus performance gain

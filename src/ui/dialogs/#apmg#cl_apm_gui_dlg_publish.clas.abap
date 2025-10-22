@@ -249,7 +249,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
     result->command(
       iv_label       = 'Publish Package'
-      iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-publish_package
     )->command(
       iv_label       = 'Refresh'
