@@ -96,11 +96,12 @@ SELECTION-SCREEN END OF SCREEN 1001.
 
 TABLES sscrfields.
 
-INCLUDE /apmg/apm_password_dialog. " !!! Contains SELECTION SCREEN
+INCLUDE /apmg/apm_password_dialog. " Contains SELECTION SCREEN
 
 INCLUDE /apmg/apm_forms.
 
 **********************************************************************
+
 INITIALIZATION.
   PERFORM adjust_toolbar USING '1001'.
   lcl_password_dialog=>on_screen_init( ).

@@ -643,8 +643,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     TRY.
         settings = /apmg/cl_apm_settings=>factory( )->get( ).
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-        " Settings don't exist (yet)
+      CATCH /apmg/cx_apm_error.
+        " Settings didn't exist, so save the defaults
+        /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
     ENDTRY.
 
   ENDMETHOD.
