@@ -244,6 +244,11 @@ CLASS lcl_validate IMPLEMENTATION.
       ENDIF.
       IF NOT line_exists( manifest-dependencies[ key = value ] ).
         INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
+      ELSE.
+        DATA(range) = manifest-dependencies[ key = value ]-range.
+        IF NOT /apmg/cl_apm_semver_functions=>valid( range ).
+          INSERT |Bundle dependency { value } must be pinned to a version in dependencies| INTO TABLE result.
+        ENDIF.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-bundle_dependencies ) <> lines( values ).

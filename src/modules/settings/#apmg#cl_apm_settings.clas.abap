@@ -38,6 +38,14 @@ CLASS /apmg/cl_apm_settings DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS initialize_personal_settings
+      IMPORTING
+        !name         TYPE /apmg/if_apm_settings=>ty_name
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_settings=>ty_settings
+      RAISING
+        /apmg/cx_apm_error.
+
     CLASS-METHODS get_setting_key
       IMPORTING
         !name         TYPE /apmg/if_apm_settings=>ty_name
@@ -239,6 +247,8 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
       CATCH /apmg/cx_apm_error.
         IF name = /apmg/if_apm_settings=>c_global.
           settings = get_default( ).
+        ELSE.
+          settings = initialize_personal_settings( name ).
         ENDIF.
     ENDTRY.
 
@@ -288,21 +298,23 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
 
     DATA(global) = factory( /apmg/if_apm_settings=>c_global ).
 
-    " Check if global settings exist already
-    TRY.
-        DATA(settings) = global->load( )->get( ).
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-    ENDTRY.
-
-    IF settings IS NOT INITIAL.
-      RETURN.
-    ENDIF.
-
-    global->set( get_default( ) ).
-
     " Save defaults to global settings
     db_persist->save(
       key   = get_setting_key( /apmg/if_apm_settings=>c_global )
+      value = global->get_json( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD initialize_personal_settings.
+
+    DATA(global) = factory( /apmg/if_apm_settings=>c_global ).
+
+    result = global->load( )->get( ).
+
+    " Save global defaults to personal settings
+    db_persist->save(
+      key   = get_setting_key( name )
       value = global->get_json( ) ).
 
   ENDMETHOD.

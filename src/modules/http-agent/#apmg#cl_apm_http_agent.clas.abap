@@ -14,15 +14,30 @@ CLASS /apmg/cl_apm_http_agent DEFINITION
     INTERFACES /apmg/if_apm_http_agent.
 
     CLASS-METHODS create
+      IMPORTING
+        !proxy_host    TYPE string OPTIONAL
+        !proxy_service TYPE string OPTIONAL
+        !proxy_user    TYPE string OPTIONAL
+        !proxy_passwd  TYPE string OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_http_agent.
+        VALUE(result)  TYPE REF TO /apmg/if_apm_http_agent.
 
-    METHODS constructor.
+    METHODS constructor
+      IMPORTING
+        !proxy_host    TYPE string OPTIONAL
+        !proxy_service TYPE string OPTIONAL
+        !proxy_user    TYPE string OPTIONAL
+        !proxy_passwd  TYPE string OPTIONAL.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA global_headers TYPE REF TO /apmg/cl_apm_string_map.
+    DATA:
+      proxy_host     TYPE string,
+      proxy_service  TYPE string,
+      proxy_user     TYPE string,
+      proxy_passwd   TYPE string,
+      global_headers TYPE REF TO /apmg/cl_apm_string_map.
 
     CLASS-METHODS attach_payload
       IMPORTING
@@ -36,40 +51,6 @@ ENDCLASS.
 
 
 CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
-
-
-  METHOD attach_payload.
-
-    DATA(payload_type) = cl_abap_typedescr=>describe_by_data( payload ).
-
-    CASE payload_type->type_kind.
-      WHEN cl_abap_typedescr=>typekind_xstring.
-        request->set_data( payload ).
-      WHEN cl_abap_typedescr=>typekind_string.
-        request->set_cdata( payload ).
-      WHEN cl_abap_typedescr=>typekind_char.
-        request->set_cdata( |{ payload }| ).
-      WHEN OTHERS.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |Unexpected payload type { payload_type->absolute_name }|.
-    ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD constructor.
-
-    global_headers = NEW #( ).
-
-  ENDMETHOD.
-
-
-  METHOD create.
-
-    result = NEW /apmg/cl_apm_http_agent( ).
-
-  ENDMETHOD.
 
 
   METHOD /apmg/if_apm_http_agent~global_headers.
@@ -86,13 +67,28 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
       status_code TYPE i,
       message     TYPE string.
 
-    " TODO: Add proxy support
     cl_http_client=>create_by_url(
       EXPORTING
-        url    = url
-        ssl_id = ssl_id
+        url                = url
+        ssl_id             = ssl_id
+        proxy_host         = proxy_host
+        proxy_service      = proxy_service
+        proxy_user         = proxy_user
+        proxy_passwd       = proxy_passwd
       IMPORTING
-        client = http_client ).
+        client             = http_client
+      EXCEPTIONS
+        argument_not_found = 1
+        plugin_not_active  = 2
+        internal_error     = 3
+        pse_not_found      = 4
+        pse_not_distrib    = 5
+        pse_errors         = 6
+        OTHERS             = 7 ).
+
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+    ENDIF.
 
     http_client->request->set_version( if_http_request=>co_protocol_version_1_1 ).
     http_client->request->set_method( method ).
@@ -155,6 +151,49 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     ENDIF.
 
     result = lcl_http_response=>create( http_client ).
+
+  ENDMETHOD.
+
+
+  METHOD attach_payload.
+
+    DATA(payload_type) = cl_abap_typedescr=>describe_by_data( payload ).
+
+    CASE payload_type->type_kind.
+      WHEN cl_abap_typedescr=>typekind_xstring.
+        request->set_data( payload ).
+      WHEN cl_abap_typedescr=>typekind_string.
+        request->set_cdata( payload ).
+      WHEN cl_abap_typedescr=>typekind_char.
+        request->set_cdata( |{ payload }| ).
+      WHEN OTHERS.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Unexpected payload type { payload_type->absolute_name }|.
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD constructor.
+
+    me->proxy_host    = proxy_host.
+    me->proxy_service = proxy_service.
+    me->proxy_user    = proxy_user.
+    me->proxy_passwd  = proxy_passwd.
+
+    global_headers = NEW #( ).
+
+  ENDMETHOD.
+
+
+  METHOD create.
+
+    result = NEW /apmg/cl_apm_http_agent(
+      proxy_host    = proxy_host
+      proxy_service = proxy_service
+      proxy_user    = proxy_user
+      proxy_passwd  = proxy_passwd ).
 
   ENDMETHOD.
 ENDCLASS.
