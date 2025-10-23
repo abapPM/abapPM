@@ -354,9 +354,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_act      = /apmg/if_apm_gui_router=>c_action-apm_init
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
-      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_install }{ c_dummy_key }|
-      iv_class    = c_action_class
-      iv_li_class = c_action_class
+      iv_act      = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'upload-solid' ) && ' Publish'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
@@ -365,8 +363,6 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
       io_sub      = commands
-      iv_class    = c_action_class
-      iv_li_class = c_action_class
     )->add(
       iv_txt      = /apmg/cl_apm_gui_buttons=>settings( )
       io_sub      = /apmg/cl_apm_gui_menus=>settings( )

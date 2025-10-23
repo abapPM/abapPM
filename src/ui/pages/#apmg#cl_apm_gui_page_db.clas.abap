@@ -285,11 +285,13 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     DATA(zip) = NEW cl_abap_zip( ).
 
-    LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
-      DATA(filename) = to_lower( <data>-keys ) && '.json'.
+    LOOP AT db_entries INTO DATA(db_entry).
+      DATA(filename) = |{ db_entry-keys }|.
+
+      TRANSLATE filename USING '/#'.
 
       TRY.
-          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( <data>-value ).
+          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( db_entry-value ).
         CATCH zcx_abapgit_exception INTO DATA(error).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
       ENDTRY.
@@ -298,7 +300,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         name    = filename
         content = content ).
 
-      INSERT explain_key( <data>-keys ) INTO TABLE table_of_contents.
+      INSERT explain_key( db_entry-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
     TRY.
@@ -389,13 +391,13 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     LOOP AT zip->files ASSIGNING FIELD-SYMBOL(<file>) WHERE name <> c_toc_filename.
       CLEAR db_entry.
-      DATA(key) = replace(
-        val  = <file>-name
-        sub  = '.json'
-        with = '' ).
+
+      db_entry-keys = <file>-name.
+
+      TRANSLATE db_entry-keys USING '#/'.
 
       " Validate DB key
-      IF /apmg/cl_apm_persist_apm=>validate_key( key ) = abap_false.
+      IF /apmg/cl_apm_persist_apm=>validate_key( db_entry-keys ) = abap_false.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
           EXPORTING
             text = 'Invalid DB entry type. This is not an apm Backup'.
@@ -440,11 +442,10 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     db_persist->lock( db_entry-keys ).
 
     db_entries_old = db_persist->list( ).
+
     LOOP AT db_entries_old INTO db_entry.
       db_persist->delete( db_entry-keys ).
     ENDLOOP.
-
-    COMMIT WORK.
 
     LOOP AT db_entries INTO db_entry.
       db_persist->save(

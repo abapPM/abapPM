@@ -349,7 +349,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( '<meta http-equiv="content-type" content="text/html; charset=utf-8">' ).
     html->add( '<meta http-equiv="X-UA-Compatible" content="IE=11,10,9,8" />' ).
 
-    html->add( '<title>abapGit</title>' ).
+    html->add( '<title>apm</title>' ).
 
     header_stylesheet_links( html ).
     header_script_links( html ).
