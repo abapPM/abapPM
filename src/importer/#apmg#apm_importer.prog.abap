@@ -55,7 +55,8 @@ START-OF-SELECTION.
         transport     = p_trkorr
         default_rule  = p_defrul
         is_dry_run    = p_dryrun
-        is_production = p_prod ).
+        is_production = p_prod
+        is_logging    = p_log ).
 
     CATCH /apmg/cx_apm_error INTO DATA(error).
       MESSAGE error TYPE 'S' DISPLAY LIKE 'E'.

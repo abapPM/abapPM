@@ -122,7 +122,8 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
       package       = package
       dependencies  = import_dependencies
       is_dry_run    = is_dry_run
-      is_production = is_production ).
+      is_production = is_production
+      is_logging    = abap_false ).
 
     " 7. Update package
     IF is_newer = abap_true.
@@ -146,6 +147,8 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 
 
   METHOD get_bundle_dependencies.
+
+    " XXX: Major rewrite
 
     " Get all installed packages
     DATA(list) = /apmg/cl_apm_package_json=>list( instanciate = abap_true ).

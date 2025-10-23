@@ -293,18 +293,22 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
     result = program_source.
 
     LOOP AT result ASSIGNING FIELD-SYMBOL(<code>).
-      <code> = replace(
-        val  = <code>
-        sub  = '* @@IMPORT'
-        with = 'IMPORT'
-        case = abap_false
-        occ  = 1 ).
-      <code> = replace(
-        val  = <code>
-        sub  = '##IMPORT'
-        with = 'IMPORT'
-        case = abap_false
-        occ  = 1 ).
+      DO 3 TIMES.
+        CASE sy-index.
+          WHEN 1.
+            DATA(prefix) = '* @@'.
+          WHEN 2.
+            prefix = '" @@'.
+          WHEN 3.
+            prefix = '##'.
+        ENDCASE.
+        <code> = replace(
+          val  = <code>
+          sub  = |{ prefix }IMPORT|
+          with = 'IMPORT'
+          case = abap_false
+          occ  = 1 ).
+      ENDDO.
     ENDLOOP.
 
   ENDMETHOD.

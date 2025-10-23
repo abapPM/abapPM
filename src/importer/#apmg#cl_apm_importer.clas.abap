@@ -7,6 +7,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * TODO!: use registry as package source, instead of installed packages
+* TODO: change to factory
 * TODO: replace logging with ABAP Logger (wait for v2 of logger)
 ************************************************************************
   PUBLIC SECTION.
@@ -21,6 +22,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !default_rule  TYPE string DEFAULT /apmg/if_apm_importer=>c_default_import_rule
         !is_dry_run    TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
+        !is_logging    TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
@@ -29,7 +31,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CONSTANTS c_width TYPE i VALUE 150.
 
-    CLASS-DATA is_logging TYPE abap_bool VALUE 'X'.
+    CLASS-DATA is_logging TYPE abap_bool.
 
     CLASS-METHODS get_programs
       IMPORTING
@@ -465,6 +467,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD run.
 
+    /apmg/cl_apm_importer=>is_logging = is_logging.
+
     " 1. Get all programs that contain IMPORT statements
     DATA(programs) = get_programs( package ).
 
@@ -508,6 +512,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
 
   METHOD save_packages.
+
+    " FUTURE: Avoid saving bundled deps individually but store it with the parent package
 
     " Add or update dependencies
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
