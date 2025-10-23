@@ -66,7 +66,7 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
           iv_url = 'css/common.css'
           iv_assert_subtype = 'xyz' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH /apmg/cx_error.
+      CATCH /apmg/cx_apm_error.
         " no futher check
     ENDTRY.
 
@@ -78,7 +78,7 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
     TRY.
         li_assetman->get_text_asset( 'css/common.xyz' ).
         cl_abap_unit_assert=>fail( ).
-      CATCH /apmg/cx_error.
+      CATCH /apmg/cx_apm_error.
         " no futher check
     ENDTRY.
 
