@@ -290,6 +290,14 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
       TRANSLATE filename USING '/#'.
 
+      IF filename CS 'JSON'.
+        filename = filename && '.json'.
+      ELSEIF filename CS 'README'.
+        filename = filename && '.md'.
+      ELSE.
+        filename = filename && '.txt'.
+      ENDIF.
+
       TRY.
           DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( db_entry-value ).
         CATCH zcx_abapgit_exception INTO DATA(error).
@@ -392,7 +400,8 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     LOOP AT zip->files ASSIGNING FIELD-SYMBOL(<file>) WHERE name <> c_toc_filename.
       CLEAR db_entry.
 
-      db_entry-keys = <file>-name.
+      " Remove extension
+      SPLIT <file>-name AT '.' INTO db_entry-keys DATA(rest).
 
       TRANSLATE db_entry-keys USING '#/'.
 
