@@ -31,7 +31,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CONSTANTS c_width TYPE i VALUE 150.
 
-    CLASS-DATA is_logging TYPE abap_bool.
+    CLASS-DATA is_log TYPE abap_bool.
 
     CLASS-METHODS get_programs
       IMPORTING
@@ -133,7 +133,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD get_map.
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
       WRITE: / 'Object Mapping:', AT c_width space.
       SKIP.
@@ -147,7 +147,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         rules          = rules
         object_types   = object_types
         object_names   = object_names
-        is_logging     = is_logging
+        is_logging     = is_log
         is_production  = is_production ).
 
       INSERT LINES OF map INTO TABLE result.
@@ -164,7 +164,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       instanciate = abap_true
       is_bundle   = abap_false ).
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
       WRITE: / 'Packages:', AT c_width space.
       SKIP.
@@ -213,21 +213,21 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
         INSERT package INTO TABLE result.
 
-        IF is_logging = abap_true.
+        IF is_log = abap_true.
           FORMAT COLOR COL_POSITIVE.
           WRITE: / package-name, AT 30 package-version,
             AT 40 package-source_package, AT 72 package-target_package, AT c_width space.
         ENDIF.
 
       ELSE.
-        IF is_logging = abap_true.
+        IF is_log = abap_true.
           FORMAT COLOR COL_NEGATIVE.
           WRITE: / <rule>-name, 'not found in global namespace', AT c_width space.
         ENDIF.
       ENDIF.
     ENDLOOP.
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR OFF.
       SKIP.
     ENDIF.
@@ -247,7 +247,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       INSERT package INTO TABLE packages.
     ENDIF.
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
       WRITE: / 'Searching for IMPORTs:', AT c_width space.
       FORMAT COLOR OFF.
@@ -266,12 +266,12 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         ON a~obj_name = b~name
         WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = @sub_package AND b~subc = 'I' ##SUBRC_OK.
 
-      IF is_logging = abap_true AND programs IS NOT INITIAL.
+      IF is_log = abap_true AND programs IS NOT INITIAL.
         WRITE: / 'PACKAGE', sub_package, AT c_width space.
       ENDIF.
 
       LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
-        IF is_logging = abap_true.
+        IF is_log = abap_true.
           WRITE: AT /5 'INCLUDE', <program>-program, AT c_width space.
         ENDIF.
 
@@ -282,7 +282,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           " TODO?: Check for multi-line statements
           FIND REGEX 'IMPORT\s+.*\s+TO\s+.*\s+FROM\s+''.*''\s*\.' IN <code> IGNORING CASE.
           IF sy-subrc = 0.
-            IF is_logging = abap_true.
+            IF is_log = abap_true.
               FORMAT COLOR COL_POSITIVE.
               WRITE: AT /10 <code>, AT c_width space.
               FORMAT COLOR OFF.
@@ -293,7 +293,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
         IF found = abap_true.
           INSERT <program> INTO TABLE result.
-        ELSEIF is_logging = abap_true.
+        ELSEIF is_log = abap_true.
           FORMAT COLOR COL_NORMAL.
           WRITE: AT /10 'No IMPORT statements found', AT c_width space.
           FORMAT COLOR OFF.
@@ -301,7 +301,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       ENDLOOP. " programs
     ENDLOOP. " packages
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR COL_TOTAL.
       IF result IS INITIAL.
         WRITE: / 'No includes with IMPORT statements found', AT c_width space.
@@ -319,7 +319,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     result = /apmg/cl_apm_code_import_rules=>get(
       programs     = programs
-      is_logging   = is_logging
+      is_logging   = is_log
       default_rule = default_rule ).
 
   ENDMETHOD.
@@ -331,7 +331,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     DATA(log) = NEW zcl_abapgit_log( ).
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
       WRITE: / 'Importing:', AT c_width space.
       FORMAT COLOR OFF.
@@ -351,7 +351,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     LOOP AT map INTO DATA(mapping).
 
-      IF is_logging = abap_true.
+      IF is_log = abap_true.
         WRITE: /
           'IMPORT', mapping-object_type, mapping-old_object,
           'TO', mapping-new_object,
@@ -381,7 +381,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           old_item-obj_name CP 'Z++_AJSON*' OR
           old_item-obj_name CP '/APMG/++_PACKAGE_JSON*' ).
 
-        IF is_logging = abap_true.
+        IF is_log = abap_true.
           WRITE 'Skipped' COLOR COL_TOTAL INTENSIFIED OFF.
         ENDIF.
         CONTINUE.
@@ -428,7 +428,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             is_dry_run    = is_dry_run
             is_production = is_production ).
 
-          IF is_logging = abap_true.
+          IF is_log = abap_true.
             IF is_dry_run = abap_true.
               WRITE 'Dry run' COLOR COL_TOTAL.
             ELSE.
@@ -437,7 +437,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           ENDIF.
 
         CATCH cx_root INTO DATA(any_error).
-          IF is_logging = abap_true.
+          IF is_log = abap_true.
             DATA(msg) = any_error->get_text( ).
             WRITE msg COLOR COL_NEGATIVE.
           ENDIF.
@@ -457,7 +457,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
 
-    IF is_logging = abap_true.
+    IF is_log = abap_true.
       FORMAT COLOR OFF.
       SKIP.
     ENDIF.
@@ -467,7 +467,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD run.
 
-    /apmg/cl_apm_importer=>is_logging = is_logging.
+    is_log = is_logging.
 
     " 1. Get all programs that contain IMPORT statements
     DATA(programs) = get_programs( package ).
