@@ -74,6 +74,7 @@ INTERFACE zif_abapgit_aff_oo_types_v1 DEFERRED.
 INTERFACE zif_abapgit_aff_registry DEFERRED.
 INTERFACE zif_abapgit_aff_type_mapping DEFERRED.
 INTERFACE zif_abapgit_aff_types_v1 DEFERRED.
+INTERFACE zif_abapgit_apack_definitions DEFERRED.
 INTERFACE zif_abapgit_comparator DEFERRED.
 INTERFACE zif_abapgit_cts_api DEFERRED.
 INTERFACE zif_abapgit_data_config DEFERRED.
@@ -258,7 +259,6 @@ CLASS lcl_error_longtext IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_error DEFINITION
-
   INHERITING FROM cx_static_check
   CREATE PUBLIC.
 
@@ -556,7 +556,6 @@ CLASS /apmg/cx_apm_error IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_error_t100 DEFINITION
-
   INHERITING FROM /apmg/cx_apm_error
   CREATE PUBLIC.
 
@@ -608,7 +607,6 @@ CLASS /apmg/cx_apm_error_t100 IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_error_text DEFINITION
-
   INHERITING FROM /apmg/cx_apm_error_t100
   CREATE PUBLIC.
 
@@ -644,7 +642,6 @@ CLASS /apmg/cx_apm_error_text IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_error_prev DEFINITION
-
   INHERITING FROM /apmg/cx_apm_error_text
   CREATE PUBLIC.
 
@@ -678,7 +675,6 @@ CLASS /apmg/cx_apm_error_prev IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_cancel DEFINITION
-
   INHERITING FROM /apmg/cx_apm_error
   FINAL
   CREATE PUBLIC.
@@ -723,7 +719,6 @@ CLASS /apmg/cx_apm_cancel IMPLEMENTATION.
 ENDCLASS.
 
 CLASS /apmg/cx_apm_ajson_error DEFINITION
-
   INHERITING FROM cx_static_check
   FINAL
   CREATE PUBLIC .
@@ -856,7 +851,6 @@ ENDCLASS.
 
 "! abapGit general error
 CLASS zcx_abapgit_exception DEFINITION
-
   INHERITING FROM cx_static_check
   CREATE PUBLIC .
 
@@ -1283,7 +1277,6 @@ CLASS zcx_abapgit_exception IMPLEMENTATION.
 ENDCLASS.
 
 CLASS zcx_abapgit_type_not_supported DEFINITION
-
   INHERITING FROM zcx_abapgit_exception
   CREATE PUBLIC .
 
@@ -1332,7 +1325,6 @@ CLASS zcx_abapgit_type_not_supported IMPLEMENTATION.
 ENDCLASS.
 
 CLASS zcx_abapgit_not_found DEFINITION
-
   INHERITING FROM cx_static_check
   FINAL
   CREATE PUBLIC.
@@ -1474,6 +1466,8 @@ CLASS /apmg/cl_apm_url DEFINITION DEFERRED.
 CLASS /apmg/cl_apm_url_params DEFINITION DEFERRED.
 CLASS zcl_abapgit_abap_language_vers DEFINITION DEFERRED.
 CLASS zcl_abapgit_adt_link DEFINITION DEFERRED.
+CLASS zcl_abapgit_aff_factory DEFINITION DEFERRED.
+CLASS zcl_abapgit_aff_injector DEFINITION DEFERRED.
 CLASS zcl_abapgit_aff_registry DEFINITION DEFERRED.
 CLASS zcl_abapgit_convert DEFINITION DEFERRED.
 CLASS zcl_abapgit_cts_api DEFINITION DEFERRED.
@@ -1498,6 +1492,7 @@ CLASS zcl_abapgit_env_injector DEFINITION DEFERRED.
 CLASS zcl_abapgit_environment DEFINITION DEFERRED.
 CLASS zcl_abapgit_exit DEFINITION DEFERRED.
 CLASS zcl_abapgit_factory DEFINITION DEFERRED.
+CLASS zcl_abapgit_feature DEFINITION DEFERRED.
 CLASS zcl_abapgit_field_rules DEFINITION DEFERRED.
 CLASS zcl_abapgit_filename_logic DEFINITION DEFERRED.
 CLASS zcl_abapgit_folder_logic DEFINITION DEFERRED.
@@ -1697,6 +1692,7 @@ CLASS zcl_abapgit_objects_compare DEFINITION DEFERRED.
 CLASS zcl_abapgit_objects_factory DEFINITION DEFERRED.
 CLASS zcl_abapgit_objects_files DEFINITION DEFERRED.
 CLASS zcl_abapgit_objects_generic DEFINITION DEFERRED.
+CLASS zcl_abapgit_objects_injector DEFINITION DEFERRED.
 CLASS zcl_abapgit_objects_program DEFINITION DEFERRED.
 CLASS zcl_abapgit_objects_super DEFINITION DEFERRED.
 CLASS zcl_abapgit_oo_base DEFINITION DEFERRED.
@@ -2777,23 +2773,6 @@ INTERFACE zif_abapgit_exit .
       !is_step TYPE zif_abapgit_objects=>ty_step_data
       !ii_log  TYPE REF TO zif_abapgit_log.
 
-  METHODS determine_transport_request
-    IMPORTING
-      !ii_repo              TYPE REF TO zif_abapgit_repo
-      !iv_transport_type    TYPE zif_abapgit_definitions=>ty_transport_type
-    CHANGING
-      !cv_transport_request TYPE trkorr.
-
-  METHODS enhance_any_toolbar
-    IMPORTING
-      !io_menu TYPE REF TO zcl_abapgit_html_toolbar.
-
-  METHODS enhance_repo_toolbar
-    IMPORTING
-      !io_menu TYPE REF TO zcl_abapgit_html_toolbar
-      !iv_key  TYPE zif_abapgit_persistence=>ty_value
-      !iv_act  TYPE string.
-
   METHODS get_ci_tests
     IMPORTING
       !iv_object   TYPE tadir-object
@@ -2824,14 +2803,6 @@ INTERFACE zif_abapgit_exit .
       !ii_log     TYPE REF TO zif_abapgit_log
     CHANGING
       !ct_files   TYPE zif_abapgit_definitions=>ty_files_item_tt.
-
-  METHODS validate_before_push
-    IMPORTING
-      !is_comment     TYPE zif_abapgit_git_definitions=>ty_comment
-      !io_stage       TYPE REF TO zcl_abapgit_stage
-      !ii_repo_online TYPE REF TO zif_abapgit_repo_online
-    RAISING
-      zcx_abapgit_exception.
 
   METHODS change_committer_info
     IMPORTING
@@ -4091,7 +4062,7 @@ INTERFACE /apmg/if_apm_object .
       !language      TYPE ty_item-language
       !map           TYPE /apmg/if_apm_importer=>ty_map
       !files         TYPE REF TO /apmg/if_apm_file_importer OPTIONAL
-      !is_dryrun     TYPE abap_bool DEFAULT abap_true
+      !is_dry_run    TYPE abap_bool DEFAULT abap_true
       !is_production TYPE abap_bool DEFAULT abap_true
     RAISING
       /apmg/cx_apm_error.
@@ -4613,11 +4584,12 @@ INTERFACE /apmg/if_apm_settings .
 
   TYPES:
     BEGIN OF ty_gui_settings,
-      adt_jump_enabled TYPE abap_bool,
-      max_lines        TYPE i,
-      icon_scaling     TYPE c LENGTH 1,
-      ui_theme         TYPE string,
-      label_colors     TYPE string,
+      adt_jump_enabled  TYPE abap_bool,
+      activate_wo_popup TYPE abap_bool,
+      max_lines         TYPE i,
+      icon_scaling      TYPE c LENGTH 1,
+      ui_theme          TYPE string,
+      label_colors      TYPE string,
     END OF ty_gui_settings,
     BEGIN OF ty_keyboard_settings,
       link_hints_enabled TYPE abap_bool,
@@ -5546,6 +5518,7 @@ INTERFACE zif_abapgit_cts_api
   TYPES:
     BEGIN OF ty_transport_data,
       trstatus TYPE e070-trstatus,
+      as4date  TYPE d,
       keys     TYPE STANDARD TABLE OF ty_transport_key WITH DEFAULT KEY,
     END OF ty_transport_data .
   TYPES:
@@ -6112,13 +6085,6 @@ INTERFACE zif_abapgit_gui_jumper
       !iv_tcode      TYPE sy-tcode
       !it_bdcdata    TYPE ty_bdcdata_tt
       !iv_new_window TYPE abap_bool DEFAULT abap_true
-    RAISING
-      zcx_abapgit_exception.
-
-  METHODS jump_abapgit
-    IMPORTING
-      !iv_language TYPE spras
-      !iv_key      TYPE zif_abapgit_persistence=>ty_value
     RAISING
       zcx_abapgit_exception.
 
@@ -6711,6 +6677,53 @@ INTERFACE zif_abapgit_aff_type_mapping
       EXPORTING es_data TYPE data.
 ENDINTERFACE.
 
+INTERFACE zif_abapgit_apack_definitions  .
+
+  TYPES:
+    BEGIN OF ty_dependency,
+      group_id       TYPE string,
+      artifact_id    TYPE string,
+      version        TYPE string,
+      sem_version    TYPE zif_abapgit_definitions=>ty_version,
+      git_url        TYPE string,
+      target_package TYPE devclass,
+    END OF ty_dependency,
+    ty_dependencies    TYPE STANDARD TABLE OF ty_dependency
+                    WITH NON-UNIQUE DEFAULT KEY,
+
+    ty_repository_type TYPE string,
+
+    BEGIN OF ty_descriptor_wo_dependencies,
+      group_id        TYPE string,
+      artifact_id     TYPE string,
+      version         TYPE string,
+      sem_version     TYPE zif_abapgit_definitions=>ty_version,
+      repository_type TYPE ty_repository_type,
+      git_url         TYPE string,
+    END OF ty_descriptor_wo_dependencies,
+
+    BEGIN OF ty_descriptor.
+      INCLUDE TYPE ty_descriptor_wo_dependencies.
+  TYPES:
+      dependencies TYPE ty_dependencies,
+    END OF ty_descriptor,
+
+    ty_descriptors TYPE STANDARD TABLE OF ty_descriptor WITH NON-UNIQUE DEFAULT KEY.
+
+  TYPES:
+    BEGIN OF ty_manifest_declaration,
+      clsname  TYPE seoclsname,
+      devclass TYPE devclass,
+    END OF ty_manifest_declaration,
+    ty_manifest_declarations TYPE STANDARD TABLE OF ty_manifest_declaration WITH DEFAULT KEY.
+
+  CONSTANTS c_dot_apack_manifest TYPE string VALUE '.apack-manifest.xml' ##NO_TEXT.
+  CONSTANTS c_repository_type_abapgit TYPE ty_repository_type VALUE 'abapGit' ##NO_TEXT.
+  CONSTANTS c_apack_interface_sap TYPE seoclsname VALUE 'IF_APACK_MANIFEST' ##NO_TEXT.
+  CONSTANTS c_apack_interface_cust TYPE seoclsname VALUE 'ZIF_APACK_MANIFEST' ##NO_TEXT.
+  CONSTANTS c_apack_interface_nspc TYPE seoclsname VALUE '/*/IF_APACK_MANIFEST' ##NO_TEXT.
+ENDINTERFACE.
+
 INTERFACE zif_abapgit_ecatt_download
    .
 
@@ -6769,7 +6782,6 @@ ENDINTERFACE.
 ****** CLASSES ******
 
 CLASS zcl_abapgit_xml DEFINITION
-
   ABSTRACT
   CREATE PUBLIC .
 
@@ -6815,7 +6827,6 @@ CLASS zcl_abapgit_xml DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_xml_output DEFINITION
-
   INHERITING FROM zcl_abapgit_xml
   CREATE PUBLIC .
 
@@ -6834,7 +6845,6 @@ CLASS zcl_abapgit_xml_output DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_abapgit_objects DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -7095,7 +7105,6 @@ CLASS /apmg/cl_apm_abapgit_objects DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_abapgit_serialize DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -7203,7 +7212,6 @@ CLASS /apmg/cl_apm_abapgit_serialize DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -7330,7 +7338,6 @@ CLASS /apmg/cl_apm_ajson DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson_extensions DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -7380,7 +7387,6 @@ CLASS /apmg/cl_apm_ajson_extensions DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson_filter_lib DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -7530,7 +7536,6 @@ CLASS lcl_to_camel DEFINITION.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson_mapping DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -7602,7 +7607,6 @@ CLASS /apmg/cl_apm_ajson_mapping DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson_refs_init_l DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -7619,7 +7623,6 @@ CLASS /apmg/cl_apm_ajson_refs_init_l DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_ajson_utilities DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -7708,7 +7711,6 @@ CLASS /apmg/cl_apm_ajson_utilities DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_auth DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -7881,7 +7883,6 @@ CLASS /apmg/cl_apm_code_mapper DEFINITION  FINAL CREATE PUBLIC.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_deprecate DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -7938,7 +7939,6 @@ CLASS /apmg/cl_apm_command_deprecate DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_init DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -7970,7 +7970,6 @@ CLASS /apmg/cl_apm_command_init DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_install DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -7989,6 +7988,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
         !is_production TYPE abap_bool DEFAULT abap_false
         !is_force      TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -8016,8 +8016,9 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
         !is_production TYPE abap_bool
         !is_force      TYPE abap_bool
+        !is_dry_run    TYPE abap_bool
       RAISING
-        /apmg/cx_apm_error.
+        /apmg/cx_apm_error ##NEEDED.
 
     METHODS check_package
       IMPORTING
@@ -8077,11 +8078,9 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_installer DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -8120,7 +8119,6 @@ CLASS /apmg/cl_apm_command_installer DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_integrity DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -8173,7 +8171,6 @@ CLASS /apmg/cl_apm_command_integrity DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_login DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -8221,7 +8218,6 @@ CLASS /apmg/cl_apm_command_login DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_publish DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -8238,8 +8234,9 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 
     CLASS-METHODS run
       IMPORTING
-        !registry TYPE string
-        !package  TYPE devclass
+        !registry   TYPE string
+        !package    TYPE devclass
+        !is_dry_run TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -8248,10 +8245,11 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 
     METHODS execute
       IMPORTING
-        !registry TYPE string
-        !package  TYPE devclass
+        !registry   TYPE string
+        !package    TYPE devclass
+        !is_dry_run TYPE abap_bool
       RAISING
-        /apmg/cx_apm_error.
+        /apmg/cx_apm_error ##NEEDED.
 
     METHODS check_package
       IMPORTING
@@ -8326,11 +8324,9 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_uninstall DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -8368,7 +8364,6 @@ CLASS /apmg/cl_apm_command_uninstall DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_unpublish DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -8458,7 +8453,6 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_update DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -8474,7 +8468,7 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
-        !is_dryrun     TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool DEFAULT abap_false
         !is_production TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
@@ -8486,8 +8480,8 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
-        !is_dryrun     TYPE abap_bool DEFAULT abap_false
-        !is_production TYPE abap_bool DEFAULT abap_false
+        !is_dry_run    TYPE abap_bool
+        !is_production TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -8546,7 +8540,6 @@ CLASS /apmg/cl_apm_command_update DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_command_utils DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -8657,7 +8650,6 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_emoji DEFINITION
-
   CREATE PRIVATE.
 
 ************************************************************************
@@ -8729,7 +8721,6 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_exception_viewer DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -8837,7 +8828,6 @@ CLASS /apmg/cl_apm_file_importer DEFINITION  FINAL CREATE PUBLIC.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_frontend_services DEFINITION
-
   CREATE PRIVATE
    FRIENDS /apmg/cl_apm_gui_factory.
 
@@ -8859,7 +8849,6 @@ CLASS /apmg/cl_apm_frontend_services DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_log DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -8898,7 +8887,6 @@ CLASS zcl_abapgit_log DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_event DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -8982,7 +8970,6 @@ CLASS /apmg/cl_apm_gui_event DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -9112,7 +9099,6 @@ CLASS /apmg/cl_apm_gui DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_asset_manager DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -9154,7 +9140,6 @@ CLASS /apmg/cl_apm_gui_asset_manager DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_buttons DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -9191,7 +9176,6 @@ CLASS /apmg/cl_apm_gui_buttons DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -9353,7 +9337,6 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_component DEFINITION
-
   ABSTRACT
   CREATE PUBLIC.
 
@@ -9409,7 +9392,6 @@ CLASS /apmg/cl_apm_gui_component DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_css_processor DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -9458,7 +9440,6 @@ CLASS /apmg/cl_apm_gui_css_processor DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -9559,7 +9540,6 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_init DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -9649,7 +9629,6 @@ CLASS /apmg/cl_apm_gui_dlg_init DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -9729,7 +9708,6 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -9829,7 +9807,6 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_undepreca DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -9927,7 +9904,6 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_uninstall DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -10027,7 +10003,6 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -10136,7 +10111,6 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_router DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -10247,7 +10221,6 @@ CLASS /apmg/cl_apm_gui_router DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_hotkey_ctl DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PUBLIC.
@@ -10294,7 +10267,6 @@ CLASS /apmg/cl_apm_gui_hotkey_ctl DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_html_viewer DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -10324,7 +10296,6 @@ CLASS /apmg/cl_apm_gui_html_viewer DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_popups DEFINITION
-
   FINAL
   CREATE PRIVATE
    FRIENDS /apmg/cl_apm_gui_factory.
@@ -10355,7 +10326,6 @@ CLASS /apmg/cl_apm_popups DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_factory DEFINITION
-
   CREATE PRIVATE.
 
 ************************************************************************
@@ -10413,7 +10383,6 @@ CLASS /apmg/cl_apm_gui_factory DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_html_processo DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -10464,7 +10433,6 @@ CLASS /apmg/cl_apm_gui_html_processo DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_menus DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -10501,7 +10469,6 @@ CLASS /apmg/cl_apm_gui_menus DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   ABSTRACT
   CREATE PUBLIC.
@@ -10648,7 +10615,6 @@ CLASS /apmg/cl_apm_gui_page DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_db DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PUBLIC.
@@ -10755,7 +10721,6 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PUBLIC.
@@ -10871,7 +10836,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_debuginf DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -10920,7 +10884,6 @@ CLASS /apmg/cl_apm_gui_page_debuginf DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_hoc DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_page
   FINAL
   CREATE PRIVATE.
@@ -10984,7 +10947,6 @@ CLASS /apmg/cl_apm_gui_page_hoc DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_list DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -11167,7 +11129,6 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_page_package DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -11368,7 +11329,6 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_gui_utils DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -11389,7 +11349,6 @@ CLASS /apmg/cl_apm_gui_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter DEFINITION
-
   ABSTRACT
   CREATE PUBLIC.
 
@@ -11490,7 +11449,6 @@ CLASS /apmg/cl_apm_highlighter DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_abap DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11543,7 +11501,6 @@ CLASS /apmg/cl_apm_highlighter_abap DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_css DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11646,7 +11603,6 @@ CLASS /apmg/cl_apm_highlighter_css DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_diff DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11685,7 +11641,6 @@ CLASS /apmg/cl_apm_highlighter_diff DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_facto DEFINITION
-
   ABSTRACT
   CREATE PUBLIC.
 
@@ -11709,7 +11664,6 @@ CLASS /apmg/cl_apm_highlighter_facto DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_js DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11784,7 +11738,6 @@ CLASS /apmg/cl_apm_highlighter_js DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_json DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11830,7 +11783,6 @@ CLASS /apmg/cl_apm_highlighter_json DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_md DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11890,7 +11842,6 @@ CLASS /apmg/cl_apm_highlighter_md DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_po DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   FINAL
   CREATE PUBLIC.
@@ -11930,7 +11881,6 @@ CLASS /apmg/cl_apm_highlighter_po DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_txt DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11949,7 +11899,6 @@ CLASS /apmg/cl_apm_highlighter_txt DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_xml DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -11996,7 +11945,6 @@ CLASS /apmg/cl_apm_highlighter_xml DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_highlighter_yaml DEFINITION
-
   INHERITING FROM /apmg/cl_apm_highlighter
   CREATE PUBLIC.
 
@@ -12049,7 +11997,6 @@ CLASS /apmg/cl_apm_highlighter_yaml DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -12139,7 +12086,6 @@ CLASS /apmg/cl_apm_html DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_action_utils DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -12177,7 +12123,6 @@ CLASS /apmg/cl_apm_html_action_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_form DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
@@ -12402,7 +12347,6 @@ CLASS /apmg/cl_apm_html_form DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_form_utils DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -12486,7 +12430,6 @@ CLASS /apmg/cl_apm_html_form_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_parts DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -12532,7 +12475,6 @@ CLASS /apmg/cl_apm_html_parts DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_table DEFINITION
-
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PUBLIC.
@@ -12663,7 +12605,6 @@ CLASS /apmg/cl_apm_html_table DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_html_toolbar DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -12758,7 +12699,6 @@ CLASS /apmg/cl_apm_html_toolbar DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_http_agent DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -12773,15 +12713,30 @@ CLASS /apmg/cl_apm_http_agent DEFINITION
     INTERFACES /apmg/if_apm_http_agent.
 
     CLASS-METHODS create
+      IMPORTING
+        !proxy_host    TYPE string OPTIONAL
+        !proxy_service TYPE string OPTIONAL
+        !proxy_user    TYPE string OPTIONAL
+        !proxy_passwd  TYPE string OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_http_agent.
+        VALUE(result)  TYPE REF TO /apmg/if_apm_http_agent.
 
-    METHODS constructor.
+    METHODS constructor
+      IMPORTING
+        !proxy_host    TYPE string OPTIONAL
+        !proxy_service TYPE string OPTIONAL
+        !proxy_user    TYPE string OPTIONAL
+        !proxy_passwd  TYPE string OPTIONAL.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA global_headers TYPE REF TO /apmg/cl_apm_string_map.
+    DATA:
+      proxy_host     TYPE string,
+      proxy_service  TYPE string,
+      proxy_user     TYPE string,
+      proxy_passwd   TYPE string,
+      global_headers TYPE REF TO /apmg/cl_apm_string_map.
 
     CLASS-METHODS attach_payload
       IMPORTING
@@ -12793,7 +12748,6 @@ CLASS /apmg/cl_apm_http_agent DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_http_login_manage DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -12860,6 +12814,7 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * TODO!: use registry as package source, instead of installed packages
+* TODO: change to factory
 * TODO: replace logging with ABAP Logger (wait for v2 of logger)
 ************************************************************************
   PUBLIC SECTION.
@@ -12872,8 +12827,9 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
         !object_names  TYPE /apmg/if_apm_importer=>ty_object_names OPTIONAL
         !transport     TYPE trkorr OPTIONAL
         !default_rule  TYPE string DEFAULT /apmg/if_apm_importer=>c_default_import_rule
-        !is_dryrun     TYPE abap_bool DEFAULT abap_true
+        !is_dry_run    TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
+        !is_logging    TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
@@ -12882,7 +12838,7 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
 
     CONSTANTS c_width TYPE i VALUE 150.
 
-    CLASS-DATA is_logging TYPE abap_bool VALUE 'X'.
+    CLASS-DATA is_logging TYPE abap_bool.
 
     CLASS-METHODS get_programs
       IMPORTING
@@ -12924,8 +12880,8 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
 
     CLASS-METHODS create_packages
       IMPORTING
-        !packages  TYPE /apmg/if_apm_importer=>ty_packages
-        !is_dryrun TYPE abap_bool DEFAULT abap_true
+        !packages   TYPE /apmg/if_apm_importer=>ty_packages
+        !is_dry_run TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
@@ -12933,7 +12889,7 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
       IMPORTING
         !map           TYPE /apmg/if_apm_importer=>ty_map
         !transport     TYPE trkorr
-        !is_dryrun     TYPE abap_bool DEFAULT abap_true
+        !is_dry_run    TYPE abap_bool DEFAULT abap_true
         !is_production TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
@@ -12948,7 +12904,6 @@ CLASS /apmg/cl_apm_importer DEFINITION  FINAL CREATE PUBLIC.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_installer DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -13105,7 +13060,6 @@ CLASS /apmg/cl_apm_installer DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_installer_files DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -13192,7 +13146,6 @@ CLASS /apmg/cl_apm_installer_files DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_json DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -13242,7 +13195,6 @@ CLASS /apmg/cl_apm_json DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_logo DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -13460,7 +13412,6 @@ CLASS lcl_alerts DEFINITION FINAL.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_markdown DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -14055,7 +14006,6 @@ CLASS /apmg/cl_apm_markdown DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_markdown_path DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -14111,7 +14061,6 @@ CLASS /apmg/cl_apm_markdown_path DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_markdown_syn DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -14152,7 +14101,6 @@ CLASS /apmg/cl_apm_markdown_syn DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_oo_base DEFINITION
-
   ABSTRACT
   CREATE PROTECTED.
 
@@ -14177,7 +14125,6 @@ CLASS zcl_abapgit_oo_base DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_oo_class DEFINITION
-
   INHERITING FROM zcl_abapgit_oo_base
   CREATE PUBLIC
    FRIENDS zcl_abapgit_oo_factory.
@@ -14335,7 +14282,6 @@ CLASS /apmg/cl_apm_object_clas DEFINITION  FINAL CREATE PUBLIC
 ENDCLASS.
 
 CLASS zcl_abapgit_oo_interface DEFINITION
-
   INHERITING FROM zcl_abapgit_oo_base
   CREATE PUBLIC
    FRIENDS zcl_abapgit_oo_factory.
@@ -14484,7 +14430,6 @@ CLASS /apmg/cl_apm_object_prog DEFINITION  FINAL CREATE PUBLIC.
 ENDCLASS.
 
 CLASS /apmg/cl_apm_package_json DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -14634,7 +14579,6 @@ CLASS /apmg/cl_apm_package_json DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_package_json_vali DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -14741,7 +14685,6 @@ CLASS /apmg/cl_apm_package_json_vali DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_pacote DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -14877,7 +14820,6 @@ CLASS /apmg/cl_apm_pacote DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_persist_apm DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -14919,7 +14861,6 @@ CLASS /apmg/cl_apm_persist_apm DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -14990,7 +14931,6 @@ CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_popup_utils DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -15009,7 +14949,6 @@ CLASS /apmg/cl_apm_popup_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_readme DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -15079,7 +15018,6 @@ CLASS /apmg/cl_apm_readme DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_roadmap DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -15106,7 +15044,6 @@ CLASS /apmg/cl_apm_roadmap DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver DEFINITION
-
   CREATE PRIVATE.
 
 ************************************************************************
@@ -15214,7 +15151,6 @@ CLASS /apmg/cl_apm_semver DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_cli DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -15272,7 +15208,6 @@ CLASS /apmg/cl_apm_semver_cli DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_comparator DEFINITION
-
   CREATE PRIVATE.
 
 ************************************************************************
@@ -15345,7 +15280,6 @@ CLASS /apmg/cl_apm_semver_comparator DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_fixtures DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -15494,7 +15428,6 @@ CLASS /apmg/cl_apm_semver_fixtures DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_functions DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -15770,7 +15703,6 @@ CLASS /apmg/cl_apm_semver_functions DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_identifier DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -15801,7 +15733,6 @@ CLASS /apmg/cl_apm_semver_identifier DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_integratio DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -15820,7 +15751,6 @@ CLASS /apmg/cl_apm_semver_integratio DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_range DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -16056,7 +15986,6 @@ CLASS /apmg/cl_apm_semver_range DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_ranges DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -16197,7 +16126,6 @@ CLASS /apmg/cl_apm_semver_ranges DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_re DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -16297,7 +16225,6 @@ CLASS /apmg/cl_apm_semver_re DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_sap DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -16353,7 +16280,6 @@ CLASS /apmg/cl_apm_semver_sap DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_semver_utils DEFINITION
-
   CREATE PUBLIC.
 
 ************************************************************************
@@ -16388,7 +16314,6 @@ CLASS /apmg/cl_apm_semver_utils DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_settings DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -16424,6 +16349,14 @@ CLASS /apmg/cl_apm_settings DEFINITION
         /apmg/cx_apm_error.
 
     CLASS-METHODS initialize_global_settings
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS initialize_personal_settings
+      IMPORTING
+        !name         TYPE /apmg/if_apm_settings=>ty_name
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_settings=>ty_settings
       RAISING
         /apmg/cx_apm_error.
 
@@ -16469,7 +16402,6 @@ CLASS /apmg/cl_apm_settings DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_string_map DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -16597,7 +16529,6 @@ CLASS /apmg/cl_apm_string_map DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_tar DEFINITION
-
   CREATE PRIVATE.
 
 ************************************************************************
@@ -16906,7 +16837,6 @@ CLASS /apmg/cl_apm_tar DEFINITION
 ENDCLASS.
 
 CLASS /apmg/cl_apm_trace DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -17131,7 +17061,6 @@ CLASS /apmg/cl_apm_url_params DEFINITION  FINAL CREATE PUBLIC.
 ENDCLASS.
 
 CLASS zcl_abapgit_abap_language_vers DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -17203,7 +17132,6 @@ CLASS zcl_abapgit_abap_language_vers DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_adt_link DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -17263,9 +17191,9 @@ CLASS zcl_abapgit_adt_link DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_aff_registry DEFINITION
-
   FINAL
-  CREATE PUBLIC .
+  CREATE PRIVATE
+   FRIENDS zcl_abapgit_aff_factory .
 
   PUBLIC SECTION.
     INTERFACES:
@@ -17274,7 +17202,6 @@ CLASS zcl_abapgit_aff_registry DEFINITION
     CONSTANTS c_aff_feature TYPE string VALUE 'AFF'.
 
     METHODS constructor.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -17299,8 +17226,29 @@ CLASS zcl_abapgit_aff_registry DEFINITION
 
 ENDCLASS.
 
-CLASS zcl_abapgit_convert DEFINITION
+CLASS zcl_abapgit_aff_factory DEFINITION
+   FRIENDS zcl_abapgit_aff_injector.
+  PUBLIC SECTION.
+    CLASS-METHODS get_registry
+      RETURNING
+        VALUE(ri_registry) TYPE REF TO zif_abapgit_aff_registry.
+  PRIVATE SECTION.
+    CLASS-DATA gi_registry TYPE REF TO zif_abapgit_aff_registry.
+ENDCLASS.
 
+CLASS zcl_abapgit_aff_injector DEFINITION
+  FINAL
+  CREATE PRIVATE
+  .
+
+  PUBLIC SECTION.
+    CLASS-METHODS
+      set_registry
+        IMPORTING ii_registry TYPE REF TO zif_abapgit_aff_registry.
+
+ENDCLASS.
+
+CLASS zcl_abapgit_convert DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -17449,7 +17397,6 @@ ENDCLASS.
 
 "! Change transport system API
 CLASS zcl_abapgit_cts_api DEFINITION
-
   FINAL
   CREATE PRIVATE
    FRIENDS zcl_abapgit_factory.
@@ -17530,7 +17477,6 @@ CLASS zcl_abapgit_cts_api DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_default_transport DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -17560,7 +17506,6 @@ CLASS zcl_abapgit_default_transport DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_dependencies DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -17609,7 +17554,6 @@ CLASS zcl_abapgit_dependencies DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_dot_abapgit DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -17753,7 +17697,6 @@ CLASS zcl_abapgit_dot_abapgit DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_config_downl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_config_download
   CREATE PUBLIC .
 
@@ -17775,7 +17718,6 @@ CLASS zcl_abapgit_ecatt_config_downl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_config_upl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_config_upload
   FINAL
   CREATE PUBLIC .
@@ -17794,7 +17736,6 @@ CLASS zcl_abapgit_ecatt_config_upl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_data_downl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_data_download
   CREATE PUBLIC .
 
@@ -17817,7 +17758,6 @@ CLASS zcl_abapgit_ecatt_data_downl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_data_upload DEFINITION
-
   INHERITING FROM cl_apl_ecatt_data_upload
   FINAL
   CREATE PUBLIC .
@@ -17844,7 +17784,6 @@ CLASS zcl_abapgit_ecatt_data_upload DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_helper DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -17882,7 +17821,6 @@ CLASS zcl_abapgit_ecatt_helper DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_script_downl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_script_download
   CREATE PUBLIC .
 
@@ -17933,7 +17871,6 @@ CLASS zcl_abapgit_ecatt_script_downl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_script_upl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_script_upload
   FINAL
   CREATE PUBLIC .
@@ -17952,7 +17889,6 @@ CLASS zcl_abapgit_ecatt_script_upl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_sp_download DEFINITION
-
   INHERITING FROM cl_apl_ecatt_download
   CREATE PUBLIC .
 
@@ -17977,7 +17913,6 @@ CLASS zcl_abapgit_ecatt_sp_download DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_sp_upload DEFINITION
-
   INHERITING FROM cl_apl_ecatt_upload
   FINAL
   CREATE PUBLIC .
@@ -18004,7 +17939,6 @@ CLASS zcl_abapgit_ecatt_sp_upload DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_system_downl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_systems_download
   CREATE PUBLIC .
 
@@ -18029,7 +17963,6 @@ CLASS zcl_abapgit_ecatt_system_downl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_system_upl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_systems_upload
   FINAL
   CREATE PUBLIC .
@@ -18048,7 +17981,6 @@ CLASS zcl_abapgit_ecatt_system_upl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_val_obj_down DEFINITION
-
   INHERITING FROM cl_apl_ecatt_download
   CREATE PUBLIC.
 
@@ -18078,7 +18010,6 @@ CLASS zcl_abapgit_ecatt_val_obj_down DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_ecatt_val_obj_upl DEFINITION
-
   INHERITING FROM cl_apl_ecatt_upload
   FINAL
   CREATE PUBLIC .
@@ -18113,7 +18044,6 @@ CLASS zcl_abapgit_ecatt_val_obj_upl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_environment DEFINITION
-
   FINAL
   CREATE PRIVATE
    FRIENDS zcl_abapgit_factory.
@@ -18134,7 +18064,6 @@ CLASS zcl_abapgit_environment DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_user_record DEFINITION
-
   FINAL
   CREATE PRIVATE
    FRIENDS zcl_abapgit_env_factory.
@@ -18201,7 +18130,6 @@ CLASS zcl_abapgit_env_injector DEFINITION .
 ENDCLASS.
 
 CLASS zcl_abapgit_exit DEFINITION
-
   CREATE PUBLIC
    FRIENDS zcl_abapgit_injector.
 
@@ -18226,7 +18154,6 @@ CLASS zcl_abapgit_exit DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_function_module DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -18239,7 +18166,6 @@ CLASS zcl_abapgit_function_module DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_longtexts DEFINITION
-
   CREATE PRIVATE
    FRIENDS zcl_abapgit_factory.
 
@@ -18273,7 +18199,6 @@ CLASS zcl_abapgit_longtexts DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_lxe_texts DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -18461,7 +18386,6 @@ CLASS zcl_abapgit_lxe_texts DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_sap_namespace DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -18472,7 +18396,6 @@ CLASS zcl_abapgit_sap_namespace DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_sap_package DEFINITION
-
   CREATE PRIVATE
    FRIENDS zcl_abapgit_factory .
 
@@ -18489,7 +18412,6 @@ CLASS zcl_abapgit_sap_package DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_sap_report DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -18510,7 +18432,6 @@ CLASS zcl_abapgit_sap_report DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_tadir DEFINITION
-
   FINAL
   CREATE PRIVATE
    FRIENDS zcl_abapgit_factory .
@@ -18582,7 +18503,6 @@ CLASS zcl_abapgit_tadir DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_factory DEFINITION
-
   CREATE PRIVATE
    FRIENDS zcl_abapgit_injector .
 
@@ -18644,8 +18564,26 @@ CLASS zcl_abapgit_factory DEFINITION
     CLASS-DATA gi_default_transport TYPE REF TO zif_abapgit_default_transport .
 ENDCLASS.
 
-CLASS zcl_abapgit_field_rules DEFINITION
+CLASS zcl_abapgit_feature DEFINITION
+  FINAL
+  CREATE PUBLIC.
 
+  PUBLIC SECTION.
+
+    " For dependency injection/testing, use the following
+    " zcl_abapgit_persist_factory=>get_settings( )->read( )->set_experimental_features( )
+
+    CLASS-METHODS is_enabled
+      IMPORTING
+        !iv_feature   TYPE string OPTIONAL
+      RETURNING
+        VALUE(rv_run) TYPE abap_bool.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS zcl_abapgit_field_rules DEFINITION
   FINAL
   CREATE PRIVATE.
 
@@ -18681,7 +18619,6 @@ CLASS zcl_abapgit_field_rules DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_filename_logic DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -18758,9 +18695,6 @@ CLASS zcl_abapgit_filename_logic DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CLASS-DATA:
-      go_aff_registry TYPE REF TO zif_abapgit_aff_registry.
-
     CLASS-METHODS name_escape
       IMPORTING
         !iv_name       TYPE csequence
@@ -18806,7 +18740,6 @@ CLASS zcl_abapgit_filename_logic DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_folder_logic DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -18858,7 +18791,6 @@ CLASS zcl_abapgit_folder_logic DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_gui_jumper DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -18902,7 +18834,6 @@ CLASS zcl_abapgit_gui_jumper DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_hash DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -18967,7 +18898,6 @@ CLASS zcl_abapgit_hash DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_i18n_params DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -19042,7 +18972,6 @@ CLASS zcl_abapgit_i18n_params DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_injector DEFINITION
-
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -19083,7 +19012,6 @@ CLASS zcl_abapgit_injector DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_item_graph DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -19120,7 +19048,6 @@ CLASS zcl_abapgit_item_graph DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_json_handler DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -19229,7 +19156,6 @@ CLASS zcl_abapgit_json_path DEFINITION  CREATE PUBLIC.
 ENDCLASS.
 
 CLASS zcl_abapgit_language DEFINITION
-
   CREATE PUBLIC .
 
 *----------------------------------------------------------------------*
@@ -19252,7 +19178,6 @@ CLASS zcl_abapgit_language DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_activation DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -19382,7 +19307,6 @@ CLASS zcl_abapgit_objects_activation DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_xml_input DEFINITION
-
   INHERITING FROM zcl_abapgit_xml
   CREATE PUBLIC .
 
@@ -19405,7 +19329,6 @@ CLASS zcl_abapgit_xml_input DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_compare DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -19433,7 +19356,6 @@ CLASS zcl_abapgit_objects_compare DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_factory DEFINITION
-
   CREATE PRIVATE
    FRIENDS zcl_abapgit_objects_injector .
 
@@ -19448,7 +19370,6 @@ CLASS zcl_abapgit_objects_factory DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_files DEFINITION
-
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -19581,7 +19502,6 @@ CLASS zcl_abapgit_objects_files DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_generic DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -19705,8 +19625,19 @@ CLASS zcl_abapgit_objects_generic DEFINITION
         !ct_data    TYPE STANDARD TABLE .
 ENDCLASS.
 
-CLASS zcl_abapgit_objects_super DEFINITION
+CLASS zcl_abapgit_objects_injector DEFINITION
+  CREATE PRIVATE .
 
+  PUBLIC SECTION.
+
+    CLASS-METHODS set_gui_jumper
+      IMPORTING
+        !ii_gui_jumper TYPE REF TO zif_abapgit_gui_jumper .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS zcl_abapgit_objects_super DEFINITION
   ABSTRACT
   CREATE PUBLIC.
 
@@ -19815,7 +19746,6 @@ CLASS zcl_abapgit_objects_super DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_objects_program DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20011,7 +19941,6 @@ CLASS zcl_abapgit_object_acid DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_aifc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -20165,7 +20094,6 @@ CLASS zcl_abapgit_object_amsd DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_apis DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -20191,7 +20119,6 @@ CLASS zcl_abapgit_object_apis DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_common_aff DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   ABSTRACT
   CREATE PUBLIC .
@@ -20254,7 +20181,6 @@ CLASS zcl_abapgit_object_common_aff DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_aplo DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -20269,7 +20195,6 @@ CLASS zcl_abapgit_object_aplo DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_aqbg DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20291,7 +20216,6 @@ CLASS zcl_abapgit_object_aqbg DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_aqqu DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20313,7 +20237,6 @@ CLASS zcl_abapgit_object_aqqu DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_aqsg DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20335,7 +20258,6 @@ CLASS zcl_abapgit_object_aqsg DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_area DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -20349,7 +20271,6 @@ CLASS zcl_abapgit_object_area DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_asfc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20387,7 +20308,6 @@ CLASS zcl_abapgit_object_auth DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_avar DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -20404,7 +20324,6 @@ CLASS zcl_abapgit_object_avar DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_avas DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -20491,7 +20410,6 @@ CLASS zcl_abapgit_object_bdef DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_bgqc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff FINAL
   CREATE PUBLIC.
 
@@ -20506,7 +20424,6 @@ CLASS zcl_abapgit_object_bgqc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_cdbo DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -20532,7 +20449,6 @@ CLASS zcl_abapgit_object_cdbo DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_char DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -20565,7 +20481,6 @@ CLASS zcl_abapgit_object_char DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_chdo DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -20622,7 +20537,6 @@ CLASS zcl_abapgit_object_chkc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_chko DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC.
@@ -20636,7 +20550,6 @@ CLASS zcl_abapgit_object_chko DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_chkv DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC.
@@ -20650,7 +20563,6 @@ CLASS zcl_abapgit_object_chkv DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_clas DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_program
   CREATE PUBLIC .
 
@@ -20802,7 +20714,6 @@ CLASS zcl_abapgit_object_clas DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_cmod DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -20837,7 +20748,6 @@ CLASS zcl_abapgit_object_cmpt DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_cota DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21151,7 +21061,6 @@ CLASS zcl_abapgit_object_doct DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_docv DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -21260,7 +21169,6 @@ CLASS zcl_abapgit_object_doma DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_dras DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21274,7 +21182,6 @@ CLASS zcl_abapgit_object_dras DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_drty DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21334,7 +21241,6 @@ CLASS zcl_abapgit_object_drul DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_dsfd DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21348,7 +21254,6 @@ CLASS zcl_abapgit_object_dsfd DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_dsfi DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21454,7 +21359,6 @@ CLASS zcl_abapgit_object_dtdc DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_dteb DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21512,7 +21416,6 @@ CLASS zcl_abapgit_object_dtel DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ecatt_super DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   ABSTRACT
   CREATE PUBLIC .
@@ -21654,7 +21557,6 @@ CLASS zcl_abapgit_object_ecatt_super DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ecat DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21671,7 +21573,6 @@ CLASS zcl_abapgit_object_ecat DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ecsd DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21688,7 +21589,6 @@ CLASS zcl_abapgit_object_ecsd DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ecsp DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21705,7 +21605,6 @@ CLASS zcl_abapgit_object_ecsp DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ectc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21722,7 +21621,6 @@ CLASS zcl_abapgit_object_ectc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ectd DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21739,7 +21637,6 @@ CLASS zcl_abapgit_object_ectd DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ecvo DEFINITION
-
   INHERITING FROM zcl_abapgit_object_ecatt_super
   FINAL
   CREATE PUBLIC .
@@ -21756,7 +21653,6 @@ CLASS zcl_abapgit_object_ecvo DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_eeec DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -21770,7 +21666,6 @@ CLASS zcl_abapgit_object_eeec DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_enhc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super.
 
   PUBLIC SECTION.
@@ -21859,7 +21754,6 @@ CLASS zcl_abapgit_object_enho_hook DEFINITION .
 ENDCLASS.
 
 CLASS zcl_abapgit_object_enho_class DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -21973,7 +21867,6 @@ CLASS zcl_abapgit_object_enho DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_enho_clif DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -22042,7 +21935,6 @@ CLASS zcl_abapgit_object_enhs DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_enqu DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -22072,7 +21964,6 @@ CLASS zcl_abapgit_object_ensc DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_evtb DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   CREATE PUBLIC.
 
@@ -22086,7 +21977,6 @@ CLASS zcl_abapgit_object_evtb DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_fdt0 DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -22265,7 +22155,6 @@ CLASS zcl_abapgit_object_ftgl DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_fugr DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_program
   CREATE PUBLIC .
 
@@ -22426,7 +22315,6 @@ CLASS zcl_abapgit_object_fugr DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_fugs DEFINITION
-
   INHERITING FROM zcl_abapgit_object_fugr
   FINAL
   CREATE PUBLIC .
@@ -22439,7 +22327,6 @@ CLASS zcl_abapgit_object_fugs DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_g4ba DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -22460,7 +22347,6 @@ CLASS zcl_abapgit_object_g4ba DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_g4bs DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -22481,7 +22367,6 @@ CLASS zcl_abapgit_object_g4bs DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_gsmp DEFINITION
-
     INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -22493,7 +22378,6 @@ CLASS zcl_abapgit_object_gsmp DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_http DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -23036,7 +22920,6 @@ CLASS zcl_abapgit_object_iobj DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwmo DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23057,7 +22940,6 @@ CLASS zcl_abapgit_object_iwmo DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwom DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23078,7 +22960,6 @@ CLASS zcl_abapgit_object_iwom DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwpr DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23099,7 +22980,6 @@ CLASS zcl_abapgit_object_iwpr DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwsg DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23120,7 +23000,6 @@ CLASS zcl_abapgit_object_iwsg DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwsv DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23141,7 +23020,6 @@ CLASS zcl_abapgit_object_iwsv DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_iwvb DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23233,7 +23111,6 @@ CLASS zcl_abapgit_object_msag DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_nont DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   CREATE PUBLIC.
 
@@ -23258,7 +23135,6 @@ CLASS zcl_abapgit_object_nrob DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_nspc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23324,7 +23200,6 @@ CLASS zcl_abapgit_object_nspc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_oa2p DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -23349,7 +23224,6 @@ CLASS zcl_abapgit_object_oa2p DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_odso DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -23377,7 +23251,6 @@ CLASS zcl_abapgit_object_odso DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_otgr DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -23417,7 +23290,6 @@ CLASS zcl_abapgit_object_para DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_pdxx_super DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   ABSTRACT.
 
@@ -23669,7 +23541,6 @@ CLASS zcl_abapgit_object_prog DEFINITION  INHERITING FROM zcl_abapgit_objects_pr
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ront DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   CREATE PUBLIC.
 
@@ -23682,7 +23553,6 @@ CLASS zcl_abapgit_object_ront DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sajc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -23697,7 +23567,6 @@ CLASS zcl_abapgit_object_sajc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sajt DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -23712,7 +23581,6 @@ CLASS zcl_abapgit_object_sajt DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_saxx_super DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   ABSTRACT
   CREATE PUBLIC .
@@ -23771,7 +23639,6 @@ CLASS zcl_abapgit_object_saxx_super DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_samc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_saxx_super
   FINAL
   CREATE PUBLIC .
@@ -23799,7 +23666,6 @@ CLASS zcl_abapgit_object_samc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sapc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_saxx_super
   FINAL
   CREATE PUBLIC .
@@ -23827,7 +23693,6 @@ CLASS zcl_abapgit_object_sapc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_scp1 DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -23882,7 +23747,6 @@ CLASS zcl_abapgit_object_scp1 DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_scvi DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -23972,7 +23836,6 @@ CLASS zcl_abapgit_object_sfbs DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sfpf DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -24187,7 +24050,6 @@ CLASS zcl_abapgit_object_shma DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_sots_handler DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -24260,7 +24122,6 @@ CLASS zcl_abapgit_sots_handler DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sicf DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -24350,7 +24211,6 @@ CLASS zcl_abapgit_object_sicf DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sktd DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -24392,7 +24252,6 @@ CLASS zcl_abapgit_object_sktd DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_smbc DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC.
@@ -24489,7 +24348,6 @@ CLASS zcl_abapgit_object_smtg DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sobj DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -24514,7 +24372,6 @@ CLASS zcl_abapgit_object_sobj DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sod1 DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -24576,7 +24433,6 @@ CLASS zcl_abapgit_object_sod1 DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sod2 DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -24682,7 +24538,6 @@ CLASS zcl_abapgit_object_splo DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sppf DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -24750,7 +24605,6 @@ CLASS zcl_abapgit_object_sprx DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sqsc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -24862,7 +24716,6 @@ CLASS zcl_abapgit_object_sqsc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_srfc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -24995,7 +24848,6 @@ CLASS zcl_abapgit_object_srvd DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ssfo DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -25057,7 +24909,6 @@ CLASS zcl_abapgit_object_ssst DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_stvi DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -25093,7 +24944,6 @@ CLASS zcl_abapgit_object_styl DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sucu DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   CREATE PUBLIC .
 
@@ -25140,7 +24990,6 @@ CLASS zcl_abapgit_object_susc DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sush DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -25206,7 +25055,6 @@ CLASS zcl_abapgit_object_suso DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_swcr DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -25235,7 +25083,6 @@ CLASS zcl_abapgit_object_sxci DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_sxsd DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -25256,7 +25103,6 @@ CLASS zcl_abapgit_object_sxsd DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_tabl DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -25342,7 +25188,6 @@ CLASS zcl_abapgit_object_tabl DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_tabl_compar DEFINITION
-
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -25397,7 +25242,6 @@ CLASS zcl_abapgit_object_tabl_compar DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_tabl_ddl DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -25520,7 +25364,6 @@ CLASS zcl_abapgit_object_tobj DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_tran DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -25698,7 +25541,6 @@ CLASS zcl_abapgit_object_ucsa DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_udmo DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -25799,7 +25641,6 @@ CLASS zcl_abapgit_object_udmo DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_ueno DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC.
@@ -25909,7 +25750,6 @@ CLASS zcl_abapgit_object_ueno DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_uiad DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -25931,7 +25771,6 @@ CLASS zcl_abapgit_object_uiad DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_uipg DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -25953,7 +25792,6 @@ CLASS zcl_abapgit_object_uipg DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_uist DEFINITION
-
   INHERITING FROM zcl_abapgit_object_common_aff
   FINAL
   CREATE PUBLIC .
@@ -26088,7 +25926,6 @@ CLASS zcl_abapgit_object_view DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_w3xx_super DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   ABSTRACT
   CREATE PUBLIC .
@@ -26220,7 +26057,6 @@ CLASS zcl_abapgit_object_wapa DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_wdca DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -26259,7 +26095,6 @@ CLASS zcl_abapgit_object_wdca DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_object_wdcc DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -26304,7 +26139,6 @@ CLASS zcl_abapgit_object_wdya DEFINITION  INHERITING FROM zcl_abapgit_objects_su
 ENDCLASS.
 
 CLASS zcl_abapgit_object_wdyn DEFINITION
-
   INHERITING FROM zcl_abapgit_objects_super
   FINAL
   CREATE PUBLIC .
@@ -26533,7 +26367,6 @@ CLASS zcl_abapgit_oo_factory DEFINITION .
 ENDCLASS.
 
 CLASS zcl_abapgit_oo_serializer DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -26652,7 +26485,6 @@ CLASS zcl_abapgit_path DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_po_file DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -26739,7 +26571,6 @@ CLASS zcl_abapgit_po_file DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_progress DEFINITION
-
   FINAL
   CREATE PROTECTED .
 
@@ -26772,15 +26603,11 @@ CLASS zcl_abapgit_progress DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_properties_file DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
     INTERFACES zif_abapgit_i18n_file.
-
-    CONSTANTS:
-      c_properties_feature TYPE string VALUE 'TRANSL'.
 
     METHODS constructor
       IMPORTING
@@ -26810,7 +26637,6 @@ CLASS zcl_abapgit_properties_file DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_sotr_handler DEFINITION
-
   FINAL
   CREATE PUBLIC.
 
@@ -26895,7 +26721,6 @@ CLASS zcl_abapgit_sotr_handler DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_status_calc DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -27001,7 +26826,6 @@ CLASS zcl_abapgit_status_calc DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_string_buffer DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -27031,7 +26855,6 @@ CLASS zcl_abapgit_string_buffer DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_timer DEFINITION
-
   FINAL
   CREATE PRIVATE.
 
@@ -27070,7 +26893,6 @@ CLASS zcl_abapgit_timer DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_url DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -27130,7 +26952,6 @@ CLASS zcl_abapgit_url DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_utils DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -27156,7 +26977,6 @@ CLASS zcl_abapgit_utils DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_version DEFINITION
-
   FINAL
   CREATE PUBLIC .
 
@@ -27206,7 +27026,6 @@ CLASS zcl_abapgit_version DEFINITION
 ENDCLASS.
 
 CLASS zcl_abapgit_xml_pretty DEFINITION
-
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -28712,7 +28531,7 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
 
   METHOD add_objects.
 
-    DATA: lo_filter TYPE REF TO zcl_abapgit_repo_filter,
+    DATA: " lo_filter TYPE REF TO zcl_abapgit_repo_filter,
           lv_force  TYPE abap_bool,
           lt_found  LIKE ct_files,
           lt_tadir  TYPE zif_abapgit_definitions=>ty_tadir_tt.
@@ -28725,10 +28544,10 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
       ii_log                = ii_log
       it_filter             = it_filter ).
 
-    CREATE OBJECT lo_filter.
-
-    lo_filter->apply( EXPORTING it_filter = it_filter
-                      CHANGING  ct_tadir  = lt_tadir ).
+*    CREATE OBJECT lo_filter.
+*
+*    lo_filter->apply( EXPORTING it_filter = it_filter
+*                      CHANGING  ct_tadir  = lt_tadir ).
 
 * if there are less than 10 objects run in single thread
 * this helps a lot when debugging, plus performance gain
@@ -33406,18 +33225,22 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
     result = program_source.
 
     LOOP AT result ASSIGNING FIELD-SYMBOL(<code>).
-      <code> = replace(
-        val  = <code>
-        sub  = '* @@IMPORT'
-        with = 'IMPORT'
-        case = abap_false
-        occ  = 1 ).
-      <code> = replace(
-        val  = <code>
-        sub  = '##IMPORT'
-        with = 'IMPORT'
-        case = abap_false
-        occ  = 1 ).
+      DO 3 TIMES.
+        CASE sy-index.
+          WHEN 1.
+            DATA(prefix) = '* @@'.
+          WHEN 2.
+            prefix = '" @@'.
+          WHEN 3.
+            prefix = '##'.
+        ENDCASE.
+        <code> = replace(
+          val  = <code>
+          sub  = |{ prefix }IMPORT|
+          with = 'IMPORT'
+          case = abap_false
+          occ  = 1 ).
+      ENDDO.
     ENDLOOP.
 
   ENDMETHOD.
@@ -34200,7 +34023,8 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       package       = package
       package_json  = package_json
       is_production = is_production
-      is_force      = is_force ).
+      is_force      = is_force
+      is_dry_run    = is_dry_run ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -34636,8 +34460,9 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_publish( ).
 
     command->execute(
-      registry = registry
-      package  = package ).
+      registry   = registry
+      package    = package
+      is_dry_run = is_dry_run ).
 
   ENDMETHOD.
 
@@ -34862,6 +34687,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD update_dist_tags.
 
+    " TODO
     result = packument.
 
   ENDMETHOD.
@@ -34899,8 +34725,9 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     /apmg/cl_apm_importer=>run(
       package       = package
       dependencies  = import_dependencies
-      is_dryrun     = is_dryrun
-      is_production = is_production ).
+      is_dry_run    = is_dry_run
+      is_production = is_production
+      is_logging    = abap_false ).
 
     " 7. Update package
     IF is_newer = abap_true.
@@ -34923,6 +34750,8 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_bundle_dependencies.
+
+    " XXX: Major rewrite
 
     " Get all installed packages
     DATA(list) = /apmg/cl_apm_package_json=>list( instanciate = abap_true ).
@@ -34968,7 +34797,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
         IF NOT line_exists( manifest-dependencies[ key = <bundle> ] ).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
             EXPORTING
-                text = |Bundle dependency { <bundle> } missing from dependencies|.
+              text = |Bundle dependency { <bundle> } missing from dependencies|.
         ENDIF.
         " New bundle dependency which will be added
         dependency = VALUE /apmg/if_apm_importer=>ty_dependency(
@@ -35076,7 +34905,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     command->execute(
       registry      = registry
       package       = package
-      is_dryrun     = is_dryrun
+      is_dry_run    = is_dry_run
       is_production = is_production ).
 
   ENDMETHOD.
@@ -35237,9 +35066,7 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
       INSERT <version>-key INTO TABLE result.
     ENDLOOP.
 
-    DATA(semver) = NEW /apmg/cl_apm_semver_functions( ).
-
-    result = semver->sort( result ).
+    result = /apmg/cl_apm_semver_functions=>sort( result ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -40115,7 +39942,7 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
 
     result->command(
       iv_label    = 'Deprecate'
-      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action   = c_action-deprecate
     )->command(
       iv_label    = 'Back'
@@ -40552,7 +40379,7 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
 
     result->command(
       iv_label       = 'Install Package'
-      iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-install_package
     )->command(
       iv_label       = 'Create Package'
@@ -40752,7 +40579,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
     result->command(
       iv_label       = 'Publish Package'
-      iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-publish_package
     )->command(
       iv_label       = 'Refresh'
@@ -40940,7 +40767,7 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
 
     result->command(
       iv_label    = 'Undeprecate'
-      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action   = c_action-undeprecate
     )->command(
       iv_label    = 'Back'
@@ -41148,7 +40975,7 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
 
     result->command(
       iv_label       = 'Uninstall Package'
-      iv_cmd_type    = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-uninstall_package
     )->command(
       iv_label       = 'Refresh'
@@ -41382,7 +41209,7 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
     result->command(
       iv_label    = 'Unpublish Version'
-      iv_cmd_type = zif_abapgit_html_form=>c_cmd_type-input_main
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action   = c_action-unpublish_version
     )->command(
       iv_label    = 'Unpublish Complete Package'
@@ -42292,14 +42119,2229 @@ CLASS /apmg/cl_apm_gui_factory IMPLEMENTATION.
 
     li_asset_man = /apmg/cl_apm_gui_asset_manager=>create( ).
 
-    " @@abapmerge include zabapgit_css_common.w3mi.data.css > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_COMMON
+****************************************************
+    lo_buf->add( '/*' ).
+    lo_buf->add( ' * ABAPGIT COMMON CSS' ).
+    lo_buf->add( ' */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* GLOBALS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'body {' ).
+    lo_buf->add( '  overflow-x: hidden;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'body.centered {' ).
+    lo_buf->add( '  max-width: 1280px;' ).
+    lo_buf->add( '  margin: 0 auto;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'body.full_width {' ).
+    lo_buf->add( '  width:100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'a, a:visited {' ).
+    lo_buf->add( '  text-decoration:  none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'a:hover, a:active {' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '  text-decoration: underline;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'img {' ).
+    lo_buf->add( '  border-width: 0px;' ).
+    lo_buf->add( '  vertical-align: middle;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table { border-collapse: collapse; }' ).
+    lo_buf->add( 'pre { display: inline; }' ).
+    lo_buf->add( 'sup {' ).
+    lo_buf->add( '  vertical-align: top;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  top: -0.5em;' ).
+    lo_buf->add( '  font-size: 75%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'input, textarea, select {' ).
+    lo_buf->add( '  padding: 3px 0.5em;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'input:focus, textarea:focus {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cursor-pointer {' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.separator {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  padding-right: 0.5em;' ).
+    lo_buf->add( '  opacity: 0.25;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MODIFIERS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.emphasis     { font-weight: bold !important; }' ).
+    lo_buf->add( '.crossout     { text-decoration: line-through !important; }' ).
+    lo_buf->add( '.right        { text-align:right; }' ).
+    lo_buf->add( '.center       { text-align:center; }' ).
+    lo_buf->add( '.paddings     { padding: 0.5em 0.5em; }' ).
+    lo_buf->add( '.pad-sides    { padding-left: 0.3em; padding-right: 0.3em; }' ).
+    lo_buf->add( '.pad-1em      { padding: 1em 1em; }' ).
+    lo_buf->add( '.margin-v5    { margin-top: 0.5em; margin-bottom: 0.5em; }' ).
+    lo_buf->add( '.margin-v1    { margin-top: 1em; margin-bottom: 1em; }' ).
+    lo_buf->add( '.indent5em    { padding-left: 0.5em; }' ).
+    lo_buf->add( '.pad4px       { padding: 4px; }' ).
+    lo_buf->add( '.w100         { width: 100%; }' ).
+    lo_buf->add( '.wmin         { width: 1%; }' ).
+    lo_buf->add( '.w40          { width: 40%; }' ).
+    lo_buf->add( '.float-right  { float: right; }' ).
+    lo_buf->add( '.pad-right    { padding-right: 6px; }' ).
+    lo_buf->add( '.no-pad       { padding: 0px !important; }' ).
+    lo_buf->add( '.inline       { display: inline; }' ).
+    lo_buf->add( '.hidden       { visibility: hidden; }' ).
+    lo_buf->add( '.nodisplay    { display: none }' ).
+    lo_buf->add( '.m-em5-sides  { margin-left: 0.5em; margin-right: 0.5em }' ).
+    lo_buf->add( '.w600px       { width: 600px }' ).
+    lo_buf->add( '.w800px       { width: 800px }' ).
+    lo_buf->add( '.w1000px      { width: 1000px }' ).
+    lo_buf->add( '.wmax600px    { max-width: 600px }' ).
+    lo_buf->add( '.auto-center  { /* use with max-width */' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  margin-left: auto;' ).
+    lo_buf->add( '  margin-right: auto;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.boxed {' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding: 4px 7px;' ).
+    lo_buf->add( '  margin-left: 0.2em;' ).
+    lo_buf->add( '  margin-right: 0.2em;' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.boxed i.icon {' ).
+    lo_buf->add( '  padding-right: 5px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.red-filled-set {' ).
+    lo_buf->add( '  border-width: 0px;' ).
+    lo_buf->add( '  color: hsl(0, 78%, 93%);' ).
+    lo_buf->add( '  background-color: hsl(0, 78%, 65%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.green-filled-set {' ).
+    lo_buf->add( '  border-width: 0px;' ).
+    lo_buf->add( '  color: hsl(120, 45%, 90%);' ).
+    lo_buf->add( '  background-color: hsl(120, 27%, 60%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.yellow-filled-set {' ).
+    lo_buf->add( '  border-width: 0px;' ).
+    lo_buf->add( '  color: hsl(45, 99%, 90%);' ).
+    lo_buf->add( '  background-color: hsl(45, 100%, 46%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* PANELS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.panel {' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding: 0.5em 0.5em;' ).
+    lo_buf->add( '  margin: 0.5em 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.dummydiv {' ).
+    lo_buf->add( '  padding:          0.5em 1em;' ).
+    lo_buf->add( '  text-align:       center;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'a.close-btn {' ).
+    lo_buf->add( '  text-decoration: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STRUCTURE DIVS, HEADER & FOOTER */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div#header {' ).
+    lo_buf->add( '  padding:          0.5em 0.5em;' ).
+    lo_buf->add( '  border-bottom:    3px double;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div#header > div { display: inline-block }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.logo .icon { display: inline-block }' ).
+    lo_buf->add( '.logo .icon:before { width: auto }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* official logo colors, not vars, redefine in themes directly*/' ).
+    lo_buf->add( '.logo .icon.icon-git-alt { color: #f03c2e }' ).
+    lo_buf->add( '.logo .icon.icon-abapgit {' ).
+    lo_buf->add( '  color: #362701;' ).
+    lo_buf->add( '  vertical-align: bottom;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div#header .logo { font-size: x-large }' ).
+    lo_buf->add( 'div#header .page-title { font-size: x-large }' ).
+    lo_buf->add( 'div#header span.spacer {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  padding-right: 0.25em;' ).
+    lo_buf->add( '  padding-left: 0.25em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div#footer .sponsor a { font-size: smaller; }' ).
+    lo_buf->add( 'div#footer .logo { font-size: large }' ).
+    lo_buf->add( 'div#footer {' ).
+    lo_buf->add( '  padding:          0.5em 0.5em;' ).
+    lo_buf->add( '  border-top:       3px double;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div#footer .version {' ).
+    lo_buf->add( '  margin-top: 0.5em;' ).
+    lo_buf->add( '  font-size: small;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '#debug-output {' ).
+    lo_buf->add( '  text-align: right;' ).
+    lo_buf->add( '  padding-right: 0.5em;' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '#debug-output p {' ).
+    lo_buf->add( '  margin-top: 0em;' ).
+    lo_buf->add( '  margin-bottom: 0em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ERROR LOG */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.log {' ).
+    lo_buf->add( '  padding: 6px;' ).
+    lo_buf->add( '  margin: 4px;' ).
+    lo_buf->add( '  border: 1px  solid;' ).
+    lo_buf->add( '  border-radius: 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.log > span   { display:block; }' ).
+    lo_buf->add( 'div.log .icon { padding-right: 6px; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.repo {' ).
+    lo_buf->add( '  padding: 0.5em 1em 0.5em 1em;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_name span.name {' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '  font-size: 14pt;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_name a.url {' ).
+    lo_buf->add( '  font-size: 12pt;' ).
+    lo_buf->add( '  margin-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_name span.url {' ).
+    lo_buf->add( '  font-size: 12pt;' ).
+    lo_buf->add( '  margin-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_name .icon {' ).
+    lo_buf->add( '  padding-right: 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_attr {' ).
+    lo_buf->add( '  font-size: 12pt;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_attr span {' ).
+    lo_buf->add( '  margin-left: 0.2em;' ).
+    lo_buf->add( '  margin-right: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_attr span.bg_marker {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  font-size: 8pt;' ).
+    lo_buf->add( '  padding: 4px 2px 3px 2px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ABAPGIT OBJECTS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.branch,' ).
+    lo_buf->add( 'span.user-box,' ).
+    lo_buf->add( 'span.package-box,' ).
+    lo_buf->add( 'span.path-box,' ).
+    lo_buf->add( 'span.transport-box {' ).
+    lo_buf->add( '  padding: 2px 4px;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 4px;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.package-box i.icon {' ).
+    lo_buf->add( '  margin-right: 0.15em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MISC AND REFACTOR */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.hidden-submit {' ).
+    lo_buf->add( '  border: 0 none;' ).
+    lo_buf->add( '  height: 0;' ).
+    lo_buf->add( '  width: 0;' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '  margin: 0;' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  overflow: hidden;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STATE BLOCK COMMON*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.state-block {' ).
+    lo_buf->add( '  margin-left: 1em;' ).
+    lo_buf->add( '  font-family: Consolas, "Lucida Console", Courier, monospace;' ).
+    lo_buf->add( '  font-size: x-small;' ).
+    lo_buf->add( '  vertical-align: 13%;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '  white-space: nowrap;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.state-block span {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  padding: 0px 3px;' ).
+    lo_buf->add( '  border-width: 1px;' ).
+    lo_buf->add( '  border-style: solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY TABLE*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.repo_container {' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.repo_banner {' ).
+    lo_buf->add( '  margin: 0em 1em 1em;' ).
+    lo_buf->add( '  padding: 0.5em 0.5em;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '  font-size: 85%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.repo_tab {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  line-height: 1.2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  padding: 0.5em;' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '  font-weight: normal;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab td {' ).
+    lo_buf->add( '  vertical-align: middle;' ).
+    lo_buf->add( '  padding-top: 2px;' ).
+    lo_buf->add( '  padding-bottom: 2px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.icon {' ).
+    lo_buf->add( '  width: 1px;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '  padding-left: 8px;' ).
+    lo_buf->add( '  padding-right: 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.transport {' ).
+    lo_buf->add( '  width: 140px;' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab td.type {' ).
+    lo_buf->add( '  width: 4em;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.filename{' ).
+    lo_buf->add( '  padding-left: 1em;' ).
+    lo_buf->add( '  word-break: break-all;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.object {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.files {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab tr.object_row{' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td.cmd, .repo_tab th.cmd {' ).
+    lo_buf->add( '  text-align: right;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  padding-right: 0.7em;' ).
+    lo_buf->add( '  min-width: 70px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab th.cmd .icon{' ).
+    lo_buf->add( '  padding-right: 8px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab tr:first-child td { border-top: 0px; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab tr:hover td {' ).
+    lo_buf->add( '  background-image: linear-gradient(rgba(0, 0, 0, 0.075), rgba(0, 0, 0, 0.075));' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STAGE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'th.stage-status { width: 30px; }' ).
+    lo_buf->add( 'th.stage-objtype { width: 30px; }' ).
+    lo_buf->add( 'input.stage-filter { width: 18em; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  margin-top: 0.2em;' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td {' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '  vertical-align: middle;' ).
+    lo_buf->add( '  padding: 2px 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  font-weight: normal;' ).
+    lo_buf->add( '  padding: 4px 0.5em;' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.status {' ).
+    lo_buf->add( '  width: 2em;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.highlight {' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.name {' ).
+    lo_buf->add( '  word-break: break-all;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab tr:first-child td { border-top: 0px; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab tr:hover td {' ).
+    lo_buf->add( '  background-image: linear-gradient(rgba(0, 0, 0, 0.075), rgba(0, 0, 0, 0.075));' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab td.cmd {  cursor: pointer; }' ).
+    lo_buf->add( '.stage_tab td.cmd a { padding: 0px 4px; }' ).
+    lo_buf->add( '.stage_tab th.cmd a { padding: 0px 4px; }' ).
+    lo_buf->add( '.stage_tab tbody tr:first-child td { padding-top: 0.5em; }' ).
+    lo_buf->add( '.stage_tab tbody tr:last-child td { padding-bottom: 0.5em; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COMMIT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.form-container {' ).
+    lo_buf->add( '  padding: 1em 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'form.aligned-form {' ).
+    lo_buf->add( '  display: table;' ).
+    lo_buf->add( '  border-spacing: 2px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'form.aligned-form label {' ).
+    lo_buf->add( '  padding-right: 1em;' ).
+    lo_buf->add( '  vertical-align: middle;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'form.aligned-form select {' ).
+    lo_buf->add( '  padding-right: 1em;' ).
+    lo_buf->add( '  vertical-align: middle;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'form.aligned-form span.sub-title {' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '  padding-top: 8px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'form.aligned-form div.row { display: table-row; }' ).
+    lo_buf->add( 'form.aligned-form label { display: table-cell; }' ).
+    lo_buf->add( 'form.aligned-form input { display: table-cell; }' ).
+    lo_buf->add( 'form.aligned-form input[type="text"] { width: 25em; }' ).
+    lo_buf->add( 'form.aligned-form span.cell { display: table-cell; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* SETTINGS STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.settings_container {' ).
+    lo_buf->add( '  padding: 0.5em 0.5em 1em;' ).
+    lo_buf->add( '  font-size: 10pt;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.settings_section {' ).
+    lo_buf->add( '  margin-left:50px' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.settings td:first-child {' ).
+    lo_buf->add( '  padding-left: 1em;' ).
+    lo_buf->add( '  padding-right: 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.diff {' ).
+    lo_buf->add( '  padding: 0.7em' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.diff_head {' ).
+    lo_buf->add( '  padding-bottom: 0.7em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.diff_name {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.diff_changed_by {' ).
+    lo_buf->add( '  float: right;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.diff_banner {' ).
+    lo_buf->add( '  border-style: solid;' ).
+    lo_buf->add( '  border-width: 1px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding-left: 0.3em;' ).
+    lo_buf->add( '  padding-right: 0.3em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.diff_content {' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.diff_content tbody tr td{' ).
+    lo_buf->add( '  width: 50%;' ).
+    lo_buf->add( '  vertical-align: top' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.diff_head span.state-block {' ).
+    lo_buf->add( '  margin-left: 0.5em;' ).
+    lo_buf->add( '  font-size: inherit;' ).
+    lo_buf->add( '  vertical-align: initial;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.diff_head span.state-block span {' ).
+    lo_buf->add( '  padding: 0px 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF TABLE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab {' ).
+    lo_buf->add( '  font-family: Consolas, Courier, monospace;' ).
+    lo_buf->add( '  font-size: 10pt;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td,' ).
+    lo_buf->add( 'table.diff_tab th {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  padding-right: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  font-weight: normal;' ).
+    lo_buf->add( '  padding-top: 3px;' ).
+    lo_buf->add( '  padding-bottom: 3px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab thead.header th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  font-size: 9pt;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td.num, th.num {' ).
+    lo_buf->add( '  width: 1%;' ).
+    lo_buf->add( '  min-width: 2em;' ).
+    lo_buf->add( '  padding-right: 8px;' ).
+    lo_buf->add( '  padding-left:  8px;' ).
+    lo_buf->add( '  text-align: right !important;' ).
+    lo_buf->add( '  border-left: 1px solid;' ).
+    lo_buf->add( '  border-right: 1px solid;' ).
+    lo_buf->add( '  -ms-user-select: none;' ).
+    lo_buf->add( '  user-select: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td.patch, th.patch {' ).
+    lo_buf->add( '  width: 1%;' ).
+    lo_buf->add( '  min-width: 1.5em;' ).
+    lo_buf->add( '  padding-right: 8px;' ).
+    lo_buf->add( '  padding-left:  8px;' ).
+    lo_buf->add( '  text-align: right !important;' ).
+    lo_buf->add( '  border-left: 1px solid;' ).
+    lo_buf->add( '  border-right: 1px solid;' ).
+    lo_buf->add( '  -ms-user-select: none;' ).
+    lo_buf->add( '  user-select: none;' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab tr.diff_line:hover td {' ).
+    lo_buf->add( '  background-image: linear-gradient(rgba(0, 0, 0, 0.075), rgba(0, 0, 0, 0.075));' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab td.num::before {' ).
+    lo_buf->add( '  content: attr(line-num);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab code {' ).
+    lo_buf->add( '  font-family: inherit;' ).
+    lo_buf->add( '  white-space: pre;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td.code {' ).
+    lo_buf->add( '  word-wrap: break-word;' ).
+    lo_buf->add( '  white-space: pre-wrap;' ).
+    lo_buf->add( '  overflow: visible;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab tbody tr:first-child td { padding-top: 0.5em; }' ).
+    lo_buf->add( 'table.diff_tab tbody tr:last-child td { padding-bottom: 0.5em; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab td.mark, th.mark {' ).
+    lo_buf->add( '  width: 0.1%;' ).
+    lo_buf->add( '  -ms-user-select: none;' ).
+    lo_buf->add( '  user-select: none;' ).
+    lo_buf->add( '  cursor: default;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.diff_select_left td.diff_right,' ).
+    lo_buf->add( '.diff_select_left td.diff_right *,' ).
+    lo_buf->add( '.diff_select_left th.diff_right,' ).
+    lo_buf->add( '.diff_select_left th.diff_right *,' ).
+    lo_buf->add( '.diff_select_right td.diff_left,' ).
+    lo_buf->add( '.diff_select_right td.diff_left *,' ).
+    lo_buf->add( '.diff_select_right th.diff_left,' ).
+    lo_buf->add( '.diff_select_right th.diff_left * {' ).
+    lo_buf->add( '  -ms-user-select: none;' ).
+    lo_buf->add( '  user-select: none;' ).
+    lo_buf->add( '  cursor: text;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.diff_select_left td.diff_left,' ).
+    lo_buf->add( '.diff_select_left td.diff_left *,' ).
+    lo_buf->add( '.diff_select_left th.diff_left,' ).
+    lo_buf->add( '.diff_select_left th.diff_left *,' ).
+    lo_buf->add( '.diff_select_right td.diff_right,' ).
+    lo_buf->add( '.diff_select_right td.diff_right *,' ).
+    lo_buf->add( '.diff_select_right th.diff_right,' ).
+    lo_buf->add( '.diff_select_right th.diff_right * {' ).
+    lo_buf->add( '  -ms-user-select: text;' ).
+    lo_buf->add( '  user-select: text;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'td.diff_others::selection,' ).
+    lo_buf->add( 'td.diff_others *::selection,' ).
+    lo_buf->add( 'th.diff_others::selection,' ).
+    lo_buf->add( 'th.diff_others *::selection {' ).
+    lo_buf->add( '  background-color: transparent;' ).
+    lo_buf->add( '  cursor: default;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.diff_select_left td.diff_right::selection,' ).
+    lo_buf->add( '.diff_select_left td.diff_right *::selection,' ).
+    lo_buf->add( '.diff_select_left th.diff_right::selection,' ).
+    lo_buf->add( '.diff_select_left th.diff_right *::selection,' ).
+    lo_buf->add( '.diff_select_right td.diff_left::selection,' ).
+    lo_buf->add( '.diff_select_right td.diff_left *::selection,' ).
+    lo_buf->add( '.diff_select_right th.diff_left::selection,' ).
+    lo_buf->add( '.diff_select_right th.diff_left *::selection {' ).
+    lo_buf->add( '  background-color: transparent;' ).
+    lo_buf->add( '  cursor: text;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DEBUG INFO STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.debug_container {' ).
+    lo_buf->add( '  padding: 0.5em;' ).
+    lo_buf->add( '  font-size: 10pt;' ).
+    lo_buf->add( '  font-family: Consolas, Courier, monospace;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.debug_container p {' ).
+    lo_buf->add( '  margin: 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* *** */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'li.action_link.enabled{' ).
+    lo_buf->add( '  visibility: visible;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'li.action_link:not(enabled){' ).
+    lo_buf->add( '  visibility: hidden;' ).
+    lo_buf->add( '  position: fixed; /* so it does not take up space when hidden */' ).
+    lo_buf->add( '  display: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TUTORIAL */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.tutorial {' ).
+    lo_buf->add( '  margin-top:       3px;' ).
+    lo_buf->add( '  padding: 0.5em 1em 0.5em 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.tutorial li { margin: 2px 0px }' ).
+    lo_buf->add( 'div.tutorial h1 { font-size: 18pt; }' ).
+    lo_buf->add( 'div.tutorial h2 { font-size: 14pt;}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MENU */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Special credits to example at https://codepen.io/philhoyt/pen/ujHzd */' ).
+    lo_buf->add( '/* container div, aligned left, but with .float-right modifier aligns right */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul {' ).
+    lo_buf->add( '  list-style: none;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  float: left;' ).
+    lo_buf->add( '  margin: 0;' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '  white-space: nowrap;' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container.float-right ul { float: right; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul a {' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  text-decoration: none;' ).
+    lo_buf->add( '  line-height: 30px;' ).
+    lo_buf->add( '  padding: 0 12px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* clearfix https://css-tricks.com/snippets/css/clear-fix/ */' ).
+    lo_buf->add( '.nav-container:after {' ).
+    lo_buf->add( '  clear: both;' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  content: "";' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* submenues align to left or right border of the active item' ).
+    lo_buf->add( '   depending on .float-right modifier */' ).
+    lo_buf->add( '.nav-container ul li {' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  float: left;' ).
+    lo_buf->add( '  margin: 0;' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container.float-right ul ul { left: auto; right: 0; }' ).
+    lo_buf->add( '.nav-container ul li.current-menu-item { font-weight: 700; }' ).
+    lo_buf->add( '.nav-container ul li.force-nav-hover ul { display: block; }' ).
+    lo_buf->add( '.nav-container ul li:hover > ul { display: block; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* special selection style for 1st level items (see also .corner below) */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul ul {' ).
+    lo_buf->add( '  display: none;' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  top: 100%;' ).
+    lo_buf->add( '  left: 0;' ).
+    lo_buf->add( '  z-index: 1;' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '  box-shadow: 1px 1px 3px 0px #bbb;' ).
+    lo_buf->add( '  max-height: 700px;' ).
+    lo_buf->add( '  overflow: auto;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul ul li {' ).
+    lo_buf->add( '  float: none;' ).
+    lo_buf->add( '  min-width: 160px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul ul a {' ).
+    lo_buf->add( '  line-height: 120%;' ).
+    lo_buf->add( '  padding: 8px 15px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul ul ul {' ).
+    lo_buf->add( '  top: 0;' ).
+    lo_buf->add( '  left: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container.float-right ul ul ul {' ).
+    lo_buf->add( '  left: auto;' ).
+    lo_buf->add( '  right: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Minizone to extent hover area,' ).
+    lo_buf->add( '   aligned to the left or to the right of the selected item' ).
+    lo_buf->add( '   depending on .float-right modifier */' ).
+    lo_buf->add( '.nav-container > ul > li > div.minizone {' ).
+    lo_buf->add( '  display: none;' ).
+    lo_buf->add( '  z-index: 1;' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  padding: 0px;' ).
+    lo_buf->add( '  width: 16px;' ).
+    lo_buf->add( '  height: 100%;' ).
+    lo_buf->add( '  bottom: 0px;' ).
+    lo_buf->add( '  left: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container > ul > li:hover div.minizone { display: block; }' ).
+    lo_buf->add( '.nav-container.float-right > ul > li > div.minizone {' ).
+    lo_buf->add( '  left: auto;' ).
+    lo_buf->add( '  right: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* icons - text-align strictly left - otherwise look ugly' ).
+    lo_buf->add( '   + bite a bit of left padding for nicer look' ).
+    lo_buf->add( '   + forbids item text wrapping (maybe can be done differently) */' ).
+    lo_buf->add( '.nav-container ul ul li a .icon {' ).
+    lo_buf->add( '  padding-right: 10px;' ).
+    lo_buf->add( '  margin-left: -3px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container ul.with-icons li {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  white-space: nowrap;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Special .corner modifier - hangs menu at the top right corner' ).
+    lo_buf->add( '   and cancels 1st level background coloring */' ).
+    lo_buf->add( '.nav-container.corner {' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  right: 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Toolbar separator style */' ).
+    lo_buf->add( '.nav-container ul ul li.separator {' ).
+    lo_buf->add( '  font-size: x-small;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '  padding: 4px 0;' ).
+    lo_buf->add( '  text-transform: uppercase;' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container ul ul li.separator:first-child { border-top: none; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* NEWS ANNOUNCEMENT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel {' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  z-index: 99;' ).
+    lo_buf->add( '  top: 36px;' ).
+    lo_buf->add( '  left: 50%;' ).
+    lo_buf->add( '  width: 40em;' ).
+    lo_buf->add( '  margin-left: -20em;' ).
+    lo_buf->add( '  box-shadow: 1px 1px 3px 2px #dcdcdc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel-fixed {' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  top: 15%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel div.info-hint {' ).
+    lo_buf->add( '  text-transform: uppercase;' ).
+    lo_buf->add( '  font-size: small;' ).
+    lo_buf->add( '  padding: 8px 6px 0px;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel div.info-title {' ).
+    lo_buf->add( '  text-transform: uppercase;' ).
+    lo_buf->add( '  font-size: small;' ).
+    lo_buf->add( '  padding: 6px;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel div.info-title a.close-btn {' ).
+    lo_buf->add( '  padding-left: 12px;' ).
+    lo_buf->add( '  padding-right: 2px;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  bottom: 1px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel div.info-list {' ).
+    lo_buf->add( '  padding: 0.8em 0.7em 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel ul {' ).
+    lo_buf->add( '  padding-left: 10px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel li {' ).
+    lo_buf->add( '  padding-left: 0px;' ).
+    lo_buf->add( '  list-style-type: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel h1:first-child { margin: auto; }' ).
+    lo_buf->add( 'div.info-panel h1 {' ).
+    lo_buf->add( '  font-size: inherit;' ).
+    lo_buf->add( '  padding: 6px 4px;' ).
+    lo_buf->add( '  margin: 4px auto auto;' ).
+    lo_buf->add( '  text-decoration: underline;' ).
+    lo_buf->add( '  font-weight: normal;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel .version-marker {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  margin-left: 20px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding: 0px 6px;' ).
+    lo_buf->add( '  border:  1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel .update { border:  1px solid; }' ).
+    lo_buf->add( 'div.info-panel div.info-list td { padding-right: 1em }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ERROR MESSAGE PANEL */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.message-panel {' ).
+    lo_buf->add( '  z-index: 99;' ).
+    lo_buf->add( '  box-shadow: 2px 2px 4px 0px hsla(0, 0%, 0%, .1);' ).
+    lo_buf->add( '  padding: 0.5em 1em;' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  bottom: 12px;' ).
+    lo_buf->add( '  width: 95%;' ).
+    lo_buf->add( '  margin: 0 auto;' ).
+    lo_buf->add( '  max-width: 1248px;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 5px;' ).
+    lo_buf->add( '  border-color: hsl(0, 42%, 64%);' ).
+    lo_buf->add( '  background-color: hsla(0, 42%, 90%, 1);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.message-panel-bar {' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  bottom: 10px;' ).
+    lo_buf->add( '  right: 10px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.message-panel-commands {' ).
+    lo_buf->add( '  display: none;' ).
+    lo_buf->add( '  margin-right: 2em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.message-panel-commands a {' ).
+    lo_buf->add( '  padding: 0em 0.5em;' ).
+    lo_buf->add( '  border-left: 1px solid;' ).
+    lo_buf->add( '  border-left-color: #ccc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.message-panel-commands a:first-child {' ).
+    lo_buf->add( '  padding-left: 0;' ).
+    lo_buf->add( '  border-left: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.message-panel:hover .message-panel-commands {' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TOOLTIP TEXT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint {' ).
+    lo_buf->add( '    line-height: 1em;' ).
+    lo_buf->add( '    text-align: center;' ).
+    lo_buf->add( '    padding: 5px 15px;' ).
+    lo_buf->add( '    border-radius: 4px;' ).
+    lo_buf->add( '    position: absolute;' ).
+    lo_buf->add( '    z-index: 1;' ).
+    lo_buf->add( '    margin-top: -30px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint-a {' ).
+    lo_buf->add( '  margin-left: -60px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint-input {' ).
+    lo_buf->add( '  margin-left: -30px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint-i {' ).
+    lo_buf->add( '  margin-left: -30px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint .pending { color: hsla(0, 0%, 0%, 0.2); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Tooltip arrow */' ).
+    lo_buf->add( '.link-hint::after {' ).
+    lo_buf->add( '    content: "";' ).
+    lo_buf->add( '    position: absolute;' ).
+    lo_buf->add( '    top: 100%;' ).
+    lo_buf->add( '    left: 50%;' ).
+    lo_buf->add( '    margin-left: -5px;' ).
+    lo_buf->add( '    border-width: 5px;' ).
+    lo_buf->add( '    border-style: solid;' ).
+    lo_buf->add( '    border-color: transparent;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* HOTKEYS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'ul.hotkeys {' ).
+    lo_buf->add( '  list-style-type: none;' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '  margin: 0;' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'ul.hotkeys span.key-id {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding: 1px 7px;' ).
+    lo_buf->add( '  width: 3em;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '  margin-top: 0.2em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'ul.hotkeys span.key-descr {' ).
+    lo_buf->add( '  margin-left: 1.2em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.corner-hint {' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  bottom: 10px;' ).
+    lo_buf->add( '  right: 10px;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  padding: 4px;' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '  opacity: 0.5;' ).
+    lo_buf->add( '  z-index: 99;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Commit popup */' ).
+    lo_buf->add( 'table.commit tr .title {' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '  vertical-align: top;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Repo overview */' ).
+    lo_buf->add( '.repo-overview {' ).
+    lo_buf->add( '  padding: 0.5em 0.7em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview table {' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview-toolbar {' ).
+    lo_buf->add( '  padding: 1em 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview-toolbar label {' ).
+    lo_buf->add( '  margin-right: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  font-weight: normal;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview table {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview thead tr {' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview tfoot tr {' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview tr.favorite .icon-star {' ).
+    lo_buf->add( '  color: #5e8dc9 !important;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview td,' ).
+    lo_buf->add( '.repo-overview th {' ).
+    lo_buf->add( '  padding: 6px 6px; /* maybe use height ? */' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview .ro-detail { display: none; }' ).
+    lo_buf->add( '.repo-overview .ro-go a {' ).
+    lo_buf->add( '  padding: 0px 0.15em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview .ro-go a:hover {' ).
+    lo_buf->add( '  color: #ff721e;' ).
+    lo_buf->add( '  text-decoration: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview td.labels {' ).
+    lo_buf->add( '  max-width: 18ch;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPO LABELS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo-label-catalog {' ).
+    lo_buf->add( '  padding: 1em 1em;' ).
+    lo_buf->add( '  margin-top: -1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-label-catalog label {' ).
+    lo_buf->add( '  margin-right: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'ul.repo-labels {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  list-style-type: none;' ).
+    lo_buf->add( '  padding-inline-start: 0px;' ).
+    lo_buf->add( '  padding-left: 0px;' ).
+    lo_buf->add( '  margin-block-start: 0px;' ).
+    lo_buf->add( '  margin-block-end: 0px;' ).
+    lo_buf->add( '  margin-top: 0px;' ).
+    lo_buf->add( '  margin-bottom: 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'ul.repo-labels li {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  padding: 3px 5px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  border-style: solid;' ).
+    lo_buf->add( '  border-width: 1px;' ).
+    lo_buf->add( '  margin-bottom: 2px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'ul.repo-labels li a {' ).
+    lo_buf->add( '  color: inherit;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'ul.repo-labels li:not(:last-child) { margin-right: 0.3em; }' ).
+    lo_buf->add( 'table ul.repo-labels li {' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '  padding: 2px 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* LABEL COLORS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.rl-white {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 30%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 80%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-white-b {' ).
+    lo_buf->add( '  color: hsl(214, 100%, 60%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  border-color: hsl(214, 89%, 86%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-white-r {' ).
+    lo_buf->add( '  color: hsl(0, 100%, 41%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  border-color: hsl(0, 100%, 85%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-grey {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 70%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 60%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-dark-w {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 25%);;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-dark-y {' ).
+    lo_buf->add( '  color: hsl(43, 95%, 75%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-dark-r {' ).
+    lo_buf->add( '  color: hsl(0, 100%, 74%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-dark-b {' ).
+    lo_buf->add( '  color: hsl(227, 92%, 80%);' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '  border-color: hsl(0, 0%, 25%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-lightblue {' ).
+    lo_buf->add( '  color: hsl(217, 80%, 25%);' ).
+    lo_buf->add( '  background-color: hsl(216, 76%, 84%);' ).
+    lo_buf->add( '  border-color: hsl(216, 76%, 73%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-darkblue {' ).
+    lo_buf->add( '  color: hsl(218, 77%, 88%);' ).
+    lo_buf->add( '  background-color: hsl(217, 66%, 32%);' ).
+    lo_buf->add( '  border-color: hsl(217, 66%, 20%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-lightgreen {' ).
+    lo_buf->add( '  color: hsl(153, 76%, 18%);' ).
+    lo_buf->add( '  background-color: hsl(152, 65%, 82%);' ).
+    lo_buf->add( '  border-color: hsl(152, 65%, 65%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-darkgreen {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(153, 77%, 37%);' ).
+    lo_buf->add( '  border-color: hsl(153, 77%, 30%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-lightred {' ).
+    lo_buf->add( '  color: hsl(8, 86%, 29%);' ).
+    lo_buf->add( '  background-color: hsl(8, 74%, 80%);' ).
+    lo_buf->add( '  border-color: hsl(8, 74%, 70%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-darkred {' ).
+    lo_buf->add( '  color: hsl(7, 76%, 85%);' ).
+    lo_buf->add( '  background-color: hsl(8, 77%, 29%);' ).
+    lo_buf->add( '  border-color: hsl(8, 77%, 20%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-yellow {' ).
+    lo_buf->add( '  color: hsl(44, 87%, 22%);' ).
+    lo_buf->add( '  background-color: hsl(44, 94%, 87%);' ).
+    lo_buf->add( '  border-color: hsl(44, 94%, 70%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-darkyellow {' ).
+    lo_buf->add( '  color: hsl(49, 100%, 24%);' ).
+    lo_buf->add( '  background-color: hsl(49, 100%, 64%);' ).
+    lo_buf->add( '  border-color: hsl(49, 100%, 49%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-orange {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(19, 100%, 61%);' ).
+    lo_buf->add( '  border-color: hsl(19, 100%, 50%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-brown {' ).
+    lo_buf->add( '  color: hsl(33, 100%, 89%);' ).
+    lo_buf->add( '  background-color: hsl(33, 66%, 39%);' ).
+    lo_buf->add( '  border-color: hsl(33, 66%, 30%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-pink {' ).
+    lo_buf->add( '  color: hsl(340, 35%, 45%);' ).
+    lo_buf->add( '  background-color: hsl(340, 85%, 77%);' ).
+    lo_buf->add( '  border-color: hsl(340, 85%, 65%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-teal {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(191, 61%, 45%);' ).
+    lo_buf->add( '  border-color: hsl(191, 61%, 37%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.rl-darkviolet {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 100%);' ).
+    lo_buf->add( '  background-color: hsl(258, 100%, 80%);' ).
+    lo_buf->add( '  border-color: hsl(258, 100%, 72%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* FORM FIELD HELP TOOLTIP */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.form-field-help-tooltip {' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.form-field-help-tooltip .form-field-help-tooltip-text {' ).
+    lo_buf->add( '  visibility: hidden;' ).
+    lo_buf->add( '  width: 40ch;' ).
+    lo_buf->add( '  border-radius: 5px;' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  z-index: 1;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  padding: 0.4em 0.6em;' ).
+    lo_buf->add( '  text-align: justify;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.form-field-help-tooltip .form-field-help-tooltip-text p {' ).
+    lo_buf->add( '  margin: 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.form-field-help-tooltip .form-field-help-tooltip-text {' ).
+    lo_buf->add( '  background-color: white;' ).
+    lo_buf->add( '  border-color: #888;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.form-field-help-tooltip:hover .form-field-help-tooltip-text {' ).
+    lo_buf->add( '  visibility: visible;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.form-field-help-tooltip code {' ).
+    lo_buf->add( '  border-radius: 5px;' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '  padding: 0.1em 0.4em;' ).
+    lo_buf->add( '  background-color: #e2e2e2;' ).
+    lo_buf->add( '  word-wrap: break-word;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TABLE COMPONENT DEFAULT STYLE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.default-table-container {' ).
+    lo_buf->add( '  padding: 6px 0.5em;' ).
+    lo_buf->add( '  background-color: white;' ).
+    lo_buf->add( '  border-radius: 6px;' ).
+    lo_buf->add( '  overflow-x: hidden;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table {' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table thead tr:last-child {' ).
+    lo_buf->add( '  border-bottom: #efefef solid 1px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table td,' ).
+    lo_buf->add( 'table.default-table th {' ).
+    lo_buf->add( '  padding: 6px 8px;' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table th {' ).
+    lo_buf->add( '  white-space: nowrap;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table th span.sort-arrow {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  color: hsla(0, 0%, 0%, 0.15);' ).
+    lo_buf->add( '  width: 1em; /*for constant width*/' ).
+    lo_buf->add( '  text-align: right;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table th span.sort-active {' ).
+    lo_buf->add( '  color: #4078c0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.default-table th {' ).
+    lo_buf->add( '  padding-bottom: 10px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* CODE INSPECTOR */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci {' ).
+    lo_buf->add( '  margin-top: 1px;' ).
+    lo_buf->add( '  margin-bottom: 1px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-msg {' ).
+    lo_buf->add( '  padding: 0.7em 1em 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-msg span.ci-variant {' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-stats {' ).
+    lo_buf->add( '  padding: 0.5em 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-stats span.count {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  padding: 2px 6px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail {' ).
+    lo_buf->add( '  padding: 6px 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail table td,' ).
+    lo_buf->add( 'div.ci-detail table th {' ).
+    lo_buf->add( '  vertical-align: text-top;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail table th[data-cid="kind"],' ).
+    lo_buf->add( 'div.ci-detail table th[data-cid="obj_type"] {' ).
+    lo_buf->add( '  white-space: nowrap' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail table td[data-cid="kind"] span {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  width: 1em;' ).
+    lo_buf->add( '  height: 1em;' ).
+    lo_buf->add( '  vertical-align: inherit;' ).
+    lo_buf->add( '  color: transparent;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail table td[data-cid="text"] {' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* FLOATING BUTTONS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.floating-button {' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  top: 8em;' ).
+    lo_buf->add( '  right: 2.8em;' ).
+    lo_buf->add( '  padding: 1em 1.8em;' ).
+    lo_buf->add( '  border-radius: 4px;' ).
+    lo_buf->add( '  border-width: 1px;' ).
+    lo_buf->add( '  border-style: solid;' ).
+    lo_buf->add( '  box-shadow: 2px 2px 6px 0px #ccc;' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COMMAND PALETTE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette {' ).
+    lo_buf->add( '  position: absolute;' ).
+    lo_buf->add( '  z-index: 99;' ).
+    lo_buf->add( '  top: 36px;' ).
+    lo_buf->add( '  left: 50%;' ).
+    lo_buf->add( '  width: 40em;' ).
+    lo_buf->add( '  margin-left: -20em;' ).
+    lo_buf->add( '  box-shadow: 1px 1px 3px 2px #dcdcdc;' ).
+    lo_buf->add( '  background-color: white;' ).
+    lo_buf->add( '  border: solid 2px;' ).
+    lo_buf->add( '  padding: 0px 1px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette input {' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  box-sizing: border-box;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette ul {' ).
+    lo_buf->add( '  max-height: 10em;' ).
+    lo_buf->add( '  overflow-y: scroll;' ).
+    lo_buf->add( '  margin: 4px 0;' ).
+    lo_buf->add( '  padding: 2px 4px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette li {' ).
+    lo_buf->add( '  list-style-type: none;' ).
+    lo_buf->add( '  cursor: default;' ).
+    lo_buf->add( '  padding: 4px 6px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette li .icon {' ).
+    lo_buf->add( '  margin-right: 10px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette li .icon:before {' ).
+    lo_buf->add( '  width: 1.1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* SETTINGS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.settings_tab {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  max-width: 600px;' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab th {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  padding: 0.5em;' ).
+    lo_buf->add( '  border-bottom: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab td {' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '  padding: 0.3em 0.5em;' ).
+    lo_buf->add( '  border-top: 1px solid;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab input {' ).
+    lo_buf->add( '  border: none;' ).
+    lo_buf->add( '  text-align: center;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'settings_tab tr:first-child td { border-top: 0px; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* UNIT TESTS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.unit_tests {' ).
+    lo_buf->add( '  line-height: 1.5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIALOGS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.dialog {' ).
+    lo_buf->add( '  margin: 0 auto;' ).
+    lo_buf->add( '  margin-top: 1em;' ).
+    lo_buf->add( '  margin-bottom: 1em;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  padding: 1em 1em;' ).
+    lo_buf->add( '  border-radius: 6px;' ).
+    lo_buf->add( '  text-align: left;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog-form {' ).
+    lo_buf->add( '  width: 600px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog-form-center {' ).
+    lo_buf->add( '  margin: 1em auto 1em;' ).
+    lo_buf->add( '  max-width: 600px;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog ul {' ).
+    lo_buf->add( '  padding: 0;' ).
+    lo_buf->add( '  margin: 0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li {' ).
+    lo_buf->add( '  padding: 5px 10px;' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  list-style: none;' ).
+    lo_buf->add( '  position: relative;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands {' ).
+    lo_buf->add( '  text-align: right;' ).
+    lo_buf->add( '  margin-top: 12px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '  text-decoration: none;' ).
+    lo_buf->add( '  padding: 6px 12px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="button"],' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"] {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  padding: 6px 12px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a.main,' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"].main {' ).
+    lo_buf->add( '  border: 1px solid transparent;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog label {' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '  margin-top: 6px;' ).
+    lo_buf->add( '  margin-bottom: 6px;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.error small {' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  font-size: 75%;' ).
+    lo_buf->add( '  margin: 4px 0px;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.hidden {' ).
+    lo_buf->add( '  padding: 0px 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container {' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '  padding: 4px;' ).
+    lo_buf->add( '  border-radius: 3px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog input[type="checkbox"] + label {' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog input[type="password"],' ).
+    lo_buf->add( '.dialog input[type="text"] {' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  box-sizing: border-box;' ).
+    lo_buf->add( '  height: 2.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog input[type="number"] {' ).
+    lo_buf->add( '  width: 25%;' ).
+    lo_buf->add( '  box-sizing: border-box;' ).
+    lo_buf->add( '  height: 2.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog textarea {' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  box-sizing: border-box;' ).
+    lo_buf->add( '  padding: 10px;' ).
+    lo_buf->add( '  font-family: Arial,Helvetica,sans-serif;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"] {' ).
+    lo_buf->add( '  visibility: hidden;' ).
+    lo_buf->add( '  display: none;' ).
+    lo_buf->add( '  height: 0px;' ).
+    lo_buf->add( '  width: 0px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"] + label {' ).
+    lo_buf->add( '  border: 1px solid transparent;' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '  width: auto;' ).
+    lo_buf->add( '  margin: 0px;' ).
+    lo_buf->add( '  padding: 3px 8px;' ).
+    lo_buf->add( '  border-radius: 2px;' ).
+    lo_buf->add( '  display: inline-block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"]:checked + label {' ).
+    lo_buf->add( '  border: 1px solid transparent;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog table {' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog table thead td {' ).
+    lo_buf->add( '  font-size: 14px;' ).
+    lo_buf->add( '  height: 2.5em;' ).
+    lo_buf->add( '  background-color: #ddd;' ).
+    lo_buf->add( '  border: 1px solid #ccc;' ).
+    lo_buf->add( '  padding: 0px 10px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog table tbody td {' ).
+    lo_buf->add( '  border: 1px solid #ccc;' ).
+    lo_buf->add( '  background-color: white;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog table td input {' ).
+    lo_buf->add( '  border: 0px;' ).
+    lo_buf->add( '  background: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.with-command div.input-container {' ).
+    lo_buf->add( '  display: table-cell;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.with-command div.command-container {' ).
+    lo_buf->add( '  display: table-cell;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.with-command input[type="button"],' ).
+    lo_buf->add( '.dialog li.with-command input[type="submit"] {' ).
+    lo_buf->add( '  height: 2.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset {' ).
+    lo_buf->add( '  margin-top: 1em;' ).
+    lo_buf->add( '  border: 1px solid;' ).
+    lo_buf->add( '  border-right: none;' ).
+    lo_buf->add( '  border-left: none;' ).
+    lo_buf->add( '  border-bottom: none;' ).
+    lo_buf->add( '  border-radius: 6px; /* does not work in IE ? */' ).
+    lo_buf->add( '  padding-bottom: 1em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset:first-child {' ).
+    lo_buf->add( '  margin-top: 0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset legend {' ).
+    lo_buf->add( '  font-size: large;' ).
+    lo_buf->add( '  font-weight: bold;' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  padding-right: 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .dialog-help {' ).
+    lo_buf->add( '  float: left;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STICKY HEADERS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* https://www.w3schools.com/howto/howto_js_navbar_sticky.asp */' ).
+    lo_buf->add( '/* Note: We have to use JS since IE does not support CSS position:sticky */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* The sticky class is added to the navbar with JS when it reaches its scroll position */' ).
+    lo_buf->add( '.sticky {' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  top: 0;' ).
+    lo_buf->add( '  z-index: 10;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  padding: 0.5em;' ).
+    lo_buf->add( '  margin-bottom: 3px;' ).
+    lo_buf->add( '  max-height: 47px;' ).
+    lo_buf->add( '  max-width: 1265px; /* if set to 1280px, then actual width will be 1296px (strange) */' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.sticky_full_width {' ).
+    lo_buf->add( '  position: fixed;' ).
+    lo_buf->add( '  top: 0;' ).
+    lo_buf->add( '  z-index: 10;' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '  padding: 0.5em 0.5em;' ).
+    lo_buf->add( '  margin-bottom: 3px;' ).
+    lo_buf->add( '  max-height: 47px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.sticky_full_width .nav-container {' ).
+    lo_buf->add( '  margin-right: 18px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Add some top padding to the page content to prevent sudden quick movement' ).
+    lo_buf->add( '   as the navigation bar gets a new position at the top of the page */' ).
+    lo_buf->add( '.sticky + .not_sticky {' ).
+    lo_buf->add( '  padding-top: 50px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Give more padding if browser control warning is present */' ).
+    lo_buf->add( '.sticky:has(.browser-control-warning) + .not_sticky,' ).
+    lo_buf->add( '.sticky_full_width:has(.browser-control-warning) + .not_sticky {' ).
+    lo_buf->add( '  padding-top: 75px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.sticky_full_width + .not_sticky {' ).
+    lo_buf->add( '  padding-top: 50px;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Light toolbar or blocks with separators */' ).
+    lo_buf->add( '.toolbar-light a {' ).
+    lo_buf->add( '  padding-left: 0.5em;' ).
+    lo_buf->add( '  padding-right: 0.5em;' ).
+    lo_buf->add( '  border-left: 1px solid;' ).
+    lo_buf->add( '  border-left-color: #ccc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.toolbar-light a:first-child {' ).
+    lo_buf->add( '  padding-left: 0;' ).
+    lo_buf->add( '  border-left: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Warning if wrong browser control is used */' ).
+    lo_buf->add( '.browser-control-warning {' ).
+    lo_buf->add( '  width: 100%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MODAL POPUP */' ).
+    lo_buf->add( '/* https://css-tricks.com/considerations-styling-modal/ */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.modal {' ).
+    lo_buf->add( '    /* center on screen */' ).
+    lo_buf->add( '    position: fixed;' ).
+    lo_buf->add( '    top: 50%;' ).
+    lo_buf->add( '    left: 50%;' ).
+    lo_buf->add( '    transform: translate(-50%, -50%);' ).
+    lo_buf->add( '    /* size */' ).
+    lo_buf->add( '    max-width: 100%;' ).
+    lo_buf->add( '    max-height: 100%;' ).
+    lo_buf->add( '    /* infront of overlay */' ).
+    lo_buf->add( '    z-index: 1010;' ).
+    lo_buf->add( '    display: block;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.modal-guts {' ).
+    lo_buf->add( '    padding: 6px 6px;' ).
+    lo_buf->add( '    /* let it scroll */' ).
+    lo_buf->add( '    overflow: auto;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.modal-guts .dialog {' ).
+    lo_buf->add( '    box-shadow: 2px 2px 4px 1px rgba(0,0,0,0.3);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.modal-overlay {' ).
+    lo_buf->add( '    /* darken and prevent interactions with background */' ).
+    lo_buf->add( '    z-index: 1000;' ).
+    lo_buf->add( '    position: fixed;' ).
+    lo_buf->add( '    top: 0;' ).
+    lo_buf->add( '    left: 0;' ).
+    lo_buf->add( '    width: 100%;' ).
+    lo_buf->add( '    height: 100%;' ).
+    lo_buf->add( '    background: rgba(0, 0, 0, 0.3);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.modal .radio-container label {' ).
+    lo_buf->add( '  /* hacky, improve later, get rid of !important, hook it to a named style instead */' ).
+    lo_buf->add( '  border-radius: 3px !important;' ).
+    lo_buf->add( '  border: 1px solid rgba(0, 0, 0, 0.3) !important;' ).
+    lo_buf->add( '  margin-bottom: 2px !important;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.modal .radio-container label:hover {' ).
+    lo_buf->add( '  background-color: rgba(0, 0, 0, 0.1);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* WHERE USED PAGE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.wu-header {' ).
+    lo_buf->add( '  padding: 8px 0.5em;' ).
+    lo_buf->add( '  margin: 0px 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.wu {' ).
+    lo_buf->add( '  padding: 8px 0.5em;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.wu table thead tr:first-child {' ).
+    lo_buf->add( '  /* TODO: maybe move this to default table style */' ).
+    lo_buf->add( '  color: hsl(0, 0%, 80%);' ).
+    lo_buf->add( '  text-transform: uppercase;' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.wu table tbody {' ).
+    lo_buf->add( '  font-size: 90%;' ).
+    lo_buf->add( '  vertical-align: baseline; /* for second lines, used type */' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.wu table td[data-cid="dep_obj_name"] span.used-obj {' ).
+    lo_buf->add( '  display: block;' ).
+    lo_buf->add( '  color: hsl(0, 0%, 70%);' ).
+    lo_buf->add( '  font-size: smaller;' ).
+    lo_buf->add( '  text-transform: lowercase;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.wu table td[data-gid="where"],' ).
+    lo_buf->add( 'div.wu table th[data-gid="where"] {' ).
+    lo_buf->add( '  background-color: hsl(0, 0%, 97%);' ).
+    lo_buf->add( '}' ).
+
     li_asset_man->register_asset(
       iv_url       = 'css/common.css'
       iv_type      = 'text/css'
       iv_mime_name = 'ZABAPGIT_CSS_COMMON'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include zabapgit_css_theme_default.w3mi.data.css > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_THEME_DEFAULT
+****************************************************
+    lo_buf->add( '/*' ).
+    lo_buf->add( ' * ABAPGIT COLOR THEME CSS - DEFAULT' ).
+    lo_buf->add( ' */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( ':root {' ).
+    lo_buf->add( '  --theme-background-color: #E8E8E8;' ).
+    lo_buf->add( '  --theme-container-background-color: #f2f2f2;' ).
+    lo_buf->add( '  --theme-container-border-color: lightgrey;' ).
+    lo_buf->add( '  --theme-table-background-color: white;' ).
+    lo_buf->add( '  --theme-table-head-background-color: #edf2f9;' ).
+    lo_buf->add( '  --theme-table-border-color: #ddd;' ).
+    lo_buf->add( '  --theme-table-cell-border-color: #eee;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  --theme-primary-font: "72", Arial, Helvetica, sans-serif;' ).
+    lo_buf->add( '  --theme-primary-font-color: #333333;' ).
+    lo_buf->add( '  --theme-primary-font-color-reduced: #ccc;' ).
+    lo_buf->add( '  --theme-font-size: 12pt;' ).
+    lo_buf->add( '  --theme-link-color: #4078c0;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  --theme-greyscale-dark: #808080;' ).
+    lo_buf->add( '  --theme-greyscale-medium: #b3b3b3;' ).
+    lo_buf->add( '  --theme-greyscale-light: #ccc;' ).
+    lo_buf->add( '  --theme-greyscale-lighter: lightgrey;' ).
+    lo_buf->add( '  --theme-linkhint-background: lightgreen;' ).
+    lo_buf->add( '  --theme-debug-color: #aaa;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* GLOBALS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'body {' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '  font-family: var(--theme-primary-font);' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '  font-size: var(--theme-font-size);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'a, a:visited  { color: var(--theme-link-color); }' ).
+    lo_buf->add( '.link  {' ).
+    lo_buf->add( '  color: var(--theme-link-color);' ).
+    lo_buf->add( '  cursor: pointer;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'input, textarea, select     { border-color: #ddd; }' ).
+    lo_buf->add( 'input:focus, textarea:focus { border-color: #8cadd9; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COLOR PALETTE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.grey         { color: var(--theme-greyscale-lighter) !important; }' ).
+    lo_buf->add( '.grey70       { color: var(--theme-greyscale-medium)  !important; }' ).
+    lo_buf->add( '.grey80       { color: var(--theme-greyscale-light)   !important; }' ).
+    lo_buf->add( '.darkgrey     { color: var(--theme-greyscale-dark)    !important; }' ).
+    lo_buf->add( '.bgorange     { background-color: orange; }' ).
+    lo_buf->add( '.attention    { color: red        !important; }' ).
+    lo_buf->add( '.error        { color: #d41919    !important; }' ).
+    lo_buf->add( '.warning      { color: #efb301    !important; }' ).
+    lo_buf->add( '.success      { color: green      !important; }' ).
+    lo_buf->add( '.blue         { color: #5e8dc9    !important; }' ).
+    lo_buf->add( '.red          { color: red        !important; }' ).
+    lo_buf->add( '.white        { color: white      !important; }' ).
+    lo_buf->add( '.pink         { color: pink       !important; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* FLOATING BUTTONS AND COLOR SETS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.blue-set {' ).
+    lo_buf->add( '  border-color: #abc3e3;' ).
+    lo_buf->add( '  color: #5e8dc9;' ).
+    lo_buf->add( '  background-color: #d9e4f2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.grey-set {' ).
+    lo_buf->add( '  border-color: #c7c7c7;' ).
+    lo_buf->add( '  color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  background-color: #e6e6e6;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ABAPGIT OBJECTS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.user-box {' ).
+    lo_buf->add( '  border-color: #c2d4ea;' ).
+    lo_buf->add( '  background-color: #d9e4f2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.package-box {' ).
+    lo_buf->add( '  border-color: #d3ccd2;' ).
+    lo_buf->add( '  background-color: #ebe3ea;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.path-box,' ).
+    lo_buf->add( 'span.transport-box {' ).
+    lo_buf->add( '  border-color: #a7e3cf;' ).
+    lo_buf->add( '  background-color: #dbf3eb;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* PANELS */' ).
+    lo_buf->add( '/* TODO: add warning and error colors */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.panel.success {' ).
+    lo_buf->add( '  color: #589a58 !important;' ).
+    lo_buf->add( '  background-color: #c5eac5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.panel.error {' ).
+    lo_buf->add( '  color: #d41919;' ).
+    lo_buf->add( '  background-color: #fad6d6;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '#debug-output { color: var(--theme-debug-color); }' ).
+    lo_buf->add( 'div.dummydiv { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STRUCTURE DIVS, HEADER & FOOTER */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div#header {' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '  border-bottom-color: var(--theme-container-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div#header .page-title { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( 'div#footer .version { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( 'div#footer { border-top-color: var(--theme-container-border-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ERROR LOG */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.log {' ).
+    lo_buf->add( '  background-color: #fee6e6;' ).
+    lo_buf->add( '  border-color: #fdcece;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.repo { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '.repo_name span.name { color: #333; }' ).
+    lo_buf->add( '.repo_name span.url  { color: var(--theme-primary-font-color-reduced); }' ).
+    lo_buf->add( '.repo_name a.url { color: var(--theme-primary-font-color-reduced); }' ).
+    lo_buf->add( '.repo_name a.url:hover { color: var(--theme-link-color); }' ).
+    lo_buf->add( '.repo_attr       { color: grey; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_attr span.bg_marker {' ).
+    lo_buf->add( '  border-color: #d2d2d2;' ).
+    lo_buf->add( '  background-color: #d8d8d8;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_attr span.branch_head {' ).
+    lo_buf->add( '  border-color: #d8dff3;' ).
+    lo_buf->add( '  background-color: #eceff9;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.branch {' ).
+    lo_buf->add( '  border-color: #d9d9d9;' ).
+    lo_buf->add( '  background-color: #e2e2e2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.branch_branch {' ).
+    lo_buf->add( '  border-color: #e7d9b1;' ).
+    lo_buf->add( '  background-color: #f8f0d8;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY TABLE*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.repo_tab {' ).
+    lo_buf->add( '  border-color: var(--theme-table-border-color);' ).
+    lo_buf->add( '  background-color: var(--theme-table-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab th {' ).
+    lo_buf->add( '  color: var(--theme-link-color);' ).
+    lo_buf->add( '  background-color: #edf2f9;' ).
+    lo_buf->add( '  border-bottom-color: var(--theme-table-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab td {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab tr.object_row{' ).
+    lo_buf->add( '  border-top-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab .inactive      { color: orange; }' ).
+    lo_buf->add( '.repo_tab tr.unsupported { color: var(--theme-greyscale-lighter); }' ).
+    lo_buf->add( '.repo_tab tr.modified    { background-color: #fbf7e9; }' ).
+    lo_buf->add( '.repo_tab td.current_dir { color: var(--theme-primary-font-color-reduced); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STAGE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab {' ).
+    lo_buf->add( '  border-color: #ddd;' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab th {' ).
+    lo_buf->add( '  color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  background-color: #edf2f9;' ).
+    lo_buf->add( '  border-bottom-color: #ddd;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td {' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '  border-top-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.status {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color-reduced);' ).
+    lo_buf->add( '  background-color: #fafafa;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.highlight { color: #444 !important; }' ).
+    lo_buf->add( '.stage_tab td.method { font-weight: bold; }' ).
+    lo_buf->add( '.stage_tab mark {' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '  background-color: #79a0d2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COMMIT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.form-container { background-color: #F8F8F8; }' ).
+    lo_buf->add( 'form.aligned-form label { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( 'form.aligned-form span.sub-title { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* SETTINGS STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.settings_container {' ).
+    lo_buf->add( '  color: #444;' ).
+    lo_buf->add( '  background-color: var(--theme-container-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.diff { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( 'span.diff_name { color: grey; }' ).
+    lo_buf->add( 'span.diff_name strong { color: #333; }' ).
+    lo_buf->add( 'span.diff_changed_by  { color: grey; }' ).
+    lo_buf->add( 'span.diff_changed_by span.user {' ).
+    lo_buf->add( '  border-color: #c2d4ea;' ).
+    lo_buf->add( '  background-color: #d9e4f2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.diff_ins {' ).
+    lo_buf->add( '  border-color: #abf2ab;' ).
+    lo_buf->add( '  background-color: #e0ffe0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.diff_del {' ).
+    lo_buf->add( '  border-color: #ff667d;' ).
+    lo_buf->add( '  background-color: #ffccd4;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.diff_upd {' ).
+    lo_buf->add( '  border-color: #dada00;' ).
+    lo_buf->add( '  background-color: #ffffcc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.diff_content {' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '  border-top-color: #ddd;' ).
+    lo_buf->add( '  border-bottom-color: #ddd;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STATE BLOCK COLORS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.state-block span.added {' ).
+    lo_buf->add( '  background-color: #69ad74;' ).
+    lo_buf->add( '  border-color: #579e64;' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.state-block span.changed {' ).
+    lo_buf->add( '  background-color: #e0c150;' ).
+    lo_buf->add( '  border-color: #d4af25;' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.state-block span.mixed {' ).
+    lo_buf->add( '  background-color: #e0c150;' ).
+    lo_buf->add( '  border-color: #579e64;' ).
+    lo_buf->add( '  color: #69ad74;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.state-block span.deleted {' ).
+    lo_buf->add( '  background-color: #c76861;' ).
+    lo_buf->add( '  border-color: #b8605a;' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.state-block span.none {' ).
+    lo_buf->add( '  background-color: #e8e8e8;' ).
+    lo_buf->add( '  border-color: #dbdbdb;' ).
+    lo_buf->add( '  color: #c8c8c8;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF TABLE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab td,' ).
+    lo_buf->add( 'table.diff_tab th {' ).
+    lo_buf->add( '  color: #444;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab thead.header th {' ).
+    lo_buf->add( '  color: #eee;' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab thead.nav_line {' ).
+    lo_buf->add( '  background-color: #edf2f9;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab thead.nav_line th {' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td.num, th.num {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color-reduced);' ).
+    lo_buf->add( '  border-left-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '  border-right-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.diff_tab td.patch, th.patch {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color-reduced);' ).
+    lo_buf->add( '  border-left-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '  border-right-color: var(--theme-table-cell-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STYLES FOR SYNTAX HIGHLIGHTING */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ABAP */' ).
+    lo_buf->add( '.syntax-hl span.keyword  { color: #0a69ce; }' ).
+    lo_buf->add( '.syntax-hl span.text     { color: #48ce4f; }' ).
+    lo_buf->add( '.syntax-hl span.comment  { color: var(--theme-greyscale-dark); font-style: italic; }' ).
+    lo_buf->add( '/* XML+HTML */' ).
+    lo_buf->add( '.syntax-hl span.xml_tag  { color: #457ce3; }' ).
+    lo_buf->add( '.syntax-hl span.attr     { color: #b777fb; }' ).
+    lo_buf->add( '.syntax-hl span.attr_val { color: #7a02f9; }' ).
+    lo_buf->add( '/* CSS+JS */' ).
+    lo_buf->add( '.syntax-hl span.properties   { color:#0a69ce; }' ).
+    lo_buf->add( '.syntax-hl span.values       { color:blue; }' ).
+    lo_buf->add( '.syntax-hl span.units        { color:maroon; }' ).
+    lo_buf->add( '.syntax-hl span.selectors    { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.functions    { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.colors       { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.extensions   { color:darkblue; }' ).
+    lo_buf->add( '.syntax-hl span.at_rules     { color:darkblue; }' ).
+    lo_buf->add( '.syntax-hl span.html         { color:green; }' ).
+    lo_buf->add( '.syntax-hl span.variables    { color:purple; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DEBUG INFO STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.debug_container {' ).
+    lo_buf->add( '  color: #444;' ).
+    lo_buf->add( '  background-color: var(--theme-container-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* Repo overview */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo-overview { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '.repo-overview table {' ).
+    lo_buf->add( '  background-color: var(--theme-table-background-color);' ).
+    lo_buf->add( '  border-color: var(--theme-table-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview th {' ).
+    lo_buf->add( '  color: var(--theme-link-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview thead tr {' ).
+    lo_buf->add( '  background-color: var(--theme-table-head-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview thead tr,' ).
+    lo_buf->add( '.repo-overview tfoot tr {' ).
+    lo_buf->add( '  border-color: var(--theme-table-border-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo-overview a.remote_repo { color: var(--theme-primary-font-color-reduced); }' ).
+    lo_buf->add( '.repo-overview a.remote_repo:hover { color: var(--theme-link-color); }' ).
+    lo_buf->add( '.repo-overview tbody tr:hover td { background-color: hsla(214, 50%, 50%, 0.05); }' ).
+    lo_buf->add( '.repo-overview tbody tr.selected { background-color: hsla(214, 50%, 75%, 0.33); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TUTORIAL */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.tutorial { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( 'div.tutorial hr { border-color: var(--theme-greyscale-light); }' ).
+    lo_buf->add( 'div.tutorial h1, h2 { color: #404040; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MENU */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul li:hover { background-color: #fff; }' ).
+    lo_buf->add( '.nav-container ul ul li:hover { background-color: #f6f6f6; }' ).
+    lo_buf->add( '.nav-container > ul > li:hover > a { background-color: #ffffff80; }' ).
+    lo_buf->add( '.nav-container ul ul { background-color: #fff; }' ).
+    lo_buf->add( '.nav-container.corner > ul > li:hover > a { background-color: inherit; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.nav-container ul ul li.separator {' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '  border-bottom-color: #eee;' ).
+    lo_buf->add( '  border-top-color: #eee;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.nav-container ul ul li.separator:hover { background-color: inherit; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* NEWS ANNOUNCEMENT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.info-panel { background-color: white; }' ).
+    lo_buf->add( 'div.info-panel div.info-hint { color: var(--theme-greyscale-light); }' ).
+    lo_buf->add( 'div.info-panel div.info-title {' ).
+    lo_buf->add( '  color: #f8f8f8;' ).
+    lo_buf->add( '  background-color: #888;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.info-panel div.info-title a.close-btn { color: #d8d8d8; }' ).
+    lo_buf->add( 'div.info-panel div.info-list { color: #444; }' ).
+    lo_buf->add( 'div.info-panel .version-marker {' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '  border-color: #c0c0c0;' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-light);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.info-panel .update {' ).
+    lo_buf->add( '  border-color: #e8ba30;' ).
+    lo_buf->add( '  background-color: #f5c538;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TOOLTIPS TEXT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.link-hint { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '.link-hint { background-color: var(--theme-linkhint-background) }' ).
+    lo_buf->add( '.link-hint::after { border-top-color: var(--theme-linkhint-background) }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* HOTKEYS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'ul.hotkeys span.key-id {' ).
+    lo_buf->add( '  background-color: #f0f0f0;' ).
+    lo_buf->add( '  border-color: #dcdcdc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.corner-hint {' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '  border-color: var(--theme-greyscale-light);' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* CODE INSPECTOR */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-msg span.ci-variant { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-stats span.error-count {' ).
+    lo_buf->add( '  border-color: hsl(350, 100%, 80%);' ).
+    lo_buf->add( '  background-color: hsl(350, 100%, 90%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-stats span.warn-count {' ).
+    lo_buf->add( '  border-color: hsl(60, 100%, 42%);' ).
+    lo_buf->add( '  background-color: hsl(60, 100%, 90%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-stats span.info-count {' ).
+    lo_buf->add( '  border-color: hsl(120, 80%, 80%);' ).
+    lo_buf->add( '  background-color: hsl(120, 80%, 94%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-stats span.all-count {' ).
+    lo_buf->add( '  border-color: hsl(235, 100%, 89%);' ).
+    lo_buf->add( '  background-color: hsl(235, 100%, 93%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-detail table td[data-cid="text"] {' ).
+    lo_buf->add( '  color: hsl(0, 0%, 40%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.ci-detail table tr[data-kind="error"] td[data-cid="kind"] span {' ).
+    lo_buf->add( '  background-color: hsl(0, 100%, 68%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-detail table tr[data-kind="warning"] td[data-cid="kind"] span {' ).
+    lo_buf->add( '  background-color:hsl(52, 100%, 49%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'div.ci-detail table tr[data-kind="info"] td[data-cid="kind"] span {' ).
+    lo_buf->add( '  background-color: hsl(118, 67%, 47%);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COMMAND PALETTE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.cmd-palette {' ).
+    lo_buf->add( '  border-color: #ccc;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.cmd-palette li.selected {' ).
+    lo_buf->add( '  background-color: hsla(214, 50%, 90%, 1);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.cmd-palette mark {' ).
+    lo_buf->add( '  color: white;' ).
+    lo_buf->add( '  background-color: #79a0d2;' ).
+    lo_buf->add( '  /* todo merge with stage search */' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* SETTINGS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.settings_tab {' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '  border-color: #ddd;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab th {' ).
+    lo_buf->add( '  color: #888888;' ).
+    lo_buf->add( '  border-bottom-color: #ddd;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab td {' ).
+    lo_buf->add( '  color: #333;' ).
+    lo_buf->add( '  border-top-color: #eee;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab input {' ).
+    lo_buf->add( '  background-color: #f8f8f8;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'table.settings_tab input:focus {' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* HTML FORMS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.dialog input::placeholder { color: #ccc }' ).
+    lo_buf->add( '.dialog textarea::placeholder { color: #ccc }' ).
+    lo_buf->add( '.dialog input:-ms-input-placeholder { color: #ccc }' ).
+    lo_buf->add( '.dialog textarea:-ms-input-placeholder { color: #ccc }' ).
+    lo_buf->add( '.dialog {' ).
+    lo_buf->add( '  border-color: #ccc;' ).
+    lo_buf->add( '  background-color: #f0f0f0;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a,' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"] {' ).
+    lo_buf->add( '  border-color: #ccc;' ).
+    lo_buf->add( '  background-color: #ddd;' ).
+    lo_buf->add( '  color: #000;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a.main,' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"].main {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog label {' ).
+    lo_buf->add( '  color: #444;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog label em {' ).
+    lo_buf->add( '  color: #64a8ff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.error small {' ).
+    lo_buf->add( '  color: #ff5959;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.error input[type="number"],' ).
+    lo_buf->add( '.dialog li.error input[type="text"] {' ).
+    lo_buf->add( '  border-color: #ff5959;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container {' ).
+    lo_buf->add( '  border-color: #ddd;' ).
+    lo_buf->add( '  background-color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"]:checked + label {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.with-command input[type="button"]:hover,' ).
+    lo_buf->add( '.dialog li.with-command input[type="submit"]:hover {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset {' ).
+    lo_buf->add( '  border-color: #dfdfdf;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset legend {' ).
+    lo_buf->add( '  color: #444;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog input:read-only {' ).
+    lo_buf->add( '  background-color: #f4f4f4;' ).
+    lo_buf->add( '  color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '/* for IE */' ).
+    lo_buf->add( '.dialog input[readonly] {' ).
+    lo_buf->add( '  background-color: #f4f4f4;' ).
+    lo_buf->add( '  color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '}' ).
+
     li_asset_man->register_asset(
       iv_url       = 'css/theme-default.css'
       iv_type      = 'text/css'
@@ -42307,7 +44349,276 @@ CLASS /apmg/cl_apm_gui_factory IMPLEMENTATION.
       iv_mime_name = 'ZABAPGIT_CSS_THEME_DEFAULT'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include zabapgit_css_theme_dark.w3mi.data.css > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_THEME_DARK
+****************************************************
+    lo_buf->add( '/*' ).
+    lo_buf->add( ' * ABAPGIT THEME CSS - DARK' ).
+    lo_buf->add( ' */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* https://experience.sap.com/fiori-design-web/colors/ */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( ':root {' ).
+    lo_buf->add( '  --theme-background-color: #333333;' ).
+    lo_buf->add( '  --theme-container-background-color: #444444;' ).
+    lo_buf->add( '  --theme-primary-font: "72", Arial, Helvetica, sans-serif;' ).
+    lo_buf->add( '  --theme-primary-font-color: #cccccc;' ).
+    lo_buf->add( '  --theme-primary-font-color-reduced: #EEEEEE;' ).
+    lo_buf->add( '  --theme-font-size: 11pt;' ).
+    lo_buf->add( '  --theme-link-color: #d9ffff;' ).
+    lo_buf->add( '  --theme-link-color-hover: #f6f6f6;' ).
+    lo_buf->add( '  --theme-container-border-color: #D1E0EE;' ).
+    lo_buf->add( '  --theme-table-border-color: #E5E5E5; /* ALV border color */' ).
+    lo_buf->add( '  --theme-greyscale-dark: #666666;' ).
+    lo_buf->add( '  --theme-greyscale-medium: #999999;' ).
+    lo_buf->add( '  --theme-greyscale-light: #CCCCCC;' ).
+    lo_buf->add( '  --theme-greyscale-lighter: #E5E5E5;' ).
+    lo_buf->add( '  --theme-list-hover-background-color: black;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  --theme-table-background-color: #333333;' ).
+    lo_buf->add( '  --theme-table-head-background-color: #202020;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* GLOBALS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'body {' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'select, input, textarea {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '  border-color: #ffffff;' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'a:hover { color: var(--theme-link-color-hover); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* HEADER */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '#header a, #header a:visited { color: var(--theme-link-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* MENU */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div#toc .favorites a { opacity: 1; }' ).
+    lo_buf->add( '.nav-container ul a:hover { text-decoration: underline; }' ).
+    lo_buf->add( '.nav-container ul ul { background-color: #555555; }' ).
+    lo_buf->add( '.nav-container ul li:hover { background-color: #555555; }' ).
+    lo_buf->add( '.nav-container ul ul li:hover { background-color: var(--theme-list-hover-background-color); }' ).
+    lo_buf->add( 'table.repo_tab {' ).
+    lo_buf->add( '    border-color: var(--theme-container-background-color);' ).
+    lo_buf->add( '    background-color: var(--theme-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ABAPGIT OBJECTS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.user-box {' ).
+    lo_buf->add( '  background-color: #4c6782;' ).
+    lo_buf->add( '  border-color: #7491b2;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.package-box {' ).
+    lo_buf->add( '  background-color: #705a6d;' ).
+    lo_buf->add( '  border-color: #987095;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( 'span.path-box,' ).
+    lo_buf->add( 'span.transport-box {' ).
+    lo_buf->add( '  background-color: #456d5d;' ).
+    lo_buf->add( '  border-color: #60a087;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* PANELS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '#debug-output { color: var(--theme-greyscale-dark); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* abapGit logo in header and footer */' ).
+    lo_buf->add( '.logo .icon.icon-abapgit {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* TUTORIAL */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.tutorial h1, h2 { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.repo { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '.repo_name span.name { color: var(--theme-primary-font-color-reduced); }' ).
+    lo_buf->add( '.repo_name span.url  { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( '.repo_name a.url { color: var(--theme-greyscale-medium); }' ).
+    lo_buf->add( '.repo_attr { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'span.branch_branch {' ).
+    lo_buf->add( '  border-color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '  background-color: #777777;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* REPOSITORY TABLE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab td { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '.repo_tab tr.unsupported { background-color: #555; }' ).
+    lo_buf->add( '.repo_tab tr.modified { background-color: #555; }' ).
+    lo_buf->add( '.repo_tab tr:hover {background-color: var(--theme-list-hover-background-color) !important;}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.repo_tab th {' ).
+    lo_buf->add( '  border-top-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  background-color: black;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.repo_tab td {' ).
+    lo_buf->add( '  border-top-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STAGE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.stage_tab {' ).
+    lo_buf->add( '  border-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab th {' ).
+    lo_buf->add( '  border-top-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  background-color: black;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '  border-top-color:  var(--theme-greyscale-dark);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.status.highlight {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color) !important;' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab td.status {' ).
+    lo_buf->add( '  color: #777;' ).
+    lo_buf->add( '  background-color: var(--theme-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.stage_tab th { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '.stage_tab tr:hover {background-color: var(--theme-list-hover-background-color) !important;}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* COMMIT */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.form-container { background-color: var(--theme-background-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* SETTINGS STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.settings_container { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.diff_ins { background-color: #352; }' ).
+    lo_buf->add( '.diff_del { background-color: #411; }' ).
+    lo_buf->add( '.diff_upd { background-color: #551; }' ).
+    lo_buf->add( 'div.diff_content { background-color: var(--theme-background-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIFF TABLE */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.diff_tab td,th { color: #fff; }' ).
+    lo_buf->add( 'table.diff_tab thead.nav_line { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* STYLES FOR SYNTAX HIGHLIGHTING */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ABAP */' ).
+    lo_buf->add( '.syntax-hl span.keyword  { color: #4af; }' ).
+    lo_buf->add( '.syntax-hl span.text     { color: #8f8; }' ).
+    lo_buf->add( '.syntax-hl span.comment  { color: #999; }' ).
+    lo_buf->add( '/* XML+HTML */' ).
+    lo_buf->add( '.syntax-hl span.xml_tag  { color: #659cff; }' ).
+    lo_buf->add( '.syntax-hl span.attr     { color: #bab2f9; }' ).
+    lo_buf->add( '.syntax-hl span.attr_val { color: #b777fb; }' ).
+    lo_buf->add( '/* CSS+JS */' ).
+    lo_buf->add( '.syntax-hl span.properties   { color:#0a69ce; }' ).
+    lo_buf->add( '.syntax-hl span.values       { color:blue; }' ).
+    lo_buf->add( '.syntax-hl span.units        { color:maroon; }' ).
+    lo_buf->add( '.syntax-hl span.selectors    { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.functions    { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.colors       { color:purple; }' ).
+    lo_buf->add( '.syntax-hl span.extensions   { color:lightblue; }' ).
+    lo_buf->add( '.syntax-hl span.at_rules     { color:lightblue; }' ).
+    lo_buf->add( '.syntax-hl span.html         { color:green; }' ).
+    lo_buf->add( '.syntax-hl span.variables    { color:purple; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DEBUG INFO STYLES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.debug_container#debug_info { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DB ENTRIES */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.db_list { background-color: var(--theme-container-background-color); }' ).
+    lo_buf->add( 'table.db_tab td      { color: var(--theme-primary-font-color); }' ).
+    lo_buf->add( 'table.db_tab td.data { opacity: 0.5; }' ).
+    lo_buf->add( 'table.db_tab tbody tr:hover, tr:active { background-color: var(--theme-list-hover-background-color); }' ).
+    lo_buf->add( 'table.db_tab th {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '  border-bottom-color: #333;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'table.db_tab tr.selected {' ).
+    lo_buf->add( '  background: rgba(92, 92, 92, 1) !important;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* ERROR LOGS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'div.log { color: var(--theme-greyscale-dark); }' ).
+    lo_buf->add( '.close-btn, .message-panel, .message-panel-commands a { color: var(--theme-greyscale-dark); }' ).
+    lo_buf->add( '.message-panel-commands a:hover { color: var(--theme-greyscale-dark); }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* DIALOGS */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.dialog {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color-reduced);' ).
+    lo_buf->add( '  background-color: var(--theme-container-background-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a,' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"] {' ).
+    lo_buf->add( '  border-color: #ccc;' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.dialog-commands a.main,' ).
+    lo_buf->add( '.dialog li.dialog-commands input[type="submit"].main {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog label {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog label em {' ).
+    lo_buf->add( '  color: #64a8ff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.error small {' ).
+    lo_buf->add( '  color: #ff5959;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.error input[type="number"],' ).
+    lo_buf->add( '.dialog li.error input[type="text"] {' ).
+    lo_buf->add( '  border-color: #ff5959;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container {' ).
+    lo_buf->add( '  border-color: #ddd;' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"] + label {' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog .radio-container input[type="radio"]:checked + label {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog li.with-command input[type="button"]:hover,' ).
+    lo_buf->add( '.dialog li.with-command input[type="submit"]:hover {' ).
+    lo_buf->add( '  background-color: #64a8ff;' ).
+    lo_buf->add( '  color: #fff;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset {' ).
+    lo_buf->add( '  border-color: #dfdfdf;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog fieldset legend {' ).
+    lo_buf->add( '  color: var(--theme-primary-font-color);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '.dialog input:read-only {' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '/* for IE */' ).
+    lo_buf->add( '.dialog input[readonly] {' ).
+    lo_buf->add( '  background-color: var(--theme-greyscale-dark);' ).
+    lo_buf->add( '  color: var(--theme-greyscale-medium);' ).
+    lo_buf->add( '}' ).
+
     li_asset_man->register_asset(
       iv_url       = 'css/theme-dark.css'
       iv_type      = 'text/css'
@@ -42315,7 +44626,45 @@ CLASS /apmg/cl_apm_gui_factory IMPLEMENTATION.
       iv_mime_name = 'ZABAPGIT_CSS_THEME_DARK'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include zabapgit_css_theme_belize_blue.w3mi.data.css > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_THEME_BELIZE_BLUE
+****************************************************
+    lo_buf->add( '/*' ).
+    lo_buf->add( ' * ABAPGIT THEME CSS - BELIZE BLUE' ).
+    lo_buf->add( ' */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* https://experience.sap.com/fiori-design-web/colors/ */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( ':root {' ).
+    lo_buf->add( '  --fiori-color-global-light-base: #EFF4F9; /* Background in SAP GUI */' ).
+    lo_buf->add( '  --fiori-color-gui-tab-background: #FCFDFE; /* Tabstrip background */' ).
+    lo_buf->add( '  --fiori-color-gui-container-border: #D1E0EE;' ).
+    lo_buf->add( '  --fiori-color-gui-uneditable-background: #F2F2F2; /* Textbox not editable */' ).
+    lo_buf->add( '  --fiori-color-gui-editable-background: #FFFFFF; /* Textbox editable */' ).
+    lo_buf->add( '  --fiori-color-font-primary: #333333; /* Grayscale 1 */' ).
+    lo_buf->add( '  --fiori-color-font-secondary: #666666; /* Grayscale 2 */' ).
+    lo_buf->add( '  --fiori-color-font-highlighted: #003D84;' ).
+    lo_buf->add( '  --fiori-color-message-box-background: #2F3C48; /* Bottom message container */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  --theme-background-color: var(--fiori-color-global-light-base);' ).
+    lo_buf->add( '  --theme-container-background-color: var(--fiori-color-gui-tab-background);' ).
+    lo_buf->add( '  --theme-primary-font: "72", Arial, Helvetica, sans-serif;' ).
+    lo_buf->add( '  --theme-primary-font-color: var(--fiori-color-font-primary);' ).
+    lo_buf->add( '  --theme-primary-font-color-reduced: var(--fiori-color-font-secondary);' ).
+    lo_buf->add( '  --theme-font-size: 11pt;' ).
+    lo_buf->add( '  --theme-link-color: var(--fiori-color-font-highlighted);' ).
+    lo_buf->add( '  --theme-container-border-color: var(--fiori-color-gui-container-border);' ).
+    lo_buf->add( '  --theme-table-border-color: #E5E5E5; /* ALV border color */' ).
+    lo_buf->add( '  --theme-greyscale-dark: #666666;' ).
+    lo_buf->add( '  --theme-greyscale-medium: #BFBFBF;' ).
+    lo_buf->add( '  --theme-greyscale-light: #CCCCCC;' ).
+    lo_buf->add( '  --theme-greyscale-lighter: #E5E5E5;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '#header a, #header a:visited {' ).
+    lo_buf->add( '  color: #346187;' ).
+    lo_buf->add( '}' ).
+
     li_asset_man->register_asset(
       iv_url       = 'css/theme-belize-blue.css'
       iv_type      = 'text/css'
@@ -42323,21 +44672,2836 @@ CLASS /apmg/cl_apm_gui_factory IMPLEMENTATION.
       iv_mime_name = 'ZABAPGIT_CSS_THEME_BELIZE_BLUE'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include zabapgit_js_common.w3mi.data.js > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_JS_COMMON
+****************************************************
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * abapGit JavaScript Function Library' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( '  Global variables used from outside' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* exported setInitialFocus */' ).
+    lo_buf->add( '/* exported setInitialFocusWithQuerySelector */' ).
+    lo_buf->add( '/* exported submitFormById */' ).
+    lo_buf->add( '/* exported errorStub */' ).
+    lo_buf->add( '/* exported confirmInitialized */' ).
+    lo_buf->add( '/* exported perfOut */' ).
+    lo_buf->add( '/* exported perfLog */' ).
+    lo_buf->add( '/* exported perfClear */' ).
+    lo_buf->add( '/* exported enableArrowListNavigation */' ).
+    lo_buf->add( '/* exported activateLinkHints */' ).
+    lo_buf->add( '/* exported setKeyBindings */' ).
+    lo_buf->add( '/* exported preparePatch */' ).
+    lo_buf->add( '/* exported registerStagePatch */' ).
+    lo_buf->add( '/* exported toggleRepoListDetail */' ).
+    lo_buf->add( '/* exported onTagTypeChange */' ).
+    lo_buf->add( '/* exported getIndocStyleSheet */' ).
+    lo_buf->add( '/* exported addMarginBottom */' ).
+    lo_buf->add( '/* exported enumerateJumpAllFiles */' ).
+    lo_buf->add( '/* exported createRepoCatalogEnumerator */' ).
+    lo_buf->add( '/* exported enumerateUiActions */' ).
+    lo_buf->add( '/* exported onDiffCollapse */' ).
+    lo_buf->add( '/* exported restoreScrollPosition */' ).
+    lo_buf->add( '/* exported toggleBrowserControlWarning */' ).
+    lo_buf->add( '/* exported displayBrowserControlFooter */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Polyfills' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Bind polyfill (for IE7), taken from https://developer.mozilla.org/' ).
+    lo_buf->add( 'if (!Function.prototype.bind) {' ).
+    lo_buf->add( '  Function.prototype.bind = function(oThis) {' ).
+    lo_buf->add( '    if (typeof this !== "function") {' ).
+    lo_buf->add( '      throw new TypeError("Function.prototype.bind - subject is not callable");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var aArgs   = Array.prototype.slice.call(arguments, 1);' ).
+    lo_buf->add( '    var fToBind = this;' ).
+    lo_buf->add( '    var fNOP    = function() { };' ).
+    lo_buf->add( '    var fBound  = function() {' ).
+    lo_buf->add( '      return fToBind.apply(' ).
+    lo_buf->add( '        this instanceof fNOP ? this : oThis,' ).
+    lo_buf->add( '        aArgs.concat(Array.prototype.slice.call(arguments))' ).
+    lo_buf->add( '      );' ).
+    lo_buf->add( '    };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (this.prototype) {' ).
+    lo_buf->add( '      fNOP.prototype = this.prototype;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    fBound.prototype = new fNOP();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    return fBound;' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// String includes polyfill, taken from https://developer.mozilla.org' ).
+    lo_buf->add( 'if (!String.prototype.includes) {' ).
+    lo_buf->add( '  String.prototype.includes = function(search, start) {' ).
+    lo_buf->add( '    "use strict";' ).
+    lo_buf->add( '    if (typeof start !== "number") {' ).
+    lo_buf->add( '      start = 0;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (start + search.length > this.length) {' ).
+    lo_buf->add( '      return false;' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      return this.indexOf(search, start) !== -1;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// String startsWith polyfill, taken from https://developer.mozilla.org' ).
+    lo_buf->add( 'if (!String.prototype.startsWith) {' ).
+    lo_buf->add( '  Object.defineProperty(String.prototype, "startsWith", {' ).
+    lo_buf->add( '    value: function(search, pos) {' ).
+    lo_buf->add( '      pos = !pos || pos < 0 ? 0 : +pos;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      return this.substring(pos, pos + search.length) === search;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// forEach polyfill, taken from https://developer.mozilla.org' ).
+    lo_buf->add( '// used for querySelectorAll results' ).
+    lo_buf->add( 'if (window.NodeList && !NodeList.prototype.forEach) {' ).
+    lo_buf->add( '  NodeList.prototype.forEach = Array.prototype.forEach;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Common functions' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Output text to the debug div' ).
+    lo_buf->add( 'function debugOutput(text, dstID) {' ).
+    lo_buf->add( '  var stdout  = document.getElementById(dstID || "debug-output");' ).
+    lo_buf->add( '  var wrapped = "<p>" + text + "</p>";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  stdout.innerHTML = stdout.innerHTML + wrapped;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Use a supplied form, a pre-created form or create a hidden form' ).
+    lo_buf->add( '// and submit with sapevent' ).
+    lo_buf->add( 'function submitSapeventForm(params, action, method, form) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  function getSapeventPrefix() {' ).
+    lo_buf->add( '    // Depending on the used browser control and its version, different URL schemes' ).
+    lo_buf->add( '    // are used which we distinguish here' ).
+    lo_buf->add( '    if (document.querySelector(''a[href*="file:///SAPEVENT:"]'')) {' ).
+    lo_buf->add( '      // Prefix for old (SAPGUI <= 8.00 PL3) chromium based browser control' ).
+    lo_buf->add( '      return "file:///";' ).
+    lo_buf->add( '    } else if (document.querySelector(''a[href^="sap-cust"]'')) {' ).
+    lo_buf->add( '      // Prefix for new (SAPGUI >= 8.00 PL3 Hotfix 1) chromium based browser control' ).
+    lo_buf->add( '      return "sap-cust://sap-place-holder/";' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      return ""; // No prefix for old IE control' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var stub_form_id = "form_" + action;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  form = form' ).
+    lo_buf->add( '    || document.getElementById(stub_form_id)' ).
+    lo_buf->add( '    || document.createElement("form");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  form.setAttribute("method", method || "post");' ).
+    lo_buf->add( '  if (/sapevent/i.test(action)) {' ).
+    lo_buf->add( '    form.setAttribute("action", action);' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    form.setAttribute("action", getSapeventPrefix() + "SAPEVENT:" + action);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  for (var key in params) {' ).
+    lo_buf->add( '    var hiddenField = document.createElement("input");' ).
+    lo_buf->add( '    hiddenField.setAttribute("type", "hidden");' ).
+    lo_buf->add( '    hiddenField.setAttribute("name", key);' ).
+    lo_buf->add( '    hiddenField.setAttribute("value", params[key]);' ).
+    lo_buf->add( '    form.appendChild(hiddenField);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var formExistsInDOM = form.id && Boolean(document.querySelector("#" + form.id));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (form.id !== stub_form_id && !formExistsInDOM) {' ).
+    lo_buf->add( '    document.body.appendChild(form);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  form.submit();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Set focus to a control' ).
+    lo_buf->add( 'function setInitialFocus(id) {' ).
+    lo_buf->add( '  document.getElementById(id).focus();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Set focus to an element with query selector' ).
+    lo_buf->add( 'function setInitialFocusWithQuerySelector(sSelector, bFocusParent) {' ).
+    lo_buf->add( '  var oSelected = document.querySelector(sSelector);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (oSelected) {' ).
+    lo_buf->add( '    if (bFocusParent) {' ).
+    lo_buf->add( '      oSelected.parentElement.focus();' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      oSelected.focus();' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Submit an existing form' ).
+    lo_buf->add( 'function submitFormById(id) {' ).
+    lo_buf->add( '  document.getElementById(id).submit();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// JS error stub' ).
+    lo_buf->add( 'function errorStub(event) {' ).
+    lo_buf->add( '  var element    = event.target || event.srcElement;' ).
+    lo_buf->add( '  var targetName = element.id || element.name || "???";' ).
+    lo_buf->add( '  alert("JS Error, please log an issue (@" + targetName + ")");' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Confirm JS initialization' ).
+    lo_buf->add( 'function confirmInitialized() {' ).
+    lo_buf->add( '  var errorBanner = document.getElementById("js-error-banner");' ).
+    lo_buf->add( '  if (errorBanner) {' ).
+    lo_buf->add( '    errorBanner.style.display = "none";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  debugOutput("js: OK"); // Final final confirmation :)' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Performance utils (for debugging)' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'var gPerf = [];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function perfOut(prefix) {' ).
+    lo_buf->add( '  var totals = {};' ).
+    lo_buf->add( '  for (var i = gPerf.length - 1; i >= 0; i--) {' ).
+    lo_buf->add( '    if (!totals[gPerf[i].name]) totals[gPerf[i].name] = { count: 0, time: 0 };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    totals[gPerf[i].name].time  += gPerf[i].time;' ).
+    lo_buf->add( '    totals[gPerf[i].name].count += 1;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var keys = Object.keys(totals);' ).
+    lo_buf->add( '  for (var j = keys.length - 1; j >= 0; j--) {' ).
+    lo_buf->add( '    console.log(prefix' ).
+    lo_buf->add( '      + " " + keys[j] + ": "' ).
+    lo_buf->add( '      + totals[keys[j]].time.toFixed(3) + "ms"' ).
+    lo_buf->add( '      + " (" + totals[keys[j]].count.toFixed() + ")");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function perfLog(name, startTime) {' ).
+    lo_buf->add( '  gPerf.push({ name: name, time: window.performance.now() - startTime });' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function perfClear() {' ).
+    lo_buf->add( '  gPerf = [];' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Repo Overview Logic' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function findStyleSheetByName(name) {' ).
+    lo_buf->add( '  for (var s = 0; s < document.styleSheets.length; s++) {' ).
+    lo_buf->add( '    var styleSheet = document.styleSheets[s];' ).
+    lo_buf->add( '    var classes    = styleSheet.cssRules || styleSheet.rules;' ).
+    lo_buf->add( '    for (var i = 0; i < classes.length; i++) {' ).
+    lo_buf->add( '      if (classes[i].selectorText === name) return classes[i];' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function getIndocStyleSheet() {' ).
+    lo_buf->add( '  for (var s = 0; s < document.styleSheets.length; s++) {' ).
+    lo_buf->add( '    if (!document.styleSheets[s].href) return document.styleSheets[s]; // One with empty href' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  // None found ? create one' ).
+    lo_buf->add( '  var style = document.createElement("style");' ).
+    lo_buf->add( '  document.head.appendChild(style);' ).
+    lo_buf->add( '  return style.sheet;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function RepoOverViewHelper(opts) {' ).
+    lo_buf->add( '  if (opts && opts.focusFilterKey) {' ).
+    lo_buf->add( '    this.focusFilterKey = opts.focusFilterKey;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  this.setHooks();' ).
+    lo_buf->add( '  this.pageId                   = (opts && opts.pageId) ? opts.pageId : "RepoOverViewHelperState";' ).
+    lo_buf->add( '  this.isDetailsDisplayed       = false;' ).
+    lo_buf->add( '  this.isOnlyFavoritesDisplayed = false;' ).
+    lo_buf->add( '  this.detailCssClass           = findStyleSheetByName(".repo-overview .ro-detail");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var icon = document.getElementById("icon-filter-detail");' ).
+    lo_buf->add( '  this.toggleFilterIcon(icon, this.isDetailsDisplayed);' ).
+    lo_buf->add( '  this.registerRowSelection();' ).
+    lo_buf->add( '  this.registerKeyboardShortcuts();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.setHooks = function() {' ).
+    lo_buf->add( '  window.onload = this.onPageLoad.bind(this);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.onPageLoad = function() {' ).
+    lo_buf->add( '  var data = window.localStorage && JSON.parse(window.localStorage.getItem(this.pageId));' ).
+    lo_buf->add( '  if (data) {' ).
+    lo_buf->add( '    if (data.isDetailsDisplayed) {' ).
+    lo_buf->add( '      this.toggleItemsDetail(true);' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    if (data.selectedRepoKey) {' ).
+    lo_buf->add( '      this.selectRowByRepoKey(data.selectedRepoKey);' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      this.selectRowByIndex(0);' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.registerKeyboardShortcuts = function() {' ).
+    lo_buf->add( '  var self = this;' ).
+    lo_buf->add( '  document.addEventListener("keypress", function(event) {' ).
+    lo_buf->add( '    if (document.activeElement.id === "filter") {' ).
+    lo_buf->add( '      return;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    if (self.focusFilterKey && event.key === self.focusFilterKey && !CommandPalette.isVisible()) {' ).
+    lo_buf->add( '      var filterInput = document.getElementById("filter");' ).
+    lo_buf->add( '      if (filterInput) filterInput.focus();' ).
+    lo_buf->add( '      event.preventDefault();' ).
+    lo_buf->add( '      return;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var keycode         = event.keyCode;' ).
+    lo_buf->add( '    var rows            = Array.prototype.slice.call(self.getVisibleRows());' ).
+    lo_buf->add( '    var selected        = document.querySelector(".repo-overview tr.selected");' ).
+    lo_buf->add( '    var indexOfSelected = rows.indexOf(selected);' ).
+    lo_buf->add( '    var lastRow         = rows.length - 1;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (keycode == 13 && document.activeElement.tagName.toLowerCase() != "input") {' ).
+    lo_buf->add( '      // "enter" to open, unless command field has focus' ).
+    lo_buf->add( '      self.openSelectedRepo();' ).
+    lo_buf->add( '    } else if ((keycode == 52 || keycode == 56) && indexOfSelected > 0) {' ).
+    lo_buf->add( '      // "4,8" for previous, digits are the numlock keys' ).
+    lo_buf->add( '      // NB: numpad must be activated, keypress does not detect arrows' ).
+    lo_buf->add( '      //     if we need arrows it will be keydown. But then mind the keycodes, they may change !' ).
+    lo_buf->add( '      //     e.g. 100 is ''d'' with keypress (and conflicts with diff hotkey), and also it is arrow-left keydown' ).
+    lo_buf->add( '      self.selectRowByIndex(indexOfSelected - 1);' ).
+    lo_buf->add( '    } else if ((keycode == 54 || keycode == 50) && indexOfSelected < lastRow) {' ).
+    lo_buf->add( '      // "6,2" for next' ).
+    lo_buf->add( '      self.selectRowByIndex(indexOfSelected + 1);' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.openSelectedRepo = function() {' ).
+    lo_buf->add( '  this.selectedRepoKey = document.querySelector(".repo-overview tr.selected").dataset.key;' ).
+    lo_buf->add( '  this.saveLocalStorage();' ).
+    lo_buf->add( '  document.querySelector(".repo-overview tr.selected td.ro-go a").click();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.selectRowByIndex = function(index) {' ).
+    lo_buf->add( '  var rows = this.getVisibleRows();' ).
+    lo_buf->add( '  if (rows.length >= index) {' ).
+    lo_buf->add( '    var selectedRow = rows[index];' ).
+    lo_buf->add( '    if (selectedRow.classList.contains("selected")) {' ).
+    lo_buf->add( '      return;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    this.deselectAllRows();' ).
+    lo_buf->add( '    rows[index].classList.add("selected");' ).
+    lo_buf->add( '    this.selectedRepoKey = selectedRow.dataset.key;' ).
+    lo_buf->add( '    this.updateActionLinks(selectedRow);' ).
+    lo_buf->add( '    this.saveLocalStorage();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.selectRowByRepoKey = function(key) {' ).
+    lo_buf->add( '  var attributeQuery = "[data-key=''" + key + "'']";' ).
+    lo_buf->add( '  var row            = document.querySelector(".repo-overview tbody tr" + attributeQuery);' ).
+    lo_buf->add( '  // navigation to already selected repo' ).
+    lo_buf->add( '  if (row.dataset.key === key && row.classList.contains("selected")) {' ).
+    lo_buf->add( '    return;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.deselectAllRows();' ).
+    lo_buf->add( '  row.classList.add("selected");' ).
+    lo_buf->add( '  this.selectedRepoKey = key;' ).
+    lo_buf->add( '  this.updateActionLinks(row);' ).
+    lo_buf->add( '  this.saveLocalStorage();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.updateActionLinks = function(selectedRow) {' ).
+    lo_buf->add( '  // now we have a repo selected, determine which action buttons are relevant' ).
+    lo_buf->add( '  var selectedRepoKey       = selectedRow.dataset.key;' ).
+    lo_buf->add( '  var selectedRepoIsOffline = selectedRow.dataset.offline === "X";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var actionLinks = document.querySelectorAll("a.action_link");' ).
+    lo_buf->add( '  actionLinks.forEach(function(link) {' ).
+    lo_buf->add( '    // adjust repo key in urls' ).
+    lo_buf->add( '    link.href = link.href.replace(/\?key=(#|\d+)/, "?key=" + selectedRepoKey);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // toggle button visibility' ).
+    lo_buf->add( '    if (link.classList.contains("action_offline_repo")) {' ).
+    lo_buf->add( '      if (selectedRepoIsOffline) {' ).
+    lo_buf->add( '        link.parentElement.classList.add("enabled");' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        link.parentElement.classList.remove("enabled");' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    else if (link.classList.contains("action_online_repo")) {' ).
+    lo_buf->add( '      if (!selectedRepoIsOffline) {' ).
+    lo_buf->add( '        link.parentElement.classList.add("enabled");' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        link.parentElement.classList.remove("enabled");' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    else {' ).
+    lo_buf->add( '      // if the action is for both repository types, it will only have the .action_link class' ).
+    lo_buf->add( '      // it still needs to be toggled as we want to hide everything if no repo is selected' ).
+    lo_buf->add( '      link.parentElement.classList.add("enabled");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.deselectAllRows = function() {' ).
+    lo_buf->add( '  document.querySelectorAll(".repo-overview tbody tr").forEach(function(x) {' ).
+    lo_buf->add( '    x.classList.remove("selected");' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.getVisibleRows = function() {' ).
+    lo_buf->add( '  return document.querySelectorAll(".repo-overview tbody tr:not(.nodisplay)");' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.registerRowSelection = function() {' ).
+    lo_buf->add( '  var self = this;' ).
+    lo_buf->add( '  document.querySelectorAll(".repo-overview tr td:not(.ro-go)").forEach(function(repoListRowCell) {' ).
+    lo_buf->add( '    repoListRowCell.addEventListener("click", function() {' ).
+    lo_buf->add( '      self.selectRowByRepoKey(this.parentElement.dataset.key);' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  document.querySelectorAll(".repo-overview tr td.ro-go").forEach(function(openRepoIcon) {' ).
+    lo_buf->add( '    openRepoIcon.addEventListener("click", function() {' ).
+    lo_buf->add( '      var selectedRow = this.parentElement;' ).
+    lo_buf->add( '      self.selectRowByRepoKey(selectedRow.dataset.key);' ).
+    lo_buf->add( '      self.openSelectedRepo();' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.toggleRepoListDetail = function(forceDisplay) {' ).
+    lo_buf->add( '  if (this.detailCssClass) {' ).
+    lo_buf->add( '    this.toggleItemsDetail(forceDisplay);' ).
+    lo_buf->add( '    this.saveLocalStorage();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.toggleItemsDetail = function(forceDisplay) {' ).
+    lo_buf->add( '  if (this.detailCssClass) {' ).
+    lo_buf->add( '    this.isDetailsDisplayed = forceDisplay || !this.isDetailsDisplayed;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // change layout to wide if details are displayed' ).
+    lo_buf->add( '    if (this.isDetailsDisplayed) {' ).
+    lo_buf->add( '      document.body.classList.remove("centered");' ).
+    lo_buf->add( '      document.body.classList.add("full_width");' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      document.body.classList.add("centered");' ).
+    lo_buf->add( '      document.body.classList.remove("full_width");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    this.detailCssClass.style.display = this.isDetailsDisplayed ? "" : "none";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var icon = document.getElementById("icon-filter-detail");' ).
+    lo_buf->add( '    this.toggleFilterIcon(icon, this.isDetailsDisplayed);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.toggleFilterIcon = function(icon, isEnabled) {' ).
+    lo_buf->add( '  if (isEnabled) {' ).
+    lo_buf->add( '    icon.classList.remove("grey");' ).
+    lo_buf->add( '    icon.classList.add("blue");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    icon.classList.remove("blue");' ).
+    lo_buf->add( '    icon.classList.add("grey");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'RepoOverViewHelper.prototype.saveLocalStorage = function() {' ).
+    lo_buf->add( '  if (!window.localStorage) return;' ).
+    lo_buf->add( '  var data = {' ).
+    lo_buf->add( '    isDetailsDisplayed      : this.isDetailsDisplayed,' ).
+    lo_buf->add( '    isOnlyFavoritesDisplayed: this.isOnlyFavoritesDisplayed,' ).
+    lo_buf->add( '    selectedRepoKey         : this.selectedRepoKey,' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '  window.localStorage.setItem(this.pageId, JSON.stringify(data));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Staging Logic' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Stage helper constructor' ).
+    lo_buf->add( 'function StageHelper(params) {' ).
+    lo_buf->add( '  this.pageSeed        = params.seed;' ).
+    lo_buf->add( '  this.formAction      = params.formAction;' ).
+    lo_buf->add( '  this.patchAction     = params.patchAction;' ).
+    lo_buf->add( '  this.user            = params.user;' ).
+    lo_buf->add( '  this.ids             = params.ids;' ).
+    lo_buf->add( '  this.selectedCount   = 0;' ).
+    lo_buf->add( '  this.filteredCount   = 0;' ).
+    lo_buf->add( '  this.lastFilterValue = "";' ).
+    lo_buf->add( '  this.focusFilterKey  = params.focusFilterKey;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // DOM nodes' ).
+    lo_buf->add( '  this.dom = {' ).
+    lo_buf->add( '    stageTab         : document.getElementById(params.ids.stageTab),' ).
+    lo_buf->add( '    commitAllBtn     : document.getElementById(params.ids.commitAllBtn),' ).
+    lo_buf->add( '    commitSelectedBtn: document.getElementById(params.ids.commitSelectedBtn),' ).
+    lo_buf->add( '    commitFilteredBtn: document.getElementById(params.ids.commitFilteredBtn),' ).
+    lo_buf->add( '    patchBtn         : document.getElementById(params.ids.patchBtn),' ).
+    lo_buf->add( '    objectSearch     : document.getElementById(params.ids.objectSearch),' ).
+    lo_buf->add( '    selectedCounter  : null,' ).
+    lo_buf->add( '    filteredCounter  : null,' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '  this.findCounters();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Table columns (autodetection)' ).
+    lo_buf->add( '  this.colIndex      = this.detectColumns();' ).
+    lo_buf->add( '  this.filterTargets = ["name", "user", "transport"];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Constants' ).
+    lo_buf->add( '  this.HIGHLIGHT_STYLE = "highlight";' ).
+    lo_buf->add( '  this.STATUS          = {' ).
+    lo_buf->add( '    add    : "A",' ).
+    lo_buf->add( '    remove : "R",' ).
+    lo_buf->add( '    ignore : "I",' ).
+    lo_buf->add( '    reset  : "?",' ).
+    lo_buf->add( '    isValid: function(status) { return "ARI?".indexOf(status) == -1 }' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.TEMPLATES = {' ).
+    lo_buf->add( '    cmdReset : "<a>reset</a>",' ).
+    lo_buf->add( '    cmdLocal : "<a>add</a>",' ).
+    lo_buf->add( '    cmdRemote: "<a>ignore</a><a>remove</a>"' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.setHooks();' ).
+    lo_buf->add( '  if (this.user) this.injectFilterMe();' ).
+    lo_buf->add( '  Hotkeys.addHotkeyToHelpSheet("^Enter", "Commit");' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.findCounters = function() {' ).
+    lo_buf->add( '  this.dom.selectedCounter = this.dom.commitSelectedBtn.querySelector("span.counter");' ).
+    lo_buf->add( '  this.dom.filteredCounter = this.dom.commitFilteredBtn.querySelector("span.counter");' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.injectFilterMe = function() {' ).
+    lo_buf->add( '  var tabFirstHead = this.dom.stageTab.tHead.rows[0];' ).
+    lo_buf->add( '  if (!tabFirstHead || tabFirstHead.className !== "local") {' ).
+    lo_buf->add( '    return; // for the case only "remove part" is displayed' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  var changedByHead = tabFirstHead.cells[this.colIndex.user];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  changedByHead.innerText = changedByHead.innerText + " (";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var a = document.createElement("A");' ).
+    lo_buf->add( '  a.appendChild(document.createTextNode("me"));' ).
+    lo_buf->add( '  a.onclick = this.onFilterMe.bind(this);' ).
+    lo_buf->add( '  a.href    = "#";' ).
+    lo_buf->add( '  changedByHead.appendChild(a);' ).
+    lo_buf->add( '  changedByHead.appendChild(document.createTextNode(")"));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.onFilterMe = function() {' ).
+    lo_buf->add( '  this.dom.objectSearch.value = this.user;' ).
+    lo_buf->add( '  this.onFilter({ type: "keypress", which: 13, target: this.dom.objectSearch });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Hook global click listener on table, load/unload actions' ).
+    lo_buf->add( 'StageHelper.prototype.setHooks = function() {' ).
+    lo_buf->add( '  window.onkeypress                  = this.onCtrlEnter.bind(this);' ).
+    lo_buf->add( '  this.dom.stageTab.onclick          = this.onTableClick.bind(this);' ).
+    lo_buf->add( '  this.dom.commitSelectedBtn.onclick = this.submit.bind(this);' ).
+    lo_buf->add( '  this.dom.commitFilteredBtn.onclick = this.submitVisible.bind(this);' ).
+    lo_buf->add( '  this.dom.patchBtn.onclick          = this.submitPatch.bind(this);' ).
+    lo_buf->add( '  this.dom.objectSearch.oninput      = this.onFilter.bind(this);' ).
+    lo_buf->add( '  this.dom.objectSearch.onkeypress   = this.onFilter.bind(this);' ).
+    lo_buf->add( '  window.onbeforeunload              = this.onPageUnload.bind(this);' ).
+    lo_buf->add( '  window.onload                      = this.onPageLoad.bind(this);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var self = this;' ).
+    lo_buf->add( '  document.addEventListener("keypress", function(event) {' ).
+    lo_buf->add( '    if (document.activeElement.id !== self.ids.objectSearch' ).
+    lo_buf->add( '      && self.focusFilterKey && event.key === self.focusFilterKey' ).
+    lo_buf->add( '      && !CommandPalette.isVisible()) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      self.dom.objectSearch.focus();' ).
+    lo_buf->add( '      event.preventDefault();' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Detect column index' ).
+    lo_buf->add( 'StageHelper.prototype.detectColumns = function() {' ).
+    lo_buf->add( '  var dataRow  = this.dom.stageTab.tBodies[0].rows[0];' ).
+    lo_buf->add( '  var colIndex = {};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  for (var i = dataRow.cells.length - 1; i >= 0; i--) {' ).
+    lo_buf->add( '    if (dataRow.cells[i].className) colIndex[dataRow.cells[i].className] = i;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return colIndex;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Store table state on leaving the page' ).
+    lo_buf->add( 'StageHelper.prototype.onPageUnload = function() {' ).
+    lo_buf->add( '  if (!window.sessionStorage) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var data = this.collectData();' ).
+    lo_buf->add( '  window.sessionStorage.setItem(this.pageSeed, JSON.stringify(data));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Re-store table state on entering the page' ).
+    lo_buf->add( 'StageHelper.prototype.onPageLoad = function() {' ).
+    lo_buf->add( '  var data = window.sessionStorage && JSON.parse(window.sessionStorage.getItem(this.pageSeed));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.iterateStageTab(true, function(row) {' ).
+    lo_buf->add( '    var status = data && data[row.cells[this.colIndex["name"]].innerText];' ).
+    lo_buf->add( '    this.updateRow(row, status || this.STATUS.reset);' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.updateMenu();' ).
+    lo_buf->add( '  if (this.dom.objectSearch.value) {' ).
+    lo_buf->add( '    this.applyFilterValue(this.dom.objectSearch.value);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Table event handler, change status' ).
+    lo_buf->add( 'StageHelper.prototype.onTableClick = function(event) {' ).
+    lo_buf->add( '  var target = event.target || event.srcElement;' ).
+    lo_buf->add( '  if (!target) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var td;' ).
+    lo_buf->add( '  if (target.tagName === "A") {' ).
+    lo_buf->add( '    td = target.parentNode;' ).
+    lo_buf->add( '  } else if (target.tagName === "TD") {' ).
+    lo_buf->add( '    td = target;' ).
+    lo_buf->add( '    if (td.children.length === 1 && td.children[0].tagName === "A") {' ).
+    lo_buf->add( '      target = td.children[0];' ).
+    lo_buf->add( '    } else return;' ).
+    lo_buf->add( '  } else return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (["TD", "TH"].indexOf(td.tagName) == -1 || td.className != "cmd") return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var status    = this.STATUS[target.innerText]; // Convert anchor text to status' ).
+    lo_buf->add( '  var targetRow = td.parentNode;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (td.tagName === "TD") {' ).
+    lo_buf->add( '    this.updateRow(targetRow, status);' ).
+    lo_buf->add( '  } else { // TH' ).
+    lo_buf->add( '    this.iterateStageTab(true, function(row) {' ).
+    lo_buf->add( '      if (row.style.display !== "none"           // Not filtered out' ).
+    lo_buf->add( '        && row.className === targetRow.className // Same context as header' ).
+    lo_buf->add( '      ) {' ).
+    lo_buf->add( '        this.updateRow(row, status);' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.updateMenu();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.onCtrlEnter = function(e) {' ).
+    lo_buf->add( '  if (e.ctrlKey && (e.which === 10 || e.key === "Enter")) {' ).
+    lo_buf->add( '    var clickMap = {' ).
+    lo_buf->add( '      "default" : this.dom.commitAllBtn,' ).
+    lo_buf->add( '      "selected": this.dom.commitSelectedBtn,' ).
+    lo_buf->add( '      "filtered": this.dom.commitFilteredBtn' ).
+    lo_buf->add( '    };' ).
+    lo_buf->add( '    clickMap[this.calculateActiveCommitCommand()].click();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Search object' ).
+    lo_buf->add( 'StageHelper.prototype.onFilter = function(e) {' ).
+    lo_buf->add( '  if ( // Enter hit or clear, IE SUCKS !' ).
+    lo_buf->add( '    e.type === "input" && !e.target.value && this.lastFilterValue' ).
+    lo_buf->add( '    || e.type === "keypress" && (e.which === 13 || e.key === "Enter") && !e.ctrlKey) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    this.applyFilterValue(e.target.value);' ).
+    lo_buf->add( '    submitSapeventForm({ filterValue: e.target.value }, "stage_filter", "post");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.applyFilterValue = function(sFilterValue) {' ).
+    lo_buf->add( '  this.lastFilterValue = sFilterValue;' ).
+    lo_buf->add( '  this.filteredCount   = this.iterateStageTab(true, this.applyFilterToRow, sFilterValue);' ).
+    lo_buf->add( '  this.updateMenu();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Apply filter to a single stage line - hide or show' ).
+    lo_buf->add( 'StageHelper.prototype.applyFilterToRow = function(row, filter) {' ).
+    lo_buf->add( '  // Collect data cells' ).
+    lo_buf->add( '  var targets = this.filterTargets.map(function(attr) {' ).
+    lo_buf->add( '    // Get the innermost tag with the text we want to filter' ).
+    lo_buf->add( '    // <td>text</td>: elem = td-tag' ).
+    lo_buf->add( '    // <td><span><i></i><a>text</a></span></td>: elem = a-tag' ).
+    lo_buf->add( '    var elem  = row.cells[this.colIndex[attr]];' ).
+    lo_buf->add( '    var elemA = elem.getElementsByTagName("A")[0];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (elemA) elem = elemA;' ).
+    lo_buf->add( '    return {' ).
+    lo_buf->add( '      elem     : elem,' ).
+    lo_buf->add( '      plainText: elem.innerText.replace(/ /g, "\u00a0"), // without tags, with encoded spaces' ).
+    lo_buf->add( '      curHtml  : elem.innerHTML' ).
+    lo_buf->add( '    };' ).
+    lo_buf->add( '  }, this);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var isVisible = false;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Apply filter to cells, mark filtered text' ).
+    lo_buf->add( '  for (var i = targets.length - 1; i >= 0; i--) {' ).
+    lo_buf->add( '    var target = targets[i];' ).
+    lo_buf->add( '    // Ignore case of filter' ).
+    lo_buf->add( '    var regFilter = new RegExp("(" + filter + ")", "gi");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    target.newHtml = (filter)' ).
+    lo_buf->add( '      ? target.plainText.replace(regFilter, "<mark>$1</mark>")' ).
+    lo_buf->add( '      : target.plainText;' ).
+    lo_buf->add( '    target.isChanged = target.newHtml !== target.curHtml;' ).
+    lo_buf->add( '    isVisible        = isVisible || !filter || target.newHtml !== target.plainText;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Update DOM' ).
+    lo_buf->add( '  row.style.display = isVisible ? "" : "none";' ).
+    lo_buf->add( '  for (var j = targets.length - 1; j >= 0; j--) {' ).
+    lo_buf->add( '    if (targets[j].isChanged) targets[j].elem.innerHTML = targets[j].newHtml;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  return isVisible ? 1 : 0;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Get how status should affect object counter' ).
+    lo_buf->add( 'StageHelper.prototype.getStatusImpact = function(status) {' ).
+    lo_buf->add( '  if (typeof status !== "string"' ).
+    lo_buf->add( '    || status.length !== 1' ).
+    lo_buf->add( '    || this.STATUS.isValid(status)) {' ).
+    lo_buf->add( '    alert("Unknown status");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    return (status !== this.STATUS.reset) ? 1: 0;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Update table line' ).
+    lo_buf->add( 'StageHelper.prototype.updateRow = function(row, newStatus) {' ).
+    lo_buf->add( '  var oldStatus = row.cells[this.colIndex["status"]].innerText;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (oldStatus !== newStatus) {' ).
+    lo_buf->add( '    this.updateRowStatus(row, newStatus);' ).
+    lo_buf->add( '    this.updateRowCommand(row, newStatus);' ).
+    lo_buf->add( '  } else if (!row.cells[this.colIndex["cmd"]].children.length) {' ).
+    lo_buf->add( '    this.updateRowCommand(row, newStatus); // For initial run' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.selectedCount += this.getStatusImpact(newStatus) - this.getStatusImpact(oldStatus);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Update Status cell (render set of commands)' ).
+    lo_buf->add( 'StageHelper.prototype.updateRowStatus = function(row, status) {' ).
+    lo_buf->add( '  row.cells[this.colIndex["status"]].innerText = status;' ).
+    lo_buf->add( '  if (status === this.STATUS.reset) {' ).
+    lo_buf->add( '    row.cells[this.colIndex["status"]].classList.remove(this.HIGHLIGHT_STYLE);' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    row.cells[this.colIndex["status"]].classList.add(this.HIGHLIGHT_STYLE);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Update Command cell (render set of commands)' ).
+    lo_buf->add( 'StageHelper.prototype.updateRowCommand = function(row, status) {' ).
+    lo_buf->add( '  var cell = row.cells[this.colIndex["cmd"]];' ).
+    lo_buf->add( '  if (status === this.STATUS.reset) {' ).
+    lo_buf->add( '    cell.innerHTML = (row.className == "local")' ).
+    lo_buf->add( '      ? this.TEMPLATES.cmdLocal' ).
+    lo_buf->add( '      :     this.TEMPLATES.cmdRemote;' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    cell.innerHTML = this.TEMPLATES.cmdReset;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.calculateActiveCommitCommand = function() {' ).
+    lo_buf->add( '  var active;' ).
+    lo_buf->add( '  if (this.selectedCount > 0) {' ).
+    lo_buf->add( '    active = "selected";' ).
+    lo_buf->add( '  } else if (this.lastFilterValue) {' ).
+    lo_buf->add( '    active = "filtered";' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    active = "default";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  return active;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Update menu items visibility' ).
+    lo_buf->add( 'StageHelper.prototype.updateMenu = function() {' ).
+    lo_buf->add( '  var display = this.calculateActiveCommitCommand();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (display === "selected") this.dom.selectedCounter.innerText = this.selectedCount.toString();' ).
+    lo_buf->add( '  if (display === "filtered") this.dom.filteredCounter.innerText = this.filteredCount.toString();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.dom.commitAllBtn.style.display      = display === "default" ? "" : "none";' ).
+    lo_buf->add( '  this.dom.commitSelectedBtn.style.display = display === "selected" ? "" : "none";' ).
+    lo_buf->add( '  this.dom.commitFilteredBtn.style.display = display === "filtered" ? "" : "none";' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Submit stage state to the server' ).
+    lo_buf->add( 'StageHelper.prototype.submit = function() {' ).
+    lo_buf->add( '  submitSapeventForm(this.collectData(), this.formAction);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.submitVisible = function() {' ).
+    lo_buf->add( '  this.markVisiblesAsAdded();' ).
+    lo_buf->add( '  submitSapeventForm(this.collectData(), this.formAction);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.submitPatch = function() {' ).
+    lo_buf->add( '  submitSapeventForm(this.collectData(), this.patchAction);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Extract data from the table' ).
+    lo_buf->add( 'StageHelper.prototype.collectData = function() {' ).
+    lo_buf->add( '  var data = {};' ).
+    lo_buf->add( '  this.iterateStageTab(false, function(row) {' ).
+    lo_buf->add( '    data[row.cells[this.colIndex["name"]].innerText] = row.cells[this.colIndex["status"]].innerText;' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '  return data;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'StageHelper.prototype.markVisiblesAsAdded = function() {' ).
+    lo_buf->add( '  this.iterateStageTab(false, function(row) {' ).
+    lo_buf->add( '    // TODO refactor, unify updateRow logic' ).
+    lo_buf->add( '    if (row.style.display === "" && row.className === "local") { // visible' ).
+    lo_buf->add( '      this.updateRow(row, this.STATUS.add);' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      this.updateRow(row, this.STATUS.reset);' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Table iteration helper' ).
+    lo_buf->add( 'StageHelper.prototype.iterateStageTab = function(changeMode, cb /*, ...*/) {' ).
+    lo_buf->add( '  var restArgs = Array.prototype.slice.call(arguments, 2);' ).
+    lo_buf->add( '  var table    = this.dom.stageTab;' ).
+    lo_buf->add( '  var retTotal = 0;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (changeMode) {' ).
+    lo_buf->add( '    var scrollOffset = window.pageYOffset;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    this.dom.stageTab.style.display = "none";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  for (var b = 0, bN = table.tBodies.length; b < bN; b++) {' ).
+    lo_buf->add( '    var tbody = table.tBodies[b];' ).
+    lo_buf->add( '    for (var r = 0, rN = tbody.rows.length; r < rN; r++) {' ).
+    lo_buf->add( '      var args   = [tbody.rows[r]].concat(restArgs);' ).
+    lo_buf->add( '      var retVal = cb.apply(this, args); // callback' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      if (typeof retVal === "number") retTotal += retVal;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (changeMode) {' ).
+    lo_buf->add( '    this.dom.stageTab.style.display = "";' ).
+    lo_buf->add( '    window.scrollTo(0, scrollOffset);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return retTotal;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Check List Wrapper' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function CheckListWrapper(id, cbAction, cbActionOnlyMyChanges) {' ).
+    lo_buf->add( '  this.id                    = document.getElementById(id);' ).
+    lo_buf->add( '  this.cbAction              = cbAction;' ).
+    lo_buf->add( '  this.cbActionOnlyMyChanges = cbActionOnlyMyChanges;' ).
+    lo_buf->add( '  this.id.onclick            = this.onClick.bind(this);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CheckListWrapper.prototype.onClick = function(e) { // eslint-disable-line no-unused-vars' ).
+    lo_buf->add( '  // Get nodes' ).
+    lo_buf->add( '  var target = event.target || event.srcElement;' ).
+    lo_buf->add( '  if (!target) return;' ).
+    lo_buf->add( '  if (target.tagName !== "A") { target = target.parentNode } // icon clicked' ).
+    lo_buf->add( '  if (target.tagName !== "A") return;' ).
+    lo_buf->add( '  if (target.parentNode.tagName !== "LI") return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var nodeA    = target;' ).
+    lo_buf->add( '  var nodeLi   = target.parentNode;' ).
+    lo_buf->add( '  var nodeIcon = target.children[0];' ).
+    lo_buf->add( '  if (!nodeIcon.classList.contains("icon")) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Node updates' ).
+    lo_buf->add( '  var option   = nodeA.innerText;' ).
+    lo_buf->add( '  var oldState = nodeLi.getAttribute("data-check");' ).
+    lo_buf->add( '  if (oldState === null) return; // no data-check attribute - non-checkbox' ).
+    lo_buf->add( '  var newState = oldState === "X" ? false : true;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (newState) {' ).
+    lo_buf->add( '    nodeIcon.classList.remove("grey");' ).
+    lo_buf->add( '    nodeIcon.classList.add("blue");' ).
+    lo_buf->add( '    nodeLi.setAttribute("data-check", "X");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    nodeIcon.classList.remove("blue");' ).
+    lo_buf->add( '    nodeIcon.classList.add("grey");' ).
+    lo_buf->add( '    nodeLi.setAttribute("data-check", "");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Action callback, special handling for "Only My Changes"' ).
+    lo_buf->add( '  if (option === "Only my changes") {' ).
+    lo_buf->add( '    this.cbActionOnlyMyChanges(nodeLi.getAttribute("data-aux"), newState);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // hide "Changed By" menu' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    this.cbAction(nodeLi.getAttribute("data-aux"), option, newState);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Diff Page Logic' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Diff helper constructor' ).
+    lo_buf->add( 'function DiffHelper(params) {' ).
+    lo_buf->add( '  this.pageSeed    = params.seed;' ).
+    lo_buf->add( '  this.counter     = 0;' ).
+    lo_buf->add( '  this.stageAction = params.stageAction;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // DOM nodes' ).
+    lo_buf->add( '  this.dom = {' ).
+    lo_buf->add( '    diffList   : document.getElementById(params.ids.diffList),' ).
+    lo_buf->add( '    stageButton: document.getElementById(params.ids.stageButton)' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.repoKey = this.dom.diffList.getAttribute("data-repo-key");' ).
+    lo_buf->add( '  if (!this.repoKey) return; // Unexpected' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.dom.jump         = document.getElementById(params.ids.jump);' ).
+    lo_buf->add( '  this.dom.jump.onclick = this.onJump.bind(this);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Checklist wrapper' ).
+    lo_buf->add( '  if (document.getElementById(params.ids.filterMenu)) {' ).
+    lo_buf->add( '    this.checkList        = new CheckListWrapper(params.ids.filterMenu, this.onFilter.bind(this), this.onFilterOnlyMyChanges.bind(this));' ).
+    lo_buf->add( '    this.dom.filterButton = document.getElementById(params.ids.filterMenu).parentNode;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Hijack stage command' ).
+    lo_buf->add( '  if (this.dom.stageButton) {' ).
+    lo_buf->add( '    this.dom.stageButton.href    = "#";' ).
+    lo_buf->add( '    this.dom.stageButton.onclick = this.onStage.bind(this);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Action on jump click' ).
+    lo_buf->add( 'DiffHelper.prototype.onJump = function(e) {' ).
+    lo_buf->add( '  var text = ((e.target && e.target.text) || e);' ).
+    lo_buf->add( '  if (!text) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var elFile = document.querySelector("[data-file*=''" + text + "'']");' ).
+    lo_buf->add( '  if (!elFile) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  setTimeout(function() {' ).
+    lo_buf->add( '    elFile.scrollIntoView();' ).
+    lo_buf->add( '  }, 100);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Action on filter click' ).
+    lo_buf->add( 'DiffHelper.prototype.onFilter = function(attr, target, state) {' ).
+    lo_buf->add( '  this.applyFilter(attr, target, state);' ).
+    lo_buf->add( '  this.highlightButton(state);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'DiffHelper.prototype.onFilterOnlyMyChanges = function(username, state) {' ).
+    lo_buf->add( '  this.applyOnlyMyChangesFilter(username, state);' ).
+    lo_buf->add( '  this.counter = 0;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (state) {' ).
+    lo_buf->add( '    this.dom.filterButton.classList.add("bgorange");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    this.dom.filterButton.classList.remove("bgorange");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // apply logic on Changed By list items' ).
+    lo_buf->add( '  var changedByListItems = Array.prototype.slice.call(document.querySelectorAll("[data-aux*=changed-by]"));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  changedByListItems' ).
+    lo_buf->add( '    .map(function(item) {' ).
+    lo_buf->add( '      var nodeIcon = item.children[0].children[0];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      if (state === true) {' ).
+    lo_buf->add( '        if (item.innerText === username) { // current user' ).
+    lo_buf->add( '          item.style.display = "";' ).
+    lo_buf->add( '          item.setAttribute("data-check", "X");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '          if (nodeIcon) {' ).
+    lo_buf->add( '            nodeIcon.classList.remove("grey");' ).
+    lo_buf->add( '            nodeIcon.classList.add("blue");' ).
+    lo_buf->add( '          }' ).
+    lo_buf->add( '        } else { // other users' ).
+    lo_buf->add( '          item.style.display = "none";' ).
+    lo_buf->add( '          item.setAttribute("data-check", "");' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        item.style.display = "";' ).
+    lo_buf->add( '        item.setAttribute("data-check", "X");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '        if (nodeIcon) {' ).
+    lo_buf->add( '          nodeIcon.classList.remove("grey");' ).
+    lo_buf->add( '          nodeIcon.classList.add("blue");' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'DiffHelper.prototype.applyOnlyMyChangesFilter = function(username, state) {' ).
+    lo_buf->add( '  var jumpListItems = Array.prototype.slice.call(document.querySelectorAll("[id*=li_jump]"));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.iterateDiffList(function(div) {' ).
+    lo_buf->add( '    if (state === true) { // switching on "Only my changes" filter' ).
+    lo_buf->add( '      if (div.getAttribute("data-changed-by") === username) {' ).
+    lo_buf->add( '        div.style.display = state ? "" : "none";' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        div.style.display = state ? "none" : "";' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    } else { // disabling' ).
+    lo_buf->add( '      div.style.display = "";' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // hide the file in the jump list' ).
+    lo_buf->add( '    var dataFile = div.getAttribute("data-file");' ).
+    lo_buf->add( '    jumpListItems' ).
+    lo_buf->add( '      .filter(function(item) { return dataFile.includes(item.text) })' ).
+    lo_buf->add( '      .map(function(item) { item.style.display = div.style.display });' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Hide/show diff based on params' ).
+    lo_buf->add( 'DiffHelper.prototype.applyFilter = function(attr, target, state) {' ).
+    lo_buf->add( '  var jumpListItems = Array.prototype.slice.call(document.querySelectorAll("[id*=li_jump]"));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.iterateDiffList(function(div) {' ).
+    lo_buf->add( '    if (div.getAttribute("data-" + attr) === target) {' ).
+    lo_buf->add( '      div.style.display = state ? "" : "none";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // hide the file in the jump list' ).
+    lo_buf->add( '      var dataFile = div.getAttribute("data-file");' ).
+    lo_buf->add( '      jumpListItems' ).
+    lo_buf->add( '        .filter(function(item) { return dataFile.includes(item.text) })' ).
+    lo_buf->add( '        .map(function(item) { item.style.display = div.style.display });' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Action on stage -> save visible diffs as state for stage page' ).
+    lo_buf->add( 'DiffHelper.prototype.onStage = function(e) { // eslint-disable-line no-unused-vars' ).
+    lo_buf->add( '  if (window.sessionStorage) {' ).
+    lo_buf->add( '    var data = this.buildStageCache();' ).
+    lo_buf->add( '    window.sessionStorage.setItem(this.pageSeed, JSON.stringify(data));' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  var getParams = { key: this.repoKey, seed: this.pageSeed };' ).
+    lo_buf->add( '  submitSapeventForm(getParams, this.stageAction, "get");' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Collect visible diffs' ).
+    lo_buf->add( 'DiffHelper.prototype.buildStageCache = function() {' ).
+    lo_buf->add( '  var list = {};' ).
+    lo_buf->add( '  this.iterateDiffList(function(div) {' ).
+    lo_buf->add( '    var filename = div.getAttribute("data-file");' ).
+    lo_buf->add( '    if (!div.style.display && filename) { // No display override - visible !!' ).
+    lo_buf->add( '      list[filename] = "A"; // Add' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '  return list;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Table iterator' ).
+    lo_buf->add( 'DiffHelper.prototype.iterateDiffList = function(cb /*, ...*/) {' ).
+    lo_buf->add( '  var restArgs = Array.prototype.slice.call(arguments, 1);' ).
+    lo_buf->add( '  var diffList = this.dom.diffList;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  for (var i = 0, iN = diffList.children.length; i < iN; i++) {' ).
+    lo_buf->add( '    var div = diffList.children[i];' ).
+    lo_buf->add( '    if (div.className !== "diff") continue;' ).
+    lo_buf->add( '    var args = [div].concat(restArgs);' ).
+    lo_buf->add( '    cb.apply(this, args);// callback' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Highlight filter button if filter is activated' ).
+    lo_buf->add( 'DiffHelper.prototype.highlightButton = function(state) {' ).
+    lo_buf->add( '  this.counter += state ? -1 : 1;' ).
+    lo_buf->add( '  if (this.counter > 0) {' ).
+    lo_buf->add( '    this.dom.filterButton.classList.add("bgorange");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    this.dom.filterButton.classList.remove("bgorange");' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Collapse or expand diffs' ).
+    lo_buf->add( 'function onDiffCollapse(event) {' ).
+    lo_buf->add( '  var source          = event.target || event.srcElement;' ).
+    lo_buf->add( '  var nextDiffContent = source.parentElement.nextElementSibling;' ).
+    lo_buf->add( '  var hide;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (source.classList.contains("icon-chevron-down")) {' ).
+    lo_buf->add( '    source.classList.remove("icon-chevron-down");' ).
+    lo_buf->add( '    source.classList.add("icon-chevron-right");' ).
+    lo_buf->add( '    hide = true;' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    source.classList.remove("icon-chevron-right");' ).
+    lo_buf->add( '    source.classList.add("icon-chevron-down");' ).
+    lo_buf->add( '    hide = false;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  hide ? nextDiffContent.classList.add("nodisplay"): nextDiffContent.classList.remove("nodisplay");' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Add bottom margin, so that we can scroll to the top of the last file' ).
+    lo_buf->add( 'function addMarginBottom() {' ).
+    lo_buf->add( '  document.getElementsByTagName("body")[0].style.marginBottom = screen.height + "px";' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Diff Page Column Selection' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function DiffColumnSelection() {' ).
+    lo_buf->add( '  this.selectedColumnIdx = -1;' ).
+    lo_buf->add( '  this.lineNumColumnIdx  = -1;' ).
+    lo_buf->add( '  //https://stackoverflow.com/questions/2749244/javascript-setinterval-and-this-solution' ).
+    lo_buf->add( '  document.addEventListener("mousedown", this.mousedownEventListener.bind(this));' ).
+    lo_buf->add( '  document.addEventListener("copy", this.copyEventListener.bind(this));' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'DiffColumnSelection.prototype.mousedownEventListener = function(e) {' ).
+    lo_buf->add( '  // Select text in a column of an HTML table and copy to clipboard (in DIFF view)' ).
+    lo_buf->add( '  // (https://stackoverflow.com/questions/6619805/select-text-in-a-column-of-an-html-table)' ).
+    lo_buf->add( '  // Process mousedown event for all TD elements -> apply CSS class at TABLE level.' ).
+    lo_buf->add( '  // (https://stackoverflow.com/questions/40956717/how-to-addeventlistener-to-multiple-elements-in-a-single-line)' ).
+    lo_buf->add( '  var unifiedLineNumColumnIdx    = 0;' ).
+    lo_buf->add( '  var unifiedCodeColumnIdx       = 3;' ).
+    lo_buf->add( '  var splitLineNumLeftColumnIdx  = 0;' ).
+    lo_buf->add( '  var splitCodeLeftColumnIdx     = 2;' ).
+    lo_buf->add( '  var splitLineNumRightColumnIdx = 3;' ).
+    lo_buf->add( '  var splitCodeRightColumnIdx    = 5;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (e.button !== 0) return; // function is only valid for left button, not right button' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var td = e.target;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  while (td != undefined && td.tagName != "TD" && td.tagName != "TBODY") td = td.parentElement;' ).
+    lo_buf->add( '  if (td == undefined) return;' ).
+    lo_buf->add( '  var table = td.parentElement.parentElement;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var patchColumnCount = 0;' ).
+    lo_buf->add( '  if (td.parentElement.cells[0].classList.contains("patch")) {' ).
+    lo_buf->add( '    patchColumnCount = 1;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (td.classList.contains("diff_left")) {' ).
+    lo_buf->add( '    table.classList.remove("diff_select_right");' ).
+    lo_buf->add( '    table.classList.add("diff_select_left");' ).
+    lo_buf->add( '    if (window.getSelection() && this.selectedColumnIdx != splitCodeLeftColumnIdx + patchColumnCount) {' ).
+    lo_buf->add( '      // De-select to avoid effect of dragging selection in case the right column was first selected' ).
+    lo_buf->add( '      if (document.body.createTextRange) { // All IE but Edge' ).
+    lo_buf->add( '        // document.getSelection().removeAllRanges() may trigger error' ).
+    lo_buf->add( '        // so use this code which is equivalent but does not fail' ).
+    lo_buf->add( '        // (https://stackoverflow.com/questions/22914075/javascript-error-800a025e-using-range-selector)' ).
+    lo_buf->add( '        range = document.body.createTextRange();' ).
+    lo_buf->add( '        range.collapse();' ).
+    lo_buf->add( '        range.select();' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        document.getSelection().removeAllRanges();' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    this.selectedColumnIdx = splitCodeLeftColumnIdx + patchColumnCount;' ).
+    lo_buf->add( '    this.lineNumColumnIdx  = splitLineNumLeftColumnIdx + patchColumnCount;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  } else if (td.classList.contains("diff_right")) {' ).
+    lo_buf->add( '    table.classList.remove("diff_select_left");' ).
+    lo_buf->add( '    table.classList.add("diff_select_right");' ).
+    lo_buf->add( '    if (window.getSelection() && this.selectedColumnIdx != splitCodeRightColumnIdx + patchColumnCount) {' ).
+    lo_buf->add( '      if (document.body.createTextRange) { // All IE but Edge' ).
+    lo_buf->add( '        // document.getSelection().removeAllRanges() may trigger error' ).
+    lo_buf->add( '        // so use this code which is equivalent but does not fail' ).
+    lo_buf->add( '        // (https://stackoverflow.com/questions/22914075/javascript-error-800a025e-using-range-selector)' ).
+    lo_buf->add( '        var range = document.body.createTextRange();' ).
+    lo_buf->add( '        range.collapse();' ).
+    lo_buf->add( '        range.select();' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        document.getSelection().removeAllRanges();' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    this.selectedColumnIdx = splitCodeRightColumnIdx + patchColumnCount;' ).
+    lo_buf->add( '    this.lineNumColumnIdx  = splitLineNumRightColumnIdx + patchColumnCount;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  } else if (td.classList.contains("diff_unified")) {' ).
+    lo_buf->add( '    this.selectedColumnIdx = unifiedCodeColumnIdx;' ).
+    lo_buf->add( '    this.lineNumColumnIdx  = unifiedLineNumColumnIdx;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    this.selectedColumnIdx = -1;' ).
+    lo_buf->add( '    this.lineNumColumnIdx  = -1;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'DiffColumnSelection.prototype.copyEventListener = function(e) {' ).
+    lo_buf->add( '  // Select text in a column of an HTML table and copy to clipboard (in DIFF view)' ).
+    lo_buf->add( '  // (https://stackoverflow.com/questions/6619805/select-text-in-a-column-of-an-html-table)' ).
+    lo_buf->add( '  var td = e.target;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  while (td != undefined && td.tagName != "TD" && td.tagName != "TBODY") td = td.parentElement;' ).
+    lo_buf->add( '  if (td != undefined) {' ).
+    lo_buf->add( '    // Use window.clipboardData instead of e.clipboardData' ).
+    lo_buf->add( '    // (https://stackoverflow.com/questions/23470958/ie-10-copy-paste-issue)' ).
+    lo_buf->add( '    var clipboardData = (e.clipboardData == undefined ? window.clipboardData : e.clipboardData);' ).
+    lo_buf->add( '    var text          = this.getSelectedText();' ).
+    lo_buf->add( '    clipboardData.setData("text", text);' ).
+    lo_buf->add( '    e.preventDefault();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'DiffColumnSelection.prototype.getSelectedText = function() {' ).
+    lo_buf->add( '  // Select text in a column of an HTML table and copy to clipboard (in DIFF view)' ).
+    lo_buf->add( '  // (https://stackoverflow.com/questions/6619805/select-text-in-a-column-of-an-html-table)' ).
+    lo_buf->add( '  var sel   = window.getSelection();' ).
+    lo_buf->add( '  var range = sel.getRangeAt(0);' ).
+    lo_buf->add( '  var doc   = range.cloneContents();' ).
+    lo_buf->add( '  var nodes = doc.querySelectorAll("tr");' ).
+    lo_buf->add( '  var text  = "";' ).
+    lo_buf->add( '  if (nodes.length === 0) {' ).
+    lo_buf->add( '    text = doc.textContent;' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    var newline  = "";' ).
+    lo_buf->add( '    var realThis = this;' ).
+    lo_buf->add( '    var copySide = "";' ).
+    lo_buf->add( '    [].forEach.call(nodes, function(tr, i) {' ).
+    lo_buf->add( '      var cellIdx = (i == 0 ? 0 : realThis.selectedColumnIdx);' ).
+    lo_buf->add( '      if (tr.cells.length > cellIdx) {' ).
+    lo_buf->add( '        var tdSelected = tr.cells[cellIdx];' ).
+    lo_buf->add( '        // decide which side to copy based on first line of selection' ).
+    lo_buf->add( '        if (i == 0) {' ).
+    lo_buf->add( '          copySide = (tdSelected.classList.contains("new") ? "new" : "old" );' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '        // copy is interesting only for one side of code, do not copy lines which exist on other side' ).
+    lo_buf->add( '        if (i == 0 || copySide == "new" && !tdSelected.classList.contains("old") || copySide == "old" && !tdSelected.classList.contains("new")) {' ).
+    lo_buf->add( '          text += newline + tdSelected.textContent;' ).
+    lo_buf->add( '          // special processing for TD tag which sometimes contains newline' ).
+    lo_buf->add( '          // (expl: /src/ui/zabapgit_js_common.w3mi.data.js) so do not add newline again in that case.' ).
+    lo_buf->add( '          var lastChar = tdSelected.textContent[tdSelected.textContent.length - 1];' ).
+    lo_buf->add( '          if (lastChar == "\n") newline = "";' ).
+    lo_buf->add( '          else newline = "\n";' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  return text;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Display Helper' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Toggle display of changelog (news) and message popups' ).
+    lo_buf->add( 'function toggleDisplay(divId) {' ).
+    lo_buf->add( '  var div = document.getElementById(divId);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (div) div.style.display = (div.style.display) ? "" : "none";' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Keyboard Navigation' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function KeyNavigation() { }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.onkeydown = function(event) {' ).
+    lo_buf->add( '  if (event.defaultPrevented) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // navigate with arrows through list items and support pressing links with enter and space' ).
+    lo_buf->add( '  var isHandled = false;' ).
+    lo_buf->add( '  if (event.key === "Enter" || event.key === "") {' ).
+    lo_buf->add( '    isHandled = this.onEnterOrSpace();' ).
+    lo_buf->add( '  } else if (/Down$/.test(event.key)) {' ).
+    lo_buf->add( '    isHandled = this.onArrowDown();' ).
+    lo_buf->add( '  } else if (/Up$/.test(event.key)) {' ).
+    lo_buf->add( '    isHandled = this.onArrowUp();' ).
+    lo_buf->add( '  } else if (event.key === "Backspace") {' ).
+    lo_buf->add( '    isHandled = this.onBackspace();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (isHandled) event.preventDefault();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.onEnterOrSpace = function() {' ).
+    lo_buf->add( '  if (document.activeElement.nodeName !== "A") return;' ).
+    lo_buf->add( '  var anchor = document.activeElement;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (anchor.href.replace(/#$/, "") === document.location.href.replace(/#$/, "")' ).
+    lo_buf->add( '    && !anchor.onclick' ).
+    lo_buf->add( '    && anchor.parentElement' ).
+    lo_buf->add( '    && anchor.parentElement.nodeName === "LI") {' ).
+    lo_buf->add( '    anchor.parentElement.classList.toggle("force-nav-hover");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    anchor.click();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  return true;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.focusListItem = function(li) {' ).
+    lo_buf->add( '  var anchor = li.firstElementChild;' ).
+    lo_buf->add( '  if (!anchor || anchor.nodeName !== "A") return false;' ).
+    lo_buf->add( '  anchor.focus();' ).
+    lo_buf->add( '  return true;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.closeDropdown = function(dropdownLi) {' ).
+    lo_buf->add( '  dropdownLi.classList.remove("force-nav-hover");' ).
+    lo_buf->add( '  if (dropdownLi.firstElementChild.nodeName === "A") dropdownLi.firstElementChild.focus();' ).
+    lo_buf->add( '  return true;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.onBackspace = function() {' ).
+    lo_buf->add( '  var activeElement = document.activeElement;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Detect opened subsequent dropdown' ).
+    lo_buf->add( '  if (activeElement.nodeName === "A"' ).
+    lo_buf->add( '    && activeElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.classList.contains("force-nav-hover")) {' ).
+    lo_buf->add( '    return this.closeDropdown(activeElement.parentElement);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Detect opened parent dropdown' ).
+    lo_buf->add( '  if (activeElement.nodeName === "A"' ).
+    lo_buf->add( '    && activeElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.parentElement.nodeName === "UL"' ).
+    lo_buf->add( '    && activeElement.parentElement.parentElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.parentElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.parentElement.parentElement.classList.contains("force-nav-hover")) {' ).
+    lo_buf->add( '    return this.closeDropdown(activeElement.parentElement.parentElement.parentElement);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.onArrowDown = function() {' ).
+    lo_buf->add( '  var activeElement = document.activeElement;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Start of dropdown list: LI > selected A :: UL > LI > A' ).
+    lo_buf->add( '  if (activeElement.nodeName === "A"' ).
+    lo_buf->add( '    && activeElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.classList.contains("force-nav-hover") // opened dropdown' ).
+    lo_buf->add( '    && activeElement.nextElementSibling' ).
+    lo_buf->add( '    && activeElement.nextElementSibling.nodeName === "UL"' ).
+    lo_buf->add( '    && activeElement.nextElementSibling.firstElementChild' ).
+    lo_buf->add( '    && activeElement.nextElementSibling.firstElementChild.nodeName === "LI") {' ).
+    lo_buf->add( '    return this.focusListItem(activeElement.nextElementSibling.firstElementChild);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Next item of dropdown list: ( LI > selected A ) :: LI > A' ).
+    lo_buf->add( '  if (activeElement.nodeName === "A"' ).
+    lo_buf->add( '    && activeElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.nextElementSibling' ).
+    lo_buf->add( '    && activeElement.parentElement.nextElementSibling.nodeName === "LI") {' ).
+    lo_buf->add( '    return this.focusListItem(activeElement.parentElement.nextElementSibling);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.onArrowUp = function() {' ).
+    lo_buf->add( '  var activeElement = document.activeElement;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // Prev item of dropdown list: ( LI > selected A ) <:: LI > A' ).
+    lo_buf->add( '  if (activeElement.nodeName === "A"' ).
+    lo_buf->add( '    && activeElement.parentElement' ).
+    lo_buf->add( '    && activeElement.parentElement.nodeName === "LI"' ).
+    lo_buf->add( '    && activeElement.parentElement.previousElementSibling' ).
+    lo_buf->add( '    && activeElement.parentElement.previousElementSibling.nodeName === "LI") {' ).
+    lo_buf->add( '    return this.focusListItem(activeElement.parentElement.previousElementSibling);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'KeyNavigation.prototype.getHandler = function() {' ).
+    lo_buf->add( '  return this.onkeydown.bind(this);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// this function enables the navigation with arrows through list items (li)' ).
+    lo_buf->add( '// e.g. in dropdown menus' ).
+    lo_buf->add( 'function enableArrowListNavigation() {' ).
+    lo_buf->add( '  document.addEventListener("keydown", new KeyNavigation().getHandler());' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Link Hints (Vimium-like)' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function LinkHints(linkHintHotKey) {' ).
+    lo_buf->add( '  this.linkHintHotKey    = linkHintHotKey;' ).
+    lo_buf->add( '  this.areHintsDisplayed = false;' ).
+    lo_buf->add( '  this.pendingPath       = ""; // already typed code prefix' ).
+    lo_buf->add( '  this.hintsMap          = this.deployHintContainers();' ).
+    lo_buf->add( '  this.activatedDropdown = null;' ).
+    lo_buf->add( '  this.yankModeActive    = false;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.getHintStartValue = function(targetsCount) {' ).
+    lo_buf->add( '  // e.g. if we have 89 tooltips we start from 10' ).
+    lo_buf->add( '  //      if we have 90 tooltips we start from 100' ).
+    lo_buf->add( '  //      if we have 900 tooltips we start from 1000' ).
+    lo_buf->add( '  var' ).
+    lo_buf->add( '    baseLength          = Math.pow(10, targetsCount.toString().length - 1),' ).
+    lo_buf->add( '    maxHintStringLength = (targetsCount + baseLength).toString().length;' ).
+    lo_buf->add( '  return Math.pow(10, maxHintStringLength - 1);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.deployHintContainers = function() {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var hintTargets = document.querySelectorAll("a, input, textarea, i");' ).
+    lo_buf->add( '  var codeCounter = this.getHintStartValue(hintTargets.length);' ).
+    lo_buf->add( '  var hintsMap    = { first: codeCounter };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // <span class="link-hint" data-code="123">' ).
+    lo_buf->add( '  //   <span class="pending">12</span><span>3</span>' ).
+    lo_buf->add( '  // </span>' ).
+    lo_buf->add( '  for (var i = 0, N = hintTargets.length; i < N; i++) {' ).
+    lo_buf->add( '    // skip hidden fields' ).
+    lo_buf->add( '    if (hintTargets[i].type === "HIDDEN") {' ).
+    lo_buf->add( '      continue;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var hint = {};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    hint.container     = document.createElement("span");' ).
+    lo_buf->add( '    hint.pendingSpan   = document.createElement("span");' ).
+    lo_buf->add( '    hint.remainingSpan = document.createElement("span");' ).
+    lo_buf->add( '    hint.parent        = hintTargets[i];' ).
+    lo_buf->add( '    hint.code          = codeCounter.toString();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    hint.container.appendChild(hint.pendingSpan);' ).
+    lo_buf->add( '    hint.container.appendChild(hint.remainingSpan);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    hint.pendingSpan.classList.add("pending");' ).
+    lo_buf->add( '    hint.container.classList.add("link-hint");' ).
+    lo_buf->add( '    if (hint.parent.nodeName === "INPUT" || hint.parent.nodeName === "TEXTAREA") {' ).
+    lo_buf->add( '      hint.container.classList.add("link-hint-input");' ).
+    lo_buf->add( '    } else if (hint.parent.nodeName === "A") {' ).
+    lo_buf->add( '      hint.container.classList.add("link-hint-a");' ).
+    lo_buf->add( '    } else if (hint.parent.nodeName === "I" && hint.parent.classList.contains("cursor-pointer")) {' ).
+    lo_buf->add( '      hint.container.classList.add("link-hint-i");' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      continue;' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    hint.container.classList.add("nodisplay"); // hide by default' ).
+    lo_buf->add( '    hint.container.dataset.code = codeCounter.toString(); // not really needed, more for debug' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (hintTargets[i].nodeName === "INPUT" || hintTargets[i].nodeName === "TEXTAREA") {' ).
+    lo_buf->add( '      // does not work if inside the input node' ).
+    lo_buf->add( '      if (hintTargets[i].type === "checkbox" || hintTargets[i].type === "radio") {' ).
+    lo_buf->add( '        if (hintTargets[i].nextElementSibling && hintTargets[i].nextElementSibling.nodeName === "LABEL") {' ).
+    lo_buf->add( '          // insert at end of label' ).
+    lo_buf->add( '          hintTargets[i].nextElementSibling.appendChild(hint.container);' ).
+    lo_buf->add( '        } else {' ).
+    lo_buf->add( '          // inserting right after' ).
+    lo_buf->add( '          hintTargets[i].insertAdjacentElement("afterend", hint.container);' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        // inserting right after' ).
+    lo_buf->add( '        hintTargets[i].insertAdjacentElement("afterend", hint.container);' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      hintTargets[i].appendChild(hint.container);' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    hintsMap[codeCounter++] = hint;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  hintsMap.last = codeCounter - 1;' ).
+    lo_buf->add( '  return hintsMap;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.getHandler = function() {' ).
+    lo_buf->add( '  return this.handleKey.bind(this);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.handleKey = function(event) {' ).
+    lo_buf->add( '  if (event.defaultPrevented) {' ).
+    lo_buf->add( '    return;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (event.key === "y") {' ).
+    lo_buf->add( '    this.yankModeActive = !this.yankModeActive;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (event.key === this.linkHintHotKey && Hotkeys.isHotkeyCallPossible()) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // on user hide hints, close an opened dropdown too' ).
+    lo_buf->add( '    if (this.areHintsDisplayed && this.activatedDropdown) this.closeActivatedDropdown();' ).
+    lo_buf->add( '    if (this.areHintsDisplayed) this.yankModeActive = false;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    this.pendingPath = "";' ).
+    lo_buf->add( '    this.displayHints(!this.areHintsDisplayed);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  } else if (this.areHintsDisplayed) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // the user tries to reach a hint' ).
+    lo_buf->add( '    this.pendingPath += event.key;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var hint = this.hintsMap[this.pendingPath];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    if (hint) { // we are there, we have a fully specified tooltip. Let us activate or yank it' ).
+    lo_buf->add( '      this.displayHints(false);' ).
+    lo_buf->add( '      event.preventDefault();' ).
+    lo_buf->add( '      if (this.yankModeActive) {' ).
+    lo_buf->add( '        submitSapeventForm({ clipboard: hint.parent.firstChild.textContent }, "clipboard");' ).
+    lo_buf->add( '        this.yankModeActive = false;' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        this.hintActivate(hint);' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      // we are not there yet, but let us filter the link so that only' ).
+    lo_buf->add( '      // the partially matched are shown' ).
+    lo_buf->add( '      var visibleHints = this.filterHints();' ).
+    lo_buf->add( '      if (!visibleHints) {' ).
+    lo_buf->add( '        this.displayHints(false);' ).
+    lo_buf->add( '        if (this.activatedDropdown) this.closeActivatedDropdown();' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.closeActivatedDropdown = function() {' ).
+    lo_buf->add( '  if (!this.activatedDropdown) return;' ).
+    lo_buf->add( '  this.activatedDropdown.classList.remove("force-nav-hover");' ).
+    lo_buf->add( '  this.activatedDropdown = null;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.displayHints = function(isActivate) {' ).
+    lo_buf->add( '  this.areHintsDisplayed = isActivate;' ).
+    lo_buf->add( '  for (var i = this.hintsMap.first; i <= this.hintsMap.last; i++) {' ).
+    lo_buf->add( '    var hint = this.hintsMap[i];' ).
+    lo_buf->add( '    if (isActivate) {' ).
+    lo_buf->add( '      hint.container.classList.remove("nodisplay");' ).
+    lo_buf->add( '      hint.pendingSpan.innerText   = "";' ).
+    lo_buf->add( '      hint.remainingSpan.innerText = hint.code;' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      hint.container.classList.add("nodisplay");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.hintActivate = function(hint) {' ).
+    lo_buf->add( '  if (hint.parent.nodeName === "A"' ).
+    lo_buf->add( '    // hint.parent.href doesn`t have a # at the end while accessing dropdowns the first time.' ).
+    lo_buf->add( '    // Seems like a idiosyncrasy of SAP GUI`s IE. So let`s ignore the last character.' ).
+    lo_buf->add( '    && (hint.parent.href.substr(0, hint.parent.href.length - 1) === document.location.href)// href is #' ).
+    lo_buf->add( '    && !hint.parent.onclick // no handler' ).
+    lo_buf->add( '    && hint.parent.parentElement && hint.parent.parentElement.nodeName === "LI") {' ).
+    lo_buf->add( '    // probably it is a dropdown ...' ).
+    lo_buf->add( '    this.activatedDropdown = hint.parent.parentElement;' ).
+    lo_buf->add( '    this.activatedDropdown.classList.toggle("force-nav-hover");' ).
+    lo_buf->add( '    hint.parent.focus();' ).
+    lo_buf->add( '  } else if (hint.parent.type === "checkbox") {' ).
+    lo_buf->add( '    this.toggleCheckbox(hint);' ).
+    lo_buf->add( '  } else if (hint.parent.type === "radio") {' ).
+    lo_buf->add( '    this.toggleRadioButton(hint);' ).
+    lo_buf->add( '  } else if (hint.parent.type === "submit") {' ).
+    lo_buf->add( '    hint.parent.click();' ).
+    lo_buf->add( '  } else if (hint.parent.nodeName === "INPUT" || hint.parent.nodeName === "TEXTAREA") {' ).
+    lo_buf->add( '    hint.parent.focus();' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    hint.parent.click();' ).
+    lo_buf->add( '    if (this.activatedDropdown) this.closeActivatedDropdown();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.toggleCheckbox = function(hint) {' ).
+    lo_buf->add( '  var checked = hint.parent.checked;' ).
+    lo_buf->add( '  this.triggerClickHandler(hint.parent.parentElement);' ).
+    lo_buf->add( '  if (checked === hint.parent.checked) {' ).
+    lo_buf->add( '    // fallback if no handler is registered' ).
+    lo_buf->add( '    hint.parent.checked = !hint.parent.checked;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.toggleRadioButton = function(hint) {' ).
+    lo_buf->add( '  this.triggerClickHandler(hint.parent);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.triggerClickHandler = function(el) {' ).
+    lo_buf->add( '  // ensures that onclick handler is executed' ).
+    lo_buf->add( '  // https://stackoverflow.com/questions/41981509/trigger-an-event-when-a-checkbox-is-changed-programmatically-via-javascript' ).
+    lo_buf->add( '  var event = document.createEvent("HTMLEvents");' ).
+    lo_buf->add( '  event.initEvent("click", false, true);' ).
+    lo_buf->add( '  el.dispatchEvent(event);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'LinkHints.prototype.filterHints = function() {' ).
+    lo_buf->add( '  var visibleHints = 0;' ).
+    lo_buf->add( '  for (var i = this.hintsMap.first; i <= this.hintsMap.last; i++) {' ).
+    lo_buf->add( '    var hint = this.hintsMap[i];' ).
+    lo_buf->add( '    if (i.toString().startsWith(this.pendingPath)) {' ).
+    lo_buf->add( '      hint.pendingSpan.innerText   = this.pendingPath;' ).
+    lo_buf->add( '      hint.remainingSpan.innerText = hint.code.substring(this.pendingPath.length);' ).
+    lo_buf->add( '      // hint.container.classList.remove("nodisplay"); // for backspace' ).
+    lo_buf->add( '      visibleHints++;' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      hint.container.classList.add("nodisplay");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  return visibleHints;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function activateLinkHints(linkHintHotKey) {' ).
+    lo_buf->add( '  if (!linkHintHotKey) return;' ).
+    lo_buf->add( '  var oLinkHint = new LinkHints(linkHintHotKey);' ).
+    lo_buf->add( '  document.addEventListener("keypress", oLinkHint.getHandler());' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Hotkeys' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function Hotkeys(oKeyMap) {' ).
+    lo_buf->add( '  this.oKeyMap = oKeyMap || {};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // these are the hotkeys provided by the backend' ).
+    lo_buf->add( '  Object.keys(this.oKeyMap).forEach(function(sKey) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    var action = this.oKeyMap[sKey];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // add a tooltip/title with the hotkey, currently only sapevents are supported' ).
+    lo_buf->add( '    this.getAllSapEventsForSapEventName(action).forEach(function(elAnchor) {' ).
+    lo_buf->add( '      elAnchor.title = elAnchor.title + " [" + sKey + "]";' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    // We replace the actions with callback functions to unify' ).
+    lo_buf->add( '    // the hotkey execution' ).
+    lo_buf->add( '    this.oKeyMap[sKey] = function(oEvent) {' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // gHelper is only valid for diff page' ).
+    lo_buf->add( '      var diffHelper = (window.gHelper || {});' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // We have either a js function on this' ).
+    lo_buf->add( '      if (this[action]) {' ).
+    lo_buf->add( '        this[action].call(this);' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // Or a method of the helper object for the diff page' ).
+    lo_buf->add( '      if (diffHelper[action]) {' ).
+    lo_buf->add( '        diffHelper[action].call(diffHelper);' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // Or a global function' ).
+    lo_buf->add( '      if (window[action] && typeof (window[action]) === "function") {' ).
+    lo_buf->add( '        window[action].call(this);' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // Or a SAP event link' ).
+    lo_buf->add( '      var sUiSapEventHref = this.getSapEventHref(action);' ).
+    lo_buf->add( '      if (sUiSapEventHref) {' ).
+    lo_buf->add( '        submitSapeventForm({}, sUiSapEventHref, "post");' ).
+    lo_buf->add( '        oEvent.preventDefault();' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // Or an SAP event input' ).
+    lo_buf->add( '      var sUiSapEventInputAction = this.getSapEventInputAction(action);' ).
+    lo_buf->add( '      if (sUiSapEventInputAction) {' ).
+    lo_buf->add( '        submitSapeventForm({}, sUiSapEventInputAction, "post");' ).
+    lo_buf->add( '        oEvent.preventDefault();' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      // Or an SAP event main form' ).
+    lo_buf->add( '      var elForm = this.getSapEventForm(action);' ).
+    lo_buf->add( '      if (elForm) {' ).
+    lo_buf->add( '        elForm.submit();' ).
+    lo_buf->add( '        oEvent.preventDefault();' ).
+    lo_buf->add( '        return;' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.showHotkeys = function() {' ).
+    lo_buf->add( '  var elHotkeys = document.querySelector("#hotkeys");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (elHotkeys) {' ).
+    lo_buf->add( '    elHotkeys.style.display = (elHotkeys.style.display) ? "" : "none";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.getAllSapEventsForSapEventName = function (sSapEvent) {' ).
+    lo_buf->add( '  if (/^#+$/.test(sSapEvent)){' ).
+    lo_buf->add( '    // sSapEvent contains only #. Nothing sensible can be done here' ).
+    lo_buf->add( '    return [];' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var includesSapEvent = function(text){' ).
+    lo_buf->add( '    return (text.includes("sapevent") || text.includes("SAPEVENT"));' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return [].slice' ).
+    lo_buf->add( '    .call(document.querySelectorAll("a[href*="+ sSapEvent +"], input[formaction*="+ sSapEvent+"]"))' ).
+    lo_buf->add( '    .filter(function (elem) {' ).
+    lo_buf->add( '      return (elem.nodeName === "A" && includesSapEvent(elem.href)' ).
+    lo_buf->add( '          || (elem.nodeName === "INPUT" && includesSapEvent(elem.formAction)));' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.getSapEventHref = function(sSapEvent) {' ).
+    lo_buf->add( '  return this.getAllSapEventsForSapEventName(sSapEvent)' ).
+    lo_buf->add( '    .filter(function(el) {' ).
+    lo_buf->add( '      // only anchors' ).
+    lo_buf->add( '      return (!!el.href);' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .map(function(oSapEvent) {' ).
+    lo_buf->add( '      return oSapEvent.href;' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .filter(this.eliminateSapEventFalsePositives(sSapEvent))' ).
+    lo_buf->add( '    .pop();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.getSapEventInputAction = function(sSapEvent) {' ).
+    lo_buf->add( '  return this.getAllSapEventsForSapEventName(sSapEvent)' ).
+    lo_buf->add( '    .filter(function(el) {' ).
+    lo_buf->add( '      // input forms' ).
+    lo_buf->add( '      return (el.type === "submit");' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .map(function(oSapEvent) {' ).
+    lo_buf->add( '      return oSapEvent.formAction;' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .filter(this.eliminateSapEventFalsePositives(sSapEvent))' ).
+    lo_buf->add( '    .pop();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.getSapEventForm = function(sSapEvent) {' ).
+    lo_buf->add( '  return this.getAllSapEventsForSapEventName(sSapEvent)' ).
+    lo_buf->add( '    .filter(function(el) {' ).
+    lo_buf->add( '      // forms' ).
+    lo_buf->add( '      var parentForm = el.parentNode.parentNode.parentNode;' ).
+    lo_buf->add( '      return (el.type === "submit" && parentForm.nodeName === "FORM");' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .map(function(oSapEvent) {' ).
+    lo_buf->add( '      return oSapEvent.parentNode.parentNode.parentNode;' ).
+    lo_buf->add( '    })' ).
+    lo_buf->add( '    .pop();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.eliminateSapEventFalsePositives = function(sapEvent) {' ).
+    lo_buf->add( '  return function(sapEventAttr) {' ).
+    lo_buf->add( '    return sapEventAttr.match(new RegExp("\\b" + sapEvent + "\\b"));' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.prototype.onkeydown = function(oEvent) {' ).
+    lo_buf->add( '  if (oEvent.defaultPrevented) {' ).
+    lo_buf->add( '    return;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (!Hotkeys.isHotkeyCallPossible()) {' ).
+    lo_buf->add( '    return;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var' ).
+    lo_buf->add( '    sKey     = oEvent.key || String.fromCharCode(oEvent.keyCode),' ).
+    lo_buf->add( '    fnHotkey = this.oKeyMap[sKey];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (fnHotkey) {' ).
+    lo_buf->add( '    fnHotkey.call(this, oEvent);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.isHotkeyCallPossible = function() {' ).
+    lo_buf->add( '  var activeElementType     = ((document.activeElement && document.activeElement.nodeName) || "");' ).
+    lo_buf->add( '  var activeElementReadOnly = ((document.activeElement && document.activeElement.readOnly) || false);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return (activeElementReadOnly || (activeElementType !== "INPUT" && activeElementType !== "TEXTAREA"));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Hotkeys.addHotkeyToHelpSheet = function(key, description) {' ).
+    lo_buf->add( '  var hotkeysUl = document.querySelector("#hotkeys ul.hotkeys");' ).
+    lo_buf->add( '  if (!hotkeysUl) return;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var li        = document.createElement("li");' ).
+    lo_buf->add( '  var spanId    = document.createElement("span");' ).
+    lo_buf->add( '  var spanDescr = document.createElement("span");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  spanId.className    = "key-id";' ).
+    lo_buf->add( '  spanId.innerText    = key;' ).
+    lo_buf->add( '  spanDescr.className = "key-descr";' ).
+    lo_buf->add( '  spanDescr.innerText = description;' ).
+    lo_buf->add( '  li.appendChild(spanId);' ).
+    lo_buf->add( '  li.appendChild(spanDescr);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  hotkeysUl.appendChild(li);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function setKeyBindings(oKeyMap) {' ).
+    lo_buf->add( '  var oHotkeys = new Hotkeys(oKeyMap);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  document.addEventListener("keypress", oHotkeys.onkeydown.bind(oHotkeys));' ).
+    lo_buf->add( '  setTimeout(function() {' ).
+    lo_buf->add( '    var div                     = document.getElementById("hotkeys-hint");' ).
+    lo_buf->add( '    if  (div) div.style.opacity = 0.2;' ).
+    lo_buf->add( '  }, 4900);' ).
+    lo_buf->add( '  setTimeout(function() { toggleDisplay("hotkeys-hint") }, 5000);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Patch Logic (git add -p)' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/*' ).
+    lo_buf->add( '  We have three type of cascading checkboxes.' ).
+    lo_buf->add( '  Which means that by clicking a file or section checkbox all corresponding line checkboxes are checked.' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  The id of the checkbox indicates its semantics and its membership.' ).
+    lo_buf->add( '*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/*' ).
+    lo_buf->add( '  1) file links' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      example id of file link' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      patch_file_zcl_abapgit_user_exit.clas.abap' ).
+    lo_buf->add( '      \________/ \_____________________________/' ).
+    lo_buf->add( '          |                   |' ).
+    lo_buf->add( '          |                   |____ file name' ).
+    lo_buf->add( '          |' ).
+    lo_buf->add( '          |' ).
+    lo_buf->add( '          |' ).
+    lo_buf->add( '      constant prefix' ).
+    lo_buf->add( '*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function PatchFile(sId) {' ).
+    lo_buf->add( '  var oRegex = new RegExp("(" + this.ID + ")_(.*$)");' ).
+    lo_buf->add( '  var oMatch = sId.match(oRegex);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.id        = sId;' ).
+    lo_buf->add( '  this.prefix    = oMatch[1];' ).
+    lo_buf->add( '  this.file_name = oMatch[2];' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'PatchFile.prototype.ID = "patch_file";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/*' ).
+    lo_buf->add( '  2) section links within a file' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      example id of section link' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      patch_section_zcl_abapgit_user_exit.clas.abap_1' ).
+    lo_buf->add( '      \___________/ \_____________________________/ ^' ).
+    lo_buf->add( '            |                   |                   |' ).
+    lo_buf->add( '            |               file name               |' ).
+    lo_buf->add( '            |                                       |' ).
+    lo_buf->add( '            |                                       ------ section' ).
+    lo_buf->add( '            |' ).
+    lo_buf->add( '      constant prefix' ).
+    lo_buf->add( '*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function PatchSection(sId) {' ).
+    lo_buf->add( '  var oRegex = new RegExp("(" + this.ID + ")_(.*)_(\\d+$)");' ).
+    lo_buf->add( '  var oMatch = sId.match(oRegex);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.id        = sId;' ).
+    lo_buf->add( '  this.prefix    = oMatch[1];' ).
+    lo_buf->add( '  this.file_name = oMatch[2];' ).
+    lo_buf->add( '  this.section   = oMatch[3];' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'PatchSection.prototype.ID = "patch_section";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/*' ).
+    lo_buf->add( '  3) line links within a section' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      example id of line link' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '      patch_line_zcl_abapgit_user_exit.clas.abap_1_25' ).
+    lo_buf->add( '      \________/ \_____________________________/ ^  ^' ).
+    lo_buf->add( '            ^                  ^                 |  |' ).
+    lo_buf->add( '            |                  |                 |  ------- line number' ).
+    lo_buf->add( '            |               file name            |' ).
+    lo_buf->add( '            |                                 section' ).
+    lo_buf->add( '            |' ).
+    lo_buf->add( '            |' ).
+    lo_buf->add( '      constant prefix' ).
+    lo_buf->add( '*/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function PatchLine() { }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'PatchLine.prototype.ID = "patch_line";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function Patch() { }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.ID = {' ).
+    lo_buf->add( '  STAGE: "stage"' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.ACTION = {' ).
+    lo_buf->add( '  PATCH_STAGE  : "patch_stage",' ).
+    lo_buf->add( '  REFRESH_LOCAL: "refresh_local",' ).
+    lo_buf->add( '  REFRESH_ALL  : "refresh_all"' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.escape = function(sFileName) {' ).
+    lo_buf->add( '  return sFileName' ).
+    lo_buf->add( '    .replace(/\./g, "\\.")' ).
+    lo_buf->add( '    .replace(/#/g, "\\#");' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.preparePatch = function() {' ).
+    lo_buf->add( '  this.registerClickHandlerForFiles();' ).
+    lo_buf->add( '  this.registerClickHandlerForSections();' ).
+    lo_buf->add( '  this.registerClickHandlerForLines();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.buildSelectorInputStartsWithId = function(sId) {' ).
+    lo_buf->add( '  return "input[id^=''" + sId + "'']";' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.registerClickHandlerForFiles = function() {' ).
+    lo_buf->add( '  this.registerClickHandlerForSelectorParent(this.buildSelectorInputStartsWithId(PatchFile.prototype.ID), this.onClickFileCheckbox);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.registerClickHandlerForSections = function() {' ).
+    lo_buf->add( '  this.registerClickHandlerForSelectorParent(this.buildSelectorInputStartsWithId(PatchSection.prototype.ID), this.onClickSectionCheckbox);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.registerClickHandlerForLines = function() {' ).
+    lo_buf->add( '  this.registerClickHandlerForSelectorParent(this.buildSelectorInputStartsWithId(PatchLine.prototype.ID), this.onClickLineCheckbox);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.registerClickHandlerForSelectorParent = function(sSelector, fnCallback) {' ).
+    lo_buf->add( '  var elAll = document.querySelectorAll(sSelector);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  [].forEach.call(elAll, function(elem) {' ).
+    lo_buf->add( '    elem.parentElement.addEventListener("click", fnCallback.bind(this));' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllLineCheckboxesForFile = function(oFile) {' ).
+    lo_buf->add( '  return this.getAllLineCheckboxesForId(oFile.id, PatchFile.prototype.ID);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllSectionCheckboxesForFile = function(oFile) {' ).
+    lo_buf->add( '  return this.getAllSectionCheckboxesForId(oFile.id, PatchFile.prototype.ID);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllLineCheckboxesForSection = function(oSection) {' ).
+    lo_buf->add( '  return this.getAllLineCheckboxesForId(oSection.id, PatchSection.prototype.ID);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllLineCheckboxesForId = function(sId, sIdPrefix) {' ).
+    lo_buf->add( '  return this.getAllCheckboxesForId(sId, sIdPrefix, PatchLine.prototype.ID);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllSectionCheckboxesForId = function(sId, sIdPrefix) {' ).
+    lo_buf->add( '  return this.getAllCheckboxesForId(sId, sIdPrefix, PatchSection.prototype.ID);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getAllCheckboxesForId = function(sId, sIdPrefix, sNewIdPrefix) {' ).
+    lo_buf->add( '  var oRegex = new RegExp("^" + sIdPrefix);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  sId = sId.replace(oRegex, sNewIdPrefix);' ).
+    lo_buf->add( '  return document.querySelectorAll(this.buildSelectorInputStartsWithId(this.escape(sId)));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.getToggledCheckbox = function(oEvent) {' ).
+    lo_buf->add( '  var elCheckbox = null;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // We have either an input element or any element with input child' ).
+    lo_buf->add( '  // in the latter case we have to toggle the checkbox manually' ).
+    lo_buf->add( '  if (oEvent.srcElement.nodeName === "INPUT") {' ).
+    lo_buf->add( '    elCheckbox = oEvent.srcElement;' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    elCheckbox = this.toggleCheckbox(oEvent.srcElement.querySelector("INPUT"));' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return elCheckbox;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.toggleCheckbox = function(elCheckbox) {' ).
+    lo_buf->add( '  elCheckbox.checked = !elCheckbox.checked;' ).
+    lo_buf->add( '  return elCheckbox;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.onClickFileCheckbox = function(oEvent) {' ).
+    lo_buf->add( '  var elCheckbox                   = this.getToggledCheckbox(oEvent);' ).
+    lo_buf->add( '  var oFile                        = new PatchFile(elCheckbox.id);' ).
+    lo_buf->add( '  var elAllLineCheckboxesOfFile    = this.getAllLineCheckboxesForFile(oFile);' ).
+    lo_buf->add( '  var elAllSectionCheckboxesOfFile = this.getAllSectionCheckboxesForFile(oFile);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  [].forEach.call(elAllLineCheckboxesOfFile, function(elem) {' ).
+    lo_buf->add( '    elem.checked = elCheckbox.checked;' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  [].forEach.call(elAllSectionCheckboxesOfFile, function(elem) {' ).
+    lo_buf->add( '    elem.checked = elCheckbox.checked;' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.onClickSectionCheckbox = function(oEvent) {' ).
+    lo_buf->add( '  var elSrcElement = this.getToggledCheckbox(oEvent);' ).
+    lo_buf->add( '  var oSection     = new PatchSection(elSrcElement.id);' ).
+    lo_buf->add( '  this.clickAllLineCheckboxesInSection(oSection, elSrcElement.checked);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.onClickLineCheckbox = function(oEvent) {' ).
+    lo_buf->add( '  this.getToggledCheckbox(oEvent);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.clickAllLineCheckboxesInSection = function(oSection, bChecked) {' ).
+    lo_buf->add( '  var elAllLineCheckboxesOfSection = this.getAllLineCheckboxesForSection(oSection);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  [].forEach.call(elAllLineCheckboxesOfSection, function(elem) {' ).
+    lo_buf->add( '    elem.checked = bChecked;' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.registerStagePatch = function() {' ).
+    lo_buf->add( '  var elStage        = document.querySelector("#" + this.ID.STAGE);' ).
+    lo_buf->add( '  var REFRESH_PREFIX = "refresh";' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  elStage.addEventListener("click", this.submitPatch.bind(this, this.ACTION.PATCH_STAGE));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var aRefresh = document.querySelectorAll("[id*=" + REFRESH_PREFIX + "]");' ).
+    lo_buf->add( '  [].forEach.call(aRefresh, function(el) {' ).
+    lo_buf->add( '    el.addEventListener("click", memorizeScrollPosition(this.submitPatch.bind(this, el.id)).bind(this));' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // for hotkeys' ).
+    lo_buf->add( '  window.stagePatch = function() {' ).
+    lo_buf->add( '    this.submitPatch(this.ACTION.PATCH_STAGE);' ).
+    lo_buf->add( '  }.bind(this);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  window.refreshLocal = memorizeScrollPosition(function() {' ).
+    lo_buf->add( '    this.submitPatch(this.ACTION.REFRESH_LOCAL);' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  window.refreshAll = memorizeScrollPosition(function() {' ).
+    lo_buf->add( '    this.submitPatch(this.ACTION.REFRESH_ALL);' ).
+    lo_buf->add( '  }.bind(this));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.submitPatch = function(action) {' ).
+    lo_buf->add( '  // Collect add and remove info and submit to backend' ).
+    lo_buf->add( '  var aAddPatch    = this.collectElementsForCheckboxId(PatchLine.prototype.ID, true);' ).
+    lo_buf->add( '  var aRemovePatch = this.collectElementsForCheckboxId(PatchLine.prototype.ID, false);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  submitSapeventForm({ add: aAddPatch, remove: aRemovePatch }, action, "post");' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'Patch.prototype.collectElementsForCheckboxId = function(sId, bChecked) {' ).
+    lo_buf->add( '  var sSelector = this.buildSelectorInputStartsWithId(sId);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return [].slice.call(document.querySelectorAll(sSelector))' ).
+    lo_buf->add( '    .filter(function(elem) {' ).
+    lo_buf->add( '      return (elem.checked === bChecked);' ).
+    lo_buf->add( '    }).map(function(elem) {' ).
+    lo_buf->add( '      return elem.id;' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function preparePatch() {' ).
+    lo_buf->add( '  var oPatch = new Patch();' ).
+    lo_buf->add( '  oPatch.preparePatch();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function registerStagePatch() {' ).
+    lo_buf->add( '  var oPatch = new Patch();' ).
+    lo_buf->add( '  oPatch.registerStagePatch();' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Command Palette (F1)' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// fuzzy match helper' ).
+    lo_buf->add( '// return non empty marked string in case it fits the filter' ).
+    lo_buf->add( '// abc + b = a<mark>b</mark>c' ).
+    lo_buf->add( 'function fuzzyMatchAndMark(str, filter) {' ).
+    lo_buf->add( '  var markedStr   = "";' ).
+    lo_buf->add( '  var filterLower = filter.toLowerCase();' ).
+    lo_buf->add( '  var strLower    = str.toLowerCase();' ).
+    lo_buf->add( '  var cur         = 0;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  for (var i = 0; i < filter.length; i++) {' ).
+    lo_buf->add( '    while (filterLower[i] !== strLower[cur] && cur < str.length) {' ).
+    lo_buf->add( '      markedStr += str[cur++];' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    if (cur === str.length) break;' ).
+    lo_buf->add( '    markedStr += "<mark>" + str[cur++] + "</mark>";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var matched = i === filter.length;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (matched && cur < str.length) markedStr += str.substring(cur);' ).
+    lo_buf->add( '  return matched ? markedStr: null;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function CommandPalette(commandEnumerator, opts) {' ).
+    lo_buf->add( '  if (typeof commandEnumerator !== "function") throw Error("commandEnumerator must be a function");' ).
+    lo_buf->add( '  if (typeof opts !== "object") throw Error("opts must be an object");' ).
+    lo_buf->add( '  if (typeof opts.toggleKey !== "string" || !opts.toggleKey) throw Error("toggleKey must be a string");' ).
+    lo_buf->add( '  this.commands = commandEnumerator();' ).
+    lo_buf->add( '  if (!this.commands) return;' ).
+    lo_buf->add( '  // this.commands = [{' ).
+    lo_buf->add( '  //   action:    "sap_event_action_code_with_params"' ).
+    lo_buf->add( '  //   iconClass: "icon icon_x ..."' ).
+    lo_buf->add( '  //   title:     "my command X"' ).
+    lo_buf->add( '  // }, ...];' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (opts.toggleKey[0] === "^") {' ).
+    lo_buf->add( '    this.toggleKeyCtrl = true;' ).
+    lo_buf->add( '    this.toggleKey     = opts.toggleKey.substring(1);' ).
+    lo_buf->add( '    if (!this.toggleKey) throw Error("Incorrect toggleKey");' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    this.toggleKeyCtrl = false;' ).
+    lo_buf->add( '    this.toggleKey     = opts.toggleKey;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.hotkeyDescription = opts.hotkeyDescription;' ).
+    lo_buf->add( '  this.elements          = {' ).
+    lo_buf->add( '    palette: null,' ).
+    lo_buf->add( '    ul     : null,' ).
+    lo_buf->add( '    input  : null' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '  this.selectIndex = -1; // not selected' ).
+    lo_buf->add( '  this.filter      = "";' ).
+    lo_buf->add( '  this.renderAndBindElements();' ).
+    lo_buf->add( '  this.hookEvents();' ).
+    lo_buf->add( '  Hotkeys.addHotkeyToHelpSheet(opts.toggleKey, opts.hotkeyDescription);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (!CommandPalette.instances) {' ).
+    lo_buf->add( '    CommandPalette.instances = [];' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  CommandPalette.instances.push(this);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.hookEvents = function() {' ).
+    lo_buf->add( '  document.addEventListener("keydown", this.handleToggleKey.bind(this));' ).
+    lo_buf->add( '  this.elements.input.addEventListener("keyup", this.handleInputKey.bind(this));' ).
+    lo_buf->add( '  this.elements.ul.addEventListener("click", this.handleUlClick.bind(this));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.renderCommandItem = function(cmd) {' ).
+    lo_buf->add( '  var li = document.createElement("li");' ).
+    lo_buf->add( '  if (cmd.iconClass) {' ).
+    lo_buf->add( '    var icon = document.createElement("i");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    icon.className = cmd.iconClass;' ).
+    lo_buf->add( '    li.appendChild(icon);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  var titleSpan = document.createElement("span");' ).
+    lo_buf->add( '  li.appendChild(titleSpan);' ).
+    lo_buf->add( '  cmd.element   = li;' ).
+    lo_buf->add( '  cmd.titleSpan = titleSpan;' ).
+    lo_buf->add( '  return li;' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.renderAndBindElements = function() {' ).
+    lo_buf->add( '  var div   = document.createElement("div");' ).
+    lo_buf->add( '  var input = document.createElement("input");' ).
+    lo_buf->add( '  var ul    = document.createElement("ul");' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  div.className     = "cmd-palette";' ).
+    lo_buf->add( '  div.style.display = "none";' ).
+    lo_buf->add( '  input.placeholder = this.hotkeyDescription;' ).
+    lo_buf->add( '  for (var i = 0; i < this.commands.length; i++) ul.appendChild(this.renderCommandItem(this.commands[i]));' ).
+    lo_buf->add( '  div.appendChild(input);' ).
+    lo_buf->add( '  div.appendChild(ul);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.elements.palette = div;' ).
+    lo_buf->add( '  this.elements.input   = input;' ).
+    lo_buf->add( '  this.elements.ul      = ul;' ).
+    lo_buf->add( '  document.body.appendChild(div);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.handleToggleKey = function(event) {' ).
+    lo_buf->add( '  if (event.key !== this.toggleKey) return;' ).
+    lo_buf->add( '  if (this.toggleKeyCtrl && !event.ctrlKey) return;' ).
+    lo_buf->add( '  this.toggleDisplay();' ).
+    lo_buf->add( '  event.preventDefault();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.handleInputKey = function(event) {' ).
+    lo_buf->add( '  if (event.key === "ArrowUp" || event.key === "Up") {' ).
+    lo_buf->add( '    this.selectPrev();' ).
+    lo_buf->add( '  } else if (event.key === "ArrowDown" || event.key === "Down") {' ).
+    lo_buf->add( '    this.selectNext();' ).
+    lo_buf->add( '  } else if (event.key === "Enter") {' ).
+    lo_buf->add( '    this.exec(this.getSelected());' ).
+    lo_buf->add( '  } else if (event.key === "Backspace" && !this.filter) {' ).
+    lo_buf->add( '    this.toggleDisplay(false);' ).
+    lo_buf->add( '  } else if (this.filter !== this.elements.input.value) {' ).
+    lo_buf->add( '    this.filter = this.elements.input.value;' ).
+    lo_buf->add( '    this.applyFilter();' ).
+    lo_buf->add( '    this.selectFirst();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  event.preventDefault();' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.applyFilter = function() {' ).
+    lo_buf->add( '  for (var i = 0; i < this.commands.length; i++) {' ).
+    lo_buf->add( '    var cmd = this.commands[i];' ).
+    lo_buf->add( '    if (!this.filter) {' ).
+    lo_buf->add( '      cmd.element.style.display = "";' ).
+    lo_buf->add( '      cmd.titleSpan.innerText   = cmd.title;' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      var matchedTitle = fuzzyMatchAndMark(cmd.title, this.filter);' ).
+    lo_buf->add( '      if (matchedTitle) {' ).
+    lo_buf->add( '        cmd.titleSpan.innerHTML   = matchedTitle;' ).
+    lo_buf->add( '        cmd.element.style.display = "";' ).
+    lo_buf->add( '      } else {' ).
+    lo_buf->add( '        cmd.element.style.display = "none";' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.applySelectIndex = function(newIndex) {' ).
+    lo_buf->add( '  if (newIndex !== this.selectIndex) {' ).
+    lo_buf->add( '    if (this.selectIndex >= 0) this.commands[this.selectIndex].element.classList.remove("selected");' ).
+    lo_buf->add( '    var newCmd = this.commands[newIndex];' ).
+    lo_buf->add( '    newCmd.element.classList.add("selected");' ).
+    lo_buf->add( '    this.selectIndex = newIndex;' ).
+    lo_buf->add( '    this.adjustScrollPosition(newCmd.element);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.selectFirst = function() {' ).
+    lo_buf->add( '  for (var i = 0; i < this.commands.length; i++) {' ).
+    lo_buf->add( '    if (this.commands[i].element.style.display === "none") continue; // skip hidden' ).
+    lo_buf->add( '    this.applySelectIndex(i);' ).
+    lo_buf->add( '    break;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.selectNext = function() {' ).
+    lo_buf->add( '  for (var i = this.selectIndex + 1; i < this.commands.length; i++) {' ).
+    lo_buf->add( '    if (this.commands[i].element.style.display === "none") continue; // skip hidden' ).
+    lo_buf->add( '    this.applySelectIndex(i);' ).
+    lo_buf->add( '    break;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.selectPrev = function() {' ).
+    lo_buf->add( '  for (var i = this.selectIndex - 1; i >= 0; i--) {' ).
+    lo_buf->add( '    if (this.commands[i].element.style.display === "none") continue; // skip hidden' ).
+    lo_buf->add( '    this.applySelectIndex(i);' ).
+    lo_buf->add( '    break;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.getSelected = function() {' ).
+    lo_buf->add( '  return this.commands[this.selectIndex];' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.adjustScrollPosition = function(itemElement) {' ).
+    lo_buf->add( '  var bItem      = itemElement.getBoundingClientRect();' ).
+    lo_buf->add( '  var bContainer = this.elements.ul.getBoundingClientRect();' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  bItem.top         = Math.round(bItem.top);' ).
+    lo_buf->add( '  bItem.bottom      = Math.round(bItem.bottom);' ).
+    lo_buf->add( '  bItem.height      = Math.round(bItem.height);' ).
+    lo_buf->add( '  bItem.mid         = Math.round(bItem.top + bItem.height / 2);' ).
+    lo_buf->add( '  bContainer.top    = Math.round(bContainer.top);' ).
+    lo_buf->add( '  bContainer.bottom = Math.round(bContainer.bottom);' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (bItem.mid > bContainer.bottom - 2) {' ).
+    lo_buf->add( '    this.elements.ul.scrollTop += bItem.bottom - bContainer.bottom;' ).
+    lo_buf->add( '  } else if (bItem.mid < bContainer.top + 2) {' ).
+    lo_buf->add( '    this.elements.ul.scrollTop += bItem.top - bContainer.top;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.toggleDisplay = function(forceState) {' ).
+    lo_buf->add( '  var isDisplayed   = (this.elements.palette.style.display !== "none");' ).
+    lo_buf->add( '  var tobeDisplayed = (forceState !== undefined) ? forceState : !isDisplayed;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (tobeDisplayed) {' ).
+    lo_buf->add( '    // auto close other command palettes' ).
+    lo_buf->add( '    CommandPalette.instances.forEach(function(instance) {' ).
+    lo_buf->add( '      instance.elements.palette.style.display = "none";' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  this.elements.palette.style.display = tobeDisplayed ? "" : "none";' ).
+    lo_buf->add( '  if (tobeDisplayed) {' ).
+    lo_buf->add( '    this.elements.input.value = "";' ).
+    lo_buf->add( '    this.elements.input.focus();' ).
+    lo_buf->add( '    this.applyFilter();' ).
+    lo_buf->add( '    this.selectFirst();' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.getCommandByElement = function(element) {' ).
+    lo_buf->add( '  for (var i = 0; i < this.commands.length; i++) {' ).
+    lo_buf->add( '    if (this.commands[i].element === element) return this.commands[i];' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.handleUlClick = function(event) {' ).
+    lo_buf->add( '  var element = event.target || event.srcElement;' ).
+    lo_buf->add( '  if (!element) return;' ).
+    lo_buf->add( '  if (element.nodeName === "SPAN") element = element.parentNode;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (element.nodeName === "I") element = element.parentNode;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (element.nodeName !== "LI") return;' ).
+    lo_buf->add( '  this.exec(this.getCommandByElement(element));' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'CommandPalette.prototype.exec = function(cmd) {' ).
+    lo_buf->add( '  if (!cmd) return;' ).
+    lo_buf->add( '  this.toggleDisplay(false);' ).
+    lo_buf->add( '  if (typeof cmd.action === "function") {' ).
+    lo_buf->add( '    cmd.action();' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    submitSapeventForm(null, cmd.action);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Is any command palette visible?' ).
+    lo_buf->add( 'CommandPalette.isVisible = function() {' ).
+    lo_buf->add( '  return CommandPalette.instances.reduce(function(result, instance) { return result || instance.elements.palette.style.display !== "none" }, false);' ).
+    lo_buf->add( '};' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Command Enumerators' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function createRepoCatalogEnumerator(catalog, action) {' ).
+    lo_buf->add( '  // expecting [{ key, isOffline, displayName }]' ).
+    lo_buf->add( '  return function() {' ).
+    lo_buf->add( '    return catalog.map(function(i) {' ).
+    lo_buf->add( '      return {' ).
+    lo_buf->add( '        action   : action + "?key=" + i.key,' ).
+    lo_buf->add( '        iconClass: i.isOffline ? "icon icon-plug darkgrey" : "icon icon-cloud-upload-alt blue",' ).
+    lo_buf->add( '        title    : i.displayName' ).
+    lo_buf->add( '      };' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '  };' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function enumerateUiActions() {' ).
+    lo_buf->add( '  var items = [];' ).
+    lo_buf->add( '  function processUL(ulNode, prefix) {' ).
+    lo_buf->add( '    for (var i = 0; i < ulNode.children.length; i++) {' ).
+    lo_buf->add( '      var item = ulNode.children[i];' ).
+    lo_buf->add( '      if (item.nodeName !== "LI") continue; // unexpected node' ).
+    lo_buf->add( '      if (item.children.length >= 2 && item.children[1].nodeName === "UL") {' ).
+    lo_buf->add( '        // submenu detected' ).
+    lo_buf->add( '        var menutext = item.children[0].innerText;' ).
+    lo_buf->add( '        // special treatment for menus without text' ).
+    lo_buf->add( '        if (!menutext) {' ).
+    lo_buf->add( '          menutext = item.children[0].getAttribute("title");' ).
+    lo_buf->add( '        }' ).
+    lo_buf->add( '        processUL(item.children[1], menutext);' ).
+    lo_buf->add( '      } else if (item.firstElementChild && item.firstElementChild.nodeName === "A") {' ).
+    lo_buf->add( '        var anchor = item.firstElementChild;' ).
+    lo_buf->add( '        if (anchor.href && anchor.href !== "#") items.push([anchor, prefix]);' ).
+    lo_buf->add( '      }' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // toolbars and actionbars' ).
+    lo_buf->add( '  [].slice.call(document.querySelectorAll(".nav-container > ul[id*=toolbar], .nav-container > ul[id*=actionbar]"))' ).
+    lo_buf->add( '    .filter(function(toolbar) {' ).
+    lo_buf->add( '      return (toolbar && toolbar.nodeName === "UL");' ).
+    lo_buf->add( '    }).forEach(function(toolbar) {' ).
+    lo_buf->add( '      processUL(toolbar);' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  items = items.map(function(item) {' ).
+    lo_buf->add( '    var action = "";' ).
+    lo_buf->add( '    var anchor = item[0];' ).
+    lo_buf->add( '    if (anchor.href.includes("#")) {' ).
+    lo_buf->add( '      action = function() {' ).
+    lo_buf->add( '        anchor.click();' ).
+    lo_buf->add( '      };' ).
+    lo_buf->add( '    } else {' ).
+    lo_buf->add( '      action = anchor.href.replace("sapevent:", "");' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '    var prefix = item[1];' ).
+    lo_buf->add( '    return {' ).
+    lo_buf->add( '      action: action,' ).
+    lo_buf->add( '      title : (prefix ? prefix + ": " : "") + anchor.innerText.trim()' ).
+    lo_buf->add( '    };' ).
+    lo_buf->add( '  });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // forms' ).
+    lo_buf->add( '  [].slice.call(document.querySelectorAll("input[type=''submit'']"))' ).
+    lo_buf->add( '    .forEach(function(input) {' ).
+    lo_buf->add( '      items.push({' ).
+    lo_buf->add( '        action: function() {' ).
+    lo_buf->add( '          if (input.form.action.includes(input.formAction) || input.classList.contains("main")) {' ).
+    lo_buf->add( '            input.form.submit();' ).
+    lo_buf->add( '          } else {' ).
+    lo_buf->add( '            submitSapeventForm({}, input.formAction, "post", input.form);' ).
+    lo_buf->add( '          }' ).
+    lo_buf->add( '        },' ).
+    lo_buf->add( '        title: (input.value === "Submit Query" ? input.title : input.value + " " + input.title.replace(/\[.*\]/, ""))' ).
+    lo_buf->add( '      });' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // radio buttons' ).
+    lo_buf->add( '  [].slice.call(document.querySelectorAll("input[type=''radio'']"))' ).
+    lo_buf->add( '    .forEach(function(input) {' ).
+    lo_buf->add( '      items.push({' ).
+    lo_buf->add( '        action: function() {' ).
+    lo_buf->add( '          input.click();' ).
+    lo_buf->add( '        },' ).
+    lo_buf->add( '        title: document.querySelector("label[for=''" + input.id + "'']").textContent' ).
+    lo_buf->add( '      });' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  // others:' ).
+    lo_buf->add( '  // - links inside forms' ).
+    lo_buf->add( '  // - label links' ).
+    lo_buf->add( '  // - command links' ).
+    lo_buf->add( '  // - other header links' ).
+    lo_buf->add( '  [].slice.call(document.querySelectorAll("form a, a.command:not(.unlisted), #header ul:not([id*=''toolbar'']) a"))' ).
+    lo_buf->add( '    .filter(function(anchor) {' ).
+    lo_buf->add( '      return !!anchor.title || !!anchor.text;' ).
+    lo_buf->add( '    }).forEach(function(anchor) {' ).
+    lo_buf->add( '      items.push({' ).
+    lo_buf->add( '        action: function() {' ).
+    lo_buf->add( '          anchor.click();' ).
+    lo_buf->add( '        },' ).
+    lo_buf->add( '        title: (function() {' ).
+    lo_buf->add( '          var result = anchor.title + anchor.text;' ).
+    lo_buf->add( '          if (anchor.href.includes("label")) {' ).
+    lo_buf->add( '            result = "Label: " + result;' ).
+    lo_buf->add( '          }' ).
+    lo_buf->add( '          return result.trim();' ).
+    lo_buf->add( '        })()' ).
+    lo_buf->add( '      });' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return items;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function enumerateJumpAllFiles() {' ).
+    lo_buf->add( '  var root = document.getElementById("jump");' ).
+    lo_buf->add( '  if (!root || root.nodeName !== "UL") return null;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  return Array' ).
+    lo_buf->add( '    .prototype.slice.call(root.children)' ).
+    lo_buf->add( '    .filter(function(elem) { return elem.nodeName === "LI" })' ).
+    lo_buf->add( '    .map(function(listItem) {' ).
+    lo_buf->add( '      var title = listItem.children[0].childNodes[0].textContent;' ).
+    lo_buf->add( '      return {' ).
+    lo_buf->add( '        action: root.onclick.bind(null, title),' ).
+    lo_buf->add( '        title : title' ).
+    lo_buf->add( '      };' ).
+    lo_buf->add( '    });' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Save Scroll Position' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function saveScrollPosition() {' ).
+    lo_buf->add( '  // Not supported by Java GUI' ).
+    lo_buf->add( '  try { if (!window.sessionStorage) { return } }' ).
+    lo_buf->add( '  catch (err) { return err }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  window.sessionStorage.setItem("scrollTop", document.querySelector("html").scrollTop);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function restoreScrollPosition() {' ).
+    lo_buf->add( '  // Not supported by Java GUI' ).
+    lo_buf->add( '  try { if (!window.sessionStorage) { return } }' ).
+    lo_buf->add( '  catch (err) { return err }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var scrollTop = window.sessionStorage.getItem("scrollTop");' ).
+    lo_buf->add( '  if (scrollTop) {' ).
+    lo_buf->add( '    document.querySelector("html").scrollTop = scrollTop;' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '  window.sessionStorage.setItem("scrollTop", 0);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( 'function memorizeScrollPosition(fn) {' ).
+    lo_buf->add( '  return function() {' ).
+    lo_buf->add( '    saveScrollPosition();' ).
+    lo_buf->add( '    return fn.call(this, fn.args);' ).
+    lo_buf->add( '  }.bind(this);' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Sticky Header' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/* https://www.w3schools.com/howto/howto_js_navbar_sticky.asp */' ).
+    lo_buf->add( '/* Note: We have to use JS since IE does not support CSS position:sticky */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// When the user scrolls the page, execute toggleSticky' ).
+    lo_buf->add( 'window.onscroll = function() { toggleSticky() };' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Add the sticky class to the navbar when you reach its scroll position.' ).
+    lo_buf->add( '// Remove "sticky" when you leave the scroll position' ).
+    lo_buf->add( 'function toggleSticky() {' ).
+    lo_buf->add( '  var body   = document.getElementsByTagName("body")[0];' ).
+    lo_buf->add( '  var header = document.getElementById("header");' ).
+    lo_buf->add( '  var sticky = header.offsetTop;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  var stickyClass = "sticky";' ).
+    lo_buf->add( '  if (body.classList.contains("full_width")) {' ).
+    lo_buf->add( '    stickyClass = "sticky_full_width";' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '  if (window.pageYOffset >= sticky) {' ).
+    lo_buf->add( '    header.classList.add(stickyClass);' ).
+    lo_buf->add( '  } else {' ).
+    lo_buf->add( '    header.classList.remove(stickyClass);' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '/**********************************************************' ).
+    lo_buf->add( ' * Browser Control' ).
+    lo_buf->add( ' **********************************************************/' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Toggle display of warning message when using Edge (based on Chromium) browser control' ).
+    lo_buf->add( '// Todo: Remove once https://github.com/abapGit/abapGit/issues/4841 is fixed' ).
+    lo_buf->add( 'function toggleBrowserControlWarning(){' ).
+    lo_buf->add( '  if (!navigator.userAgent.includes("Edg")){' ).
+    lo_buf->add( '    var elBrowserControlWarning = document.getElementById("browser-control-warning");' ).
+    lo_buf->add( '    if (elBrowserControlWarning) {' ).
+    lo_buf->add( '      elBrowserControlWarning.style.display = "none";' ).
+    lo_buf->add( '    }' ).
+    lo_buf->add( '  }' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '// Output type of HTML control in the abapGit footer' ).
+    lo_buf->add( 'function displayBrowserControlFooter() {' ).
+    lo_buf->add( '  var out = document.getElementById("browser-control-footer");' ).
+    lo_buf->add( '  out.innerHTML = " - " + ( navigator.userAgent.includes("Edg") ? "Edge" : "IE"  );' ).
+    lo_buf->add( '}' ).
+
     li_asset_man->register_asset(
       iv_url       = 'js/common.js'
       iv_type      = 'text/javascript'
       iv_mime_name = 'ZABAPGIT_JS_COMMON'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include zabapgit_icon_font_css.w3mi.data.css > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_ICON_FONT_CSS
+****************************************************
+    lo_buf->add( '@font-face {' ).
+    lo_buf->add( '    font-family: "ag-icons";' ).
+    lo_buf->add( '    font-weight: normal;' ).
+    lo_buf->add( '    font-style: normal;' ).
+    lo_buf->add( '    src: url("../font/ag-icons.woff") format("woff");' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.icon {' ).
+    lo_buf->add( '    line-height: 1;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.icon:before {' ).
+    lo_buf->add( '    font-family: ag-icons !important;' ).
+    lo_buf->add( '    font-style: normal;' ).
+    lo_buf->add( '    font-weight: normal !important;' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    display: inline-block;' ).
+    lo_buf->add( '    text-decoration: none;' ).
+    lo_buf->add( '    text-align: center;' ).
+    lo_buf->add( '    vertical-align: text-top;' ).
+    lo_buf->add( '    /* width: 1.1em; */' ).
+    lo_buf->add( '    /* padding-right: 0.2em */' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '    /* For safety - reset parent styles, that can break glyph codes*/' ).
+    lo_buf->add( '    font-variant: normal;' ).
+    lo_buf->add( '    text-transform: none;' ).
+    lo_buf->add( '}' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.icon.large { font-size: 200%; }' ).
+    lo_buf->add( '' ).
+    lo_buf->add( '.icon-abapgit:before { content: "\f101"; }' ).
+    lo_buf->add( '.icon-abaplint:before { content: "\f102"; }' ).
+    lo_buf->add( '.icon-arrow-circle-up:before { content: "\f103"; }' ).
+    lo_buf->add( '.icon-bars:before { content: "\f104"; }' ).
+    lo_buf->add( '.icon-bolt:before { content: "\f105"; }' ).
+    lo_buf->add( '.icon-bookmark-solid:before { content: "\f106"; }' ).
+    lo_buf->add( '.icon-box:before { content: "\f107"; }' ).
+    lo_buf->add( '.icon-briefcase:before { content: "\f108"; }' ).
+    lo_buf->add( '.icon-bug-solid:before { content: "\f109"; }' ).
+    lo_buf->add( '.icon-check:before { content: "\f10a"; }' ).
+    lo_buf->add( '.icon-chevron-down:before { content: "\f10b"; }' ).
+    lo_buf->add( '.icon-chevron-left:before { content: "\f10c"; }' ).
+    lo_buf->add( '.icon-chevron-right:before { content: "\f10d"; }' ).
+    lo_buf->add( '.icon-chevron-up:before { content: "\f10e"; }' ).
+    lo_buf->add( '.icon-circle-dot-regular:before { content: "\f10f"; }' ).
+    lo_buf->add( '.icon-circle-play-regular:before { content: "\f110"; }' ).
+    lo_buf->add( '.icon-circle-solid:before { content: "\f111"; }' ).
+    lo_buf->add( '.icon-cloud-commit:before { content: "\f112"; }' ).
+    lo_buf->add( '.icon-cloud-solid:before { content: "\f113"; }' ).
+    lo_buf->add( '.icon-cloud-upload-alt:before { content: "\f114"; }' ).
+    lo_buf->add( '.icon-code-branch:before { content: "\f115"; }' ).
+    lo_buf->add( '.icon-code-commit:before { content: "\f116"; }' ).
+    lo_buf->add( '.icon-code-fork-solid:before { content: "\f117"; }' ).
+    lo_buf->add( '.icon-code-pull-request-solid:before { content: "\f118"; }' ).
+    lo_buf->add( '.icon-code-solid:before { content: "\f119"; }' ).
+    lo_buf->add( '.icon-cog:before { content: "\f11a"; }' ).
+    lo_buf->add( '.icon-copy-solid:before { content: "\f11b"; }' ).
+    lo_buf->add( '.icon-download-solid:before { content: "\f11c"; }' ).
+    lo_buf->add( '.icon-edit-solid:before { content: "\f11d"; }' ).
+    lo_buf->add( '.icon-exclamation-circle:before { content: "\f11e"; }' ).
+    lo_buf->add( '.icon-exclamation-triangle:before { content: "\f11f"; }' ).
+    lo_buf->add( '.icon-eye-solid:before { content: "\f120"; }' ).
+    lo_buf->add( '.icon-file-alt:before { content: "\f121"; }' ).
+    lo_buf->add( '.icon-file-code:before { content: "\f122"; }' ).
+    lo_buf->add( '.icon-file-image:before { content: "\f123"; }' ).
+    lo_buf->add( '.icon-file-zipper-regular:before { content: "\f124"; }' ).
+    lo_buf->add( '.icon-file:before { content: "\f125"; }' ).
+    lo_buf->add( '.icon-fire-alt:before { content: "\f126"; }' ).
+    lo_buf->add( '.icon-flow:before { content: "\f127"; }' ).
+    lo_buf->add( '.icon-folder:before { content: "\f128"; }' ).
+    lo_buf->add( '.icon-git-alt:before { content: "\f129"; }' ).
+    lo_buf->add( '.icon-github:before { content: "\f12a"; }' ).
+    lo_buf->add( '.icon-heart-regular:before { content: "\f12b"; }' ).
+    lo_buf->add( '.icon-info-circle-solid:before { content: "\f12c"; }' ).
+    lo_buf->add( '.icon-language-solid:before { content: "\f12d"; }' ).
+    lo_buf->add( '.icon-link-solid:before { content: "\f12e"; }' ).
+    lo_buf->add( '.icon-lock:before { content: "\f12f"; }' ).
+    lo_buf->add( '.icon-magnifying-glass-solid:before { content: "\f130"; }' ).
+    lo_buf->add( '.icon-markdown:before { content: "\f131"; }' ).
+    lo_buf->add( '.icon-paste-solid:before { content: "\f132"; }' ).
+    lo_buf->add( '.icon-plug:before { content: "\f133"; }' ).
+    lo_buf->add( '.icon-question-circle-solid:before { content: "\f134"; }' ).
+    lo_buf->add( '.icon-redo-alt-solid:before { content: "\f135"; }' ).
+    lo_buf->add( '.icon-server-solid:before { content: "\f136"; }' ).
+    lo_buf->add( '.icon-sliders-h:before { content: "\f137"; }' ).
+    lo_buf->add( '.icon-snowflake:before { content: "\f138"; }' ).
+    lo_buf->add( '.icon-star:before { content: "\f139"; }' ).
+    lo_buf->add( '.icon-tag-solid:before { content: "\f13a"; }' ).
+    lo_buf->add( '.icon-times-solid:before { content: "\f13b"; }' ).
+    lo_buf->add( '.icon-tools-solid:before { content: "\f13c"; }' ).
+    lo_buf->add( '.icon-truck-solid:before { content: "\f13d"; }' ).
+    lo_buf->add( '.icon-upload-solid:before { content: "\f13e"; }' ).
+    lo_buf->add( '.icon-user-cog-solid:before { content: "\f13f"; }' ).
+    lo_buf->add( '.icon-user-solid:before { content: "\f140"; }' ).
+    lo_buf->add( '.icon-vial-solid:before { content: "\f141"; }' ).
+
     li_asset_man->register_asset(
       iv_url       = 'css/ag-icons.css'
       iv_type      = 'text/css'
       iv_mime_name = 'ZABAPGIT_ICON_FONT_CSS'
       iv_inline    = lo_buf->join_w_newline_and_flush( ) ).
 
-    " @@abapmerge include-base64 zabapgit_icon_font.w3mi.data.woff > lo_buf->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_ICON_FONT
+****************************************************
+    lo_buf->add( 'd09GRgABAAAAACEsAAsAAAAAOygAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABH' ).
+    lo_buf->add( 'U1VCAAABCAAAADsAAABUIIslek9TLzIAAAFEAAAAPwAAAFZAtU4xY21hcAAA' ).
+    lo_buf->add( 'AYQAAAFYAAAE8PbieW1nbHlmAAAC3AAAGbEAACz898pmW2hlYWQAAByQAAAA' ).
+    lo_buf->add( 'MAAAADYu14YpaGhlYQAAHMAAAAAeAAAAJAmVB9NobXR4AAAc4AAAAGcAAAEI' ).
+    lo_buf->add( 'ggn/6GxvY2EAAB1IAAAAhgAAAIZvkWSUbWF4cAAAHdAAAAAfAAAAIAFnARxu' ).
+    lo_buf->add( 'YW1lAAAd8AAAASgAAAIWQeF35nBvc3QAAB8YAAACEgAAA67zKOCfeJxjYGRg' ).
+    lo_buf->add( 'YOBiMGCwY2BycfMJYeDLSSzJY5BiYGGAAJA8MpsxJzM9kYEDxgPKsYBpDiBm' ).
+    lo_buf->add( 'g4gCACY7BUgAeJxjYGT8wTiBgZWBgXEaYxoDA4M7lP7KIMnQwsDAxMDKzIAV' ).
+    lo_buf->add( 'BKS5pjA4fGT86MgE4uoxsTKAVDKCOADYRgluAHic7dNnbtwwAAXhWa+8buve' ).
+    lo_buf->add( '7XXvvfeqq+ZA+ZWL6AQORy/HiICPAxJqACVgGOgW50UFnT908PhdVjvtepfx' ).
+    lo_buf->add( 'dr3iV3tO5XpT//yUseNY5lU7DpVzq3LHHiOMMlaum6DPJFNMM8Msc8yzwCJL' ).
+    lo_buf->add( 'LLPCKmusM2CDTbbYZodd9tjngEOOOOaEU87K8y+45IprbrjljnseeOSJZ154' ).
+    lo_buf->add( '5Y13Pvjki2/q8go9/h99h+7g36x2l6Ldt6HAdsP9b6pwJ5vh8NtoeoEdCexo' ).
+    lo_buf->add( 'YMcCOx5+M81EYPvh2zWTgZ0K7HRgZwI7G9i5wM4HdiGwi4FdCuxyYFcCuxrY' ).
+    lo_buf->add( 'tcCuB3YQ2I3AbgZ2K7Dbgd0J7G5g9wK7H9iDwB4G9iiwx4E9CexpYM8Cex7+' ).
+    lo_buf->add( '581FYC8DexXY68DeBPY2sHeBvQ/sQ2AfA/sU2OfAvgT2NbBvgX0P7EdgPwP7' ).
+    lo_buf->add( 'FdjvwNZB/RfMwaYceJytWnmQHFd576+P97p7unuO7p6e+9ztnp2Vdlc7p7TS' ).
+    lo_buf->add( 'aq1dSStZNusjkbAdLMoGC8sFi8EEsA1rbIwTTEqxC8qBgqiKw7gqpFQVF7gq' ).
+    lo_buf->add( 'JAjbJKRyqZwDjKGy4Q+oFIktF05hJ2E233vdM7u6gBy7M6/f6/fe967v+H3f' ).
+    lo_buf->add( 'G8HYGAgC/ZQoCBVhQlgSrhPuFu4VPis8Jfyd8APhPMQFYbwTTMEe6PrUJ9Rr' ).
+    lo_buf->add( 'd1sloC61wCVpbx56ZQgsqPnt7l7w9kIJvNluZwpojdB6p069EhTBAtqbB+zn' ).
+    lo_buf->add( 'OqRe8wMlpNj+hRSnACnylr1OCVrzYkR1GjhVN4m0qGsj3W46JDuO47VwCKSE' ).
+    lo_buf->add( 'xQ7SnU1jyzLrWbfENM6sx9722n6NOGks2eFEomk6JA7uOO+8B1od/qjj3F2k' ).
+    lo_buf->add( 'g7XpFs4NtAyRoD3nH5AO2bZnwNyOGSjOlJqWpFhaJp+w0/UfSJLh52Z2Q28y' ).
+    lo_buf->add( '4yfEk6QoSyBLv6bnrFw6m7WyGqxnidje5R8UD9kpz4TdMzNiabocEsnmEmB7' ).
+    lo_buf->add( 'dWh0caTEuDM5lYLuNm/KluSbSUGSZMW9Sy0mnIyH9FSx8zm6U5Y1L9bv9meN' ).
+    lo_buf->add( 'nC7JoO7MLBTfelw8eqJ6sCTLn8psz+AHqjkinVQKsigpOTiupXU3fs2yJO6Q' ).
+    lo_buf->add( 'KrUxCYIpb1vynQ0ZZHJ/dwKg1CK4vHQKJ+/7uR0i2HEo7KeGWbZAelcWrBTs' ).
+    lo_buf->add( 'Xzk4D3HzVFMHIv+X7aeeIwZMlhvbDPXwr0joBxOs3WHTgpmlClJLJsQcklOU' ).
+    lo_buf->add( 'wX8qijwBM0hx7NrtBt03Mb2oyADiwav2HJBF7DQlvzVhwcmn7hJj1rtk6Qdp' ).
+    lo_buf->add( 'z8N1eoPP4NAS+Q6f1BPYRW7MSYrj3dsWpUPNQJqSxI9ta4ChCnkB/2AD/kyQ' ).
+    lo_buf->add( 'BCrEhLhgCx6+LQt1IRAmhWmhJfSEOWGvsCgcFK4W3iTcIBwVbhZuFU4I7xY+' ).
+    lo_buf->add( 'iH095Ebq9eyWWw+ib+8KeSUqe9GTfemWfHC5p0OYYCEXDzPBMAOTaddd9NLu' ).
+    lo_buf->add( 'G8Viq9lsVqtH0um5mZm6511VKk0Ui365PPjTmZlitVquVs163c3n1zwvXS7v' ).
+    lo_buf->add( 'HhvzC4WnX3zx9z/+8ZdXV1/4xjfuzVQ9r5p5Ar+YuzYswX1Vo6bWYtXByxkv' ).
+    lo_buf->add( 'k83sybC/OcxlMrP4jOF3PjOD6R6s343vF7LZ7EqS9c3EE4yS93ZW8jy2zSLf' ).
+    lo_buf->add( '69fhdcEQmoJgt+dhtgQOl/O9qBfSczDb3QNeenYvdNvT4NfiQJwypGfVxbsf' ).
+    lo_buf->add( 'vnuRJ6eWLT2hW8uoLGKUfpQ6+MWcC8Ji1GLxbv/I13TL0r92hNU49CGKHwez' ).
+    lo_buf->add( 'OLzE53AWnseTLuPpCnaVjdn269UaYQLu/ZJyAk5TTaOD4yy9Qh7u02iDlTA5' ).
+    lo_buf->add( 'fdksshzqXFjCLcGtgXqv609CDXUPwU2gJN2a7dldHxrvaUqWcUqzoAJW7Den' ).
+    lo_buf->add( 'sGDRM6jbjn8kZhva+VjiWSNlwIyR4cviyQNI0xGELFNWuJEept1OMlyApavk' ).
+    lo_buf->add( '058mqm4VnMG6U4Bzg2Xdku+6S7Z0eMYpFML9EQURUBriQhbpoXacBLc1Xsfp' ).
+    lo_buf->add( 'iS2Kx9TiWwKDlpJNfOKVwaufSGSVWfGV8wUHTiPNg0/EU2fPpuJP0Mp5JOmc' ).
+    lo_buf->add( 'F4b7LgqwjvLF5EoYdwiumGnXEcV6r95p830oov7FpMqLnRYsaBT39WzRhtN2' ).
+    lo_buf->add( '8eyplaKNzxW7KArFz6+tnWGbOnPKLhbtU6dn2GOmaK9gdQWH3MA/EXBPFoRD' ).
+    lo_buf->add( '0aiuQz00F7VpIJsD1gLKxGovsCkx+ZqDTsDErAytHgqbg3YBbYBUQxPVak8h' ).
+    lo_buf->add( 'RcfsWXs0O6d3Gy2qZBTaanT1nK3tsXqmY5v9aV73I/5uum/aG6V2ab3U/icz' ).
+    lo_buf->add( 'lagUd7O3vcprCqXKa5Uea7q7WEmk8vbcFK/ir6bmbLCxG36G54t7+A12vr2A' ).
+    lo_buf->add( 'TZZNr8eStEOB1P7wSUrHqauunlddzNDBizR96Es0TcdU9k4dw+zge+qIV/4Y' ).
+    lo_buf->add( 'PrpJax4YrTSjhXxY+9tnKbZ26Gc+g0ma0mep8+CzPAvsHfDKZzdpjcNLjJbN' ).
+    lo_buf->add( 'p1OCOHIe42fcZb9dv0xHSF46wEW0xinrzpRD4HfDxaYdKF6G2CtXphWt0fbY' ).
+    lo_buf->add( 'sixAZU18NidG79VLu8H9l12ktLHB5UJA3ZUVakgXeQB5wSnB7DyMb1Vl47Pp' ).
+    lo_buf->add( 'UEPDuf6td9/a58lgZv89j96znycgNPr9lX4fhJ1Rbf/WnQeiyv33fInVrfQv' ).
+    lo_buf->add( 'HtP/RWP2utGxIfe2rzTu103jVCx2ysheYeA/ouoxmsOvZZ2xRuca6mthc2Cc' ).
+    lo_buf->add( 'xFZlC69vKudIx4sPwD+jjLfDXgz7udgVBWoKOsxwMXyGwjSPJT/oYlKv0Snw' ).
+    lo_buf->add( 'QkDW9kGYPDzZ7Ab7gkczlenFqXL26fpcbdc20m8UM+5hlei6iUp2HVup8cPT' ).
+    lo_buf->add( '2O59ajNfnZ6u5pvq+2pz9akDWjLV6CfGtv0ba2nqQ9l5APVPAQujMbdMD3UQ' ).
+    lo_buf->add( 'n5CYi8Y5Gk0CVtnoUIxIbo7KRxI218xoz/4S6hTV3VDx1fyIp8kVxvyTq1Cv' ).
+    lo_buf->add( 'Ue2qmErvlC35TqpeaRbtVaYDVx1sh82Q3WWm92AN9XiPa77rGfcg5EVl6yGc' ).
+    lo_buf->add( 'Jfy/w6cUvnTZPHH72ZEgxu32Wt0e+5/f5Gc7hB0OsUccvja9b7qSAzcTHytY' ).
+    lo_buf->add( 'XiJbxnI5yx8FT3HsWBYm3brtQqY0OIdTtHCW4ePF8AGr0bllEJjin0xP0eFZ' ).
+    lo_buf->add( '0m9H2eyEpuoI6GSie7mm2ryT9bS0wVr4RPPAnxHGQKn5B1x3Rqii1DPVbjEz' ).
+    lo_buf->add( 'zhe3B5Ucro+dw3AJd5p2pdms2Dm7igjKNjXTTJqmKMSt+2P9A339fiuRsO7X' ).
+    lo_buf->add( 'MRu730z8BM0tfnB/2TjwTRxHFeYRGa7gWIx3GQ/3GHsP0cxWlufGh3tA3DXp' ).
+    lo_buf->add( 'he5F1MIbdpeGrskKghjHsm7KpW3ztGmnc7iruXS/MRPlZhp9njsXtnsnS1Ad' ).
+    lo_buf->add( 'PBE+M5mGFpi2bQZaI8N2kZUb/YObpYP9RlS3M+wyeCakhPuocLvJcEAgzAjL' ).
+    lo_buf->add( '6BPehBzEPKTWLEu3roKZUBcHjtTqPNDhCrwLVru5FaMlKsNFwyxRE8jz0dL8' ).
+    lo_buf->add( 'XEI1LWVFVVcU67lwdmpUFz5K0WqXwynDQDJoA2Xhyc31PZnzG9QgorKManxZ' ).
+    lo_buf->add( 'Ea8Lm+79m80mm9nBelhrhXQjzLLxc3FNlFD/lXAXBEBXVSIl6DJw5jFoStkq' ).
+    lo_buf->add( 'hmhV2QSs7EWv24bfMj15TTJyPF3UtJtuYmZ9VdNW9dzgeX2YtVkFbEiGOVgw' ).
+    lo_buf->add( 'PXSL4KzpvRer3/xmVrkaNtSijB2+j/D0K7AR8t940A1QXAMfEVscOJcHPmUq' ).
+    lo_buf->add( 'iNDA5xKPxp14+MpjPvFe4FLhpbETuvY9L80l3qdDMYcfNwlpot+a9CVVbuZr' ).
+    lo_buf->add( 'itzryUot35RVyU+iPF5cr3R5/aQU1v8Et3bf9PTz2Xo9K6pyZ0ISxaxn7JAp' ).
+    lo_buf->add( 'GAZQeYfhZUVRmujIqnhxG4WwNkThbUBmbVKM2L7pCMN/E5efRC9tG66cxRSq' ).
+    lo_buf->add( 'yGVJBtuSiCdtFC3iJkNk2UminCHGYTC204YFSx+cZ/7BctX78pdZBtChOKFb' ).
+    lo_buf->add( 'H9hHdXJ8ocFfrerW4LteFY6dwOan+CvVmthHjxN9C55F+fCE7UI30q5F3P1a' ).
+    lo_buf->add( 'yAGMKZAfxNBraEVexCRwSKOMFChTPIfYGa/h0a6xoz20nkMXGdZY+rYpu5Pa' ).
+    lo_buf->add( 'DnrE4+tMnH96mLVa01gPWzt8jZ+rsKaYbLft7f2IfcP5XYV7ZApFYRfzUxEf' ).
+    lo_buf->add( 'iMTfK3ZncS9GnMrmKbnVJPMVutxJGG4bmy+2gsdvkqSXbtFN0F+S1C/uMCqx' ).
+    lo_buf->add( 'MUm6CY94LHZ2cPZHitQgRB38kEF9OO4U4gr63l9h9S/pYOq3vCQ5O2LYRcU+' ).
+    lo_buf->add( '2KUyePntsCBNKHF0QU6zTp9TCWlII9/sdXgD5c0VxjEfgpsQ6NAhPAi8ULd2' ).
+    lo_buf->add( 'eiF23wpAXrfzeT+f36tSZUahmC4odCtYuYfV+vkvPiJTKj9CKOVnufFz3KtF' ).
+    lo_buf->add( 'lHMLTzNAfkpbgDuBsMqeRyGRrjSyuEsludSgksoR9bxWrWrNywy/nGC+NLqN' ).
+    lo_buf->add( 'iVgsMfjqZSYQjY+YKYejzzPUFBpoFFP8n+V2uItyzeT5AtTHYl4o2q6D4jzP' ).
+    lo_buf->add( 'PLWghp2gcufRSi5tEGKkc5Wjf88KpqKYrPAfwb5r9wU8OeXndF2hkr7/moau' ).
+    lo_buf->add( '7SjLiijB+nUlv1I2jHLFL123Nb8eRN2CfXfkfElU5JjuN9yloBwAVbhMKCP/' ).
+    lo_buf->add( 'k/nWOxD/7cHyCO8w2ZxN03ooEaF1bPu95FbZZWgocFt2Mgy8JaFClS8zHwkT' ).
+    lo_buf->add( 'Y5ihd4Tea8H5K8e60Vo7IqPwnga1wOpZck34YMnXB09zxkROw6a7jwzOQMXS' ).
+    lo_buf->add( 'TwyO41QJny/DSC7ue1NoCYvCm9Eb2sHU6NbwA5MRrj+26pR24NVtlBtu6anP' ).
+    lo_buf->add( 'fXdszPwUP3B3MDU77Duk9alqFV3RlETFXZK0S6RSUnrxRgtXwWZYcQprR46s' ).
+    lo_buf->add( 'DNZP4/w+JBPooYLNRE/WEVtTaaeEH9bx88WiqIq2JHXx0RMlpDq4kbn1xzm1' ).
+    lo_buf->add( 'Iw5f62ncGR/7fx3p0Oh54NKew7Nje5FEb6nIdwN9/4vXTOsdKVpycrzV4XqE' ).
+    lo_buf->add( 'J70ReL9764raR86x5WwI656sS8cCWZeDGaxsFArwuQummzgyuJ1Pd7A+s5aR' ).
+    lo_buf->add( 'pGMNSWqcYQ0bhdFZMd7KomfRF/YLR4Xb8KyGjBMJZjQ1ZKkL540nUKdhm1B0' ).
+    lo_buf->add( '3a0FPJsI+zJvk73xWkxDT/KY9gIPL2i0QrUZ21zR6IbANTSm9k127n285qKE' ).
+    lo_buf->add( 'ZEQfXYmMmIpZsaQ9qkMysEY1Vlwx7cE61eCcnxtwZQ9+Dumthrj4YPh40zFV' ).
+    lo_buf->add( 'zY+P51X1WMw0b9vEudJF5/VLzuqyp3LlExjG6piNTXFvl1A/CD2ZyG3zJcID' ).
+    lo_buf->add( '7KiavB5qKQJLpXxz56Fbd9/xwTt2V/Olbm2yf3Uq3rhtFyFOCv66UNnVWTrd' ).
+    lo_buf->add( 'nb9zHj/5G5tTg7/M7O/ny9mZ+xdjWuMY91l4fOM8ao+9HHMKdhh5CYPvhGsR' ).
+    lo_buf->add( 'XGYUvfHbvWGwguHOULGQoarhwRsvRDI1f3wIat5gVjP3eKOPhtc2H88xY7qi' ).
+    lo_buf->add( 'aW/B70pYhUY2Z/cbvOrB8e44fgZn8+wxDj9mzbP9RoVZYkyyrAv208+wZIXX' ).
+    lo_buf->add( '8gpMGn1Wuxr2fCkkFPmKuLOCzWLPUL/w2Nj6JFQqHh4anDvb08zHh+qLndSj' ).
+    lo_buf->add( '+OLPYa2nDRUgJoPzUOlpYRh7g50Z+qHbOD+gWHpdNJwsIWgtAkTjBO0Fh+K9' ).
+    lo_buf->add( 'gG4qN3jmeTWjNVpmJqbMJvJKtpqk0ynRLegmTcY1ZfZjqvq85mnPqeA8r6oT' ).
+    lo_buf->add( 'bSWWMWdJqpJVCsmpD2p1VzfH6L0kb7QexmbY5DnNE1Q+qVfRnhNEIY6wKtwj' ).
+    lo_buf->add( 'fFB4SPgdlFuHtPFQA8LsFkJpdJC7vl3jPiji0D0Ik5i1wzPmSbcVmkLEqt0e' ).
+    lo_buf->add( 't4PMofA7fq/rodLFc2YW0kuj0cQ2rsPNJ7+v6TFuRcMokTSqZZYgbmdkpsSA' ).
+    lo_buf->add( 'oNVEuzoFX4opklRG9SiDPqkAGjfYs3914S1HVM0wjaRhKbKMplpRIIZGXSdW' ).
+    lo_buf->add( 'LpGUzLFUwUrEDFnUtJSZMEtXlc2EkdJVANlScNsKqfGkpl79G7Xqe78rEpmY' ).
+    lo_buf->add( 'QEVSBhEBMw5lioh8QcLPe2RQWVYUFUlEvCUS+PDC6tINDyIeJnsALQZV4yrq' ).
+    lo_buf->add( 'DFmWmQ6nMQTNatpAb9jNbrezcc1KpyWqaPwPDXo6belx3bK35xydyFblRoLw' ).
+    lo_buf->add( '+sEblnb2FgZPspkQUVakcZBFficFJihsFBmVScSfAN9Dj6fLoma4gaOLsTAa' ).
+    lo_buf->add( 'x8Sr1017tdYODzePexgOngJ3I5hmIPS1mJHdV28tZb2njYrxtJddatUWMwCx' ).
+    lo_buf->add( '7YltXm17Mn7mTDy5veZtS8AfGEYmTbSVNinvdJ+KxZ5yd5ZJe0Uj6czKdMKU' ).
+    lo_buf->add( 'SKdO3MD6wheswCX1DpHMxKb+G2LF9kXxqZF3720FH6G7HcIQ5semL7g0WExm' ).
+    lo_buf->add( 's7Vs9hBVjjHsYBgsRfyGz60I852sUS07YLUZhS7wlCq3UyW0oeIDcJbfIjFE' ).
+    lo_buf->add( 'cSu6KO0uCnbaHcIcSFaTylRodErserPFsds0ePXxaFpszsi/+N6CaZE15Peg' ).
+    lo_buf->add( '3V4Uj+72hgHqdtfPidwaDTCFBRAGd4u6oYsLMoknJO2wJiXiRL7e9qGlGrtV' ).
+    lo_buf->add( 'w1BF0cy5qqwlqG0mUjJNEEJlXTWIkSBxO3aStWkbofsxNHQbAggzBP9O0QQl' ).
+    lo_buf->add( 'quOoBDNHJ1cNVTYShjxeNOWEJcsxzVCBjywqikESBok7WdZANUb3P+J7Ub9P' ).
+    lo_buf->add( 'CDcgykbJ566qBcwZRY4KdXnAAr7dKeCIymPe9rgFocM6D6w98aPYt8fCzOEu' ).
+    lo_buf->add( 'dhkpQsWlgm0X/Hdsg5gcz8XEzJyT8d7tLWZcOQmq4uYplFW/cPjqwuBE2HJS' ).
+    lo_buf->add( '3GyZWb1My/xrhasPF8a1Mqg5V1EhKbuZRaTpuXMZUc/H5Zg4+Q6fEXvkV204' ).
+    lo_buf->add( 'ugs7y/FMldmBTjuKF9Yv9hjDoAmcykwcuP7ARGboZxXuO9Xc3YTK8sSBCfws' ).
+    lo_buf->add( 'F5yzrAqT5VKzWRrGwriP6vAxtlx7bHpVocCEwgOnGx9mJuxDvaVhgPjcJuyH' ).
+    lo_buf->add( 'maXeh5i9+3Ajih3/xaYzsekTPwDfQv4voGcuQPUCQOLjKmng1jstr9dyvaCF' ).
+    lo_buf->add( 'cK0lXv/z76PXZItjmA5ent8zP4/fPY/cggl8K28PXmC1MGXnBy+8/8iR979w' ).
+    lo_buf->add( 'zTUvSHe94x0Cj8FxjMJ88IowK8yxO0UuFrhrTMRoFASYg1HE0mtF/kgIG9Hc' ).
+    lo_buf->add( '9NiEmN+xVvUesfTr1FKtpLJQkX6iEvrdz56wdB4weMS6G91/uo/Csldd1q14' ).
+    lo_buf->add( 'Mhm39MEZ3YL3h37369/mkYIZHk/wyXFsO9RVDLtS3JVJzPMjLYJXHfpCPALb' ).
+    lo_buf->add( '6jAN2grPPeiEAQUQEI3MDPjlYuJQb6F3KIHZn+FLWF1lOGM1waFlZdex2G23' ).
+    lo_buf->add( 'xY7tqvBiIqy7QE/uRtR8oU8d1KKoUBj6YSoRbSfKFN3qo4X+J2PQkQ++VSO+' ).
+    lo_buf->add( '2ijmXUmU65IuJTQrlSxqJClm9RRV+ugEK1YuZte69dA13qpxb0vGK7Im5dAI' ).
+    lo_buf->add( '2VS3rZiq6GDF7JzMNCqoRFYThlspTOdfD73mLXcSb7C7W9TjXq8bYkOO1ffi' ).
+    lo_buf->add( 'sddDXsZtjC6z+E9B+IpB2HGsNkbxpPSHdYs2vbnK9muntl8zVd7p4eQb6Gf9' ).
+    lo_buf->add( '+vRieKkxVh2jvJnl0Kab2X7tzddsd1000w0pJpVq0XWHoEWYdR15nkWcdwi7' ).
+    lo_buf->add( '0Iu8QbhFeBvnf25wmAFgcwyG21cfZrz/hxawPlhghw1nMd0Tsuzh8PH2/0UN' ).
+    lo_buf->add( 'HLdNXofJsZCrI97+H74f3l/h3tSFg8JJ1PjVC+93I84P2SzSd8HmlWx1qAlH' ).
+    lo_buf->add( 'bVqXtLmUTtQGzg/OcElY4c4Wz8KW/IDfGsPKZptzPHvuwuxaggteKFOb2dP/' ).
+    lo_buf->add( 'o9ccmw82NuBZ1AFfYZFaHmBgtixgYVdmvqZh9K7HSj6Ji53eMHYwWu8ocueG' ).
+    lo_buf->add( 'bVmQIRgGH3jIgdlJj176LpLzvaI7Av6X/uSiE7bleCScFzyDHEcRHMbIyvLy' ).
+    lo_buf->add( 'ColhlqKRJpKkSqbS0FFZxPGtu7xLUWKKKWdx1UTLYs6Q5V0H04AogBJRC4iJ' ).
+    lo_buf->add( 'PSTyi8lpYkgufXAX4omt5JSYLM8tc3JIAMkhrJCkz3qaGKM4AKSbTZd1pjFR' ).
+    lo_buf->add( '82SDWEjSq0cDXNe8cbdssRnlpti5TGX5ZJW5G5vXhdOhNQ8nZ+EkhxRFt9lM' ).
+    lo_buf->add( 'w/+dohH9NmPj5+I2UeK+Ojs3djaEH1aabTeevj8tIoYB6arHzDhod2ZFdMce' ).
+    lo_buf->add( 'fBA9LTF7pwZx87GriOfByw+5opPR7njMcAlZWiLENR67Q8s4kH7IUNXN39l8' ).
+    lo_buf->add( 'FeUuKeQQgbrOlkAUj26MbvTOpDr2w6nUGTv/Saewyj1fG858Mm+fsfF9Bx+F' ).
+    lo_buf->add( 'NnuXs0e69zicYbbdHvHmiCVHfBWxU/DT2zUtree022/XcnpaY88LyiBcoWJY' ).
+    lo_buf->add( 'ju4xRUVUEOXPcN2K0oOGKOgE1Gt5nKfDwTgw5kHQONvOLndEGPN3aRBd02y5' ).
+    lo_buf->add( '2vj3e5LT7sm1hePzJ2Nq8p5YWe/Ent5WtrN23tFEU7l6KXZYkej4obzrwvXG' ).
+    lo_buf->add( 'zTufsMc79n3GZ0Ml+d57kmrs5PzxhbWT7jR2j3Vipa+W7Vgqf3iMSsrh2NLV' ).
+    lo_buf->add( 'siVqTt7tFq+Xrt/5e3Zn3L638vDocoljF3ENj4rdr+1kUd/xeic8oE57FIdn' ).
+    lo_buf->add( 'gS0W1grTULMpw0VUh5keg1TiasK63XK2FZwBB4KJ/kp/Db8zyJ2DiSjmti18' ).
+    lo_buf->add( '7j617fbTdznYfoYHFrBDo99vsC9XWKth3C38nFu9ffO+Qxjdd7hhqCX61Uz4' ).
+    lo_buf->add( '2wwUZGU4V26t6pH12rznu/TCY/CdNb/tc4eDB8LgtyND9PhPL73veIo127zy' ).
+    lo_buf->add( 'ODHc0DB29BHEgnP8F6wfwP3sBmHUPLwMC3wGathVGMM8/CKMB9jDazAWEggv' ).
+    lo_buf->add( 'wXisnTKXqySS8a3w2KsFdcoj7vznKB3uqAR1XHS9FjrBaKR7fke8TZJzCugZ' ).
+    lo_buf->add( 'Wcmi21etEieZU2RPByUry1ki6p6s5IY1WUXOYM2jTgGKDfwOvl+fq9XmDrDk' ).
+    lo_buf->add( 'X0VJpLqeNAqGrKN0G7osxZL1I/Xk2PwYcwPihvhx141LpJKVJcuiJQKUoktE' ).
+    lo_buf->add( 'rbgoZytEil++1pJ4rYFDFqHQKP5uNCAmP5RkYpYDM0sVVaY5U4NEAkdrOgWN' ).
+    lo_buf->add( 'KOz3VNxvAcSTNXbnvXV/LtoKxq1TsL65nPu3Tt0pjM2DsDluZThMwWliZuQv' ).
+    lo_buf->add( 'Auc5FisLr9ZgCE17TM+g4Cs9j8JRxhz64F8K/QYJCuBprDz4x8dbx+FnjH80' ).
+    lo_buf->add( 'rGoojT5W6ax8FGuQ+n8DjoRJEQAAAHicY2BkYGAA4r+lycXx/DZfGbiZGEDg' ).
+    lo_buf->add( 'idCiqTD6/9//f9mnMbECuRwMYGkAXp8M93icY2BkYGBiAAH2qf///v/NPo2B' ).
+    lo_buf->add( 'kQEVOAEAdO8FdgAAeJxlj9ERgDAIQ6E/rtVRHIUl3IchHMQFbKS0PVA/3nE0' ).
+    lo_buf->add( 'QFIiou1AK1Y7rEZFYxn9AAhtout9aEUCFoDONCNx22frqrg77DsfNPsCfKU8' ).
+    lo_buf->add( 'y0ej92y/zLan9reZl/d3niKuu8cDcFI4PQAAAAAAAX4CNAJ2AroC5AMGAzID' ).
+    lo_buf->add( 'bgPUA/oEIARGBGwEkgTMBQwFJgVyBaAF6gZmBpoHCgeMB9wIWAiaCOoJRAmA' ).
+    lo_buf->add( 'CcAKJAp8CwILUgvaDAoMRAy2DOQNLA4GDloOpA80D7oP7BAkEFwQsBDuEVYR' ).
+    lo_buf->add( 'nhIsErITshPoFBQUThS6FRIVYhYWFkwWfgAAeJxjYGRgYHBiFGCQZgABJiDm' ).
+    lo_buf->add( 'AkIGhv9gPgMAE1cBhQB4nGWNS27CMBRFb/j0A1KLVKkd1qMOqAifIQuAOQNm' ).
+    lo_buf->add( 'HYTghKAkjhyDxKwr6BK6hK6i6gq6oF7cxwRsye+8865tAD38IMBxBbjx53E1' ).
+    lo_buf->add( 'cM3un5uke+EW+Um4jS6eha/o+8IdvGIi3MUD3vhC0Lql6aESbuAO78JN+g/h' ).
+    lo_buf->add( 'FvlTuI1HfAlf0X8Ld7DEr3AXL0E/SgdZbMp6odNdHtlTe6pLbevMlGocjk5q' ).
+    lo_buf->add( 'rkttI6fXanVQ9T6dOJeoxJpCzUzpdJ4bVVmz1bELN85V0+EwER/GpkCEFANk' ).
+    lo_buf->add( 'iGFQosYCmmaHnBN7MT3vl0xb1sz3CmOEGF2k5kyVPhnBsa6ZXOHAs8ae2Qmt' ).
+    lo_buf->add( 'Q8I+YcagIM383WM65zY0lZ9taWL6EBt/q8IUQ+7kLB/634s/3IhcMHicbVJn' ).
+    lo_buf->add( 'e9owGOQSEzAzgYzuvVt375U2/SWyLRs9CMvVgNBfX1kSNB/qD9bdya/vvVdq' ).
+    lo_buf->add( '7bT80279/znDDnYRoY09dNBFjB76GGCIEcbYxwEmmOIQRzjGCS7hMq7gKq7h' ).
+    lo_buf->add( 'Om7gJm7hNu7gLu7hPh7gIR7hMZ7gKZ4hwXO8wEu8wmu8wVu8w3t8wEd8wmd8' ).
+    lo_buf->add( 'wVd8w3ec4gd+4gy/Wh2SkrpkutusnFV6TKQUqyRjMuM0MXWUEqmiVHA9SoWY' ).
+    lo_buf->add( 'L4icJ0pwlu+m4jxOJaNFRhSNU1N6vZ3NaDYf2PdSiirJxaraEk4LPdwQycqZ' ).
+    lo_buf->add( '7m2YqSfBMxc6kbQ0nMhpkGpO1httEDRnNsi4MHmSicWC6b4nbmPfY1NzQfKE' ).
+    lo_buf->add( 'cLspcpqkklTZzGNfNHa4EJtYJ47XhnNr+NtQpb3ec7pPnonS0nrt6aiJ6Gz8' ).
+    lo_buf->add( 'hzRnoWZCzzNOFkQzG9C3fXhR0pKRquQ0puvw627BbDTbbuxA49lziC1ISacO' ).
+    lo_buf->add( '/mF1TeVmHFGj2TLpyqKCi9VeIXhOZccea6Pt2XVm0uGMErmd7AGrCpFcHOWI' ).
+    lo_buf->add( '216MdQkx7GUII4m4yObHtoGKFWtWlUnJiVKh4eZCNAPo10TpUBvV3JRHbnj/' ).
+    lo_buf->add( 'kgcXSXPRdBXOT1G5tGEciZV9UamSWawqsSo4mdNIaSJjTcLl6mu2oGqDheBb' ).
+    lo_buf->add( 'LE0W2h2EQ/d+xjrYOYb6nqMeLhnhHrZafwFnhCXLAAA=' ).
+
     li_asset_man->register_asset(
       iv_url       = 'font/ag-icons.woff'
       iv_type      = 'font/woff'
@@ -42822,7 +47986,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( '<meta http-equiv="content-type" content="text/html; charset=utf-8">' ).
     html->add( '<meta http-equiv="X-UA-Compatible" content="IE=11,10,9,8" />' ).
 
-    html->add( '<title>abapGit</title>' ).
+    html->add( '<title>apm</title>' ).
 
     header_stylesheet_links( html ).
     header_script_links( html ).
@@ -43182,11 +48346,21 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     DATA(zip) = NEW cl_abap_zip( ).
 
-    LOOP AT db_entries ASSIGNING FIELD-SYMBOL(<data>).
-      DATA(filename) = to_lower( <data>-keys ) && '.json'.
+    LOOP AT db_entries INTO DATA(db_entry).
+      DATA(filename) = |{ db_entry-keys }|.
+
+      TRANSLATE filename USING '/#'.
+
+      IF filename CS 'JSON'.
+        filename = filename && '.json'.
+      ELSEIF filename CS 'README'.
+        filename = filename && '.md'.
+      ELSE.
+        filename = filename && '.txt'.
+      ENDIF.
 
       TRY.
-          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( <data>-value ).
+          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( db_entry-value ).
         CATCH zcx_abapgit_exception INTO DATA(error).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
       ENDTRY.
@@ -43195,7 +48369,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         name    = filename
         content = content ).
 
-      INSERT explain_key( <data>-keys ) INTO TABLE table_of_contents.
+      INSERT explain_key( db_entry-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
     TRY.
@@ -43284,13 +48458,14 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     LOOP AT zip->files ASSIGNING FIELD-SYMBOL(<file>) WHERE name <> c_toc_filename.
       CLEAR db_entry.
-      DATA(key) = replace(
-        val  = <file>-name
-        sub  = '.json'
-        with = '' ).
+
+      " Remove extension
+      SPLIT <file>-name AT '.' INTO db_entry-keys DATA(rest).
+
+      TRANSLATE db_entry-keys USING '#/'.
 
       " Validate DB key
-      IF /apmg/cl_apm_persist_apm=>validate_key( key ) = abap_false.
+      IF /apmg/cl_apm_persist_apm=>validate_key( db_entry-keys ) = abap_false.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
           EXPORTING
             text = 'Invalid DB entry type. This is not an apm Backup'.
@@ -43335,11 +48510,10 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     db_persist->lock( db_entry-keys ).
 
     db_entries_old = db_persist->list( ).
+
     LOOP AT db_entries_old INTO db_entry.
       db_persist->delete( db_entry-keys ).
     ENDLOOP.
-
-    COMMIT WORK.
 
     LOOP AT db_entries INTO db_entry.
       db_persist->save(
@@ -43404,7 +48578,50 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     DATA(buffer) = NEW zcl_abapgit_string_buffer( ).
 
-    " @@abapmerge include zabapgit_css_page_db.w3mi.data.css > buffer->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_PAGE_DB
+****************************************************
+    buffer->add( '/*' ).
+    buffer->add( ' * PAGE DB CSS' ).
+    buffer->add( ' */' ).
+    buffer->add( '' ).
+    buffer->add( '/* LAYOUT */' ).
+    buffer->add( '' ).
+    buffer->add( '.db-list {' ).
+    buffer->add( '  padding: 0.5em;' ).
+    buffer->add( '  overflow-x: auto;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-list table { table-layout: fixed; }' ).
+    buffer->add( '.db-list table pre {' ).
+    buffer->add( '  display: inline-block;' ).
+    buffer->add( '  overflow: hidden;' ).
+    buffer->add( '  word-wrap:break-word;' ).
+    buffer->add( '  white-space: pre-wrap;' ).
+    buffer->add( '  margin: 0px;' ).
+    buffer->add( '  width: 30em;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-list table th {' ).
+    buffer->add( '  text-align: left;' ).
+    buffer->add( '  padding: 0.5em;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-list table thead tr { border-bottom: 1px solid; }' ).
+    buffer->add( '.db-list table td {' ).
+    buffer->add( '  padding: 4px 0.5em;' ).
+    buffer->add( '  vertical-align: middle;' ).
+    buffer->add( '  word-break: break-all;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-list table td.data { font-style: italic; }' ).
+    buffer->add( '' ).
+    buffer->add( '/* COLORS */' ).
+    buffer->add( '' ).
+    buffer->add( '.db-list { background-color: var(--theme-table-background-color); }' ).
+    buffer->add( '.db-list table td      { color: var(--theme-primary-font-color); }' ).
+    buffer->add( '.db-list table td.data { color: var(--theme-greyscale-dark); }' ).
+    buffer->add( '.db-list table tbody tr:hover td  { background-color: rgba(0, 0, 0, 0.075); }' ).
+    buffer->add( '.db-list table tbody tr:active td { background-color: #f4f4f4; } /* Needed? */' ).
+    buffer->add( '.db-list table th { color: var(--theme-link-color); }' ).
+    buffer->add( '.db-list table thead tr { border-color: var(--theme-table-border-color); }' ).
+
     gui_services( )->register_page_asset(
       iv_url       = c_css_url
       iv_type      = 'text/css'
@@ -43943,7 +49160,75 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
 
     DATA(buffer) = NEW zcl_abapgit_string_buffer( ).
 
-    " @@abapmerge include zabapgit_css_page_db_entry.w3mi.data.css > buffer->add( '$$' ).
+****************************************************
+* abapmerge Pragma - ZABAPGIT_CSS_PAGE_DB_ENTRY
+****************************************************
+    buffer->add( '/*' ).
+    buffer->add( ' * PAGE DB ENTRY CSS' ).
+    buffer->add( ' */' ).
+    buffer->add( '' ).
+    buffer->add( '/* LAYOUT */' ).
+    buffer->add( '' ).
+    buffer->add( '.db-entry {' ).
+    buffer->add( '  padding: 0.5em;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry pre {' ).
+    buffer->add( '  display: block;' ).
+    buffer->add( '  font-size: 10pt;' ).
+    buffer->add( '  overflow: hidden;' ).
+    buffer->add( '  word-wrap:break-word;' ).
+    buffer->add( '  white-space: pre-wrap;' ).
+    buffer->add( '  border: 1px  solid;' ).
+    buffer->add( '  border-radius: 3px;' ).
+    buffer->add( '  padding: 0.5em;' ).
+    buffer->add( '  margin: 0.5em 0em;' ).
+    buffer->add( '  width: 98%;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry textarea {' ).
+    buffer->add( '  margin: 0.5em 0em;' ).
+    buffer->add( '  width: 98%;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry .toolbar {' ).
+    buffer->add( '  padding-left: 0.5em;' ).
+    buffer->add( '  padding-right: 0.5em;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dl.entry-tag div {' ).
+    buffer->add( '  display: inline-block;' ).
+    buffer->add( '  border: 1px solid;' ).
+    buffer->add( '  border-radius: 3px;' ).
+    buffer->add( '  margin-right: 0.5em;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dl.entry-tag div:last-child {' ).
+    buffer->add( '  margin-right: 0px;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dt, .db-entry dd {' ).
+    buffer->add( '  display: inline-block;' ).
+    buffer->add( '  margin-left: 0px;' ).
+    buffer->add( '  padding: 2px 5px;' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dt::after { content: ":" }' ).
+    buffer->add( '' ).
+    buffer->add( '/* COLORS */' ).
+    buffer->add( '' ).
+    buffer->add( '.db-entry {' ).
+    buffer->add( '  background-color: var(--theme-container-background-color);' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry pre {' ).
+    buffer->add( '  background-color: #f4f4f4;' ).
+    buffer->add( '  border-color: var(--theme-container-border-color);' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry textarea {' ).
+    buffer->add( '  background-color: var(--theme-table-background-color);' ).
+    buffer->add( '  border-color: var(--theme-container-border-color);' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dl.entry-tag div {' ).
+    buffer->add( '  border-color: hsl(206, 20%, 75%);' ).
+    buffer->add( '  background-color: hsl(206, 20%, 90%);' ).
+    buffer->add( '}' ).
+    buffer->add( '.db-entry dt {' ).
+    buffer->add( '  background-color: hsl(206, 20%, 75%);' ).
+    buffer->add( '}' ).
+
     gui_services( )->register_page_asset(
       iv_url       = c_css_url
       iv_type      = 'text/css'
@@ -44454,9 +49739,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_act      = /apmg/if_apm_gui_router=>c_action-apm_init
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
-      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_install }{ c_dummy_key }|
-      iv_class    = c_action_class
-      iv_li_class = c_action_class
+      iv_act      = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'upload-solid' ) && ' Publish'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
@@ -44465,8 +49748,6 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
       io_sub      = commands
-      iv_class    = c_action_class
-      iv_li_class = c_action_class
     )->add(
       iv_txt      = /apmg/cl_apm_gui_buttons=>settings( )
       io_sub      = /apmg/cl_apm_gui_menus=>settings( )
@@ -44732,8 +50013,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     TRY.
         settings = /apmg/cl_apm_settings=>factory( )->get( ).
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-        " Settings don't exist (yet)
+      CATCH /apmg/cx_apm_error.
+        " Settings didn't exist, so save the defaults
+        /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
     ENDTRY.
 
   ENDMETHOD.
@@ -49853,37 +55135,6 @@ ENDCLASS.
 
 CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
 
-  METHOD attach_payload.
-
-    DATA(payload_type) = cl_abap_typedescr=>describe_by_data( payload ).
-
-    CASE payload_type->type_kind.
-      WHEN cl_abap_typedescr=>typekind_xstring.
-        request->set_data( payload ).
-      WHEN cl_abap_typedescr=>typekind_string.
-        request->set_cdata( payload ).
-      WHEN cl_abap_typedescr=>typekind_char.
-        request->set_cdata( |{ payload }| ).
-      WHEN OTHERS.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |Unexpected payload type { payload_type->absolute_name }|.
-    ENDCASE.
-
-  ENDMETHOD.
-
-  METHOD constructor.
-
-    global_headers = NEW #( ).
-
-  ENDMETHOD.
-
-  METHOD create.
-
-    result = NEW /apmg/cl_apm_http_agent( ).
-
-  ENDMETHOD.
-
   METHOD /apmg/if_apm_http_agent~global_headers.
 
     result = global_headers.
@@ -49897,13 +55148,28 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
       status_code TYPE i,
       message     TYPE string.
 
-    " TODO: Add proxy support
     cl_http_client=>create_by_url(
       EXPORTING
-        url    = url
-        ssl_id = ssl_id
+        url                = url
+        ssl_id             = ssl_id
+        proxy_host         = proxy_host
+        proxy_service      = proxy_service
+        proxy_user         = proxy_user
+        proxy_passwd       = proxy_passwd
       IMPORTING
-        client = http_client ).
+        client             = http_client
+      EXCEPTIONS
+        argument_not_found = 1
+        plugin_not_active  = 2
+        internal_error     = 3
+        pse_not_found      = 4
+        pse_not_distrib    = 5
+        pse_errors         = 6
+        OTHERS             = 7 ).
+
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+    ENDIF.
 
     http_client->request->set_version( if_http_request=>co_protocol_version_1_1 ).
     http_client->request->set_method( method ).
@@ -49966,6 +55232,46 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     ENDIF.
 
     result = lcl_http_response=>create( http_client ).
+
+  ENDMETHOD.
+
+  METHOD attach_payload.
+
+    DATA(payload_type) = cl_abap_typedescr=>describe_by_data( payload ).
+
+    CASE payload_type->type_kind.
+      WHEN cl_abap_typedescr=>typekind_xstring.
+        request->set_data( payload ).
+      WHEN cl_abap_typedescr=>typekind_string.
+        request->set_cdata( payload ).
+      WHEN cl_abap_typedescr=>typekind_char.
+        request->set_cdata( |{ payload }| ).
+      WHEN OTHERS.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Unexpected payload type { payload_type->absolute_name }|.
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD constructor.
+
+    me->proxy_host    = proxy_host.
+    me->proxy_service = proxy_service.
+    me->proxy_user    = proxy_user.
+    me->proxy_passwd  = proxy_passwd.
+
+    global_headers = NEW #( ).
+
+  ENDMETHOD.
+
+  METHOD create.
+
+    result = NEW /apmg/cl_apm_http_agent(
+      proxy_host    = proxy_host
+      proxy_service = proxy_service
+      proxy_user    = proxy_user
+      proxy_passwd  = proxy_passwd ).
 
   ENDMETHOD.
 ENDCLASS.
@@ -50063,7 +55369,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             IF <package>-target_package(1) = '$'.
               package-dlvunit = 'LOCAL'.
             ENDIF.
-            IF is_dryrun = abap_false.
+            IF is_dry_run = abap_false.
               target->create( package ).
             ENDIF.
           ENDIF.
@@ -50315,7 +55621,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
       " XXX: Switch for apm self-update
       " Some modules are used by the importer and don't support self-update
-      " If these items are changed, it would dump, so we skip them
+      " If these items are changed, it would dump, so we skip them (requires manual update)
       IF new_item-package CP '/APMG/APM*' AND
         ( old_item-obj_name CP '/APMG/CX_ERROR*' OR
           old_item-obj_name CP 'Z++_AJSON*' OR
@@ -50342,7 +55648,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       ENDTRY.
 
       TRY.
-          IF is_dryrun = abap_false.
+          IF is_dry_run = abap_false.
             zcl_abapgit_factory=>get_cts_api( )->insert_transport_object(
               iv_object   = new_item-obj_type
               iv_obj_name = new_item-obj_name
@@ -50365,11 +55671,11 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             new_package   = new_item-package
             language      = new_item-language
             map           = map
-            is_dryrun     = is_dryrun
+            is_dry_run    = is_dry_run
             is_production = is_production ).
 
           IF is_logging = abap_true.
-            IF is_dryrun = abap_true.
+            IF is_dry_run = abap_true.
               WRITE 'Dry run' COLOR COL_TOTAL.
             ELSE.
               WRITE 'Success' COLOR COL_POSITIVE.
@@ -50406,6 +55712,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD run.
 
+    /apmg/cl_apm_importer=>is_logging = is_logging.
+
     " 1. Get all programs that contain IMPORT statements
     DATA(programs) = get_programs( package ).
 
@@ -50430,14 +55738,14 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     " 6. Create packages (if necessary)
     create_packages(
-      packages  = packages
-      is_dryrun = is_dryrun ).
+      packages   = packages
+      is_dry_run = is_dry_run ).
 
     " 7. Import the tarballs using the mapping
     import_objects(
       map           = map
       transport     = transport
-      is_dryrun     = is_dryrun
+      is_dry_run    = is_dry_run
       is_production = is_production ).
 
     " 8. Save packages to apm
@@ -50448,6 +55756,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD save_packages.
+
+    " FUTURE: Avoid saving bundled deps individually but store it with the parent package
 
     " Add or update dependencies
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
@@ -55654,7 +60964,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
 
   METHOD /apmg/if_apm_object~import.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old class
@@ -55687,7 +60997,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_dryrun IS INITIAL AND class_code <> orig_code.
+        IF is_dry_run IS INITIAL AND class_code <> orig_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
@@ -55738,7 +61048,7 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
             is_pretty      = is_pretty ).
         ENDIF.
 
-        IF is_dryrun IS INITIAL.
+        IF is_dry_run IS INITIAL.
           zif_abapgit_oo_object_fnc~generate_locals(
             iv_package               = new_package
             iv_version               = class_metadata-unicode
@@ -56093,7 +61403,7 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
 
   METHOD /apmg/if_apm_object~import.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old interface
@@ -56123,7 +61433,7 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_dryrun IS INITIAL AND interface_code <> orig_interface_code.
+        IF is_dry_run IS INITIAL AND interface_code <> orig_interface_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
@@ -56158,7 +61468,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
     DATA program_texts TYPE textpool_table.
 
-    DATA(is_pretty) = xsdbool( is_dryrun = abap_false ).
+    DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
         " Get old program
@@ -56179,7 +61489,7 @@ CLASS /apmg/cl_apm_object_prog IMPLEMENTATION.
 
         READ TEXTPOOL program_name INTO program_texts.
 
-        IF is_dryrun IS INITIAL AND program_code <> orig_program_code.
+        IF is_dry_run IS INITIAL AND program_code <> orig_program_code.
           program_dir-name = new_object.
 
           deserialize_program(
@@ -56764,7 +62074,7 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
 
         result = sha1.
 
-      CATCH cx_abap_message_digest INTO DATA(error).
+      CATCH cx_abap_message_digest.
         ASSERT 0 = 1. " open an issue
     ENDTRY.
 
@@ -56861,6 +62171,8 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
 
       INSERT result_item INTO TABLE result.
     ENDLOOP.
+
+    " XXX: Remove
 
     " Check package hierarchy to determine which packages are bundled
     LOOP AT result ASSIGNING FIELD-SYMBOL(<result_item>).
@@ -57163,6 +62475,11 @@ CLASS lcl_validate IMPLEMENTATION.
       ENDIF.
       IF NOT line_exists( manifest-dependencies[ key = value ] ).
         INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
+      ELSE.
+        DATA(range) = manifest-dependencies[ key = value ]-range.
+        IF NOT /apmg/cl_apm_semver_functions=>valid( range ).
+          INSERT |Bundle dependency { value } must be pinned to a version in dependencies| INTO TABLE result.
+        ENDIF.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-bundle_dependencies ) <> lines( values ).
@@ -57637,12 +62954,6 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD constructor.
-
-    IF registry <> 'https://playground.abappm.com'.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-        EXPORTING
-          text = 'apm only works with playground.abappm.com. Stay tuned for offical registry :-)'.
-    ENDIF.
 
     me->registry = registry.
 
@@ -62922,7 +68233,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
   METHOD /apmg/if_apm_settings~save.
 
     IF /apmg/if_apm_settings~is_valid( ) = abap_false.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid settings'.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Invalid settings: { key }|.
     ENDIF.
 
     " Save complete JSON including empty values for easy editing
@@ -62935,7 +68246,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
   METHOD /apmg/if_apm_settings~set.
 
     IF check_settings( settings ) IS NOT INITIAL.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid settings'.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Invalid settings: { key }|.
     ENDIF.
 
     me->settings = CORRESPONDING #( settings ).
@@ -62955,7 +68266,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
         ajson->to_abap( IMPORTING ev_container = settings ).
 
         IF check_settings( settings ) IS NOT INITIAL.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid settings'.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Invalid settings: { key }|.
         ENDIF.
 
         me->settings = CORRESPONDING #( settings ).
@@ -63010,6 +68321,8 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
       CATCH /apmg/cx_apm_error.
         IF name = /apmg/if_apm_settings=>c_global.
           settings = get_default( ).
+        ELSE.
+          settings = initialize_personal_settings( name ).
         ENDIF.
     ENDTRY.
 
@@ -63055,21 +68368,22 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
 
     DATA(global) = factory( /apmg/if_apm_settings=>c_global ).
 
-    " Check if global settings exist already
-    TRY.
-        DATA(settings) = global->load( )->get( ).
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-    ENDTRY.
-
-    IF settings IS NOT INITIAL.
-      RETURN.
-    ENDIF.
-
-    global->set( get_default( ) ).
-
     " Save defaults to global settings
     db_persist->save(
       key   = get_setting_key( /apmg/if_apm_settings=>c_global )
+      value = global->get_json( ) ).
+
+  ENDMETHOD.
+
+  METHOD initialize_personal_settings.
+
+    DATA(global) = factory( /apmg/if_apm_settings=>c_global ).
+
+    result = global->load( )->get( ).
+
+    " Save global defaults to personal settings
+    db_persist->save(
+      key   = get_setting_key( name )
       value = global->get_json( ) ).
 
   ENDMETHOD.
@@ -65309,6 +70623,25 @@ CLASS ZCL_ABAPGIT_AFF_REGISTRY IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS zcl_abapgit_aff_factory IMPLEMENTATION.
+
+  METHOD get_registry.
+    IF gi_registry IS NOT BOUND.
+      CREATE OBJECT gi_registry TYPE zcl_abapgit_aff_registry.
+    ENDIF.
+    ri_registry = gi_registry.
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS zcl_abapgit_aff_injector IMPLEMENTATION.
+
+  METHOD set_registry.
+    zcl_abapgit_aff_factory=>gi_registry = ii_registry.
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS lcl_in DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS convert
@@ -67190,6 +72523,7 @@ CLASS zcl_abapgit_cts_api IMPLEMENTATION.
 
 * move to output structure
     rs_request-trstatus = ls_request-h-trstatus.
+    rs_request-as4date  = ls_request-h-as4date.
     LOOP AT ls_request-keys INTO ls_key.
       APPEND INITIAL LINE TO rs_request-keys ASSIGNING <ls_key>.
       MOVE-CORRESPONDING ls_key TO <ls_key>.
@@ -67728,7 +73062,7 @@ CLASS zcl_abapgit_dependencies IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-CLASS ZCL_ABAPGIT_DOT_ABAPGIT IMPLEMENTATION.
+CLASS zcl_abapgit_dot_abapgit IMPLEMENTATION.
 
   METHOD add_ignore.
 
@@ -67888,6 +73222,13 @@ CLASS ZCL_ABAPGIT_DOT_ABAPGIT IMPLEMENTATION.
 
     " Ignore all files matching pattern in ignore list
     LOOP AT ms_data-ignore INTO lv_ignore.
+      " # needs to be escaped since it's the escape character
+      " and used as namespace separator in filenames, for example
+      lv_ignore = replace(
+        val  = lv_ignore
+        sub  = '#'
+        with = '##'
+        occ  = 0 ).
       IF lv_name CP lv_ignore.
         rv_ignored = abap_true.
         RETURN.
@@ -70331,47 +75672,6 @@ CLASS zcl_abapgit_exit IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD zif_abapgit_exit~determine_transport_request.
-
-    IF gi_exit IS NOT INITIAL.
-      TRY.
-          gi_exit->determine_transport_request(
-            EXPORTING
-              ii_repo           = ii_repo
-              iv_transport_type = iv_transport_type
-            CHANGING
-              cv_transport_request = cv_transport_request ).
-        CATCH cx_sy_ref_is_initial cx_sy_dyn_call_illegal_method ##NO_HANDLER.
-      ENDTRY.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD zif_abapgit_exit~enhance_any_toolbar.
-
-    IF gi_exit IS NOT INITIAL.
-      TRY.
-          gi_exit->enhance_any_toolbar( io_menu ).
-        CATCH cx_sy_ref_is_initial cx_sy_dyn_call_illegal_method ##NO_HANDLER.
-      ENDTRY.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD zif_abapgit_exit~enhance_repo_toolbar.
-
-    IF gi_exit IS NOT INITIAL.
-      TRY.
-          gi_exit->enhance_repo_toolbar(
-            io_menu = io_menu
-            iv_key  = iv_key
-            iv_act  = iv_act ).
-        CATCH cx_sy_ref_is_initial cx_sy_dyn_call_illegal_method ##NO_HANDLER.
-      ENDTRY.
-    ENDIF.
-
-  ENDMETHOD.
-
   METHOD zif_abapgit_exit~get_ci_tests.
 
     IF gi_exit IS NOT INITIAL.
@@ -70441,20 +75741,6 @@ CLASS zcl_abapgit_exit IMPLEMENTATION.
               ii_log     = ii_log
             CHANGING
               ct_files   = ct_files ).
-        CATCH cx_sy_ref_is_initial cx_sy_dyn_call_illegal_method ##NO_HANDLER.
-      ENDTRY.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD zif_abapgit_exit~validate_before_push.
-
-    IF gi_exit IS NOT INITIAL.
-      TRY.
-          gi_exit->validate_before_push(
-            is_comment     = is_comment
-            io_stage       = io_stage
-            ii_repo_online = ii_repo_online ).
         CATCH cx_sy_ref_is_initial cx_sy_dyn_call_illegal_method ##NO_HANDLER.
       ENDTRY.
     ENDIF.
@@ -72624,6 +77910,32 @@ CLASS zcl_abapgit_factory IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS zcl_abapgit_feature IMPLEMENTATION.
+
+  METHOD is_enabled.
+
+    DATA:
+      lv_features TYPE string,
+      lt_features TYPE string_table.
+
+    IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
+      RETURN.
+    ENDIF.
+
+    lv_features = /apmg/cl_apm_settings=>factory( )->get( )-experimental_features.
+    CONDENSE lv_features NO-GAPS.
+
+    rv_run = boolc( lv_features = abap_true ).
+
+    IF iv_feature IS NOT INITIAL.
+      SPLIT lv_features AT ',' INTO TABLE lt_features.
+      READ TABLE lt_features TRANSPORTING NO FIELDS WITH TABLE KEY table_line = iv_feature.
+      rv_run = boolc( rv_run = abap_true OR sy-subrc = 0 ).
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS zcl_abapgit_field_rules IMPLEMENTATION.
 
   METHOD create.
@@ -72736,11 +78048,7 @@ CLASS ZCL_ABAPGIT_FILENAME_LOGIC IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '#' IN lv_ext WITH '/'.
 
     " Assume AFF namespace convention
-    IF go_aff_registry IS INITIAL.
-      CREATE OBJECT go_aff_registry TYPE zcl_abapgit_aff_registry.
-    ENDIF.
-
-    IF go_aff_registry->is_supported_object_type( |{ lv_type }| ) = abap_true.
+    IF zcl_abapgit_aff_factory=>get_registry( )->is_supported_object_type( |{ lv_type }| ) = abap_true.
       REPLACE ALL OCCURRENCES OF '(' IN lv_name WITH '/'.
       REPLACE ALL OCCURRENCES OF ')' IN lv_name WITH '/'.
     ENDIF.
@@ -72965,10 +78273,7 @@ CLASS ZCL_ABAPGIT_FILENAME_LOGIC IMPLEMENTATION.
       CONCATENATE rv_filename '.' iv_ext INTO rv_filename.
     ENDIF.
 
-    " Handle namespaces
-    CREATE OBJECT go_aff_registry TYPE zcl_abapgit_aff_registry.
-
-    IF go_aff_registry->is_supported_object_type( is_item-obj_type ) = abap_true.
+    IF zcl_abapgit_aff_factory=>get_registry( )->is_supported_object_type( is_item-obj_type ) = abap_true.
       FIND ALL OCCURRENCES OF `/` IN rv_filename MATCH COUNT lv_nb_of_slash.
       IF lv_nb_of_slash = 2.
         REPLACE FIRST OCCURRENCE OF `/` IN rv_filename WITH `(`.
@@ -73529,68 +78834,13 @@ CLASS zcl_abapgit_gui_jumper IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD zif_abapgit_gui_jumper~jump_abapgit.
-
-    DATA lt_spagpa        TYPE STANDARD TABLE OF rfc_spagpa.
-    DATA ls_spagpa        LIKE LINE OF lt_spagpa.
-    DATA lv_save_sy_langu TYPE sy-langu.
-    DATA lv_subrc         TYPE syst-subrc.
-    DATA lv_tcode         TYPE tcode.
-    DATA lv_msg           TYPE c LENGTH 200.
-
-    " https://blogs.sap.com/2017/01/13/logon-language-sy-langu-and-rfc/
-
-    lv_tcode = zcl_abapgit_services_abapgit=>get_abapgit_tcode( ).
-
-    lv_save_sy_langu = sy-langu.
-    SET LOCALE LANGUAGE iv_language.
-
-    ls_spagpa-parid  = zif_abapgit_definitions=>c_spagpa_param_repo_key.
-    ls_spagpa-parval = iv_key.
-    INSERT ls_spagpa INTO TABLE lt_spagpa.
-
-    CALL FUNCTION 'ABAP4_CALL_TRANSACTION'
-      DESTINATION 'NONE'
-      STARTING NEW TASK 'ABAPGIT'
-      EXPORTING
-        tcode                 = lv_tcode
-      TABLES
-        spagpa_tab            = lt_spagpa
-      EXCEPTIONS
-        communication_failure = 1 MESSAGE lv_msg
-        system_failure        = 2 MESSAGE lv_msg
-        resource_failure      = 3
-        OTHERS                = 4.
-
-    lv_subrc = sy-subrc.
-
-    SET LOCALE LANGUAGE lv_save_sy_langu.
-
-    CASE lv_subrc.
-      WHEN 1.
-        lv_msg = |Communication error { lv_msg }|.
-      WHEN 2.
-        lv_msg = |Language { iv_language } ({ zcl_abapgit_convert=>language_sap1_to_text( iv_language ) })|
-              && | is not installed|.
-      WHEN 3.
-        lv_msg = |{ lv_subrc }|.
-    ENDCASE.
-
-    IF lv_msg IS INITIAL.
-      MESSAGE 'Repository opened in a new window' TYPE 'S'.
-    ELSE.
-      zcx_abapgit_exception=>raise( |Error starting transaction { lv_tcode }: { lv_msg }| ).
-    ENDIF.
-
-  ENDMETHOD.
-
   METHOD zif_abapgit_gui_jumper~jump_adt.
 
     " Open object in ADT (if enabled)
 
     DATA lv_adt_jump_enabled TYPE abap_bool.
 
-    lv_adt_jump_enabled = zcl_abapgit_persist_factory=>get_settings( )->read( )->get_adt_jump_enabled( ).
+    lv_adt_jump_enabled = /apmg/cl_apm_settings=>factory( )->get( )-gui_settings-adt_jump_enabled.
 
     IF lv_adt_jump_enabled = abap_true.
       TRY.
@@ -74923,7 +80173,7 @@ CLASS zcl_abapgit_objects_activation IMPLEMENTATION.
     IF gt_objects IS NOT INITIAL.
 
       IF /apmg/cl_apm_gui_factory=>get_frontend_services( )->gui_is_available( ) = abap_true.
-        IF zcl_abapgit_persist_factory=>get_settings( )->read( )->get_activate_wo_popup( ) = abap_true.
+        IF /apmg/cl_apm_settings=>factory( )->get( )-gui_settings-activate_wo_popup = abap_true.
           lv_popup = abap_false.
         ELSE.
           lv_popup = abap_true.
@@ -76372,6 +81622,15 @@ CLASS zcl_abapgit_objects_generic IMPLEMENTATION.
     IF sy-dbcnt > 1.
       zcx_abapgit_exception=>raise( |More than one instance exists locally in primary table { lv_primary }| ).
     ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_abapgit_objects_injector IMPLEMENTATION.
+
+  METHOD set_gui_jumper.
+
+    zcl_abapgit_objects_factory=>gi_gui_jumper = ii_gui_jumper.
 
   ENDMETHOD.
 ENDCLASS.
@@ -78796,7 +84055,6 @@ CLASS zcl_abapgit_object_common_aff IMPLEMENTATION.
 
     DATA:
       lv_is_supported TYPE abap_bool,
-      li_aff_registry TYPE REF TO zif_abapgit_aff_registry,
       lo_handler      TYPE REF TO object.
 
     super->constructor(
@@ -78809,9 +84067,7 @@ CLASS zcl_abapgit_object_common_aff IMPLEMENTATION.
     TRY.
         lo_handler = get_object_handler( ).
 
-        CREATE OBJECT li_aff_registry TYPE zcl_abapgit_aff_registry.
-
-        lv_is_supported = li_aff_registry->is_supported_object_type( is_item-obj_type ).
+        lv_is_supported = zcl_abapgit_aff_factory=>get_registry( )->is_supported_object_type( is_item-obj_type ).
       CATCH cx_root.
         lv_is_supported = abap_false.
     ENDTRY.
@@ -97317,8 +102573,6 @@ CLASS zcl_abapgit_object_intf IMPLEMENTATION.
 
   METHOD constructor.
 
-    DATA li_aff_registry TYPE REF TO zif_abapgit_aff_registry.
-
     super->constructor(
       is_item        = is_item
       iv_language    = iv_language
@@ -97327,9 +102581,7 @@ CLASS zcl_abapgit_object_intf IMPLEMENTATION.
 
     mi_object_oriented_object_fct = zcl_abapgit_oo_factory=>get_by_type( ms_item-obj_type ).
 
-    CREATE OBJECT li_aff_registry TYPE zcl_abapgit_aff_registry.
-
-    mv_aff_enabled = li_aff_registry->is_supported_object_type( 'INTF' ).
+    mv_aff_enabled = zcl_abapgit_aff_factory=>get_registry( )->is_supported_object_type( 'INTF' ).
 
   ENDMETHOD.
 
@@ -105349,7 +110601,7 @@ CLASS zcl_abapgit_object_sfpi IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
+CLASS ZCL_ABAPGIT_OBJECT_SFSW IMPLEMENTATION.
 
   METHOD activate.
 
@@ -105465,7 +110717,8 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
           lv_name_32   TYPE sfw_name32,
           lv_name_80   TYPE sfw_name80,
           lt_parent_bf TYPE sfw_bf_sw_outtab,
-          lt_conflicts TYPE sfw_confl_outtab.
+          lt_conflicts TYPE sfw_confl_outtab,
+          lt_packages  TYPE sfw_devcl_outtab.
 
     IF iv_step = zif_abapgit_object=>gc_step_id-late.
       activate( ).
@@ -105483,6 +110736,8 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
                   CHANGING cg_data = lt_parent_bf ).
     io_xml->read( EXPORTING iv_name = 'CONFLICTS'
                   CHANGING cg_data = lt_conflicts ).
+    io_xml->read( EXPORTING iv_name = 'PACKAGES'
+                  CHANGING cg_data = lt_packages ).
 
     TRY.
         IF zif_abapgit_object~exists( ) = abap_true.
@@ -105503,6 +110758,7 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
 
     lo_switch->set_parent_bf( lt_parent_bf ).
     lo_switch->set_conflicts( lt_conflicts ).
+    lo_switch->set_assigned_packages( lt_packages ).
 
     set_default_package( iv_package ).
     tadir_insert( iv_package ).
@@ -105591,7 +110847,8 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
           lv_name_32   TYPE sfw_name32,
           lv_name_80   TYPE sfw_name80,
           lt_parent_bf TYPE sfw_bf_sw_outtab,
-          lt_conflicts TYPE sfw_confl_outtab.
+          lt_conflicts TYPE sfw_confl_outtab,
+          lt_packages  TYPE sfw_devcl_outtab.
 
     IF zif_abapgit_object~exists( ) = abap_false.
       RETURN.
@@ -105614,6 +110871,7 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
 
     lt_parent_bf = lo_switch->get_parent_bf( ).
     lt_conflicts = lo_switch->get_conflicts( ).
+    lt_packages  = lo_switch->get_assigned_packages( ).
 
     io_xml->add( ig_data = ls_header
                  iv_name = 'HEADER' ).
@@ -105626,6 +110884,8 @@ CLASS zcl_abapgit_object_sfsw IMPLEMENTATION.
                  iv_name = 'PARENT_BF' ).
     io_xml->add( ig_data = lt_conflicts
                  iv_name = 'CONFLICTS' ).
+    io_xml->add( ig_data = lt_packages
+                 iv_name = 'PACKAGES' ).
 
     serialize_longtexts( ii_xml         = io_xml
                          iv_longtext_id = c_longtext_id_sfsw ).
@@ -127220,7 +132480,6 @@ ENDCLASS.
 * - zcl_abapgit_objects
 * - zcl_abapgit_objects_bridge
 * - zcl_abapgit_objects_check
-* - zcl_abapgit_objects_injector
 
 SELECTION-SCREEN BEGIN OF SCREEN 1001.
 * dummy for triggering screen on Java SAP GUI
@@ -127581,12 +132840,10 @@ FORM adjust_toolbar USING pv_dynnr TYPE sy-dynnr.
 ENDFORM.
 
 **********************************************************************
+
 INITIALIZATION.
   PERFORM adjust_toolbar USING '1001'.
   lcl_password_dialog=>on_screen_init( ).
-
-START-OF-SELECTION.
-  PERFORM run.
 
 * Hide Execute button from screen
 AT SELECTION-SCREEN OUTPUT.
@@ -127605,9 +132862,12 @@ AT SELECTION-SCREEN.
     lcl_password_dialog=>on_screen_event( sscrfields-ucomm ).
   ENDIF.
 
+START-OF-SELECTION.
+  PERFORM run.
+
 **********************************************************************
 INTERFACE lif_abapmerge_marker.
-  CONSTANTS c_merge_timestamp TYPE string VALUE `2025-09-25T14:35:47Z`.
+  CONSTANTS c_merge_timestamp TYPE string VALUE `2025-10-23T22:51:36Z`.
   CONSTANTS c_abapinst_version TYPE string VALUE `1.2.0`.
 ENDINTERFACE.
 **********************************************************************
