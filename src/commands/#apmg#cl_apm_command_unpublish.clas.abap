@@ -255,6 +255,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
   METHOD update_dist_tags.
 
     " TODO
+    DATA(ver) = version ##NEEDED.
     result = packument.
 
   ENDMETHOD.
