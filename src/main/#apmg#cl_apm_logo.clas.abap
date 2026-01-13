@@ -44,10 +44,12 @@ CLASS /apmg/cl_apm_logo DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    TYPES ty_ratio TYPE p LENGTH 10 DECIMALS 2.
+
     CLASS-METHODS replace_width_height
       IMPORTING
         svg           TYPE string
-        ratio         TYPE p
+        ratio         TYPE ty_ratio
         height        TYPE i
       RETURNING
         VALUE(result) TYPE string.
@@ -61,7 +63,7 @@ CLASS /apmg/cl_apm_logo IMPLEMENTATION.
 
   METHOD replace_width_height.
 
-    DATA(width) = height * ratio.
+    DATA(width) = CONV ty_ratio( height * ratio ).
 
     result = replace(
       val  = svg
