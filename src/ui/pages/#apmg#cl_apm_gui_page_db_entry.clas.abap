@@ -133,7 +133,7 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
           key   = ii_event->form_data( )->get( 'KEYS' )
           value = ii_event->form_data( )->get( 'VALUE' ) ).
 
-        edit_mode        = abap_false.
+        edit_mode = abap_false.
         IF back_on_save = abap_true.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back_to_bookmark.
         ELSE.

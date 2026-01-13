@@ -631,7 +631,7 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).
-          DELETE FROM sotr_use WHERE concept = @<sotr_head>-concept.
+          DELETE FROM sotr_use WHERE concept = @<sotr_head>-concept ##SUBRC_OK.
 
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
@@ -679,7 +679,7 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).
-          DELETE FROM sotr_useu WHERE concept = @<sotr_head>-concept.
+          DELETE FROM sotr_useu WHERE concept = @<sotr_head>-concept ##SUBRC_OK.
 
           CALL FUNCTION 'BTFR_DELETE_SINGLE_TEXT'
             EXPORTING
