@@ -162,7 +162,7 @@ CLASS lcl_password_dialog IMPLEMENTATION.
 
   METHOD enrich_title_by_hostname.
 
-    FIND REGEX 'https?://([^/^:]*)' IN url SUBMATCHES DATA(host).
+    FIND REGEX 'https?://([^/^:]*)' IN url SUBMATCHES DATA(host) ##REGEX_POSIX.
     IF sy-subrc = 0 AND host IS NOT INITIAL.
       CLEAR sc_title.
       CONCATENATE 'Login:' host INTO sc_title IN CHARACTER MODE SEPARATED BY space.

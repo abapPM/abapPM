@@ -191,7 +191,7 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
     IF email IS INITIAL.
       result = abap_true.
     ELSE.
-      FIND REGEX c_email_regex IN email.
+      FIND REGEX c_email_regex IN email ##REGEX_POSIX.
       result = xsdbool( sy-subrc = 0 ).
     ENDIF.
 
@@ -215,7 +215,7 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
       BETWEEN /apmg/if_apm_types=>c_package_name-min_length
           AND /apmg/if_apm_types=>c_package_name-max_length.
 
-      FIND REGEX /apmg/if_apm_types=>c_package_name-regex IN name RESPECTING CASE.
+      FIND REGEX /apmg/if_apm_types=>c_package_name-regex IN name RESPECTING CASE ##REGEX_POSIX.
       result = xsdbool( sy-subrc = 0 ).
     ELSE.
       result = abap_false.
@@ -281,7 +281,7 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
     CONSTANTS c_regex TYPE string
       VALUE `^(\d{4})-(\d{2})-(\d{2})(T)(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|$)` ##NO_TEXT.
 
-    FIND REGEX c_regex IN timestamp.
+    FIND REGEX c_regex IN timestamp ##REGEX_POSIX.
     result = xsdbool( sy-subrc = 0 ).
 
   ENDMETHOD.

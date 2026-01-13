@@ -148,7 +148,7 @@ CLASS /apmg/cl_apm_code_importer IMPLEMENTATION.
 
     " Example:
     " "! @raising zcx_test_error | Exception
-    FIND REGEX '"! @raising (.*) \|' IN token SUBMATCHES result.
+    FIND REGEX '"! @raising (.*) \|' IN token SUBMATCHES result ##REGEX_POSIX.
     IF sy-subrc = 0.
       result = to_upper( result ).
     ENDIF.

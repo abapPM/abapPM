@@ -867,7 +867,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
         DATA(markup) = <line>.
       ELSE.
         " Detect code block
-        FIND REGEX '^```\s*(.*)' IN <line> SUBMATCHES DATA(codeblock).
+        FIND REGEX '^```\s*(.*)' IN <line> SUBMATCHES DATA(codeblock) ##REGEX_POSIX.
         IF sy-subrc = 0.
           code_block_language = 'markdown'. " falls back to txt
         ENDIF.

@@ -75,7 +75,7 @@ CLASS lcl_hashmap IMPLEMENTATION.
     "                       class names separated by a colon.
     IF value_type CS ':'.
       FIND REGEX '^([^\s:]+)(?::(.+))?$' IN value_type
-        SUBMATCHES me->value_type me->subsequent_hashmap_value_type.
+        SUBMATCHES me->value_type me->subsequent_hashmap_value_type ##REGEX_POSIX.
       IF sy-subrc <> 0.
         me->value_type = value_type.
       ENDIF.

@@ -306,7 +306,7 @@ CLASS /apmg/cl_apm_installer_files IMPLEMENTATION.
       DATA(file) = VALUE zif_abapgit_git_definitions=>ty_file( ).
 
       IF <file>-name CA '/'.
-        FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES file-path file-filename.
+        FIND REGEX '(.*[\\/])?([^\\/]+)' IN <file>-name SUBMATCHES file-path file-filename ##REGEX_POSIX.
         ASSERT sy-subrc = 0.
       ELSE.
         file-filename = <file>-name.
@@ -450,8 +450,7 @@ CLASS /apmg/cl_apm_installer_files IMPLEMENTATION.
   METHOD _filename.
 
     IF str CA '/'.
-      FIND REGEX '(.*/)(.*)' IN str
-        SUBMATCHES path filename.
+      FIND REGEX '(.*/)(.*)' IN str SUBMATCHES path filename ##REGEX_POSIX.
       IF sy-subrc <> 0.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Malformed path'.
       ENDIF.

@@ -78,25 +78,25 @@ CLASS /apmg/cl_apm_semver_sap IMPLEMENTATION.
   METHOD sap_release_to_semver.
 
     " 750 > 7.50.x
-    FIND REGEX '^(\d)(\d\d)\s*$' IN release SUBMATCHES DATA(ma) DATA(mi).
+    FIND REGEX '^(\d)(\d\d)\s*$' IN release SUBMATCHES DATA(ma) DATA(mi) ##REGEX_POSIX.
     IF sy-subrc <> 0.
       " 75E > 7.50.50x
       " FIXME? Maybe this should be 7.50.x as well?
-      FIND REGEX '^(\d)(\d)([A-Z])\s*$' IN release SUBMATCHES ma mi DATA(pa).
+      FIND REGEX '^(\d)(\d)([A-Z])\s*$' IN release SUBMATCHES ma mi DATA(pa) ##REGEX_POSIX.
       IF sy-subrc = 0.
         mi = mi * 10.
         pa = ( find( val = sy-abcde sub = pa ) + 1 ) * 100. " a=100, b=200, ...
       ELSE.
         " 1809 > 18.9.x
-        FIND REGEX '^([1-9]\d)(\d\d)\s*$' IN release SUBMATCHES ma mi.
+        FIND REGEX '^([1-9]\d)(\d\d)\s*$' IN release SUBMATCHES ma mi ##REGEX_POSIX.
         IF sy-subrc = 0.
           pa = 0.
         ELSE.
           " 2011_1_731 > 2011.1.731
-          FIND REGEX '^20\d+_\d+_(\d)(\d\d)\s*$' IN release SUBMATCHES ma mi.
+          FIND REGEX '^20\d+_\d+_(\d)(\d\d)\s*$' IN release SUBMATCHES ma mi ##REGEX_POSIX.
           IF sy-subrc <> 0.
             " ST-A/PI: 01V_731 > 7.3.1
-            FIND REGEX '^01._(\d)(\d\d)\s*$' IN release SUBMATCHES ma mi.
+            FIND REGEX '^01._(\d)(\d\d)\s*$' IN release SUBMATCHES ma mi ##REGEX_POSIX.
             IF sy-subrc <> 0.
               " unknown pattern... open GitHub issue
               RAISE EXCEPTION TYPE cx_abap_invalid_value
@@ -123,7 +123,7 @@ CLASS /apmg/cl_apm_semver_sap IMPLEMENTATION.
 
   METHOD semver_to_sap_release.
 
-    FIND REGEX '^(\d)\.(\d{1,2})\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa).
+    FIND REGEX '^(\d)\.(\d{1,2})\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa) ##REGEX_POSIX.
     IF sy-subrc = 0.
       IF mi < 10.
         mi = '0' && mi.
@@ -137,7 +137,7 @@ CLASS /apmg/cl_apm_semver_sap IMPLEMENTATION.
       ENDIF.
     ELSE.
       " 1809 <- 18.9.0
-      FIND REGEX '^([1-9]\d)\.(\d{1,2})\.(\d)' IN version SUBMATCHES ma mi pa.
+      FIND REGEX '^([1-9]\d)\.(\d{1,2})\.(\d)' IN version SUBMATCHES ma mi pa ##REGEX_POSIX.
       IF sy-subrc = 0.
         IF mi < 10.
           mi = '0' && mi.
@@ -160,7 +160,7 @@ CLASS /apmg/cl_apm_semver_sap IMPLEMENTATION.
 
     release = semver_to_sap_release( version ).
 
-    FIND REGEX '^(\d+)\.(\d+)\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa) ##NEEDED.
+    FIND REGEX '^(\d+)\.(\d+)\.(\d+)' IN version SUBMATCHES DATA(ma) DATA(mi) DATA(pa) ##NEEDED ##REGEX_POSIX.
     IF sy-subrc = 0 AND pa > 100.
       pa = substring( val = pa off = strlen( pa ) - 2 ).
     ENDIF.

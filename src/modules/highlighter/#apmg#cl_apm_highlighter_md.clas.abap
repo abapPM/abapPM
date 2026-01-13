@@ -207,7 +207,7 @@ CLASS /apmg/cl_apm_highlighter_md IMPLEMENTATION.
         AND <prev_match>-length  = 1
         AND <prev_match>-text_tag = '<'.
 
-      FIND REGEX '<\s*[^\s]*' IN line+<prev_match>-offset MATCH LENGTH <prev_match>-length.
+      FIND REGEX '<\s*[^\s]*' IN line+<prev_match>-offset MATCH LENGTH <prev_match>-length ##REGEX_POSIX.
       IF sy-subrc <> 0.
         <prev_match>-length = 1.
       ENDIF.

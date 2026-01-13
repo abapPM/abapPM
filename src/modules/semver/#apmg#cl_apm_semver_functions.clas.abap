@@ -369,7 +369,7 @@ CLASS /apmg/cl_apm_semver_functions IMPLEMENTATION.
         THEN /apmg/cl_apm_semver_re=>token-coercefull-safe_src
         ELSE /apmg/cl_apm_semver_re=>token-coerce-safe_src ).
 
-      FIND REGEX r IN version SUBMATCHES DATA(rest) DATA(major) DATA(minor) DATA(patch) DATA(prerelease) DATA(build).
+      FIND REGEX r IN version SUBMATCHES DATA(rest) DATA(major) DATA(minor) DATA(patch) DATA(prerelease) DATA(build) ##REGEX_POSIX.
       IF sy-subrc <> 0.
         RETURN.
       ENDIF.
@@ -384,7 +384,7 @@ CLASS /apmg/cl_apm_semver_functions IMPLEMENTATION.
 
       DATA(offset) = 0.
       DO.
-        FIND REGEX r IN version+offset(*) SUBMATCHES rest major minor patch prerelease build.
+        FIND REGEX r IN version+offset(*) SUBMATCHES rest major minor patch prerelease build ##REGEX_POSIX.
         IF sy-subrc <> 0.
           EXIT.
         ENDIF.
@@ -404,7 +404,7 @@ CLASS /apmg/cl_apm_semver_functions IMPLEMENTATION.
         <match>-offset = offset.
         <match>-length = strlen( match ).
         <match>-endpos = <match>-offset + <match>-length.
-        FIND REGEX '^\d' IN version+offset(*) MATCH OFFSET DATA(next_offset) ##SUBRC_OK.
+        FIND REGEX '^\d' IN version+offset(*) MATCH OFFSET DATA(next_offset) ##SUBRC_OK ##REGEX_POSIX.
         offset = offset + next_offset + 1.
         IF strlen( version ) <= offset.
           EXIT.

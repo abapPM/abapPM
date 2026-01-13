@@ -1053,7 +1053,7 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
   METHOD get_extra_from_filename.
 
     IF iv_filename IS NOT INITIAL.
-      FIND REGEX '\..*\.([\-a-z0-9_%]*)\.' IN iv_filename SUBMATCHES rv_extra.
+      FIND REGEX '\..*\.([\-a-z0-9_%]*)\.' IN iv_filename SUBMATCHES rv_extra ##REGEX_POSIX.
       IF sy-subrc = 0.
         rv_extra = cl_http_utility=>unescape_url( rv_extra ).
       ENDIF.

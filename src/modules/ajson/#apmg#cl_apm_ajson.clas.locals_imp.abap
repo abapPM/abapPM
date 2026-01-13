@@ -305,7 +305,7 @@ CLASS lcl_utils IMPLEMENTATION.
     " A lightweight check covering the top-level JSON value would look like this
     " ^\s*(\{.*\}|\[.*\]|"(?:\\.|[^"\\])*"|true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*$
     " Unfortunately, this is quite slow so we use a trivial check of the beginning of the JSON data
-    FIND REGEX '^\s*(true|false|null|-?\d|"|\{|\[)' IN iv_data.
+    FIND REGEX '^\s*(true|false|null|-?\d|"|\{|\[)' IN iv_data ##REGEX_POSIX.
     IF sy-subrc <> 0.
       /apmg/cx_apm_ajson_error=>raise(
         iv_msg      = |Json parsing error: Not JSON|

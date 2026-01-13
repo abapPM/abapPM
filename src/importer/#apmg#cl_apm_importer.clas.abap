@@ -280,7 +280,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         DATA(found) = abap_false.
         LOOP AT source_code ASSIGNING FIELD-SYMBOL(<code>).
           " TODO?: Check for multi-line statements
-          FIND REGEX 'IMPORT\s+.*\s+TO\s+.*\s+FROM\s+''.*''\s*\.' IN <code> IGNORING CASE.
+          FIND REGEX 'IMPORT\s+.*\s+TO\s+.*\s+FROM\s+''.*''\s*\.' IN <code> IGNORING CASE ##REGEX_POSIX.
           IF sy-subrc = 0.
             IF is_log = abap_true.
               FORMAT COLOR COL_POSITIVE.
