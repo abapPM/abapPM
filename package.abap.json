@@ -1,40 +1,88 @@
 {
-  "name": "abappm",
-  "version": "1.0.0",
-  "description": "ABAPPM",
-  "type": "module",
+  "name": "@apm/apm",
+  "version": "1.1.0",
+  "description": "apm - A Package Manager for ABAP 📦",
+  "type": "commonabap",
+  "author": {
+    "email": "marc@abappm.com",
+    "name": "Marc Bernard",
+    "url": "https://github.com/mbtools"
+  },
+  "bugs": {
+    "url": "https://github.com/abapPM/abapPM/issues"
+  },
+  "bundleDependencies": [
+    "@apm/package-json",
+    "@apm/pacote",
+    "@apm/persistence",
+    "@apm/readme",
+    "@apm/settings",
+    "@apm/types",
+    "ajson",
+    "ajson-extensions",
+    "emoji",
+    "error",
+    "syntax-highlighter",
+    "markdown",
+    "http-agent",
+    "semver",
+    "semver-sap",
+    "string-map",
+    "tar",
+    "url"
+  ],
+  "dependencies": {
+    "@apm/package-json": "1.0.0",
+    "@apm/pacote": "1.0.0",
+    "@apm/persistence": "1.0.0",
+    "@apm/readme": "1.0.0",
+    "@apm/settings": "1.0.0",
+    "@apm/types": "1.0.0",
+    "ajson": "1.1.12",
+    "ajson-extensions": "1.0.0",
+    "emoji": "3.0.0",
+    "error": "1.0.0",
+    "syntax-highlighter": "1.0.0",
+    "http-agent": "1.0.1",
+    "markdown": "1.4.1",
+    "semver": "7.7.1",
+    "semver-sap": "1.0.0",
+    "string-map": "1.0.5",
+    "tar": "2.0.1",
+    "url": "1.0.1"
+  },
+  "devDependencies": {
+    "tap": "^1.0.0"
+  },
+  "peerDependencies": {
+    "abapgit": "^1.132.0"
+  },
+  "engines": {
+    "abap": ">=7.50",
+    "apm": ">=1"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/abappm"
+  },
+  "homepage": "https://abappm.com",
   "keywords": [
     "abap",
     "apm",
-    "module"
+    "package-manager",
+    "sap",
+    "tools"
   ],
-  "homepage": "https://abappm.com",
-  "bugs": {
-    "url": "https://github.com/abapPM/abapPM"
-  },
   "license": "MIT",
-  "author": {
-    "name": "Marc Bernard",
-    "url": "https://abappm.com"
-  },
   "maintainers": [
     {
+      "email": "marc@abappm.com",
       "name": "Marc Bernard",
       "url": "https://github.com/mbtools"
     }
   ],
   "repository": {
-    "url": "https://github.com/abapPM/abapPM"
-  },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/abapPM"
-  },
-  "dependencies": {
-    "error": "^1.0.0"
-  },
-  "engines": {
-    "abap": ">=7.50",
-    "apm": ">=1"
+    "type": "git",
+    "url": "git+https://github.com/abapPM/abapPM.git"
   }
 }
