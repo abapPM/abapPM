@@ -191,7 +191,7 @@ CLASS lcl_mapping_camel IMPLEMENTATION. "DEPRECATED
 
     rv_result = iv_name.
 
-    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN rv_result WITH `$1_$2`. "#EC NOTEXT
+    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN rv_result WITH `$1_$2` ##REGEX_POSIX. "#EC NOTEXT
 
   ENDMETHOD.
 
@@ -276,7 +276,7 @@ CLASS lcl_to_snake IMPLEMENTATION.
 
   METHOD /apmg/if_apm_ajson_mapping~rename_node.
 
-    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN cv_name WITH `$1_$2`. "#EC NOTEXT
+    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN cv_name WITH `$1_$2` ##REGEX_POSIX. "#EC NOTEXT
     cv_name = to_lower( cv_name ).
 
   ENDMETHOD.

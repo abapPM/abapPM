@@ -284,7 +284,7 @@ CLASS /apmg/cl_apm_semver_functions IMPLEMENTATION.
     DATA(vers) = replace(
       val   = /apmg/cl_apm_semver_utils=>version_trim( version )
       regex = '^[=v]+'
-      with  = '' ).
+      with  = '' ) ##REGEX_POSIX.
 
     DATA(semver) = parse( version = vers loose = loose incpre = incpre ).
 
@@ -369,7 +369,8 @@ CLASS /apmg/cl_apm_semver_functions IMPLEMENTATION.
         THEN /apmg/cl_apm_semver_re=>token-coercefull-safe_src
         ELSE /apmg/cl_apm_semver_re=>token-coerce-safe_src ).
 
-      FIND REGEX r IN version SUBMATCHES DATA(rest) DATA(major) DATA(minor) DATA(patch) DATA(prerelease) DATA(build) ##REGEX_POSIX.
+      FIND REGEX r IN version
+        SUBMATCHES DATA(rest) DATA(major) DATA(minor) DATA(patch) DATA(prerelease) DATA(build) ##REGEX_POSIX.
       IF sy-subrc <> 0.
         RETURN.
       ENDIF.

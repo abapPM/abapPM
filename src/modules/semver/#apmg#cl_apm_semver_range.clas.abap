@@ -459,21 +459,21 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
       val   = range
       regex = /apmg/cl_apm_semver_re=>token-comparatortrim-safe_src
       with  = /apmg/cl_apm_semver_re=>comparator_trim_replace
-      occ   = /apmg/cl_apm_semver_re=>token-comparatortrim-occ ).
+      occ   = /apmg/cl_apm_semver_re=>token-comparatortrim-occ ) ##REGEX_POSIX.
 
     " `~ 1.2.3` => `~1.2.3`
     range = replace(
       val   = range
       regex = /apmg/cl_apm_semver_re=>token-tildetrim-safe_src
       with  = /apmg/cl_apm_semver_re=>tilde_trim_replace
-      occ   = /apmg/cl_apm_semver_re=>token-tildetrim-occ ).
+      occ   = /apmg/cl_apm_semver_re=>token-tildetrim-occ ) ##REGEX_POSIX.
 
     " `^ 1.2.3` => `^1.2.3`
     range = replace(
       val   = range
       regex = /apmg/cl_apm_semver_re=>token-carettrim-safe_src
       with  = /apmg/cl_apm_semver_re=>caret_trim_replace
-      occ   = /apmg/cl_apm_semver_re=>token-carettrim-occ ).
+      occ   = /apmg/cl_apm_semver_re=>token-carettrim-occ ) ##REGEX_POSIX.
 
     " At this point, the range is completely trimmed and
     " ready to be split into comparators.
@@ -663,7 +663,7 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
     result = replace(
       val   = /apmg/cl_apm_semver_utils=>trim( comp )
       regex = regex
-      with  = '' ).
+      with  = '' ) ##REGEX_POSIX.
 
   ENDMETHOD.
 
@@ -749,7 +749,7 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
     result = replace(
       val   = /apmg/cl_apm_semver_utils=>trim( comp )
       regex = /apmg/cl_apm_semver_re=>token-star-safe_src
-      with  = '' ).
+      with  = '' ) ##REGEX_POSIX.
 
   ENDMETHOD.
 

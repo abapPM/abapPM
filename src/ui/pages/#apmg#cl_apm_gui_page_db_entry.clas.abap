@@ -285,7 +285,7 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
       val   = value
       regex = '%23([a-zA-Z0-9]{3,8})%23'
       with  = '%2523$1%2523'
-      occ   = 0 ).
+      occ   = 0 ) ##REGEX_POSIX.
 
   ENDMETHOD.
 

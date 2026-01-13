@@ -160,7 +160,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     " XXX: Switch for self-update
     DATA(list) = /apmg/cl_apm_package_json=>list(
-    "DATA(list) = /apmg/cl_package_json=>list(
+      "DATA(list) = /apmg/cl_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
@@ -330,6 +330,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     DATA handler TYPE REF TO /apmg/if_apm_object.
 
     DATA(log) = NEW zcl_abapgit_log( ).
+    DATA(progress) = zcl_abapgit_progress=>get_instance( lines( map ) ).
 
     IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -350,6 +351,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     ENDTRY.
 
     LOOP AT map INTO DATA(mapping).
+
+      progress->show(
+        iv_current = sy-tabix
+        iv_text    = |Importing { mapping-new_object }| ).
 
       IF is_log = abap_true.
         WRITE: /
@@ -404,10 +409,11 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       TRY.
           IF is_dry_run = abap_false.
             zcl_abapgit_factory=>get_cts_api( )->insert_transport_object(
-              iv_object   = new_item-obj_type
-              iv_obj_name = new_item-obj_name
-              iv_package  = new_item-package
-              iv_language = new_item-language ).
+              iv_transport = transport
+              iv_object    = new_item-obj_type
+              iv_obj_name  = new_item-obj_name
+              iv_package   = new_item-package
+              iv_language  = new_item-language ).
 
             zcl_abapgit_factory=>get_tadir( )->insert_single(
               iv_object   = new_item-obj_type
@@ -456,6 +462,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       CATCH zcx_abapgit_exception INTO error.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
+
+    progress->off( ).
 
     IF is_log = abap_true.
       FORMAT COLOR OFF.

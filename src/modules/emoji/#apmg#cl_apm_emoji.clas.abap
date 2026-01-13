@@ -99,7 +99,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
       IF find(
            val   = <emoji>-name
            regex = regex
-           case  = abap_false ) >= 0.
+           case  = abap_false ) >= 0 ##REGEX_POSIX.
         INSERT <emoji>-name INTO TABLE result.
       ENDIF.
     ENDLOOP.

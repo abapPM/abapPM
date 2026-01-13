@@ -1,7 +1,7 @@
 INTERFACE /apmg/if_apm_ajson
   PUBLIC.
 
-  CONSTANTS version TYPE string VALUE 'v1.1.12'.            "#EC NOTEXT
+  CONSTANTS version TYPE string VALUE 'v1.1.13'.            "#EC NOTEXT
   CONSTANTS origin TYPE string VALUE 'https://github.com/sbcgua/ajson'. "#EC NOTEXT
   CONSTANTS license TYPE string VALUE 'MIT'.                "#EC NOTEXT
 
@@ -140,7 +140,7 @@ INTERFACE /apmg/if_apm_ajson
   METHODS to_abap
     IMPORTING
       iv_corresponding  TYPE abap_bool DEFAULT abap_false
-      ii_refs_initiator TYPE REF TO /apmg/if_apm_ajson_refs_init OPTIONAL
+      ii_refs_initiator TYPE REF TO /apmg/if_apm_ajson_ref_initial OPTIONAL
     EXPORTING
       ev_container      TYPE any
     RAISING

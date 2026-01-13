@@ -123,10 +123,10 @@ CLASS /apmg/cl_apm_persist_apm IMPLEMENTATION.
     DATA(db_entry) = VALUE /apmg/if_apm_persist_apm=>ty_zabappm(
      keys  = key
      value = replace(
-       val  = value
-       sub  = cl_abap_char_utilities=>cr_lf
-       with = cl_abap_char_utilities=>newline
-       occ  = 0 )
+     val  = value
+     sub  = cl_abap_char_utilities=>cr_lf
+     with = cl_abap_char_utilities=>newline
+     occ  = 0 )
      luser = sy-uname ).
 
     GET TIME STAMP FIELD db_entry-timestamp.

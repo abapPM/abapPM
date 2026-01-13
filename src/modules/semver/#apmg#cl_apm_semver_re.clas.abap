@@ -392,9 +392,9 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
     ASSERT sy-subrc = 0.
 
     <token>-src        = value.
-    <token>-regex      = NEW cl_abap_regex( pattern = value ).
+    <token>-regex      = NEW cl_abap_regex( pattern = value ) ##REGEX_POSIX.
     <token>-safe_src   = make_safe_regex( value ).
-    <token>-safe_regex = NEW cl_abap_regex( pattern = make_safe_regex( value ) ).
+    <token>-safe_regex = NEW cl_abap_regex( pattern = make_safe_regex( value ) ) ##REGEX_POSIX.
     <token>-occ        = COND #( WHEN global = abap_true THEN 0 ELSE 1 ).
 
   ENDMETHOD.

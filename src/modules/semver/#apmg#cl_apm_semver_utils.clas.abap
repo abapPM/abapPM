@@ -59,7 +59,7 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
         regex = `[\t\n\r]`
         with  = ` `
         occ   = 0 )
-      del = ` ` ).
+      del = ` ` ) ##REGEX_POSIX.
   ENDMETHOD.
 
 
@@ -69,6 +69,6 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
       val   = trim( data )
       regex = /apmg/cl_apm_semver_re=>token-vtrim-src
       with  = /apmg/cl_apm_semver_re=>version_trim_replace
-      occ   = /apmg/cl_apm_semver_re=>token-vtrim-occ ).
+      occ   = /apmg/cl_apm_semver_re=>token-vtrim-occ ) ##REGEX_POSIX.
   ENDMETHOD.
 ENDCLASS.

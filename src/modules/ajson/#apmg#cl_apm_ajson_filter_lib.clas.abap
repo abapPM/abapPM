@@ -1,7 +1,7 @@
 CLASS /apmg/cl_apm_ajson_filter_lib DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC.
+  CREATE PUBLIC .
 
   PUBLIC SECTION.
 
@@ -9,8 +9,7 @@ CLASS /apmg/cl_apm_ajson_filter_lib DEFINITION
       RETURNING
         VALUE(ri_filter) TYPE REF TO /apmg/if_apm_ajson_filter
       RAISING
-        /apmg/cx_apm_ajson_error.
-
+        /apmg/cx_apm_ajson_error .
     CLASS-METHODS create_path_filter
       IMPORTING
         !it_skip_paths     TYPE string_table OPTIONAL
@@ -19,15 +18,14 @@ CLASS /apmg/cl_apm_ajson_filter_lib DEFINITION
       RETURNING
         VALUE(ri_filter)   TYPE REF TO /apmg/if_apm_ajson_filter
       RAISING
-        /apmg/cx_apm_ajson_error.
-
+        /apmg/cx_apm_ajson_error .
     CLASS-METHODS create_and_filter
       IMPORTING
         !it_filters      TYPE /apmg/if_apm_ajson_filter=>ty_filter_tab
       RETURNING
         VALUE(ri_filter) TYPE REF TO /apmg/if_apm_ajson_filter
       RAISING
-        /apmg/cx_apm_ajson_error.
+        /apmg/cx_apm_ajson_error .
 
   PROTECTED SECTION.
   PRIVATE SECTION.

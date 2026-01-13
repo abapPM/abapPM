@@ -225,7 +225,7 @@ CLASS /apmg/cl_apm_html_table IMPLEMENTATION.
 
     IF find(
         val = iv_event
-        regex = c_sort_by_event_regex ) = 0.
+        regex = c_sort_by_event_regex ) = 0 ##REGEX_POSIX.
 
       lv_req = replace(
         val  = iv_event

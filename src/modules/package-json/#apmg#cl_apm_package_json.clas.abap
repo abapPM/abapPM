@@ -600,8 +600,6 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
       INSERT result_item INTO TABLE result.
     ENDLOOP.
 
-    " XXX: Remove
-
     " Check package hierarchy to determine which packages are bundled
     LOOP AT result ASSIGNING FIELD-SYMBOL(<result_item>).
       DATA(super_packages) = get_super_packages( <result_item>-package ).

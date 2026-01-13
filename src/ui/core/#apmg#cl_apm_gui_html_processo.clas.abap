@@ -99,11 +99,11 @@ CLASS /apmg/cl_apm_gui_html_processo IMPLEMENTATION.
 
     rv_head_end = find( val   = iv_html
                         regex = |{ cl_abap_char_utilities=>newline }?\\s*</head>|
-                        case  = abap_false ).
+                        case  = abap_false ) ##REGEX_POSIX.
     IF rv_head_end <= 0.
-      rv_head_end = find( val   = iv_html
-                          regex = '</head>'
-                          case  = abap_false ).
+      rv_head_end = find( val  = iv_html
+                          sub  = '</head>'
+                          case = abap_false ).
       IF rv_head_end <= 0.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
           EXPORTING
@@ -144,7 +144,7 @@ CLASS /apmg/cl_apm_gui_html_processo IMPLEMENTATION.
     CREATE OBJECT lo_css_re
       EXPORTING
         ignore_case = abap_true
-        pattern     = lc_css_re.
+        pattern     = lc_css_re ##REGEX_POSIX.
 
     lo_matcher = lo_css_re->create_matcher( text = substring( val = iv_html len = lv_head_end ) ).
     WHILE lo_matcher->find_next( ) = abap_true.

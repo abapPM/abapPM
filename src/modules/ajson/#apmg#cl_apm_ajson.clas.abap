@@ -1,10 +1,10 @@
 CLASS /apmg/cl_apm_ajson DEFINITION
   PUBLIC
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
 
-    INTERFACES /apmg/if_apm_ajson .
+    INTERFACES /apmg/if_apm_ajson.
 
     ALIASES:
       is_empty FOR /apmg/if_apm_ajson~is_empty,
@@ -57,7 +57,7 @@ CLASS /apmg/cl_apm_ajson DEFINITION
       RETURNING
         VALUE(ro_instance)  TYPE REF TO /apmg/cl_apm_ajson
       RAISING
-        /apmg/cx_apm_ajson_error .
+        /apmg/cx_apm_ajson_error.
 
     CLASS-METHODS create_empty " Might be deprecated, prefer using new( ) or create object
       IMPORTING
@@ -77,13 +77,14 @@ CLASS /apmg/cl_apm_ajson DEFINITION
       RETURNING
         VALUE(ro_instance) TYPE REF TO /apmg/cl_apm_ajson
       RAISING
-        /apmg/cx_apm_ajson_error .
+        /apmg/cx_apm_ajson_error.
 
     METHODS constructor
       IMPORTING
         iv_keep_item_order            TYPE abap_bool DEFAULT abap_false
         iv_format_datetime            TYPE abap_bool DEFAULT abap_true
         iv_to_abap_corresponding_only TYPE abap_bool DEFAULT abap_false.
+
     CLASS-METHODS new
       IMPORTING
         iv_keep_item_order            TYPE abap_bool DEFAULT abap_false
@@ -91,6 +92,12 @@ CLASS /apmg/cl_apm_ajson DEFINITION
         iv_to_abap_corresponding_only TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(ro_instance)            TYPE REF TO /apmg/cl_apm_ajson.
+
+    CLASS-METHODS normalize_path
+      IMPORTING
+        iv_path        TYPE string
+      RETURNING
+        VALUE(rv_path) TYPE string.
 
   PROTECTED SECTION.
 
@@ -128,186 +135,6 @@ ENDCLASS.
 
 
 CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
-
-
-  METHOD constructor.
-    ms_opts-keep_item_order = iv_keep_item_order.
-    ms_opts-to_abap_corresponding_only = iv_to_abap_corresponding_only.
-    format_datetime( iv_format_datetime ).
-  ENDMETHOD.
-
-
-  METHOD create_empty.
-    CREATE OBJECT ro_instance
-      EXPORTING
-        iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
-        iv_format_datetime            = iv_format_datetime
-        iv_keep_item_order            = iv_keep_item_order.
-    ro_instance->mi_custom_mapping = ii_custom_mapping.
-  ENDMETHOD.
-
-
-  METHOD create_from.
-
-    DATA lo_mutator_queue TYPE REF TO lcl_mutator_queue.
-
-    IF ii_source_json IS NOT BOUND.
-      /apmg/cx_apm_ajson_error=>raise( 'Source not bound' ).
-    ENDIF.
-
-    CREATE OBJECT ro_instance
-      EXPORTING
-        iv_to_abap_corresponding_only = ii_source_json->opts( )-to_abap_corresponding_only
-        iv_format_datetime            = ii_source_json->opts( )-format_datetime
-        iv_keep_item_order            = ii_source_json->opts( )-keep_item_order.
-
-    IF ii_filter IS NOT BOUND AND ii_mapper IS NOT BOUND.
-      ro_instance->mt_json_tree = ii_source_json->mt_json_tree.
-    ELSE.
-      CREATE OBJECT lo_mutator_queue.
-      IF ii_mapper IS BOUND.
-        " Mapping goes first. But maybe it should be a freely definable queue of processors ?
-        lo_mutator_queue->add( lcl_mapper_runner=>new( ii_mapper ) ).
-      ENDIF.
-      IF ii_filter IS BOUND.
-        lo_mutator_queue->add( lcl_filter_runner=>new( ii_filter ) ).
-      ENDIF.
-      lo_mutator_queue->lif_mutator_runner~run(
-        EXPORTING
-          it_source_tree = ii_source_json->mt_json_tree
-        IMPORTING
-          et_dest_tree = ro_instance->mt_json_tree ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD delete_subtree.
-
-    DATA lv_parent_path TYPE string.
-    DATA lr_parent LIKE ir_parent.
-
-    READ TABLE mt_json_tree INTO rs_top_node
-      WITH TABLE KEY
-        path = iv_path
-        name = iv_name.
-    IF sy-subrc <> 0.
-      RETURN. " Not found ? nothing to delete !
-    ENDIF.
-
-    DELETE mt_json_tree INDEX sy-tabix. " where path = iv_path and name = iv_name.
-
-    IF rs_top_node-children > 0. " only for objects and arrays
-      lv_parent_path = iv_path && iv_name && '/*'.
-      DELETE mt_json_tree WHERE path CP lv_parent_path.
-    ENDIF.
-
-    " decrement parent children
-    IF ir_parent IS SUPPLIED.
-      ir_parent->children = ir_parent->children - 1.
-    ELSE.
-      lr_parent = get_item( iv_path ).
-      IF lr_parent IS NOT INITIAL.
-        lr_parent->children = lr_parent->children - 1.
-      ENDIF.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD get_item.
-
-    FIELD-SYMBOLS <item> LIKE LINE OF mt_json_tree.
-    DATA ls_path_name TYPE /apmg/if_apm_ajson_types=>ty_path_name.
-    ls_path_name = lcl_utils=>split_path( iv_path ).
-
-    READ TABLE mt_json_tree
-      ASSIGNING <item>
-      WITH KEY
-        path = ls_path_name-path
-        name = ls_path_name-name.
-    IF sy-subrc = 0.
-      GET REFERENCE OF <item> INTO rv_item.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD new.
-    CREATE OBJECT ro_instance
-      EXPORTING
-        iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
-        iv_format_datetime            = iv_format_datetime
-        iv_keep_item_order            = iv_keep_item_order.
-  ENDMETHOD.
-
-
-  METHOD parse.
-
-    DATA lo_parser TYPE REF TO lcl_json_parser.
-
-    CREATE OBJECT ro_instance.
-    CREATE OBJECT lo_parser.
-    ro_instance->mt_json_tree = lo_parser->parse(
-      iv_json            = iv_json
-      iv_keep_item_order = iv_keep_item_order ).
-    ro_instance->mi_custom_mapping = ii_custom_mapping.
-    ro_instance->ms_opts-keep_item_order = iv_keep_item_order.
-
-    IF iv_freeze = abap_true.
-      ro_instance->freeze( ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD prove_path_exists.
-
-    DATA lt_path TYPE string_table.
-    DATA lr_node_parent LIKE rr_end_node.
-    DATA lv_cur_path TYPE string.
-    DATA lv_cur_name TYPE string.
-    DATA ls_new_node LIKE LINE OF mt_json_tree.
-
-    SPLIT iv_path AT '/' INTO TABLE lt_path.
-    DELETE lt_path WHERE table_line IS INITIAL.
-
-    DO.
-      lr_node_parent = rr_end_node.
-      READ TABLE mt_json_tree REFERENCE INTO rr_end_node
-        WITH TABLE KEY
-          path = lv_cur_path
-          name = lv_cur_name.
-      IF sy-subrc <> 0. " New node, assume it is always object as it has a named child, use touch_array to init array
-        CLEAR ls_new_node.
-        IF lr_node_parent IS NOT INITIAL. " if has parent
-          lr_node_parent->children = lr_node_parent->children + 1.
-          IF lr_node_parent->type = /apmg/if_apm_ajson_types=>node_type-array.
-            ls_new_node-index = lcl_utils=>validate_array_index(
-              iv_path  = lv_cur_path
-              iv_index = lv_cur_name ).
-          ENDIF.
-        ENDIF.
-        ls_new_node-path = lv_cur_path.
-        ls_new_node-name = lv_cur_name.
-        ls_new_node-type = /apmg/if_apm_ajson_types=>node_type-object.
-        INSERT ls_new_node INTO TABLE mt_json_tree REFERENCE INTO rr_end_node.
-      ENDIF.
-      lv_cur_path = lv_cur_path && lv_cur_name && '/'.
-      READ TABLE lt_path INDEX sy-index INTO lv_cur_name.
-      IF sy-subrc <> 0.
-        EXIT. " no more segments
-      ENDIF.
-    ENDDO.
-
-  ENDMETHOD.
-
-
-  METHOD read_only_watchdog.
-    IF ms_opts-read_only = abap_true.
-      /apmg/cx_apm_ajson_error=>raise( 'This json instance is read only' ).
-    ENDIF.
-  ENDMETHOD.
 
 
   METHOD /apmg/if_apm_ajson~array_to_string_table.
@@ -439,7 +266,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     IF lr_item IS NOT INITIAL AND lr_item->type = /apmg/if_apm_ajson_types=>node_type-string.
       FIND FIRST OCCURRENCE OF REGEX '^(\d{4})-(\d{2})-(\d{2})(T|$)' "#EC NOTEXT
         IN lr_item->value
-        SUBMATCHES lv_y lv_m lv_d.
+        SUBMATCHES lv_y lv_m lv_d ##REGEX_POSIX.
       CONCATENATE lv_y lv_m lv_d INTO rv_value.
     ENDIF.
 
@@ -597,7 +424,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     ls_new_path-name = |{ lv_new_index }|.
 
     lt_new_nodes = lcl_abap_to_json=>convert(
-      is_opts            = ms_opts
+      is_opts   = ms_opts
       iv_data   = iv_val
       is_prefix = ls_new_path ).
     READ TABLE lt_new_nodes INDEX 1 REFERENCE INTO lr_new_node. " assume first record is the array item - not ideal !
@@ -638,17 +465,17 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     IF ls_split_path IS INITIAL. " Assign root, exceptional processing
       IF iv_node_type IS NOT INITIAL.
         mt_json_tree = lcl_abap_to_json=>insert_with_type(
-          is_opts            = ms_opts
-          iv_data            = iv_val
-          iv_type            = iv_node_type
-          is_prefix          = ls_split_path
-          ii_custom_mapping  = mi_custom_mapping ).
+          is_opts           = ms_opts
+          iv_data           = iv_val
+          iv_type           = iv_node_type
+          is_prefix         = ls_split_path
+          ii_custom_mapping = mi_custom_mapping ).
       ELSE.
         mt_json_tree = lcl_abap_to_json=>convert(
-          is_opts            = ms_opts
-          iv_data            = iv_val
-          is_prefix          = ls_split_path
-          ii_custom_mapping  = mi_custom_mapping ).
+          is_opts           = ms_opts
+          iv_data           = iv_val
+          is_prefix         = ls_split_path
+          ii_custom_mapping = mi_custom_mapping ).
       ENDIF.
       RETURN.
     ENDIF.
@@ -679,21 +506,21 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     IF iv_node_type IS NOT INITIAL.
       lt_new_nodes = lcl_abap_to_json=>insert_with_type(
-        is_opts            = ms_opts
-        iv_item_order      = lv_item_order
-        iv_data            = iv_val
-        iv_type            = iv_node_type
-        iv_array_index     = lv_array_index
-        is_prefix          = ls_split_path
-        ii_custom_mapping  = mi_custom_mapping ).
+        is_opts           = ms_opts
+        iv_item_order     = lv_item_order
+        iv_data           = iv_val
+        iv_type           = iv_node_type
+        iv_array_index    = lv_array_index
+        is_prefix         = ls_split_path
+        ii_custom_mapping = mi_custom_mapping ).
     ELSE.
       lt_new_nodes = lcl_abap_to_json=>convert(
-        is_opts            = ms_opts
-        iv_item_order      = lv_item_order
-        iv_data            = iv_val
-        iv_array_index     = lv_array_index
-        is_prefix          = ls_split_path
-        ii_custom_mapping  = mi_custom_mapping ).
+        is_opts           = ms_opts
+        iv_item_order     = lv_item_order
+        iv_data           = iv_val
+        iv_array_index    = lv_array_index
+        is_prefix         = ls_split_path
+        ii_custom_mapping = mi_custom_mapping ).
     ENDIF.
 
     " update nodes
@@ -728,7 +555,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     ENDIF.
 
     IF go_float_regex IS NOT BOUND.
-      CREATE OBJECT go_float_regex EXPORTING pattern = '^([1-9][0-9]*|0)\.[0-9]+$'.
+      CREATE OBJECT go_float_regex EXPORTING pattern = '^([1-9][0-9]*|0)\.[0-9]+$' ##REGEX_POSIX.
       " expects fractional, because ints are detected separately
     ENDIF.
 
@@ -785,8 +612,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     lv_bool = boolc( iv_val IS NOT INITIAL ).
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_bool ).
+      iv_path         = iv_path
+      iv_val          = lv_bool ).
 
   ENDMETHOD.
 
@@ -800,8 +627,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_val ).
+      iv_path         = iv_path
+      iv_val          = lv_val ).
 
   ENDMETHOD.
 
@@ -812,8 +639,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = iv_val ).
+      iv_path         = iv_path
+      iv_val          = iv_val ).
 
   ENDMETHOD.
 
@@ -825,8 +652,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     DATA lv_null_ref TYPE REF TO data.
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_null_ref ).
+      iv_path         = iv_path
+      iv_val          = lv_null_ref ).
 
   ENDMETHOD.
 
@@ -839,8 +666,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     lv_val = iv_val.
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_val ).
+      iv_path         = iv_path
+      iv_val          = lv_val ).
 
   ENDMETHOD.
 
@@ -854,8 +681,8 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_timestamp_iso ).
+      iv_path         = iv_path
+      iv_val          = lv_timestamp_iso ).
 
   ENDMETHOD.
 
@@ -869,13 +696,18 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     /apmg/if_apm_ajson~set(
       iv_ignore_empty = abap_false
-      iv_path = iv_path
-      iv_val  = lv_timestamp_iso ).
+      iv_path         = iv_path
+      iv_val          = lv_timestamp_iso ).
 
   ENDMETHOD.
 
 
   METHOD /apmg/if_apm_ajson~slice.
+
+    " TODO: idea
+    " read only mode (for read only jsons or a param)
+    " which would reuse the original tree, so copy a reference of the tree, presuming that it is not changed
+    " this will be faster, in particular for array iterations
 
     DATA lo_section         TYPE REF TO /apmg/cl_apm_ajson.
     DATA ls_item            LIKE LINE OF mt_json_tree.
@@ -902,7 +734,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     lv_path_pattern = lv_normalized_path && `*`.
 
-    LOOP AT mt_json_tree INTO ls_item WHERE path CP lv_path_pattern.
+    LOOP AT mt_json_tree INTO ls_item WHERE path CP lv_path_pattern. "#EC CI_SORTSEQ
 
       ls_item-path = substring( val = ls_item-path off = lv_path_len - 1 ). " less closing '/'
       INSERT ls_item INTO TABLE lo_section->mt_json_tree.
@@ -1004,5 +836,186 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
   METHOD /apmg/if_apm_ajson~to_abap_corresponding_only.
     ms_opts-to_abap_corresponding_only = iv_enable.
     ri_json = me.
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    ms_opts-keep_item_order = iv_keep_item_order.
+    ms_opts-to_abap_corresponding_only = iv_to_abap_corresponding_only.
+    format_datetime( iv_format_datetime ).
+  ENDMETHOD.
+
+
+  METHOD create_empty.
+    CREATE OBJECT ro_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
+        iv_format_datetime            = iv_format_datetime
+        iv_keep_item_order            = iv_keep_item_order.
+    ro_instance->mi_custom_mapping = ii_custom_mapping.
+  ENDMETHOD.
+
+
+  METHOD create_from.
+
+    DATA lo_mutator_queue TYPE REF TO lcl_mutator_queue.
+
+    IF ii_source_json IS NOT BOUND.
+      /apmg/cx_apm_ajson_error=>raise( 'Source not bound' ).
+    ENDIF.
+
+    CREATE OBJECT ro_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = ii_source_json->opts( )-to_abap_corresponding_only
+        iv_format_datetime            = ii_source_json->opts( )-format_datetime
+        iv_keep_item_order            = ii_source_json->opts( )-keep_item_order.
+
+    IF ii_filter IS NOT BOUND AND ii_mapper IS NOT BOUND.
+      ro_instance->mt_json_tree = ii_source_json->mt_json_tree.
+    ELSE.
+      CREATE OBJECT lo_mutator_queue.
+      IF ii_mapper IS BOUND.
+        " Mapping goes first. But maybe it should be a freely definable queue of processors ?
+        lo_mutator_queue->add( lcl_mapper_runner=>new( ii_mapper ) ).
+      ENDIF.
+      IF ii_filter IS BOUND.
+        lo_mutator_queue->add( lcl_filter_runner=>new( ii_filter ) ).
+      ENDIF.
+      lo_mutator_queue->lif_mutator_runner~run(
+        EXPORTING
+          it_source_tree = ii_source_json->mt_json_tree
+        IMPORTING
+          et_dest_tree   = ro_instance->mt_json_tree ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD delete_subtree.
+
+    DATA lv_parent_path TYPE string.
+    DATA lr_parent LIKE ir_parent.
+
+    READ TABLE mt_json_tree INTO rs_top_node
+      WITH TABLE KEY
+        path = iv_path
+        name = iv_name.
+    IF sy-subrc <> 0.
+      RETURN. " Not found ? nothing to delete !
+    ENDIF.
+
+    DELETE mt_json_tree INDEX sy-tabix. "#EC CI_SORTSEQ where path = iv_path and name = iv_name.
+
+    IF rs_top_node-children > 0. " only for objects and arrays
+      lv_parent_path = iv_path && iv_name && '/*'.
+      DELETE mt_json_tree WHERE path CP lv_parent_path.
+    ENDIF.
+
+    " decrement parent children
+    IF ir_parent IS SUPPLIED.
+      ir_parent->children = ir_parent->children - 1.
+    ELSE.
+      lr_parent = get_item( iv_path ).
+      IF lr_parent IS NOT INITIAL.
+        lr_parent->children = lr_parent->children - 1.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_item.
+
+    DATA ls_path_name TYPE /apmg/if_apm_ajson_types=>ty_path_name.
+    ls_path_name = lcl_utils=>split_path( iv_path ).
+
+    READ TABLE mt_json_tree
+      REFERENCE INTO rv_item
+      WITH KEY
+        path = ls_path_name-path
+        name = ls_path_name-name.
+
+  ENDMETHOD.
+
+
+  METHOD new.
+    CREATE OBJECT ro_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
+        iv_format_datetime            = iv_format_datetime
+        iv_keep_item_order            = iv_keep_item_order.
+  ENDMETHOD.
+
+
+  METHOD normalize_path.
+    rv_path = lcl_utils=>normalize_path( iv_path ).
+  ENDMETHOD.
+
+
+  METHOD parse.
+
+    DATA lo_parser TYPE REF TO lcl_json_parser.
+
+    CREATE OBJECT ro_instance.
+    CREATE OBJECT lo_parser.
+    ro_instance->mt_json_tree = lo_parser->parse(
+      iv_json            = iv_json
+      iv_keep_item_order = iv_keep_item_order ).
+    ro_instance->mi_custom_mapping = ii_custom_mapping.
+    ro_instance->ms_opts-keep_item_order = iv_keep_item_order.
+
+    IF iv_freeze = abap_true.
+      ro_instance->freeze( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD prove_path_exists.
+
+    DATA lt_path TYPE string_table.
+    DATA lr_node_parent LIKE rr_end_node.
+    DATA lv_cur_path TYPE string.
+    DATA lv_cur_name TYPE string.
+    DATA ls_new_node LIKE LINE OF mt_json_tree.
+
+    SPLIT iv_path AT '/' INTO TABLE lt_path.
+    DELETE lt_path WHERE table_line IS INITIAL.
+
+    DO.
+      lr_node_parent = rr_end_node.
+      READ TABLE mt_json_tree REFERENCE INTO rr_end_node
+        WITH TABLE KEY
+          path = lv_cur_path
+          name = lv_cur_name.
+      IF sy-subrc <> 0. " New node, assume it is always object as it has a named child, use touch_array to init array
+        CLEAR ls_new_node.
+        IF lr_node_parent IS NOT INITIAL. " if has parent
+          lr_node_parent->children = lr_node_parent->children + 1.
+          IF lr_node_parent->type = /apmg/if_apm_ajson_types=>node_type-array.
+            ls_new_node-index = lcl_utils=>validate_array_index(
+              iv_path  = lv_cur_path
+              iv_index = lv_cur_name ).
+          ENDIF.
+        ENDIF.
+        ls_new_node-path = lv_cur_path.
+        ls_new_node-name = lv_cur_name.
+        ls_new_node-type = /apmg/if_apm_ajson_types=>node_type-object.
+        INSERT ls_new_node INTO TABLE mt_json_tree REFERENCE INTO rr_end_node.
+      ENDIF.
+      lv_cur_path = lv_cur_path && lv_cur_name && '/'.
+      READ TABLE lt_path INDEX sy-index INTO lv_cur_name.
+      IF sy-subrc <> 0.
+        EXIT. " no more segments
+      ENDIF.
+    ENDDO.
+
+  ENDMETHOD.
+
+
+  METHOD read_only_watchdog.
+    IF ms_opts-read_only = abap_true.
+      /apmg/cx_apm_ajson_error=>raise( 'This json instance is read only' ).
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

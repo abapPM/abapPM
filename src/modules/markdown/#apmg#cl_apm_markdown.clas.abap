@@ -662,7 +662,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     CONCATENATE result-markup %_newline line-body INTO result-markup.
 
-    FIND REGEX '-->\s*$' IN line-text.  " apm
+    FIND REGEX '-->\s*$' IN line-text ##REGEX_POSIX. " apm
     IF sy-subrc = 0.
       result-closed = abap_true.
     ENDIF.
@@ -753,7 +753,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     ">>> apm
     FIND REGEX ' \{(#[\w-]*)\}' IN result-element-text-text IGNORING CASE
-      MATCH OFFSET pos SUBMATCHES id.
+      MATCH OFFSET pos SUBMATCHES id ##REGEX_POSIX.
     IF sy-subrc = 0.
       " # Heading {#custom-id}
       APPEND INITIAL LINE TO result-element-attributes ASSIGNING <attribute>.
@@ -765,12 +765,12 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         val   = to_lower( result-element-text-text )
         regex = `[^\w\s\-]`
         with  = ``
-        occ   = 0 ).
+        occ   = 0 ) ##REGEX_POSIX.
       id = replace(
         val   = id
         regex = `\s`
         with  = `-`
-        occ   = 0 ).
+        occ   = 0 ) ##REGEX_POSIX.
       " If there are HTML tags, no id
       IF id CA '<>'.
         id = '#'.
@@ -895,7 +895,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     IF result-interrupted IS INITIAL.
       text = line-body.
-      REPLACE ALL OCCURRENCES OF REGEX '^[ ]{0,4}' IN text WITH ''.
+      REPLACE ALL OCCURRENCES OF REGEX '^[ ]{0,4}' IN text WITH '' ##REGEX_POSIX.
       APPEND text TO result-li-lines.
       RETURN.
     ENDIF.
@@ -903,7 +903,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     IF line-indent > 0.
       APPEND INITIAL LINE TO result-li-lines.
       text = line-body.
-      REPLACE ALL OCCURRENCES OF REGEX '^[ ]{0,4}' IN text WITH ''.
+      REPLACE ALL OCCURRENCES OF REGEX '^[ ]{0,4}' IN text WITH '' ##REGEX_POSIX.
       APPEND text TO result-li-lines.
       CLEAR result-interrupted.
       RETURN.
@@ -928,7 +928,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     regex = '^<(\w*)(?:[ ]*' && regex_html_attribute && ')*[ ]*(/)?>'.
     FIND FIRST OCCURRENCE OF REGEX regex IN line-text SUBMATCHES m1 m2
-      MATCH LENGTH length.
+      MATCH LENGTH length ##REGEX_POSIX.
     IF sy-subrc = 0.
 
       index = text_level_elements->find_val( m1 ).
@@ -955,7 +955,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         ENDIF.
 
         CONCATENATE '</' m1 '>[ ]*$' INTO regex.
-        FIND FIRST OCCURRENCE OF REGEX regex IN remainder IGNORING CASE.
+        FIND FIRST OCCURRENCE OF REGEX regex IN remainder IGNORING CASE ##REGEX_POSIX.
         IF sy-subrc = 0.
           result-closed = abap_true.
         ENDIF.
@@ -975,13 +975,13 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     result = block.
 
     CONCATENATE '^<' result-name '(?:[ ]*' regex_html_attribute ')*[ ]*>' INTO regex.
-    FIND REGEX regex IN line-text IGNORING CASE. "open
+    FIND REGEX regex IN line-text IGNORING CASE ##REGEX_POSIX. "open
     IF sy-subrc = 0.
       result-depth = result-depth + 1.
     ENDIF.
 
     CONCATENATE '</' result-name '>[ ]*$' INTO regex.
-    FIND REGEX regex IN line-text IGNORING CASE. "close
+    FIND REGEX regex IN line-text IGNORING CASE ##REGEX_POSIX. "close
     IF sy-subrc = 0.
       IF result-depth > 0.
         result-depth = result-depth - 1.
@@ -1073,7 +1073,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       ref_val  TYPE REF TO lcl_string.
 
     FIND REGEX '^\[(.+)\]:[ ]*<?(\S+)>?([ ]+["''(](.+)["'')])?[ ]*$'
-      IN line-text SUBMATCHES m1 m2 m3 m4.
+      IN line-text SUBMATCHES m1 m2 m3 m4 ##REGEX_POSIX.
     IF sy-subrc = 0.
       id = m1.
       TRANSLATE id TO LOWER CASE.
@@ -1163,10 +1163,10 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       LOOP AT divider_cells ASSIGNING <divider_cell>.
         <divider_cell> = trim( <divider_cell> ).
         <divider_cell> = replace(
-         val  = <divider_cell>
-         sub  = '%bar%'
-         with = '|'
-         occ  = 0 ). " apm
+          val  = <divider_cell>
+          sub  = '%bar%'
+          with = '|'
+          occ  = 0 ). " apm
         CHECK <divider_cell> IS NOT INITIAL.
         APPEND INITIAL LINE TO result-alignments ASSIGNING <alignment>.
 
@@ -1204,10 +1204,10 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         index = sy-tabix.
         <header_cell> = trim( <header_cell> ).
         <header_cell> = replace(
-         val  = <header_cell>
-         sub  = '%bar%'
-         with = '|'
-         occ  = 0 ). " apm
+          val  = <header_cell>
+          sub  = '%bar%'
+          with = '|'
+          occ  = 0 ). " apm
 
         APPEND INITIAL LINE TO headeresults ASSIGNING <headeresult>.
         <headeresult>-name = 'th'.
@@ -1286,7 +1286,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         occ  = 0 ).
       " REGEX '(?:(\\[|])|[^|`]|`[^`]+`|`)+' is too greedy
       FIND ALL OCCURRENCES OF REGEX '(?:(\\[|])|[^|])+'
-        IN row RESULTS matches ##SUBRC_OK.
+        IN row RESULTS matches ##SUBRC_OK ##REGEX_POSIX.
       " <<< apm
       LOOP AT matches ASSIGNING <match>.
         index = sy-tabix.
@@ -1320,9 +1320,9 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     DATA regex TYPE string.
 
     result = str.
-    REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN mask WITH '\\$1'.
+    REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN mask WITH '\\$1' ##REGEX_POSIX.
     CONCATENATE '[' mask ']*\Z' INTO regex.
-    REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH ''.
+    REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH '' ##REGEX_POSIX.
   ENDMETHOD.                    "trim
 
 
@@ -1761,7 +1761,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         text = m1.
         CONDENSE text.
         text = text.
-        REPLACE ALL OCCURRENCES OF REGEX '[ ]*\n' IN text WITH ' '.
+        REPLACE ALL OCCURRENCES OF REGEX '[ ]*\n' IN text WITH ' ' ##REGEX_POSIX.
 
         result-extent = strlen( m0 ).
         result-element-name = 'code'.
@@ -1793,7 +1793,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     regex = '(^<((mailto:)?' && common_mark_email && ')>)'.
 
     FIND REGEX regex IN excerpt-text IGNORING CASE
-      SUBMATCHES m0 m1 m2.
+      SUBMATCHES m0 m1 m2 ##REGEX_POSIX.
     IF sy-subrc = 0.
       url = m1.
       IF m2 IS INITIAL.
@@ -1834,7 +1834,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
         "// get the (ungreedy) end marker
         regex_delim = '[^&][&]{2}(?![&])'.
-        REPLACE ALL OCCURRENCES OF '&' IN regex_delim WITH marker.
+        REPLACE ALL OCCURRENCES OF '&' IN regex_delim WITH marker ##REGEX_POSIX.
         FIND REGEX regex_delim IN m1 MATCH OFFSET offset ##REGEX_POSIX.
         IF sy-subrc = 0.
           offset = offset + 1.
@@ -1900,7 +1900,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
           excerpt-text+1(1) = '='.
 
     FIND REGEX '(^==(?=\S)([^(?:==)]+)(?=\S)==)' IN excerpt-text
-      SUBMATCHES m0 m1.
+      SUBMATCHES m0 m1 ##REGEX_POSIX.
     IF sy-subrc = 0.
       result-extent = strlen( m0 ).
       result-element-name = 'mark'.
@@ -1988,8 +1988,8 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 *^[(]((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^'']*''))?[)]
 
     "FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''))?\s*[)])'
-    FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''|\([^\)]*\)))?\s*[)])' " apm
-      IN remainder SUBMATCHES m0 m1 m2.
+    FIND REGEX '(^[(]\s*((?:[^ ()]|[(][^ )]+[)])+)(?:[ ]+("[^"]*"|''[^\'']*''|\([^\)]*\)))?\s*[)])'
+      IN remainder SUBMATCHES m0 m1 m2 ##REGEX_POSIX. " apm
     IF sy-subrc = 0.
       APPEND INITIAL LINE TO result-element-attributes ASSIGNING <attribute>.
       <attribute>-name = 'href'.
@@ -2108,7 +2108,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
           excerpt-text+1(1) = '~'.
 
     FIND REGEX '(^~~(?=\S)([^(?:~~)]+)(?=\S)~~)' IN excerpt-text
-      SUBMATCHES m0 m1.
+      SUBMATCHES m0 m1 ##REGEX_POSIX.
     IF sy-subrc = 0.
       result-extent = strlen( m0 ).
       result-element-name = 'del'.
@@ -2130,7 +2130,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
           excerpt-text+2(1) = '/'.
 
     FIND REGEX '(\bhttps?:[\/]{2}[^\s<]+\b\/*)' IN excerpt-context
-      IGNORING CASE SUBMATCHES m0 MATCH OFFSET offset.
+      IGNORING CASE SUBMATCHES m0 MATCH OFFSET offset ##REGEX_POSIX.
     IF sy-subrc = 0.
       result-extent = strlen( m0 ).
       result-position = offset + 1. "// set to +1 so 0 is not initial
@@ -2431,17 +2431,17 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       offset        TYPE i.
 
     marker_ptn = marker.
-    REPLACE ALL OCCURRENCES OF REGEX '([*?!+])' IN marker_ptn WITH '[$1]'.
+    REPLACE ALL OCCURRENCES OF REGEX '([*?!+])' IN marker_ptn WITH '[$1]' ##REGEX_POSIX.
     submarker_ptn = marker(1).
-    REPLACE ALL OCCURRENCES OF REGEX '([*?!+])' IN submarker_ptn WITH '[$1]'.
+    REPLACE ALL OCCURRENCES OF REGEX '([*?!+])' IN submarker_ptn WITH '[$1]' ##REGEX_POSIX.
 
     regex = c_regex.
-    REPLACE ALL OCCURRENCES OF '{&1}' IN regex WITH submarker_ptn.
-    REPLACE ALL OCCURRENCES OF '{&X}' IN regex WITH marker_ptn.
+    REPLACE ALL OCCURRENCES OF '{&1}' IN regex WITH submarker_ptn ##REGEX_POSIX.
+    REPLACE ALL OCCURRENCES OF '{&X}' IN regex WITH marker_ptn ##REGEX_POSIX.
 
     regex_delim = c_regex_delim.
-    REPLACE ALL OCCURRENCES OF '{&1}' IN regex_delim WITH submarker_ptn.
-    REPLACE ALL OCCURRENCES OF '{&X}' IN regex_delim WITH marker_ptn.
+    REPLACE ALL OCCURRENCES OF '{&1}' IN regex_delim WITH submarker_ptn ##REGEX_POSIX.
+    REPLACE ALL OCCURRENCES OF '{&X}' IN regex_delim WITH marker_ptn ##REGEX_POSIX.
 
     FIND REGEX regex IN subject SUBMATCHES m0 m1 ##REGEX_POSIX.
     IF sy-subrc = 0.
@@ -2691,7 +2691,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     definition_data = NEW #( value_type = 'lcl_hashmap:lcl_hashmap' ).
 
     " standardize line breaks
-    REPLACE ALL OCCURRENCES OF REGEX '\r?\n' IN text WITH %_newline.
+    REPLACE ALL OCCURRENCES OF REGEX '\r?\n' IN text WITH %_newline ##REGEX_POSIX.
 
     " remove surrounding line breaks
     text = trim(
@@ -2743,9 +2743,9 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     DATA regex TYPE string.
 
     result = str.
-    REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN mask WITH '\\$1'.
+    REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN mask WITH '\\$1' ##REGEX_POSIX.
     CONCATENATE '(\A[' mask ']*)|([' mask ']*\Z)' INTO regex.
-    REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH ''.
+    REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH '' ##REGEX_POSIX.
   ENDMETHOD.                    "trim
 
 
@@ -2756,10 +2756,10 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     result = text.
 
     IF breaks_enabled IS NOT INITIAL.
-      REPLACE ALL OCCURRENCES OF REGEX '[ ]*\n' IN result WITH break.
+      REPLACE ALL OCCURRENCES OF REGEX '[ ]*\n' IN result WITH break ##REGEX_POSIX.
     ELSE.
-      REPLACE ALL OCCURRENCES OF REGEX '(?:[ ][ ]+|[ ]*\\)\n' IN result WITH break.
-      REPLACE ALL OCCURRENCES OF REGEX ' \n' IN result WITH %_newline.
+      REPLACE ALL OCCURRENCES OF REGEX '(?:[ ][ ]+|[ ]*\\)\n' IN result WITH break ##REGEX_POSIX.
+      REPLACE ALL OCCURRENCES OF REGEX ' \n' IN result WITH %_newline ##REGEX_POSIX.
     ENDIF.
   ENDMETHOD.                    "unmarked_text
 
@@ -2822,7 +2822,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     result = source.
 
-    FIND ALL OCCURRENCES OF REGEX 'href\s*=\s*"([^"]*)"' IN result RESULTS matches ##SUBRC_OK.
+    FIND ALL OCCURRENCES OF REGEX 'href\s*=\s*"([^"]*)"' IN result RESULTS matches ##SUBRC_OK ##REGEX_POSIX.
 
     SORT matches DESCENDING BY line DESCENDING offset.
 
@@ -2837,7 +2837,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     CLEAR matches.
 
-    FIND ALL OCCURRENCES OF REGEX 'src\s*=\s*"([^"]*)"' IN result RESULTS matches ##SUBRC_OK.
+    FIND ALL OCCURRENCES OF REGEX 'src\s*=\s*"([^"]*)"' IN result RESULTS matches ##SUBRC_OK ##REGEX_POSIX.
 
     SORT matches DESCENDING BY line DESCENDING offset.
 
@@ -2891,7 +2891,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     LOOP AT lines INTO line.
 
       chopped_line = line.
-      REPLACE REGEX '\s+$' IN chopped_line WITH ''.
+      REPLACE REGEX '\s+$' IN chopped_line WITH '' ##REGEX_POSIX.
       IF strlen( chopped_line ) = 0.
         current_block-interrupted = abap_true.
         CONTINUE.

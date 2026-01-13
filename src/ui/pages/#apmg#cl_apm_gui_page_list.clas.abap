@@ -957,7 +957,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     IF sy-subrc = 0.
       FIND FIRST OCCURRENCE OF REGEX 'filter=(.*)'
         IN <postdata>
-        SUBMATCHES settings-list_settings-filter ##SUBRC_OK.
+        SUBMATCHES settings-list_settings-filter ##SUBRC_OK ##REGEX_POSIX.
     ENDIF.
 
     settings-list_settings-filter = condense( settings-list_settings-filter ).

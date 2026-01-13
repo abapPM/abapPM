@@ -368,7 +368,7 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
 
     " Validate port if present
     IF port IS NOT INITIAL.
-      IF NOT matches( val = port regex = '^\d+$' ).
+      IF NOT matches( val = port regex = '^\d+$' ) ##REGEX_POSIX.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid port number'.
       ENDIF.
       IF port NOT BETWEEN 0 AND 65535.
@@ -517,7 +517,7 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
 
     " Check each part
     LOOP AT parts INTO DATA(part).
-      IF NOT matches( val = part regex = '^\d+$' ).
+      IF NOT matches( val = part regex = '^\d+$' ) ##REGEX_POSIX.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid IPv4 address: non-numeric segment'.
       ENDIF.
       IF part NOT BETWEEN 0 AND 255.
@@ -565,7 +565,7 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
       ENDIF.
 
       " Validate hexadecimal format and length
-      IF NOT matches( val = part regex = '^[0-9A-Fa-f]{1,4}$' ).
+      IF NOT matches( val = part regex = '^[0-9A-Fa-f]{1,4}$' ) ##REGEX_POSIX.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid IPv6 address: invalid hexadecimal piece'.
       ENDIF.
     ENDLOOP.
@@ -575,7 +575,7 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
 
   METHOD validate_scheme.
 
-    IF NOT matches( val = scheme regex = '^[A-Za-z][-A-Za-z0-9+.]*' ).
+    IF NOT matches( val = scheme regex = '^[A-Za-z][-A-Za-z0-9+.]*' ) ##REGEX_POSIX.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid scheme'.
     ENDIF.
 

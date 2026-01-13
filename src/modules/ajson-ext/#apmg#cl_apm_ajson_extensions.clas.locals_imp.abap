@@ -56,7 +56,7 @@ ENDCLASS.
 CLASS lcl_from_camel_case_underscore IMPLEMENTATION.
 
   METHOD /apmg/if_apm_ajson_mapping~rename_node.
-    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN cv_name WITH `$1_$2`.
+    REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN cv_name WITH `$1_$2` ##REGEX_POSIX.
   ENDMETHOD.
 
   METHOD /apmg/if_apm_ajson_mapping~to_abap. " deprecated

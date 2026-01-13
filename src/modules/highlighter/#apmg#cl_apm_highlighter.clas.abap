@@ -114,7 +114,7 @@ CLASS /apmg/cl_apm_highlighter IMPLEMENTATION.
     IF regex IS NOT INITIAL.
       rule-regex = NEW #(
         pattern     = regex
-        ignore_case = abap_true ).
+        ignore_case = abap_true ) ##REGEX_POSIX.
     ENDIF.
 
     APPEND rule TO rules.

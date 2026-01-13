@@ -87,14 +87,14 @@ CLASS /apmg/cl_apm_code_mapper IMPLEMENTATION.
           map-new_object = replace(
             val   = <tadir>-obj_name
             regex = <rule>-old_object
-            with  = <rule>-new_object ).
+            with  = <rule>-new_object ) ##REGEX_POSIX.
 
           " Remove first underscore after namespace:
           " PROG Z_TEST becomes /NAMESPACE/TEST (instead of /NAMESPACE/_TEST)
           map-new_object = replace(
             val   = map-new_object
             regex = '(/.+/)_'
-            with  = '$1' ).
+            with  = '$1' ) ##REGEX_POSIX.
         ENDIF.
         IF map-new_object <> <tadir>-obj_name.
           IF strlen( map-new_object ) > 30.

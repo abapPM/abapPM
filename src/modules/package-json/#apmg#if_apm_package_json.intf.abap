@@ -7,7 +7,6 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * Similar to @npmcli/package-json but with its own persistence
-*
 * https://www.npmjs.com/package/@npmcli/package-json
 ************************************************************************
 

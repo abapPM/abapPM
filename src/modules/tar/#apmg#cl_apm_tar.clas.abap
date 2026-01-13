@@ -601,10 +601,10 @@ CLASS /apmg/cl_apm_tar IMPLEMENTATION.
 
       " Header block
       DATA(header) = VALUE ty_header(
-        mode     = _pad( number = <file>-mode length = 7 )
+        mode     = _pad( number = <file>-mode     length = 7 )
         uid      = ''
         gid      = ''
-        size     = _pad( number = <file>-size length = 11 )
+        size     = _pad( number = <file>-size     length = 11 )
         mtime    = _pad( number = <file>-unixtime length = 11 )
         typeflag = <file>-typeflag
         magic    = c_ustar_magic

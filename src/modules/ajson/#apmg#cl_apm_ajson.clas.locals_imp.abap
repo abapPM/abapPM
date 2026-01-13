@@ -479,7 +479,7 @@ CLASS lcl_json_parser IMPLEMENTATION.
               lt_attributes = lo_open->get_attributes( ).
               " JSON nodes always have one "name" attribute
               READ TABLE lt_attributes INTO lo_attr INDEX 1.
-              ASSERT sy-subrc = 0.
+              ASSERT sy-subrc = 0 AND lo_attr->qname-name = 'name'.
               <item>-name = lo_attr->get_value( ).
               IF mv_keep_item_order = abap_true.
                 <item>-order = lr_stack_top->children.
@@ -660,7 +660,7 @@ CLASS lcl_json_serializer IMPLEMENTATION.
         lv_item = lv_item && 'null'.
       WHEN OTHERS.
         /apmg/cx_apm_ajson_error=>raise(
-          iv_msg = |Unexpected type [{ is_node-type }]|
+          iv_msg      = |Unexpected type [{ is_node-type }]|
           iv_location = is_node-path && is_node-name ).
     ENDCASE.
 
@@ -745,30 +745,30 @@ CLASS lcl_json_serializer IMPLEMENTATION.
       " TODO consider performance ...
       " see also https://www.json.org/json-en.html
       rv_escaped = replace(
-        val = rv_escaped
-        sub = '\'
+        val  = rv_escaped
+        sub  = '\'
         with = '\\'
-        occ = 0 ).
+        occ  = 0 ).
       rv_escaped = replace(
-        val = rv_escaped
-        sub = |\n|
+        val  = rv_escaped
+        sub  = |\n|
         with = '\n'
-        occ = 0 ).
+        occ  = 0 ).
       rv_escaped = replace(
-        val = rv_escaped
-        sub = |\r|
+        val  = rv_escaped
+        sub  = |\r|
         with = '\r'
-        occ = 0 ).
+        occ  = 0 ).
       rv_escaped = replace(
-        val = rv_escaped
-        sub = |\t|
+        val  = rv_escaped
+        sub  = |\t|
         with = '\t'
-        occ = 0 ).
+        occ  = 0 ).
       rv_escaped = replace(
-        val = rv_escaped
-        sub = '"'
+        val  = rv_escaped
+        sub  = '"'
         with = '\"'
-        occ = 0 ).
+        occ  = 0 ).
 
     ENDIF.
 
@@ -788,7 +788,7 @@ CLASS lcl_json_to_abap DEFINITION FINAL.
       IMPORTING
         !iv_corresponding  TYPE abap_bool DEFAULT abap_false
         !ii_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
-        !ii_refs_initiator TYPE REF TO /apmg/if_apm_ajson_refs_init OPTIONAL.
+        !ii_refs_initiator TYPE REF TO /apmg/if_apm_ajson_ref_initial OPTIONAL.
 
     METHODS to_abap
       IMPORTING
@@ -844,7 +844,7 @@ CLASS lcl_json_to_abap DEFINITION FINAL.
 
     DATA mr_nodes TYPE REF TO /apmg/if_apm_ajson_types=>ty_nodes_ts.
     DATA mi_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping.
-    DATA mi_refs_initiator TYPE REF TO /apmg/if_apm_ajson_refs_init.
+    DATA mi_refs_initiator TYPE REF TO /apmg/if_apm_ajson_ref_initial.
     DATA mv_corresponding TYPE abap_bool.
 
     METHODS any_to_abap
@@ -953,9 +953,9 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
           lo_sdescr ?= is_parent_type-dd.
           lo_sdescr->get_component_type(
             EXPORTING
-              p_name      = rs_node_type-target_field_name
+              p_name              = rs_node_type-target_field_name
             RECEIVING
-              p_descr_ref = rs_node_type-dd
+              p_descr_ref         = rs_node_type-dd
             EXCEPTIONS
               component_not_found = 4 ).
           IF sy-subrc <> 0.
@@ -1147,11 +1147,11 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
         RAISE EXCEPTION lx_ajson.
       CATCH cx_sy_conversion_no_number.
         /apmg/cx_apm_ajson_error=>raise(
-          iv_msg = 'Source is not a number'
+          iv_msg      = 'Source is not a number'
           iv_location = <n>-path && <n>-name ).
       CATCH cx_root INTO lx_root.
         /apmg/cx_apm_ajson_error=>raise(
-          iv_msg = lx_root->get_text( )
+          iv_msg      = lx_root->get_text( )
           iv_location = <n>-path && <n>-name ).
     ENDTRY.
 
@@ -1211,7 +1211,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
 
     FIND FIRST OCCURRENCE OF REGEX '^(\d{4})-(\d{2})-(\d{2})(T|$)' "#EC NOTEXT
       IN iv_value
-      SUBMATCHES lv_y lv_m lv_d.
+      SUBMATCHES lv_y lv_m lv_d ##REGEX_POSIX.
     IF sy-subrc <> 0.
       /apmg/cx_apm_ajson_error=>raise( 'Unexpected date format' ).
     ENDIF.
@@ -1269,7 +1269,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
       IN iv_value SUBMATCHES
         ls_timestamp-year ls_timestamp-month ls_timestamp-day ls_timestamp-t
         ls_timestamp-hour ls_timestamp-minute ls_timestamp-second
-        ls_timestamp-local_sign ls_timestamp-local_hour ls_timestamp-local_minute.
+        ls_timestamp-local_sign ls_timestamp-local_hour ls_timestamp-local_minute ##REGEX_POSIX.
 
     IF sy-subrc = 0.
 
@@ -1280,7 +1280,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
       FIND FIRST OCCURRENCE OF REGEX lc_regex_ts_utc
         IN iv_value SUBMATCHES
           ls_timestamp-year ls_timestamp-month ls_timestamp-day ls_timestamp-t
-          ls_timestamp-hour ls_timestamp-minute ls_timestamp-second ls_timestamp-frac.
+          ls_timestamp-hour ls_timestamp-minute ls_timestamp-second ls_timestamp-frac ##REGEX_POSIX.
 
       IF sy-subrc <> 0.
         /apmg/cx_apm_ajson_error=>raise( 'Unexpected timestamp format' ).
@@ -1334,7 +1334,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
 
     FIND FIRST OCCURRENCE OF REGEX '^(\d{2}):(\d{2}):(\d{2})(T|$)' "#EC NOTEXT
       IN iv_value
-      SUBMATCHES lv_h lv_m lv_s.
+      SUBMATCHES lv_h lv_m lv_s ##REGEX_POSIX.
     IF sy-subrc <> 0.
       /apmg/cx_apm_ajson_error=>raise( 'Unexpected time format' ).
     ENDIF.
@@ -1524,7 +1524,7 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
         iv_index      = iv_array_index
         iv_item_order = iv_item_order
       CHANGING
-        ct_nodes = rt_nodes ).
+        ct_nodes      = rt_nodes ).
 
   ENDMETHOD.
 
@@ -1534,35 +1534,35 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
       WHEN cl_abap_typedescr=>kind_elem.
         convert_value(
           EXPORTING
-            iv_data   = iv_data
-            io_type   = io_type
-            is_prefix = is_prefix
-            iv_index  = iv_index
+            iv_data       = iv_data
+            io_type       = io_type
+            is_prefix     = is_prefix
+            iv_index      = iv_index
             iv_item_order = iv_item_order
           CHANGING
-            ct_nodes = ct_nodes ).
+            ct_nodes      = ct_nodes ).
 
       WHEN cl_abap_typedescr=>kind_struct.
         convert_struc(
           EXPORTING
-            iv_data   = iv_data
-            io_type   = io_type
-            is_prefix = is_prefix
-            iv_index  = iv_index
+            iv_data       = iv_data
+            io_type       = io_type
+            is_prefix     = is_prefix
+            iv_index      = iv_index
             iv_item_order = iv_item_order
           CHANGING
-            ct_nodes = ct_nodes ).
+            ct_nodes      = ct_nodes ).
 
       WHEN cl_abap_typedescr=>kind_table.
         convert_table(
           EXPORTING
-            iv_data   = iv_data
-            io_type   = io_type
-            is_prefix = is_prefix
-            iv_index  = iv_index
+            iv_data       = iv_data
+            io_type       = io_type
+            is_prefix     = is_prefix
+            iv_index      = iv_index
             iv_item_order = iv_item_order
           CHANGING
-            ct_nodes = ct_nodes ).
+            ct_nodes      = ct_nodes ).
 
       WHEN OTHERS.
 
@@ -1571,23 +1571,23 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
           " Initial references will result in "null"
           convert_ref(
             EXPORTING
-              iv_data   = iv_data
-              is_prefix = is_prefix
-              iv_index  = iv_index
+              iv_data       = iv_data
+              is_prefix     = is_prefix
+              iv_index      = iv_index
               iv_item_order = iv_item_order
             CHANGING
-              ct_nodes = ct_nodes ).
+              ct_nodes      = ct_nodes ).
 
         ELSEIF io_type->type_kind = lif_kind=>object_ref
           AND cl_abap_typedescr=>describe_by_object_ref( iv_data )->absolute_name = gv_ajson_absolute_type_name.
           convert_ajson(
             EXPORTING
-              io_json   = iv_data
-              is_prefix = is_prefix
-              iv_index  = iv_index
+              io_json       = iv_data
+              is_prefix     = is_prefix
+              iv_index      = iv_index
               iv_item_order = iv_item_order
             CHANGING
-              ct_nodes = ct_nodes ).
+              ct_nodes      = ct_nodes ).
         ELSE.
           /apmg/cx_apm_ajson_error=>raise( |Unsupported type [{ io_type->type_kind
             }] @{ is_prefix-path && is_prefix-name }| ).
@@ -1870,12 +1870,12 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
 
       convert_any(
         EXPORTING
-          iv_data   = <val>
-          io_type   = <c>-type
-          is_prefix = ls_next_prefix
+          iv_data       = <val>
+          io_type       = <c>-type
+          is_prefix     = ls_next_prefix
           iv_item_order = lv_item_order
         CHANGING
-          ct_nodes = ct_nodes ).
+          ct_nodes      = ct_nodes ).
 
     ENDLOOP.
 
@@ -1932,7 +1932,7 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
           is_prefix = ls_next_prefix
           iv_index  = <root>-children + 1
         CHANGING
-          ct_nodes = ct_nodes ).
+          ct_nodes  = ct_nodes ).
 
       <root>-children = <root>-children + 1.
       lv_tabix = lv_tabix + 1.
@@ -1961,7 +1961,7 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
         iv_index      = iv_array_index
         iv_item_order = iv_item_order
       CHANGING
-        ct_nodes = rt_nodes ).
+        ct_nodes      = rt_nodes ).
 
   ENDMETHOD.
 
@@ -2112,9 +2112,9 @@ CLASS lcl_filter_runner IMPLEMENTATION.
 
           walk(
             EXPORTING
-              iv_path = iv_path && ls_node-name && `/`
+              iv_path   = iv_path && ls_node-name && `/`
             CHANGING
-              cs_parent    = ls_node ).
+              cs_parent = ls_node ).
 
           IF mi_filter->keep_node(
               is_node  = ls_node
@@ -2319,7 +2319,7 @@ CLASS lcl_mutator_queue IMPLEMENTATION.
         EXPORTING
           it_source_tree = <from>
         IMPORTING
-          et_dest_tree = <to> ).
+          et_dest_tree   = <to> ).
     ENDLOOP.
 
   ENDMETHOD.

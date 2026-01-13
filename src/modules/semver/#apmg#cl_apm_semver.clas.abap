@@ -503,7 +503,7 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
           ELSE |^{ /apmg/cl_apm_semver_re=>token-prerelease-safe_src }$| ).
 
         TRY.
-            DATA(r) = NEW cl_abap_regex( pattern = regex ).
+            DATA(r) = NEW cl_abap_regex( pattern = regex ) ##REGEX_POSIX.
             DATA(m) = r->create_matcher( text = |-{ identifier }| ).
 
             IF NOT m->match( ) OR m->get_submatch( 1 ) <> identifier.
