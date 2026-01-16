@@ -73,6 +73,7 @@ This project includes the code for the following open-source projects. Please su
 - [AJSON](https://github.com/sbcgua/ajson), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/ajson/blob/main/LICENSE)
 - [ABAP String Map](https://github.com/sbcgua/abap-string-map), Alexander Tsybulsky, [MIT](https://github.com/sbcgua/abap-string-map/blob/main/LICENSE)
 - [ABAP Logger](https://github.com/ABAP-Logger/ABAP-Logger), Eric Peterson, [MIT](https://github.com/ABAP-Logger/ABAP-Logger/blob/main/LICENSE)
+- [node semver](https://github.com/npm/node-semver), Isaac Z. Schlueter and Contributors, [ISC](https://github.com/npm/node-semver/blob/main/LICENSE)
 
 ## About
 
