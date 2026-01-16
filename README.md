@@ -6,7 +6,7 @@
 </div>
 
 ![Version](https://img.shields.io/endpoint?url=https://shield.abappm.com/github/abapPM/abapPM/src/main/%2523apmg%2523if_apm_version.intf.abap/c_version&label=Version&color=blue)
-[![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://raw.githubusercontent.com/abapPM/abapPM/main/build/zabappm_standalone.prog.abap)
+[![Download](https://img.shields.io/badge/Download-Click_Here-blue)](https://raw.githubusercontent.com/abapPM/abapPM-Standalone/refs/heads/main/src/zabappm_standalone.prog.abap)
 
 [![License](https://img.shields.io/github/license/abapPM/abapPM?label=License&color=success)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?color=success)](https://github.com/abapPM/.github/blob/main/CODE_OF_CONDUCT.md)
@@ -40,7 +40,7 @@ These limitations are planned to be removed in future releases.
 
 ## Installation
 
-1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://github.com/abapPM/abapPM-Standalone/src/zabappm_standalone.prog.abap)
+1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://raw.githubusercontent.com/abapPM/abapPM-Standalone/refs/heads/main/src/zabappm_standalone.prog.abap)
 1. Create SAP package `$ABAPPM` in your system
 1. Create the program `ZABAPPM_STANDALONE` in package `$ABAPPM`, upload the code, and activate
 1. Create transaction `ZAPM` in package `$ABAPPM` for the program `ZABAPPM_STANDALONE`
