@@ -425,7 +425,10 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
 
 
   METHOD parse_comparator.
-    result = comp.
+    result = replace(
+      val   = comp
+      regex = /apmg/cl_apm_semver_re=>token-build-src
+      with  = '' ) ##REGEX_POSIX.
     result = replace_carets( comp = result loose = loose incpre = incpre ).
     result = replace_tildes( comp = result loose = loose incpre = incpre ).
     result = replace_xranges( comp = result loose = loose incpre = incpre ).

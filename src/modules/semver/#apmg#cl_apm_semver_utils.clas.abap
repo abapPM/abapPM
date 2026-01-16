@@ -42,7 +42,7 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
     " Unsigned number (could be bigger than int4 or even int8)
 
     TRY.
-        result = xsdbool( |{ data }| CO '0123456789' ).
+        result = xsdbool( condense( |{ data }| ) CO '0123456789' ).
       CATCH cx_root.
         " can't be converted to string/numeric
         result = abap_false.

@@ -155,16 +155,18 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
 
     " ## Pre-release Version Identifier
     " A numeric identifier, or a non-numeric identifier.
+    " Non-numberic identifiers include numeric identifiers but can be longer.
+    " Therefore non-numeric identifiers must go first.
 
     create_token(
       name  = 'PRERELEASEIDENTIFIER'
-      value = |(?:{ token-numericidentifier-src }\|| &&
-              |{ token-nonnumericidentifier-src })| ).
+      value = |(?:{ token-nonnumericidentifier-src }\|| &&
+              |{ token-numericidentifier-src })| ).
 
     create_token(
       name  = 'PRERELEASEIDENTIFIERLOOSE'
-      value = |(?:{ token-numericidentifierloose-src }\|| &&
-              |{ token-nonnumericidentifier-src })| ).
+      value = |(?:{ token-nonnumericidentifier-src }\|| &&
+              |{ token-numericidentifierloose-src })| ).
 
     " ## Pre-release Version
     " Hyphen, followed by one or more dot-separated pre-release version

@@ -162,12 +162,20 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
 
     CHECK semver IS BOUND.
 
-    result = /apmg/cl_apm_semver_identifier=>compare_identifiers( a = major b = semver->major ).
-    IF result = 0.
-      result = /apmg/cl_apm_semver_identifier=>compare_identifiers( a = minor b = semver->minor ).
-      IF result = 0.
-        result = /apmg/cl_apm_semver_identifier=>compare_identifiers( a = patch b = semver->patch ).
-      ENDIF.
+    IF major < semver->major.
+      result = -1.
+    ELSEIF major > semver->major.
+      result = 1.
+    ELSEIF minor < semver->minor.
+      result = -1.
+    ELSEIF minor > semver->minor.
+      result = 1.
+    ELSEIF patch < semver->patch.
+      result = -1.
+    ELSEIF patch > semver->patch.
+      result = 1.
+    ELSE.
+      result = 0.
     ENDIF.
 
   ENDMETHOD.
@@ -499,12 +507,11 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
       IF identifier IS NOT INITIAL.
         DATA(regex) = COND #(
           WHEN options-loose = abap_true
-          THEN |^{ /apmg/cl_apm_semver_re=>token-prereleaseloose-safe_src }$|
-          ELSE |^{ /apmg/cl_apm_semver_re=>token-prerelease-safe_src }$| ).
+          THEN /apmg/cl_apm_semver_re=>token-prereleaseloose-regex
+          ELSE /apmg/cl_apm_semver_re=>token-prerelease-regex ).
 
         TRY.
-            DATA(r) = NEW cl_abap_regex( pattern = regex ) ##REGEX_POSIX.
-            DATA(m) = r->create_matcher( text = |-{ identifier }| ).
+            DATA(m) = regex->create_matcher( text = |-{ identifier }| ).
 
             IF NOT m->match( ) OR m->get_submatch( 1 ) <> identifier.
               RAISE EXCEPTION TYPE /apmg/cx_apm_error_text

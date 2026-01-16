@@ -253,7 +253,11 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
       DATA(tabix) = sy-tabix.
 
       IF coerce = abap_true.
-        DATA(semver) = /apmg/cl_apm_semver_functions=>coerce( version = <version> rtl = rtl ).
+        DATA(semver) = /apmg/cl_apm_semver_functions=>coerce(
+          version = <version>
+          rtl     = rtl
+          loose   = loose
+          incpre  = incpre ).
         IF semver IS BOUND.
           <version> = semver->version.
         ELSE.
@@ -262,8 +266,12 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
-      IF NOT /apmg/cl_apm_semver_functions=>valid( <version> ).
+      DATA(valid) = /apmg/cl_apm_semver_functions=>valid( version = <version> loose = loose incpre = incpre ).
+
+      IF valid IS INITIAL.
         DELETE versions INDEX tabix.
+      ELSE.
+        <version> = valid.
       ENDIF.
 
     ENDLOOP.
