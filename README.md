@@ -32,7 +32,7 @@ SAP Basis 7.50 or higher
 
 - Only "prefix" folder logic
 - Only local packages (no transports)
-- No parallel processing (for serializing package)
+- No parallel processing (for installing or publishing packages)
 - Always all languages (no "main language only")
 - Always complete package hierarchy (no "ignore sub-packages")
 
