@@ -40,11 +40,11 @@ These limitations are planned to be removed in future releases.
 
 ## Installation
 
-1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://raw.githubusercontent.com/abapPM/abapPM/main/build/zabappm_standalone.prog.abap)
-1. Create SAP package `$ZAPM` in your system
-1. Create the program `ZABAPPM_STANDALONE` in package `$ZAPM`, upload the code, and activate
-1. Create transaction `ZAPM` in package `$ZAPM` for the program `ZABAPPM_STANDALONE`
-
+1. Download the standalone version of apm from [zabappm_standalone.prog.abap](https://github.com/abapPM/abapPM-Standalone/src/zabappm_standalone.prog.abap)
+1. Create SAP package `$ABAPPM` in your system
+1. Create the program `ZABAPPM_STANDALONE` in package `$ABAPPM`, upload the code, and activate
+1. Create transaction `ZAPM` in package `$ABAPPM` for the program `ZABAPPM_STANDALONE`
+ 
 ## Usage
 
 Start apm using transaction `ZAPM`. The start screen shows a list of installed packages, which on your first run will be empty. On the top right, it shows the current registry which by default is `playground.abappm.com`. You can install from or publish any package to this playground registry (see [Playground Rules (t.b.d.)](https://docs.abappm.com/user-guide/playground.html)).
@@ -57,12 +57,10 @@ Now build awesome things with ABAP packages and share them with your fellow ABAP
 
 All contributions are welcome! Read our [Contribution Guidelines](https://github.com/abapPM/abapPM/blob/main/CONTRIBUTING.md), fork this repo, and create a pull request.
 
-Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) by creating a new online repository for `https://github.com/abapPM/abapPM`.
-
-Recommended SAP Package: `/APMG/APM`
+Install the developer version of *apm* using [abapGit](https://github.com/abapGit/abapGit) by creating a new online repository for `https://github.com/abapPM/abapPM` abd SAP Package `/APMG/APM`.
 
 > [!IMPORTANT]
-> Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on [apm GitHub](https://github.com/abapPM) or the [apm Website](https://abappm.com) and contribute to its repository.
+> Do not change dependencies found in `/src/modules`. To change a dependency, find the corresponding module on [apm GitHub](https://github.com/abapPM) or the [apm Website](https://abappm.com) and contribute to the corresponding repository.
 
 > [!NOTE]
 > Unlike other projects, a build process is required to create the standalone version. This process is not automated or documented, yet!
