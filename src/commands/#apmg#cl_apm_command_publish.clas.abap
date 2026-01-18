@@ -118,11 +118,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     " Include a list of all objects which the registry will compare against the global object
     " directory (GTADIR) to avoid name conflicts with other packages
     LOOP AT files ASSIGNING FIELD-SYMBOL(<file>).
-      DATA(item) = VALUE /apmg/if_apm_types=>ty_tadir_object(
-        pgmid    = 'R3TR'
-        object   = <file>-item-obj_type
-        obj_name = <file>-item-obj_name ).
-
+      DATA(item) = |{ <file>-item-obj_type },{ <file>-item-obj_name }|.
       COLLECT item INTO packument-_objects.
     ENDLOOP.
 
@@ -135,15 +131,12 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     DATA(dist) = /apmg/cl_apm_command_integrity=>get_integrity( tarball ).
 
-    DATA(name) = packument-name.
-    IF name(1) = '@'.
-      SPLIT name AT '/' INTO DATA(rest) name ##NEEDED.
-    ENDIF.
-    DATA(filename) = |{ name }-{ version }.tgz|.
+    DATA(package_name) = /apmg/cl_apm_command_utils=>get_package_from_name( packument-name ).
+    DATA(filename) = |{ package_name }-{ version }.tgz|.
 
     dist-file_count    = tar->file_count( ).
     dist-unpacked_size = tar->unpacked_size( ).
-    dist-tarball       = |{ registry }/{ name }/-/{ filename }|.
+    dist-tarball       = |{ registry }/{ packument-name }/-/{ filename }|.
 
     packument-versions[ key = version ]-manifest-dist = dist.
 

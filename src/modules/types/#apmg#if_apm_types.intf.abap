@@ -225,7 +225,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       _id          TYPE string,
       _rev         TYPE string,
       _attachments TYPE ty_attachments,
-      _objects     TYPE ty_tadir_objects,
+      _objects     TYPE string_table,
       access       TYPE string,
     END OF ty_packument.
 

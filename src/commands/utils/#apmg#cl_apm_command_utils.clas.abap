@@ -67,6 +67,25 @@ CLASS /apmg/cl_apm_command_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS get_package_from_name
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS get_scope_from_name
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS get_name_from_scope_package
+      IMPORTING
+        scope         TYPE string OPTIONAL
+        package       TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
     CLASS-METHODS check_response
       IMPORTING
         !response     TYPE REF TO /apmg/if_apm_http_response
@@ -236,6 +255,28 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_name_from_scope_package.
+
+    IF scope IS INITIAL.
+      result = package.
+    ELSE.
+      result = |{ scope }/{ package }|.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_package_from_name.
+
+    IF name(1) = '@' AND name CA '/'.
+      result = substring_after( val = name sub = '/' ).
+    ELSE.
+      result = name.
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD get_packument_from_registry.
 
     " The abbreviated manifest would be sufficient for installer
@@ -247,6 +288,17 @@ CLASS /apmg/cl_apm_command_utils IMPLEMENTATION.
     pacote->packument( write ).
 
     result = pacote->get( ).
+
+  ENDMETHOD.
+
+
+  METHOD get_scope_from_name.
+
+    IF name(1) = '@' AND name CA '/'.
+      result = substring_before( val = name sub = '/' ).
+    ELSE.
+      result = ''.
+    ENDIF.
 
   ENDMETHOD.
 
