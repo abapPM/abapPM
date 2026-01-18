@@ -225,7 +225,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-edit_readme.
 
-        rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
+        rs_handled-page = /apmg/cl_apm_gui_page_db_entry=>create(
           key          = /apmg/cl_apm_readme=>get_package_key( package )
           edit_mode    = abap_true
           back_on_save = abap_true ).
@@ -233,7 +233,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
       WHEN c_action-edit_json.
 
-        rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
+        rs_handled-page = /apmg/cl_apm_gui_page_db_entry=>create(
           key          = /apmg/cl_apm_package_json=>get_package_key( package )
           edit_mode    = abap_true
           back_on_save = abap_true ).
@@ -754,7 +754,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           html->add( '</div>' ).
         ELSE.
           render_header_content(
-            html   = html
+            html  = html
             image = /apmg/cl_apm_html=>icon( 'markdown' )
             text  = |{ markdown-path+1 }{ markdown-filename }| ).
         ENDIF.
@@ -763,14 +763,14 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
         " TODO: Replace with dependencies icon
         render_header_content(
-          html   = html
+          html  = html
           image = /apmg/cl_apm_html=>icon( 'code-fork-solid' )
           text  = 'Dependencies' ).
 
       WHEN c_action-view_json.
 
         render_header_content(
-          html   = html
+          html  = html
           image = /apmg/cl_apm_html=>icon( 'code-solid' )
           text  = 'package.abap.json' ).
 
@@ -926,6 +926,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       name  = package_json-name
       value = package_json-version ) ).
     html->add( '</span>' ).
+    " TODO: link to apm registry
+*    html->add( '<span class="indent5em">' )
+*    html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry_link(
+*      iv_name    = package_json-name
+*      iv_version = package_json-version ) )
+*    html->add( '</span>' )
     html->add( '</td>' ).
     html->add( '<td class="right">' ).
     html->add( get_toolbar( )->render( iv_right = abap_true ) ).

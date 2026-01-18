@@ -77,6 +77,15 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS render_registry_link
+      IMPORTING
+        !iv_name       TYPE string
+        !iv_version    TYPE string OPTIONAL
+      RETURNING
+        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
     CLASS-METHODS render_package_name
       IMPORTING
         !iv_package        TYPE devclass
@@ -374,7 +383,7 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
 
     li_html->add( |<div class="form-field-help-tooltip{ lv_add_class }">| ).
     li_html->add_icon(
-      iv_name = 'question-circle-solid'
+      iv_name  = 'question-circle-solid'
       iv_class = 'blue' ).
     li_html->add( `<div class="form-field-help-tooltip-text">` ).
     li_html->add( iv_text_to_wrap ).
@@ -430,12 +439,14 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
 
 
   METHOD render_js_error_banner.
+
     ri_html = /apmg/cl_apm_html=>create( ).
     ri_html->add( '<div id="js-error-banner" class="dummydiv error">' ).
     ri_html->add( |{ ri_html->icon( 'exclamation-triangle/red' ) }| &&
                   ' If this does not disappear soon,' &&
                   ' then there is a JS init error, please log an issue' ).
     ri_html->add( '</div>' ).
+
   ENDMETHOD.
 
 
@@ -478,6 +489,21 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
     ELSE.
       ri_html->add( iv_package ).
     ENDIF.
+    ri_html->add( '</span>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_registry_link.
+
+    ri_html = /apmg/cl_apm_html=>create( ).
+
+    ri_html->add( |<span class="registry-link">| ).
+*    ri_html = ri_html->add_a(
+*      iv_txt   = shorten_repo_url( lv_url )
+*      iv_title = lv_url
+*      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ lv_url }|
+*      iv_class = 'url' )
     ri_html->add( '</span>' ).
 
   ENDMETHOD.
