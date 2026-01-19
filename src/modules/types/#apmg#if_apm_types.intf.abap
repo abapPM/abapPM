@@ -195,15 +195,6 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     ty_attachments TYPE STANDARD TABLE OF ty_attachment WITH KEY key.
 
   TYPES:
-    "! List of Objects for Global Directory (GTADIR)
-    BEGIN OF ty_tadir_object,
-      pgmid    TYPE tadir-pgmid,
-      object   TYPE tadir-object,
-      obj_name TYPE tadir-obj_name,
-    END OF ty_tadir_object,
-    ty_tadir_objects TYPE SORTED TABLE OF ty_tadir_object WITH UNIQUE KEY pgmid object obj_name.
-
-  TYPES:
     "! Full packument (as fetched from registry)
     "! Some fields are hoisted from latest version to root
     BEGIN OF ty_packument ##NEEDED,
