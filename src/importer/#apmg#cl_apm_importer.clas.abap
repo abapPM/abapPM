@@ -109,11 +109,11 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           DATA(target) = zcl_abapgit_factory=>get_sap_package( <package>-target_package ).
 
           IF NOT target->exists( ).
-            DATA(package) = VALUE zif_abapgit_sap_package=>ty_create(
-              parentcl = <package>-parent_package
-              devclass = <package>-target_package
-              ctext    = source->read_description( )
-              as4user  = sy-uname ).
+            DATA(package) = source->get( ).
+
+            package-parentcl = <package>-parent_package.
+            package-devclass = <package>-target_package.
+            package-as4user  = sy-uname.
 
             IF <package>-target_package(1) = '$'.
               package-dlvunit = 'LOCAL'.
@@ -330,7 +330,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     DATA handler TYPE REF TO /apmg/if_apm_object.
 
     DATA(log) = NEW zcl_abapgit_log( ).
-    DATA(progress) = zcl_abapgit_progress=>get_instance( lines( map ) ).
+
+    DATA(progress) = /apmg/cl_apm_progress_bar=>get_instance( lines( map ) ).
 
     IF is_log = abap_true.
       FORMAT COLOR COL_HEADING.
@@ -353,8 +354,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     LOOP AT map INTO DATA(mapping).
 
       progress->show(
-        iv_current = sy-tabix
-        iv_text    = |Importing { mapping-new_object }| ).
+        current = sy-tabix
+        text    = |Importing { mapping-new_object }| ).
 
       IF is_log = abap_true.
         WRITE: /

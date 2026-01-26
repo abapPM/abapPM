@@ -350,11 +350,11 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
   METHOD _files.
 
-    DATA(progress) = zcl_abapgit_progress=>get_instance( 100 ).
+    DATA(progress) = /apmg/cl_apm_progress_bar=>get_instance( 100 ).
 
     progress->show(
-      iv_text    = 'Uploading package'
-      iv_current = 5 ).
+      text    = 'Uploading package'
+      current = 5 ).
 
     " Load ZIP File
     CASE enum_source.
@@ -373,8 +373,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
     ENDCASE.
 
     progress->show(
-      iv_text    = 'Unpacking files from package'
-      iv_current = 10 ).
+      text    = 'Unpacking files from package'
+      current = 10 ).
 
     CASE enum_source.
       WHEN c_enum_source-internet
@@ -390,8 +390,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     " Scan for viruses and unzip
     progress->show(
-      iv_text    = 'Scanning files for viruses'
-      iv_current = 20 ).
+      text    = 'Scanning files for viruses'
+      current = 20 ).
 
     /apmg/cl_apm_installer_files=>virus_scan( package_data ).
 

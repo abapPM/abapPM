@@ -101,16 +101,17 @@ CLASS /apmg/cl_apm_code_import_rules IMPLEMENTATION.
       DATA(tabix) = sy-tabix.
       CLEAR rule.
       DO 5 TIMES.
-        DATA(pos) = |Tabix { tabix } Index { sy-index }|.
+        DATA(pos) = |(Tabix { tabix } Index { sy-index })|.
         READ TABLE tokens ASSIGNING FIELD-SYMBOL(<token>) INDEX tabix + sy-index.
         IF sy-subrc <> 0.
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
             EXPORTING
-              text = |Error parsing IMPORT statement. { pos }|.
+              text = |Error parsing IMPORT statement { pos }|.
         ENDIF.
 
         CASE sy-index.
           WHEN 1.
+            " mapping from old object
             CASE <token>-type.
               WHEN 'r'. " reference
                 rule-old_object = <token>-str.
@@ -123,15 +124,23 @@ CLASS /apmg/cl_apm_code_import_rules IMPLEMENTATION.
               WHEN OTHERS.
                 RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                   EXPORTING
-                    text = |Unknown identifier { <token>-str }. { pos }|.
+                    text = |Unknown identifier: { <token>-str } { pos }|.
             ENDCASE.
+
+            IF rule-old_object IS INITIAL.
+              RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+                EXPORTING
+                  text = |Initial original object: { <token>-str } { pos }|.
+            ENDIF.
+
           WHEN 2.
             IF <token>-type <> 'b' OR <token>-str <> 'TO'.
               RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                 EXPORTING
-                  text = |Error parsing IMPORT statement. Expecting "TO". { pos }|.
+                  text = |Error parsing IMPORT statement. Expecting "TO" { pos }|.
             ENDIF.
           WHEN 3.
+            " mapping to new object and package
             CASE <token>-type.
               WHEN 'r'. " reference
                 rule-new_object = <token>-str.
@@ -142,40 +151,42 @@ CLASS /apmg/cl_apm_code_import_rules IMPLEMENTATION.
                   with = ''
                   occ  = 0 ) ).
 
-                DATA(separator) = ''.
-                IF rule-new_object CS ':'.
-                  separator = ':'. " for namespaces
-                ELSEIF rule-new_object CS '/'.
-                  separator = '/'. " for sub-packages
-                ENDIF.
-
-                IF separator IS INITIAL.
-                  " Install into the same package where the IMPORT was found
-                  rule-target_package = program-package.
-                ELSE.
-                  SPLIT rule-new_object AT separator INTO rule-target_package rule-new_object.
-                  " Install into a sub package of where the IMPORT was found
-                  rule-parent_package = program-package.
-                  " For namespaced packages, keep the target_package as is (fixed folder mode)
-                  " Otherwise, target_package is the folder name, which is mapped to
-                  " an ABAP package based on prefix folder rules
-                  IF rule-target_package(1) <> '/'.
-                    rule-target_package = |{ program-package }_{ rule-target_package }|.
-                  ENDIF.
-                  " FUTURE: support full and mixed folder modes
-                ENDIF.
               WHEN OTHERS.
                 RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                   EXPORTING
-                    text = |Unknown identifier { <token>-str }. { pos }|.
+                    text = |Unknown identifier: { <token>-str } { pos }|.
             ENDCASE.
+
+            IF rule-new_object IS INITIAL.
+              RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+                EXPORTING
+                  text = |Initial new object: { <token>-str } { pos }|.
+            ENDIF.
+
+            " Check if mapping includes a specific target package
+            DATA(separator) = ''.
+            IF rule-new_object CS ':'.
+              separator = ':'.
+            ENDIF.
+
+            IF separator IS NOT INITIAL.
+              SPLIT rule-new_object AT separator INTO rule-target_package rule-new_object.
+              " Install into a sub package of where the IMPORT was found
+              " Note: This assumes prefix folder mode
+              " FUTURE: support full and mixed folder modes
+              rule-parent_package = program-package.
+              rule-target_package = |{ program-package }_{ rule-target_package }|.
+            ENDIF.
+
           WHEN 4.
             IF <token>-type <> 'b' OR <token>-str <> 'FROM'.
               RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                 EXPORTING
-                  text = |Error parsing IMPORT statement. Expecting "FROM". { pos }|.
+                  text = |Error parsing IMPORT statement. Expecting "FROM" { pos }|.
             ENDIF.
+
           WHEN 5.
+            " Module name
             CASE <token>-type.
               WHEN 'r'. " reference
                 rule-name = <token>-str.
@@ -188,23 +199,66 @@ CLASS /apmg/cl_apm_code_import_rules IMPLEMENTATION.
               WHEN OTHERS.
                 RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                   EXPORTING
-                    text = |Unknown identifier { <token>-str }. { pos }|.
+                    text = |Unknown identifier: { <token>-str } { pos }|.
             ENDCASE.
+
             IF rule-name IS INITIAL.
               RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
                 EXPORTING
-                  text = |Initial package spec { <token>-str }. { pos }|.
+                  text = |Initial package spec: { <token>-str } { pos }|.
             ENDIF.
+
             " name, @scope/name, name@x.y.z, @scope/name@x.y.z, name@tag, @scope/name@tag
             IF rule-name+1(*) CS '@'.
               SPLIT rule-name AT '@' INTO rule-name rule-version.
             ELSE.
               rule-version = 'latest'.
             ENDIF.
+
+            " Default mapping uses module name
+            " Note: this might truncate or lead to conflicts which we check for below
+            IF rule-target_package IS INITIAL.
+              DATA(target_package) = to_upper( rule-name ).
+              IF target_package(1) = '@' AND target_package CS '/'.
+                SPLIT target_package AT '/' INTO DATA(rest) target_package ##NEEDED.
+              ENDIF.
+
+              " Install into a sub package of where the IMPORT was found
+              " Note: This assumes prefix folder mode
+              " FUTURE: support full and mixed folder modes
+              rule-parent_package = program-package.
+              rule-target_package = |{ program-package }_{ target_package }|.
+            ENDIF.
         ENDCASE.
       ENDDO.
 
       INSERT rule INTO TABLE result.
+    ENDLOOP.
+
+    " Check that we don't have mapping of different modules to same SAP package
+    LOOP AT result INTO rule.
+      LOOP AT result FROM sy-tabix INTO DATA(rule_check)
+        WHERE name <> rule-name AND target_package = rule-target_package.
+
+        IF is_logging = abap_true.
+          FORMAT COLOR COL_TOTAL.
+          WRITE: / rule-old_object,
+            AT 37 rule-target_package, AT 69 rule-new_object,
+            AT 94 rule-name, AT 120 rule-version, AT c_width space.
+
+          FORMAT COLOR COL_NEGATIVE.
+          WRITE: / rule_check-old_object,
+            AT 37 rule_check-target_package, AT 69 rule_check-new_object,
+            AT 94 rule_check-name, AT 120 rule_check-version, AT c_width space.
+        ENDIF.
+
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text     = 'Inconsistent mapping of modules to SAP packages'
+            longtext = |Modules { rule-name } and { rule_check-name } are mapped to SAP package | &&
+                       |{ rule-target_package }. Specify a different SAP package in "TO" (see documentation)|.
+
+      ENDLOOP.
     ENDLOOP.
 
     IF is_logging = abap_true.

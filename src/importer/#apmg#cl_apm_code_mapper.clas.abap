@@ -100,7 +100,8 @@ CLASS /apmg/cl_apm_code_mapper IMPLEMENTATION.
           IF strlen( map-new_object ) > 30.
             map-new_object = map-new_object(30).
             IF is_logging = abap_true.
-              WRITE: / <tadir>-object, <tadir>-obj_name, map-new_object, 'object name was > 30 chars' COLOR COL_TOTAL.
+              WRITE: / <tadir>-object, <tadir>-obj_name, map-new_object, 'object name shortened to 30 characters' COLOR COL_TOTAL.
+              DATA(warnings) = abap_true.
             ENDIF.
           ENDIF.
           found = abap_true.
@@ -117,6 +118,10 @@ CLASS /apmg/cl_apm_code_mapper IMPLEMENTATION.
         DATA(missing_rule) = abap_true.
       ENDIF.
     ENDLOOP.
+
+    IF is_logging = abap_true AND ( warnings = abap_true OR missing_rule = abap_true ).
+      SKIP.
+    ENDIF.
 
     IF is_logging = abap_true AND result IS NOT INITIAL.
       FORMAT COLOR COL_NORMAL.

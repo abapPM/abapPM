@@ -222,11 +222,22 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 
 
   CONSTANTS:
-    "! Package Name Specs
-    BEGIN OF c_package_name,
-      min_length TYPE i VALUE 3,
+    "! Scope Specs
+    "! apm is a bit more strict than npm
+    BEGIN OF c_scope,
+      min_length TYPE i VALUE 4,
       max_length TYPE i VALUE 214,
-      regex      TYPE string VALUE '^(?:@[a-z0-9\-*~][a-z0-9\-*._~]*/)?[a-z0-9\-~][a-z0-9\-._~]*$',
+      regex      TYPE string VALUE '^@[a-z0-9][a-z0-9\-]*$',
+    END OF c_scope.
+
+  CONSTANTS:
+    "! Package Name Specs
+    "! apm is a bit more strict than npm
+    BEGIN OF c_package_name,
+      min_length       TYPE i VALUE 3,
+      max_length       TYPE i VALUE 214,
+      regex            TYPE string VALUE '^[a-z0-9][a-z0-9\-]*$',
+      regex_with_scope TYPE string VALUE '^(?:@[a-z0-9][a-z0-9\-]*/)?[a-z0-9][a-z0-9\-]*$',
     END OF c_package_name.
 
   CONSTANTS:
