@@ -251,7 +251,7 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_create.
 
-    DATA objs_table TYPE STANDARD TABLE OF v_obj_s WITH DEFAULT KEY.
+    DATA objs_table TYPE STANDARD TABLE OF v_obj_s WITH KEY objectname objecttype tabname.
 
     DATA(objh) = VALUE objh(
       objectname = /apmg/if_apm_persist_apm=>c_zapm
