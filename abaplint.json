@@ -143,7 +143,9 @@
     "form_tables_obsolete": true,
     "fully_type_constants": true,
     "fully_type_itabs": true,
-    "function_module_recommendations": true,
+    "function_module_recommendations": {
+      "exclude": ["#apmg#cl_apm_progress_bar"]
+    },      
     "functional_writing": true,
     "global_class": true,
     "identical_conditions": true,
