@@ -258,7 +258,7 @@ CLASS /apmg/cl_apm_installer_files IMPLEMENTATION.
       EXPORTING
         eps_subdir             = 'in'
       IMPORTING
-        long_dir_name          = eps_inbox
+        ev_long_dir_name       = eps_inbox
       EXCEPTIONS
         invalid_eps_subdir     = 1
         sapgparam_failed       = 2

@@ -314,7 +314,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     " Confirm message about modification mode (DT, CLM_INFORMATION)
     " and backup old state (see _restore_messages)
-    SELECT * FROM clmcus INTO TABLE @clmcus_backup WHERE username = @sy-uname ##SUBRC_OK.
+    SELECT * FROM clmcus INTO TABLE @clmcus_backup
+      WHERE username = @sy-uname ##SUBRC_OK.  "#EC CI_ALL_FIELDS_NEEDED
 
     DATA(customizing) = VALUE clmcus(
       username = sy-uname
@@ -547,11 +548,11 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
       request_header  TYPE trwbo_request_header,
       request_headers TYPE trwbo_request_headers.
 
-    DATA(text) = |apm: Package { package }|.
+    DATA(text) = CONV as4text( |apm: Package { package }| ).
 
     CALL FUNCTION 'TR_READ_REQUEST_WITH_TASKS'
       EXPORTING
-        trkorr             = transport
+        iv_trkorr          = transport
       IMPORTING
         et_request_headers = request_headers
       EXCEPTIONS
@@ -626,8 +627,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
-      SELECT * FROM sotr_head INTO TABLE @DATA(sotr_head)
-        WHERE paket = @<tadir>-obj_name.
+      SELECT concept FROM sotr_head INTO TABLE @DATA(sotr_head)
+        WHERE paket = @<tadir>-obj_name.              "#EC CI_SGLSELECT
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).
@@ -674,8 +675,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     LOOP AT tadir ASSIGNING FIELD-SYMBOL(<tadir>) WHERE object = 'DEVC'.
 
-      SELECT * FROM sotr_headu INTO TABLE @DATA(sotr_head)
-        WHERE paket = @<tadir>-obj_name.
+      SELECT concept FROM sotr_headu INTO TABLE @DATA(sotr_head)
+        WHERE paket = @<tadir>-obj_name.              "#EC CI_SGLSELECT
       IF sy-subrc = 0.
 
         LOOP AT sotr_head ASSIGNING FIELD-SYMBOL(<sotr_head>).

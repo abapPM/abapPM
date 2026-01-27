@@ -82,11 +82,11 @@ CLASS /apmg/cl_apm_abapgit_serialize DEFINITION
 
     METHODS add_objects
       IMPORTING
-        !iv_package     TYPE devclass
-        !ii_log         TYPE REF TO zif_abapgit_log
-        !it_filter      TYPE zif_abapgit_definitions=>ty_tadir_tt OPTIONAL
+        !iv_package TYPE devclass
+        !ii_log     TYPE REF TO zif_abapgit_log
+        !it_filter  TYPE zif_abapgit_definitions=>ty_tadir_tt OPTIONAL
       CHANGING
-        VALUE(ct_files) TYPE zif_abapgit_definitions=>ty_files_item_tt
+        !ct_files   TYPE zif_abapgit_definitions=>ty_files_item_tt
       RAISING
         zcx_abapgit_exception.
 
@@ -124,9 +124,9 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
   METHOD add_objects.
 
     DATA: " lo_filter TYPE REF TO zcl_abapgit_repo_filter,
-          lv_force  TYPE abap_bool,
-          lt_found  LIKE ct_files,
-          lt_tadir  TYPE zif_abapgit_definitions=>ty_tadir_tt.
+      lv_force TYPE abap_bool,
+      lt_found LIKE ct_files,
+      lt_tadir TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     lt_tadir = zcl_abapgit_factory=>get_tadir( )->read(
       iv_package            = iv_package
@@ -243,8 +243,8 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
       ENDIF.
 
       lv_filename = zcl_abapgit_filename_logic=>object_to_file(
-        is_item  = ls_item
-        iv_ext   = '*' ).
+        is_item = ls_item
+        iv_ext  = '*' ).
 
       IF mo_dot_abapgit->is_ignored(
         iv_path     = lv_path
@@ -355,8 +355,8 @@ CLASS /apmg/cl_apm_abapgit_serialize IMPLEMENTATION.
       CATCH zcx_abapgit_exception INTO lx_error.
         IF NOT mi_log IS INITIAL.
           mi_log->add_exception(
-              ix_exc  = lx_error
-              is_item = ls_file_item-item ).
+            ix_exc  = lx_error
+            is_item = ls_file_item-item ).
         ENDIF.
     ENDTRY.
 

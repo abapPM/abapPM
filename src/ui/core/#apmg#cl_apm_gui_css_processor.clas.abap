@@ -103,7 +103,7 @@ CLASS /apmg/cl_apm_gui_css_processor IMPLEMENTATION.
     " 1. Determine all variables and their values. Later definitions overwrite previous ones.
     LOOP AT mt_files ASSIGNING <lv_url>.
       lv_content = mi_asset_manager->get_text_asset(
-        iv_url = <lv_url>
+        iv_url            = <lv_url>
         iv_assert_subtype = 'css' ).
 
       lt_css_vars_in_file = get_css_vars_in_string( lv_content ).
@@ -119,7 +119,7 @@ CLASS /apmg/cl_apm_gui_css_processor IMPLEMENTATION.
     ENDLOOP.
 
     " 2. Replace all variable usages in variables
-    LOOP AT lt_css_variables ASSIGNING <ls_css_variable> WHERE value CS 'var(--'.
+    LOOP AT lt_css_variables ASSIGNING <ls_css_variable> WHERE value CS 'var(--'. "#EC CI_SORTSEQ
       resolve_var_recursively( EXPORTING iv_variable_name = <ls_css_variable>-name
                                CHANGING  ct_variables     = lt_css_variables ).
     ENDLOOP.
@@ -134,7 +134,7 @@ CLASS /apmg/cl_apm_gui_css_processor IMPLEMENTATION.
     ENDLOOP.
 
     rv_result = concat_lines_of( table = lt_contents
-                                 sep = cl_abap_char_utilities=>newline ).
+                                 sep   = cl_abap_char_utilities=>newline ).
   ENDMETHOD.
 
 

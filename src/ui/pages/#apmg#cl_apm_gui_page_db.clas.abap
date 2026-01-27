@@ -227,7 +227,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         ENDIF.
       WHEN 'cmd'.
         IF <key_extra> IS NOT INITIAL.
-          DATA(action)  = |key={ cl_http_utility=>escape_url( |{ <key> }| ) }|.
+          DATA(action)  = |key={ escape( val = |{ <key> }| format =  cl_abap_format=>e_url ) }|.
           DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create(
             )->add(
               iv_txt = 'Display'

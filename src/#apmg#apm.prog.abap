@@ -52,6 +52,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 * @@require clas zcl_abapgit_cts_api
 * @@require intf zif_abapgit_cts_api
 * @@require intf zif_abapgit_data_config
+* @@require intf zif_abapgit_data_persistence
 * @@require intf zif_abapgit_data_supporter
 * @@require clas zcl_abapgit_default_transport
 * @@require intf zif_abapgit_default_transport

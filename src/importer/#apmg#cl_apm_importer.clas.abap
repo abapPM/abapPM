@@ -264,13 +264,17 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         FROM tadir AS a
         JOIN trdir AS b
         ON a~obj_name = b~name
-        WHERE a~pgmid = 'R3TR' AND a~object = 'PROG' AND a~devclass = @sub_package AND b~subc = 'I' ##SUBRC_OK.
+        WHERE a~pgmid = 'R3TR'
+          AND a~object = 'PROG'
+          AND a~devclass = @sub_package
+          AND b~subc = 'I'
+        ORDER BY program ##SUBRC_OK.                   "#EC CI_BUFFJOIN
 
       IF is_log = abap_true AND programs IS NOT INITIAL.
         WRITE: / 'PACKAGE', sub_package, AT c_width space.
       ENDIF.
 
-      LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>).
+      LOOP AT programs ASSIGNING FIELD-SYMBOL(<program>). "#EC CI_NOORDER
         IF is_log = abap_true.
           WRITE: AT /5 'INCLUDE', <program>-program, AT c_width space.
         ENDIF.

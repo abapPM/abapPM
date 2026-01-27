@@ -68,14 +68,11 @@ CLASS /apmg/cl_apm_progress_bar IMPLEMENTATION.
 
   METHOD /apmg/if_apm_progress_bar~show.
 
-    DATA percentage   TYPE i.
-    DATA current_time TYPE t.
-
     CONSTANTS c_wait_secs TYPE i VALUE 2.
 
     GET TIME.
 
-    current_time = sy-uzeit.
+    DATA(current_time) = sy-uzeit.
     IF time_next IS INITIAL AND date_next IS INITIAL.
       time_next = current_time.
       date_next = sy-datum.
@@ -84,7 +81,7 @@ CLASS /apmg/cl_apm_progress_bar IMPLEMENTATION.
     " Only do a progress indication if enough time has passed
     IF current_time >= time_next AND sy-datum = date_next OR sy-datum > date_next.
 
-      percentage = calculate_percentage( current ).
+      DATA(percentage) = calculate_percentage( current ).
 
       CALL FUNCTION 'SAPGUI_PROGRESS_INDICATOR'
         EXPORTING
@@ -107,17 +104,15 @@ CLASS /apmg/cl_apm_progress_bar IMPLEMENTATION.
 
   METHOD calculate_percentage.
 
-    DATA f TYPE f.
-
     TRY.
-        f = ( current / total ) * 100.
-        result = f.
+        result = current / total * 100.
 
-        IF result = 100.
-          result = 99.
-        ELSEIF result = 0.
-          result = 1.
-        ENDIF.
+        CASE result.
+          WHEN 0.
+            result = 1.
+          WHEN 100.
+            result = 99.
+        ENDCASE.
       CATCH cx_sy_zerodivide.
         result = 0.
     ENDTRY.
@@ -129,7 +124,7 @@ CLASS /apmg/cl_apm_progress_bar IMPLEMENTATION.
 
     " Max one progress indicator at a time is supported
     IF global_instance IS INITIAL.
-      CREATE OBJECT global_instance TYPE /apmg/cl_apm_progress_bar.
+      global_instance = NEW /apmg/cl_apm_progress_bar( ).
     ENDIF.
 
     global_instance->set_total( total ).

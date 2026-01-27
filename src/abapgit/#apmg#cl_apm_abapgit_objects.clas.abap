@@ -1394,7 +1394,7 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
     FIELD-SYMBOLS <ls_supported_obj_type> TYPE ty_supported_types.
 
     IF gv_supported_obj_types_loaded = abap_true.
-      LOOP AT gt_supported_obj_types ASSIGNING <ls_supported_obj_type> WHERE supported = abap_true.
+      LOOP AT gt_supported_obj_types ASSIGNING <ls_supported_obj_type> WHERE supported = abap_true. "#EC CI_SORTSEQ
         INSERT <ls_supported_obj_type>-obj_type INTO TABLE rt_types.
       ENDLOOP.
       RETURN.

@@ -48,8 +48,12 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
         view_readme_code    TYPE string VALUE 'view_readme_code',
         view_readme_raw     TYPE string VALUE 'view_readme_raw',
         edit_readme         TYPE string VALUE 'edit_readme',
+        copy_readme         TYPE string VALUE 'copy_readme',
+        download_readme     TYPE string VALUE 'download_readme',
         view_json           TYPE string VALUE 'view_json',
         edit_json           TYPE string VALUE 'edit_json',
+        copy_json           TYPE string VALUE 'copy_json',
+        download_json       TYPE string VALUE 'download_json',
         view_dependencies   TYPE string VALUE 'view_dependencies',
         add_dependency      TYPE string VALUE 'add_dependency',
         remove_dependency   TYPE string VALUE 'remove_dependency',
@@ -197,6 +201,20 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS copy_to_clipboard
+      IMPORTING
+        !data TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS download_to_file
+      IMPORTING
+        !filename  TYPE string
+        !extension TYPE string
+        !data      TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -206,8 +224,6 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    " TODO: Add "copy to clipboard" and "download to file"
-    " see zcl_fileview_abapgit_ext_ui
     CASE ii_event->mv_action.
       WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
 
@@ -231,6 +247,19 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           back_on_save = abap_true ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page_w_bookmark.
 
+      WHEN c_action-copy_readme.
+
+        copy_to_clipboard( get_markdown( ) ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
+      WHEN c_action-download_readme.
+
+        download_to_file(
+          filename  = 'README.md'
+          extension = 'md'
+          data      = get_markdown( ) ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
       WHEN c_action-edit_json.
 
         rs_handled-page = /apmg/cl_apm_gui_page_db_entry=>create(
@@ -238,6 +267,19 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           edit_mode    = abap_true
           back_on_save = abap_true ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page_w_bookmark.
+
+      WHEN c_action-copy_json.
+
+        copy_to_clipboard( get_json_data( ) ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
+      WHEN c_action-download_json.
+
+        download_to_file(
+          filename  = 'package.abap.json'
+          extension = 'json'
+          data      = get_json_data( ) ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
       WHEN c_action-update_dependencies.
 
@@ -403,6 +445,22 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD copy_to_clipboard.
+
+    " Note: export is buggy when using table of raw. Use table of char!
+    DATA clip_table TYPE STANDARD TABLE OF char1024 WITH EMPTY KEY.
+
+    SPLIT data AT cl_abap_char_utilities=>newline INTO TABLE clip_table.
+
+    DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
+
+    frontend_services->clipboard_export( clip_table ).
+
+    MESSAGE 'Copied to clipboard' TYPE 'S'.
+
+  ENDMETHOD.
+
+
   METHOD create.
 
     DATA(component) = NEW /apmg/cl_apm_gui_page_package( package ).
@@ -411,6 +469,30 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       page_title         = 'Package View'
       page_menu_provider = component
       child_component    = component ).
+
+  ENDMETHOD.
+
+
+  METHOD download_to_file.
+
+    TRY.
+        DATA(bin_data) = zcl_abapgit_convert=>string_to_xstring_utf8( data ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = error->get_text( ).
+    ENDTRY.
+
+    DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
+
+    DATA(path) = frontend_services->show_file_save_dialog(
+      iv_title            = 'apm - File Download'
+      iv_extension        = extension
+      iv_default_filename = filename ).
+
+    frontend_services->file_download(
+      iv_path = path
+      iv_xstr = bin_data ).
+
+    MESSAGE 'Saved to file' TYPE 'S'.
 
   ENDMETHOD.
 
@@ -550,6 +632,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           iv_txt = 'View'
           io_sub = readme_menu
         )->add(
+          iv_txt = 'Copy'
+          iv_act = c_action-copy_readme
+        )->add(
+          iv_txt = 'Download'
+          iv_act = c_action-download_readme
+        )->add(
           iv_txt = 'Edit'
           iv_act = |{ c_action-edit_readme }?key={ package }| ).
 
@@ -568,6 +656,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       WHEN c_action-view_json.
 
         result = /apmg/cl_apm_html_toolbar=>create( 'apm-package-manifest-actions' )->add(
+          iv_txt = 'Copy'
+          iv_act = c_action-copy_json
+        )->add(
+          iv_txt = 'Download'
+          iv_act = c_action-download_json
+        )->add(
           iv_txt = 'Edit'
           iv_act = |{ c_action-edit_json }?key={ package }| ).
 

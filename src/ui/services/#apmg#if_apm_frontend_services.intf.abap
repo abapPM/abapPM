@@ -46,7 +46,7 @@ INTERFACE /apmg/if_apm_frontend_services PUBLIC.
       iv_no_auth_check TYPE abap_bool DEFAULT abap_false
       VALUE(it_data)   TYPE STANDARD TABLE
     RAISING
-      /apmg/cx_apm_error.
+      /apmg/cx_apm_error.                                "#EC CI_VALPAR
 
   METHODS execute
     IMPORTING

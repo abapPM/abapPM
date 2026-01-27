@@ -251,6 +251,8 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_create.
 
+    DATA objs_table TYPE STANDARD TABLE OF v_obj_s WITH DEFAULT KEY.
+
     DATA(objh) = VALUE objh(
       objectname = /apmg/if_apm_persist_apm=>c_zapm
       objecttype = 'L'
@@ -275,6 +277,8 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
       ddic       = abap_true
       prim_table = abap_true ).
 
+    APPEND objs TO objs_table.
+
     DATA(objsl) = VALUE objsl(
       objectname = /apmg/if_apm_persist_apm=>c_zapm
       objecttype = 'L'
@@ -287,9 +291,29 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
       maskklen   = 2
       prim_table = abap_true ).
 
-    INSERT objh FROM @objh ##SUBRC_OK.
-    INSERT objt FROM @objt ##SUBRC_OK.
-    INSERT objs FROM @objs ##SUBRC_OK.
+    CALL FUNCTION 'OBJ_GENERATE'
+      EXPORTING
+        iv_objectname         = objh-objectname
+        iv_objecttype         = objh-objecttype
+        iv_maint_mode         = 'I'
+        iv_objecttext         = objt-ddtext
+        iv_objcateg           = objh-objcateg
+        iv_objtransp          = objh-objtransp
+        iv_no_correction      = abap_true
+      TABLES
+        tt_v_obj_s            = objs_table
+      EXCEPTIONS
+        illegal_call          = 1
+        object_not_found      = 2
+        generate_error        = 3
+        transport_error       = 4
+        object_enqueue_failed = 5
+        OTHERS                = 6.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+    ENDIF.
+
+    " No API? No choice
     INSERT objsl FROM @objsl ##SUBRC_OK.
 
   ENDMETHOD.
@@ -297,9 +321,28 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
 
   METHOD logo_delete.
 
-    DELETE FROM objh WHERE objectname = @/apmg/if_apm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
-    DELETE FROM objt WHERE objectname = @/apmg/if_apm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
-    DELETE FROM objs WHERE objectname = @/apmg/if_apm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
+    DATA(objh) = VALUE objh(
+      objectname = /apmg/if_apm_persist_apm=>c_zapm
+      objecttype = 'L' ).
+
+    CALL FUNCTION 'OBJ_GENERATE'
+      EXPORTING
+        iv_objectname         = objh-objectname
+        iv_objecttype         = objh-objecttype
+        iv_maint_mode         = 'D'
+        iv_no_correction      = abap_true
+      EXCEPTIONS
+        illegal_call          = 1
+        object_not_found      = 2
+        generate_error        = 3
+        transport_error       = 4
+        object_enqueue_failed = 5
+        OTHERS                = 6.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+    ENDIF.
+
+    " No API? No choice
     DELETE FROM objsl WHERE objectname = @/apmg/if_apm_persist_apm=>c_zapm AND objecttype = 'L' ##SUBRC_OK.
 
   ENDMETHOD.

@@ -242,7 +242,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       ENDIF.
     ENDIF.
 
-    SELECT COUNT(*) FROM tadir INTO @DATA(count) WHERE devclass = @package.
+    SELECT COUNT(*) FROM tadir INTO @DATA(count) WHERE devclass = @package. "#EC CI_SGLSELECT
     IF count > 1.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING

@@ -75,7 +75,7 @@ CLASS /apmg/cl_apm_html_action_utils IMPLEMENTATION.
     DATA ls_field LIKE LINE OF it_fields.
 
     LOOP AT it_fields INTO ls_field.
-      ls_field-value = cl_http_utility=>escape_url( ls_field-value ).
+      ls_field-value = escape( val = ls_field-value format = cl_abap_format=>e_url ).
       lv_str = ls_field-name && '=' && ls_field-value.
       APPEND lv_str TO lt_tab.
     ENDLOOP.

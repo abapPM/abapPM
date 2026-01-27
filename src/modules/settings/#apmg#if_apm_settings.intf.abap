@@ -48,7 +48,7 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
       package_settings      TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
     END OF ty_settings.
 
-  TYPES ty_name TYPE uname.
+  TYPES ty_name TYPE syst_uname.
 
   CONSTANTS:
     c_registry   TYPE string VALUE 'https://registry.abappm.com',
