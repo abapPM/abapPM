@@ -33,4 +33,23 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
       invalid    TYPE ty_error_type VALUE 'INVALID',
     END OF c_error_type.
 
+  "! Log entry for tree issues
+  TYPES:
+    BEGIN OF ty_log_entry,
+      type    TYPE string,
+      message TYPE string,
+      name    TYPE string,
+      version TYPE string,
+      spec    TYPE string,
+    END OF ty_log_entry,
+    ty_log TYPE STANDARD TABLE OF ty_log_entry WITH EMPTY KEY.
+
+  CONSTANTS:
+    BEGIN OF c_log_type,
+      info     TYPE string VALUE 'INFO',
+      warning  TYPE string VALUE 'WARNING',
+      error    TYPE string VALUE 'ERROR',
+      circular TYPE string VALUE 'CIRCULAR',
+    END OF c_log_type.
+
 ENDINTERFACE.
