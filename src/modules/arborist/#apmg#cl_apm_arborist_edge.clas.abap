@@ -27,6 +27,14 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
         name TYPE /apmg/if_apm_types=>ty_name
         spec TYPE /apmg/if_apm_types=>ty_spec.
 
+    METHODS set_target
+      IMPORTING
+        to TYPE REF TO /apmg/cl_apm_arborist_node.
+
+    METHODS mark_missing.
+
+    METHODS set_invalid.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -59,13 +67,30 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
     edge-type  = type.
     edge-name  = name.
     edge-spec  = spec.
-*    edge-to    = /apmg/cl_arborist_node=>get( name ).
-*    edge-valid = edge-to->satisfies( spec ).
+    edge-valid = abap_false.
 
-    IF edge-valid = abap_false.
-      edge-error = /apmg/if_apm_arborist=>c_error_type-invalid.
+  ENDMETHOD.
+
+  METHOD set_target.
+    edge-to = to.
+
+    IF to IS NOT BOUND.
+      mark_missing( ).
+      RETURN.
     ENDIF.
 
+    edge-valid = abap_true.
+    CLEAR edge-error.
+  ENDMETHOD.
+
+  METHOD mark_missing.
+    edge-valid = abap_false.
+    edge-error = /apmg/if_apm_arborist=>c_error_type-missing.
+  ENDMETHOD.
+
+  METHOD set_invalid.
+    edge-valid = abap_false.
+    edge-error = /apmg/if_apm_arborist=>c_error_type-invalid.
   ENDMETHOD.
 
 
