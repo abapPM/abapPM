@@ -54,6 +54,7 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
       warning  TYPE string VALUE 'WARNING',
       error    TYPE string VALUE 'ERROR',
       circular TYPE string VALUE 'CIRCULAR',
+      depth    TYPE string VALUE 'DEPTH',
     END OF c_log_type.
 
   " READING
@@ -79,7 +80,7 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
   "! Get the log of issues found during tree building
   METHODS get_log
     RETURNING
-      VALUE(result) TYPE /apmg/if_apm_arborist=>ty_log.
+      VALUE(result) TYPE ty_log.
 
   "! Get all nodes in the tree
   METHODS get_tree

@@ -37,23 +37,17 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     "! Maximum version that satisfies the list of version specs (of all in edges)
     DATA max_satisfying_version TYPE /apmg/if_apm_types=>ty_version READ-ONLY.
     "! Production dependencies
-    DATA deps_prod TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
+    DATA dependencies TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Development dependencies
-    DATA deps_dev TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
+    DATA dev_dependencies TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Peer dependencies
-    DATA deps_peer TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
+    DATA peer_dependencies TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Optional dependencies
-    DATA deps_optional TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
+    DATA optional_dependencies TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Bundled dependencies
-    DATA deps_bundled TYPE /apmg/if_apm_types=>ty_bundled_dependencies READ-ONLY.
+    DATA bundle_dependencies TYPE /apmg/if_apm_types=>ty_bundled_dependencies READ-ONLY.
     "! Is this a bundled package
     DATA bundle TYPE abap_bool READ-ONLY.
-    "! Is this a dev dependency
-    DATA dev TYPE abap_bool READ-ONLY.
-    "! Is this an optional dependency
-    DATA optional TYPE abap_bool READ-ONLY.
-    "! Is this a peer dependency
-    DATA peer TYPE abap_bool READ-ONLY.
     "! Is this package installed
     DATA installed TYPE abap_bool READ-ONLY.
     "! Outgoing edges (dependencies of this package)
@@ -199,15 +193,15 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
 
   METHOD constructor.
 
-    me->package       = package.
-    me->name          = manifest-name.
-    me->version       = manifest-version.
-    me->deps_prod     = manifest-dependencies.
-    me->deps_dev      = manifest-dev_dependencies.
-    me->deps_peer     = manifest-peer_dependencies.
-    me->deps_optional = manifest-optional_dependencies.
-    me->deps_bundled  = manifest-bundle_dependencies.
-    me->installed     = installed.
+    me->package               = package.
+    me->name                  = manifest-name.
+    me->version               = manifest-version.
+    me->dependencies          = manifest-dependencies.
+    me->dev_dependencies      = manifest-dev_dependencies.
+    me->peer_dependencies     = manifest-peer_dependencies.
+    me->optional_dependencies = manifest-optional_dependencies.
+    me->bundle_dependencies   = manifest-bundle_dependencies.
+    me->installed             = installed.
 
   ENDMETHOD.
 
@@ -255,10 +249,10 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
   METHOD get_all_dependencies.
 
     " Combine all dependency types
-    APPEND LINES OF deps_prod TO result.
-    APPEND LINES OF deps_dev TO result.
-    APPEND LINES OF deps_peer TO result.
-    APPEND LINES OF deps_optional TO result.
+    APPEND LINES OF dependencies TO result.
+    APPEND LINES OF dev_dependencies TO result.
+    APPEND LINES OF peer_dependencies TO result.
+    APPEND LINES OF optional_dependencies TO result.
 
   ENDMETHOD.
 

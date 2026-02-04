@@ -38,6 +38,9 @@ CLASS /apmg/cl_apm_arborist DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    CONSTANTS c_max_depth TYPE i VALUE 10.
+    CONSTANTS c_max_iterations TYPE i VALUE 5.
+
     TYPES:
       BEGIN OF ty_visited,
         name TYPE /apmg/if_apm_types=>ty_name,
@@ -72,6 +75,13 @@ CLASS /apmg/cl_apm_arborist DEFINITION
       IMPORTING
         !node  TYPE REF TO /apmg/cl_apm_arborist_node
         !depth TYPE i.
+
+    "! Process uninstalled dependencies
+    METHODS process_uninstalled.
+
+    METHODS resolve
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
     "! Create edges for a dependency list
     METHODS create_edges
@@ -180,99 +190,10 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
     " Step 4: Process uninstalled dependencies recursively
     " This finds dependencies that are declared but not installed
-    DATA(max_iterations) = 5.
-    DATA(iteration) = 0.
-    DATA(nodes_to_process) = VALUE /apmg/if_apm_arborist~ty_node_refs( ).
-
-    DO.
-      iteration = iteration + 1.
-      IF iteration > max_iterations.
-        add_log(
-          type    = /apmg/if_apm_arborist=>c_log_type-warning
-          message = |Stopped processing after { max_iterations } iterations to prevent infinite loop| ).
-        EXIT.
-      ENDIF.
-
-      " Find nodes with unresolved dependencies
-      CLEAR nodes_to_process.
-      DATA(all_nodes) = /apmg/cl_apm_arborist_node=>get_all( ).
-
-      LOOP AT all_nodes ASSIGNING FIELD-SYMBOL(<node>).
-        LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
-          IF <edge>->is_missing( ).
-            " Check if we haven't visited this dependency yet
-            IF NOT line_exists( visited[ name = <edge>->name ] ).
-              " Try to get manifest from registry for uninstalled dependency
-              DATA(uninstalled_manifest) = get_manifest( name = <edge>->name ).
-              IF uninstalled_manifest IS NOT INITIAL.
-                " Create placeholder node for uninstalled package
-                DATA(new_node) = /apmg/cl_apm_arborist_node=>create(
-                  manifest  = uninstalled_manifest
-                  installed = abap_false ).
-
-                INSERT VALUE #( name = <edge>->name ) INTO TABLE visited.
-                INSERT new_node INTO TABLE nodes_to_process.
-
-                add_log(
-                  type    = /apmg/if_apm_arborist=>c_log_type-warning
-                  message = |Dependency { <edge>->name }@{ <edge>->spec } is not installed|
-                  name    = <edge>->name
-                  spec    = <edge>->spec ).
-              ENDIF.
-            ENDIF.
-          ENDIF.
-        ENDLOOP.
-      ENDLOOP.
-
-      " Process dependencies of newly added nodes
-      IF nodes_to_process IS INITIAL.
-        EXIT. " No more unresolved dependencies
-      ENDIF.
-
-      LOOP AT nodes_to_process ASSIGNING FIELD-SYMBOL(<new_node>).
-        process_dependencies(
-          node  = <new_node>
-          depth = iteration ).
-      ENDLOOP.
-    ENDDO.
+    process_uninstalled( ).
 
     " Step 5: Re-resolve all edges now that all nodes are created
-    DATA(final_nodes) = /apmg/cl_apm_arborist_node=>get_all( ).
-
-    LOOP AT final_nodes ASSIGNING <node>.
-      LOOP AT <node>->edges_out ASSIGNING <edge>.
-        <edge>->resolve( ).
-      ENDLOOP.
-
-      " Aggregate required versions from incoming edges and check satisfaction
-      DATA(required_specs) = VALUE string_table( ).
-      DATA(all_satisfied)  = abap_true.
-      DATA(max_satisfying) = <node>->version.
-
-      LOOP AT <node>->edges_in ASSIGNING <edge>.
-        " Collect all specs from incoming edges
-        INSERT <edge>->spec INTO TABLE required_specs.
-
-        " Check if current node version satisfies this requirement
-        IF <node>->satisfies( <edge>->spec ) = abap_false.
-          all_satisfied = abap_false.
-        ENDIF.
-      ENDLOOP.
-
-      " Determine max_satisfying: if current version satisfies all requirements, use it
-      " Otherwise, max_satisfying needs to be calculated from available versions in registry
-      IF all_satisfied = abap_false AND required_specs IS NOT INITIAL.
-        DATA(available_versions) = get_versions( <node>->name ).
-
-        " Current version doesn't satisfy all requirements
-        " max_satisfying would ideally be the maximum version from registry that satisfies all specs
-        max_satisfying = <node>->max_satisfying(
-          versions = available_versions
-          specs    = required_specs ).
-      ENDIF.
-
-      <node>->set_max_satisfying( max_satisfying ).
-    ENDLOOP.
+    DATA(final_nodes) = resolve( ).
 
     " Log summary
     DATA(total_nodes) = lines( final_nodes ).
@@ -280,11 +201,11 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     DATA(missing_count) = 0.
     DATA(invalid_count) = 0.
 
-    LOOP AT final_nodes ASSIGNING <node>.
+    LOOP AT final_nodes ASSIGNING FIELD-SYMBOL(<node>).
       IF <node>->installed = abap_true.
         installed_count = installed_count + 1.
       ENDIF.
-      LOOP AT <node>->edges_out ASSIGNING <edge>.
+      LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
         IF <edge>->is_missing( ).
           missing_count = missing_count + 1.
         ELSEIF <edge>->is_invalid( ).
@@ -376,11 +297,11 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     IF existing_node IS BOUND.
       result-name                  = existing_node->name.
       result-version               = existing_node->version.
-      result-dependencies          = existing_node->deps_prod.
-      result-dev_dependencies      = existing_node->deps_dev.
-      result-optional_dependencies = existing_node->deps_optional.
-      result-peer_dependencies     = existing_node->deps_peer.
-      result-bundle_dependencies   = existing_node->deps_bundled.
+      result-dependencies          = existing_node->dependencies.
+      result-dev_dependencies      = existing_node->dev_dependencies.
+      result-optional_dependencies = existing_node->optional_dependencies.
+      result-peer_dependencies     = existing_node->peer_dependencies.
+      result-bundle_dependencies   = existing_node->bundle_dependencies.
       RETURN.
     ENDIF.
 
@@ -466,33 +387,42 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       RETURN.
     ENDIF.
 
+    " Check for maximum depth
+    IF depth > c_max_depth.
+      add_log(
+        type    = /apmg/if_apm_arborist=>c_log_type-depth
+        message = |Maximum depth reached: { node->name }|
+        name    = node->name ).
+      RETURN.
+    ENDIF.
+
     " Add to processing stack
     INSERT node->name INTO TABLE processing_stack.
 
     " Create edges for production dependencies
     create_edges(
       node                 = node
-      dependencies         = node->deps_prod
-      bundled_dependencies = node->deps_bundled
+      dependencies         = node->dependencies
+      bundled_dependencies = node->bundle_dependencies
       type                 = /apmg/if_apm_arborist=>c_dependency_type-prod ).
 
     " Create edges for dev dependencies
     create_edges(
       node                 = node
-      dependencies         = node->deps_dev
-      bundled_dependencies = node->deps_bundled
+      dependencies         = node->dev_dependencies
+      bundled_dependencies = node->bundle_dependencies
       type                 = /apmg/if_apm_arborist=>c_dependency_type-dev ).
 
     " Create edges for optional dependencies
     create_edges(
       node         = node
-      dependencies = node->deps_optional
+      dependencies = node->optional_dependencies
       type         = /apmg/if_apm_arborist=>c_dependency_type-optional ).
 
     " Create edges for peer dependencies
     create_edges(
       node         = node
-      dependencies = node->deps_peer
+      dependencies = node->peer_dependencies
       type         = /apmg/if_apm_arborist=>c_dependency_type-peer ).
 
     " Remove from processing stack
@@ -518,7 +448,110 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     " Process dependencies
     process_dependencies(
       node  = node
-      depth = depth ).
+      depth = depth + 1 ).
+
+  ENDMETHOD.
+
+
+  METHOD process_uninstalled.
+
+    DATA(iteration) = 0.
+    DATA(nodes_to_process) = VALUE /apmg/if_apm_arborist~ty_node_refs( ).
+
+    DO.
+      iteration = iteration + 1.
+      IF iteration > c_max_iterations.
+        add_log(
+          type    = /apmg/if_apm_arborist=>c_log_type-warning
+          message = |Stopped processing after { c_max_iterations } iterations to prevent infinite loop| ).
+        EXIT.
+      ENDIF.
+
+      " Find nodes with unresolved dependencies
+      CLEAR nodes_to_process.
+      DATA(all_nodes) = /apmg/cl_apm_arborist_node=>get_all( ).
+
+      LOOP AT all_nodes ASSIGNING FIELD-SYMBOL(<node>).
+        LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
+          IF <edge>->is_missing( ).
+            " Check if we haven't visited this dependency yet
+            IF NOT line_exists( visited[ name = <edge>->name ] ).
+              " Try to get manifest from registry for uninstalled dependency
+              DATA(uninstalled_manifest) = get_manifest( <edge>->name ).
+              IF uninstalled_manifest IS NOT INITIAL.
+                " Create placeholder node for uninstalled package
+                DATA(new_node) = /apmg/cl_apm_arborist_node=>create(
+                  manifest  = uninstalled_manifest
+                  installed = abap_false ).
+
+                INSERT VALUE #( name = <edge>->name ) INTO TABLE visited.
+                INSERT new_node INTO TABLE nodes_to_process.
+
+                add_log(
+                  type    = /apmg/if_apm_arborist=>c_log_type-warning
+                  message = |Dependency { <edge>->name }@{ <edge>->spec } is not installed|
+                  name    = <edge>->name
+                  spec    = <edge>->spec ).
+              ENDIF.
+            ENDIF.
+          ENDIF.
+        ENDLOOP.
+      ENDLOOP.
+
+      " Process dependencies of newly added nodes
+      IF nodes_to_process IS INITIAL.
+        EXIT. " No more unresolved dependencies
+      ENDIF.
+
+      LOOP AT nodes_to_process ASSIGNING FIELD-SYMBOL(<new_node>).
+        process_dependencies(
+          node  = <new_node>
+          depth = iteration ).
+      ENDLOOP.
+    ENDDO.
+
+
+  ENDMETHOD.
+
+
+  METHOD resolve.
+
+    result = /apmg/cl_apm_arborist_node=>get_all( ).
+
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<node>).
+      LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
+        <edge>->resolve( ).
+      ENDLOOP.
+
+      " Aggregate required versions from incoming edges and check satisfaction
+      DATA(required_specs) = VALUE string_table( ).
+      DATA(all_satisfied)  = abap_true.
+      DATA(max_satisfying) = <node>->version.
+
+      LOOP AT <node>->edges_in ASSIGNING <edge>.
+        " Collect all specs from incoming edges
+        INSERT <edge>->spec INTO TABLE required_specs.
+
+        " Check if current node version satisfies this requirement
+        IF <node>->satisfies( <edge>->spec ) = abap_false.
+          all_satisfied = abap_false.
+        ENDIF.
+      ENDLOOP.
+
+      " Determine max_satisfying: if current version satisfies all requirements, use it
+      " Otherwise, max_satisfying needs to be calculated from available versions in registry
+      IF all_satisfied = abap_false AND required_specs IS NOT INITIAL.
+        DATA(available_versions) = get_versions( <node>->name ).
+
+        " Current version doesn't satisfy all requirements
+        " max_satisfying would ideally be the maximum version from registry that satisfies all specs
+        max_satisfying = <node>->max_satisfying(
+          versions = available_versions
+          specs    = required_specs ).
+      ENDIF.
+
+      <node>->set_max_satisfying( max_satisfying ).
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
