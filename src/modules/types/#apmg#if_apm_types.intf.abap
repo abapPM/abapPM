@@ -18,14 +18,16 @@ INTERFACE /apmg/if_apm_types PUBLIC.
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
 
   TYPES:
-    "! SAP Package (always upper case)
+    "! SAP package (always upper case)
     ty_devclass TYPE devclass,
     "! Name of package in registry (always lower case)
     ty_name     TYPE string,
     "! Semantic version of package
     ty_version  TYPE string,
+    "! Semantic versions of package
+    ty_versions TYPE STANDARD TABLE OF ty_version WITH KEY table_line,
     "! Package specification (version, range, tag name, git url, or tarball URL)
-    ty_spec     TYPE string ##NEEDED,
+    ty_spec     TYPE string,
     "! Email
     ty_email    TYPE string,
     "! URI
@@ -37,15 +39,17 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       email  TYPE ty_email,
       avatar TYPE ty_uri,
     END OF ty_person,
-    "! List of Persons
+    "! List of persons
     ty_persons TYPE STANDARD TABLE OF ty_person WITH KEY name url email,
     "! Dependency with semver range
     BEGIN OF ty_dependency,
       key   TYPE string,
-      range TYPE string,
+      range TYPE ty_spec,
     END OF ty_dependency,
-    "! List of Dependencies
-    ty_dependencies TYPE STANDARD TABLE OF ty_dependency WITH KEY key,
+    "! List of dependencies
+    ty_dependencies         TYPE STANDARD TABLE OF ty_dependency WITH KEY key,
+    "! Bundled dependencies
+    ty_bundled_dependencies TYPE string_table,
     "! Generic key value pair
     BEGIN OF ty_generic,
       key   TYPE string,
@@ -85,7 +89,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       type TYPE string,
       url  TYPE ty_uri,
     END OF ty_funding,
-    "! Dist Details
+    "! Dist details
     BEGIN OF ty_dist,
       file_count    TYPE i,
       shasum        TYPE string,
@@ -94,7 +98,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       integrity     TYPE string,
       signatures    TYPE STANDARD TABLE OF ty_signature WITH KEY keyid,
     END OF ty_dist,
-    "! SAP Package
+    "! SAP package
     BEGIN OF ty_sap_package,
       default               TYPE ty_devclass,
       software_component    TYPE dlvunit,
@@ -127,7 +131,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       dev_dependencies      TYPE ty_dependencies,
       optional_dependencies TYPE ty_dependencies,
       peer_dependencies     TYPE ty_dependencies,
-      bundle_dependencies   TYPE string_table,
+      bundle_dependencies   TYPE ty_bundled_dependencies,
       engines               TYPE ty_dependencies,
       os                    TYPE string_table,
       cpu                   TYPE string_table,
@@ -163,7 +167,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       dev_dependencies      TYPE ty_dependencies,
       optional_dependencies TYPE ty_dependencies,
       peer_dependencies     TYPE ty_dependencies,
-      bundle_dependencies   TYPE string_table,
+      bundle_dependencies   TYPE ty_bundled_dependencies,
       engines               TYPE ty_dependencies,
       os                    TYPE string_table,
       cpu                   TYPE string_table,

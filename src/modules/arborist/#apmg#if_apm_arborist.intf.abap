@@ -33,8 +33,12 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
       invalid    TYPE ty_error_type VALUE 'INVALID',
     END OF c_error_type.
 
-  "! Log entry for tree issues
   TYPES:
+    ty_node_ref  TYPE REF TO /apmg/cl_apm_arborist_node,
+    ty_node_refs TYPE STANDARD TABLE OF ty_node_ref WITH KEY table_line.
+
+  TYPES:
+    "! Log entry for tree issues
     BEGIN OF ty_log_entry,
       type    TYPE string,
       message TYPE string,
@@ -51,5 +55,35 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
       error    TYPE string VALUE 'ERROR',
       circular TYPE string VALUE 'CIRCULAR',
     END OF c_log_type.
+
+  " READING
+
+  "! Reads the installed packages and builds the actual tree
+  METHODS load_actual_tree
+    RETURNING
+      VALUE(result) TYPE ty_node_refs.
+
+  "! Read just what the package-lock.abap.json says (FUTURE)
+  METHODS load_virtual_tree.
+
+  " OPTIMIZING AND DESIGNING
+
+  "! Build an ideal tree from package.abap.json and various lockfiles
+  METHODS build_ideal_tree.
+
+  " WRITING
+
+  "! Make the idealTree be the thing that's persisted
+  METHODS reify_tree.
+
+  "! Get the log of issues found during tree building
+  METHODS get_log
+    RETURNING
+      VALUE(result) TYPE /apmg/if_apm_arborist=>ty_log.
+
+  "! Get all nodes in the tree
+  METHODS get_tree
+    RETURNING
+      VALUE(result) TYPE ty_node_refs.
 
 ENDINTERFACE.

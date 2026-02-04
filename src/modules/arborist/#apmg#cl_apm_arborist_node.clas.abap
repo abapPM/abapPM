@@ -12,6 +12,9 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
 * Copyright 2025 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* A node represents a package that is installed on this system, either
+* as a global package, or as a modules of another package (bundle).
+*
 * https://www.npmjs.com/package/@npmcli/arborist
 * https://github.com/npm/cli/tree/latest/workspaces/arborist
 ************************************************************************
@@ -31,6 +34,8 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     DATA name TYPE /apmg/if_apm_types=>ty_name READ-ONLY.
     "! Installed version
     DATA version TYPE /apmg/if_apm_types=>ty_version READ-ONLY.
+    "! Maximum version that satisfies the list of version specs (of all in edges)
+    DATA max_satisfying_version TYPE /apmg/if_apm_types=>ty_version READ-ONLY.
     "! Production dependencies
     DATA deps_prod TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Development dependencies
@@ -39,6 +44,8 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     DATA deps_peer TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
     "! Optional dependencies
     DATA deps_optional TYPE /apmg/if_apm_types=>ty_dependencies READ-ONLY.
+    "! Bundled dependencies
+    DATA deps_bundled TYPE /apmg/if_apm_types=>ty_bundled_dependencies READ-ONLY.
     "! Is this a bundled package
     DATA bundle TYPE abap_bool READ-ONLY.
     "! Is this a dev dependency
@@ -114,9 +121,22 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     "! Check if this node satisfies a version spec
     METHODS satisfies
       IMPORTING
-        !spec         TYPE /apmg/if_apm_types=>ty_spec
+        !range        TYPE /apmg/if_apm_types=>ty_spec
       RETURNING
         VALUE(result) TYPE abap_bool.
+
+    "! Get the maximum version that satisfies a list of version specs
+    METHODS max_satisfying
+      IMPORTING
+        !versions     TYPE /apmg/if_apm_types=>ty_versions
+        !specs        TYPE string_table
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_version.
+
+    "! Set the maximum version that satisfies the version specs
+    METHODS set_max_satisfying
+      IMPORTING
+        !max_satisfying TYPE /apmg/if_apm_types=>ty_version.
 
     "! Add an error message
     METHODS add_error
@@ -149,6 +169,49 @@ ENDCLASS.
 CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
 
 
+  METHOD add_edge_in.
+
+    INSERT edge INTO TABLE edges_in.
+
+  ENDMETHOD.
+
+
+  METHOD add_edge_out.
+
+    INSERT edge INTO TABLE edges_out.
+
+  ENDMETHOD.
+
+
+  METHOD add_error.
+
+    INSERT message INTO TABLE errors.
+
+  ENDMETHOD.
+
+
+  METHOD clear.
+
+    CLEAR tree.
+
+  ENDMETHOD.
+
+
+  METHOD constructor.
+
+    me->package       = package.
+    me->name          = manifest-name.
+    me->version       = manifest-version.
+    me->deps_prod     = manifest-dependencies.
+    me->deps_dev      = manifest-dev_dependencies.
+    me->deps_peer     = manifest-peer_dependencies.
+    me->deps_optional = manifest-optional_dependencies.
+    me->deps_bundled  = manifest-bundle_dependencies.
+    me->installed     = installed.
+
+  ENDMETHOD.
+
+
   METHOD create.
 
     " Check if node already exists
@@ -173,16 +236,29 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD constructor.
+  METHOD exists.
 
-    me->package       = package.
-    me->name          = manifest-name.
-    me->version       = manifest-version.
-    me->deps_prod     = manifest-dependencies.
-    me->deps_dev      = manifest-dev_dependencies.
-    me->deps_peer     = manifest-peer_dependencies.
-    me->deps_optional = manifest-optional_dependencies.
-    me->installed     = installed.
+    result = xsdbool( line_exists( tree[ name = name ] ) ).
+
+  ENDMETHOD.
+
+
+  METHOD get_all.
+
+    LOOP AT tree ASSIGNING FIELD-SYMBOL(<entry>).
+      INSERT <entry>-instance INTO TABLE result.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD get_all_dependencies.
+
+    " Combine all dependency types
+    APPEND LINES OF deps_prod TO result.
+    APPEND LINES OF deps_dev TO result.
+    APPEND LINES OF deps_peer TO result.
+    APPEND LINES OF deps_optional TO result.
 
   ENDMETHOD.
 
@@ -207,39 +283,20 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_all.
+  METHOD max_satisfying.
 
-    LOOP AT tree ASSIGNING FIELD-SYMBOL(<entry>).
-      INSERT <entry>-instance INTO TABLE result.
-    ENDLOOP.
+    " Concatenate specs into a range (AND) condition
+    DATA(range) = concat_lines_of(
+      table = specs
+      sep   = ` ` ).
 
-  ENDMETHOD.
-
-
-  METHOD clear.
-
-    CLEAR tree.
-
-  ENDMETHOD.
-
-
-  METHOD exists.
-
-    result = xsdbool( line_exists( tree[ name = name ] ) ).
-
-  ENDMETHOD.
-
-
-  METHOD add_edge_out.
-
-    INSERT edge INTO TABLE edges_out.
-
-  ENDMETHOD.
-
-
-  METHOD add_edge_in.
-
-    INSERT edge INTO TABLE edges_in.
+    TRY.
+        result = /apmg/cl_apm_semver_ranges=>max_satisfying(
+          versions = versions
+          range    = range ).
+      CATCH /apmg/cx_apm_error.
+        result = ''.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -249,7 +306,7 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
     TRY.
         result = /apmg/cl_apm_semver_functions=>satisfies(
           version = version
-          range   = spec ).
+          range   = range ).
       CATCH /apmg/cx_apm_error.
         result = abap_false.
     ENDTRY.
@@ -257,21 +314,21 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD add_error.
+  METHOD set_max_satisfying.
 
-    INSERT message INTO TABLE errors.
+    CASE max_satisfying.
+      WHEN ''.
+        installed = abap_false.
+        add_error( 'No version satisfies required specs' ).
+      WHEN version.
+        " current version satisfies
+        installed = abap_true.
+      WHEN OTHERS.
+        installed = abap_false.
+        add_error( |New version { max_satisfying } satisfies required specs| ).
+    ENDCASE.
+
+    max_satisfying_version = max_satisfying.
 
   ENDMETHOD.
-
-
-  METHOD get_all_dependencies.
-
-    " Combine all dependency types
-    APPEND LINES OF deps_prod TO result.
-    APPEND LINES OF deps_dev TO result.
-    APPEND LINES OF deps_peer TO result.
-    APPEND LINES OF deps_optional TO result.
-
-  ENDMETHOD.
-
 ENDCLASS.

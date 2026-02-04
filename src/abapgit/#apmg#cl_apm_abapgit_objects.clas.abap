@@ -146,6 +146,7 @@ CLASS /apmg/cl_apm_abapgit_objects DEFINITION
         !iv_package   TYPE devclass
         !is_item      TYPE zif_abapgit_definitions=>ty_item
         !iv_transport TYPE trkorr
+        !ii_log       TYPE REF TO zif_abapgit_log
       RAISING
         zcx_abapgit_exception.
 
@@ -463,7 +464,8 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
             delete_object(
               iv_package   = <ls_tadir>-devclass
               is_item      = ls_item
-              iv_transport = iv_transport ).
+              iv_transport = iv_transport
+              ii_log       = ii_log ).
 
             INSERT <ls_tadir> INTO TABLE lt_deleted.
             DELETE lt_tadir.
@@ -481,7 +483,7 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
             IF ii_log IS BOUND.
               ii_log->add_exception( ix_exc  = lx_error
                                      is_item = ls_item ).
-              ii_log->add_error( iv_msg = |Deletion of object { ls_item-obj_name } failed|
+              ii_log->add_error( iv_msg  = |Deletion of object { ls_item-obj_name } failed|
                                  is_item = ls_item ).
             ENDIF.
         ENDTRY.
@@ -516,7 +518,8 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
 
     li_obj = create_object( is_item ).
     li_obj->delete( iv_package   = iv_package
-                    iv_transport = iv_transport ).
+                    iv_transport = iv_transport
+                    ii_log       = ii_log ).
 
   ENDMETHOD.
 
@@ -625,8 +628,8 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
 
           ls_item-devclass = lv_package.
           ls_item-abap_language_version = lo_abap_language_vers->get_abap_language_vers_by_objt(
-                                                                    iv_object_type = ls_item-obj_type
-                                                                    iv_package = lv_package ).
+            iv_object_type = ls_item-obj_type
+            iv_package     = lv_package ).
 
           IF <ls_result>-packmove = abap_true.
             " Move object to new package
@@ -678,9 +681,9 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
           ENDLOOP.
 
         CATCH zcx_abapgit_exception INTO lx_exc.
-          ii_log->add_exception( ix_exc = lx_exc
+          ii_log->add_exception( ix_exc  = lx_exc
                                  is_item = ls_item ).
-          ii_log->add_error( iv_msg = |Import of object { ls_item-obj_name } failed|
+          ii_log->add_error( iv_msg  = |Import of object { ls_item-obj_name } failed|
                              is_item = ls_item ).
           "object should not be part of any deserialization step
           CONTINUE.
@@ -787,13 +790,13 @@ CLASS /apmg/cl_apm_abapgit_objects IMPLEMENTATION.
           lo_base ?= <ls_obj>-obj.
           APPEND LINES OF lo_base->get_accessed_files( ) TO ct_files.
 
-          ii_log->add_success( iv_msg = |Object { <ls_obj>-item-obj_name } imported|
+          ii_log->add_success( iv_msg  = |Object { <ls_obj>-item-obj_name } imported|
                                is_item = <ls_obj>-item ).
 
         CATCH zcx_abapgit_exception INTO lx_exc.
-          ii_log->add_exception( ix_exc = lx_exc
+          ii_log->add_exception( ix_exc  = lx_exc
                                  is_item = <ls_obj>-item ).
-          ii_log->add_error( iv_msg = |Import of object { <ls_obj>-item-obj_name } failed|
+          ii_log->add_error( iv_msg  = |Import of object { <ls_obj>-item-obj_name } failed|
                              is_item = <ls_obj>-item ).
       ENDTRY.
 

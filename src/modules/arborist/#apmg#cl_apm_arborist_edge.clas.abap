@@ -13,6 +13,13 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
 * Copyright 2025 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* An Edge represents a dependency relationship. Each node has an edgesIn
+* set, and an edgesOut map. Each edge has a type which specifies what
+* kind of dependency it represents. edge.from is a reference to the node
+* that has the dependency, and edge.to is a reference to the node that
+* requires the dependency.
+************************************************************************
+
   PUBLIC SECTION.
 
     "! Source node (the package that has the dependency)
@@ -110,40 +117,6 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD resolve.
-
-    " Try to find the target node in the global tree
-    to = /apmg/cl_apm_arborist_node=>get_by_name( name ).
-
-    IF to IS NOT BOUND.
-      " Dependency is missing
-      valid = abap_false.
-      error = /apmg/if_apm_arborist=>c_error_type-missing.
-    ELSE.
-      " Check if installed version satisfies the spec
-      valid = to->satisfies( spec ).
-      IF valid = abap_false.
-        error = /apmg/if_apm_arborist=>c_error_type-invalid.
-      ENDIF.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD is_missing.
-
-    result = xsdbool( error = /apmg/if_apm_arborist=>c_error_type-missing ).
-
-  ENDMETHOD.
-
-
-  METHOD is_invalid.
-
-    result = xsdbool( error = /apmg/if_apm_arborist=>c_error_type-invalid ).
-
-  ENDMETHOD.
-
-
   METHOD get_error_description.
 
     CASE error.
@@ -165,4 +138,37 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD is_invalid.
+
+    result = xsdbool( error = /apmg/if_apm_arborist=>c_error_type-invalid ).
+
+  ENDMETHOD.
+
+
+  METHOD is_missing.
+
+    result = xsdbool( error = /apmg/if_apm_arborist=>c_error_type-missing ).
+
+  ENDMETHOD.
+
+
+  METHOD resolve.
+
+    " Try to find the target node in the global tree
+    to = /apmg/cl_apm_arborist_node=>get_by_name( name ).
+
+    IF to IS NOT BOUND.
+      " Dependency is missing
+      valid = abap_false.
+      error = /apmg/if_apm_arborist=>c_error_type-missing.
+    ELSE.
+      " Check if installed version satisfies the spec
+      valid = to->satisfies( spec ).
+      IF valid = abap_false.
+        error = /apmg/if_apm_arborist=>c_error_type-invalid.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
 ENDCLASS.
