@@ -73,10 +73,9 @@ CLASS /apmg/cl_apm_file_importer IMPLEMENTATION.
   METHOD /apmg/if_apm_file_importer~get_xml_parsed.
 
     TRY.
-        CREATE OBJECT result TYPE zcl_abapgit_xml_input
-          EXPORTING
-            iv_xml      = get_file_content( 'xml' )
-            iv_filename = get_file_name( 'xml' ).
+        result = NEW zcl_abapgit_xml_input(
+          iv_xml      = get_file_content( 'xml' )
+          iv_filename = get_file_name( 'xml' ) ).
 
       CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
