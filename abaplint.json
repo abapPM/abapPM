@@ -85,7 +85,12 @@
     "constant_classes": true,
     "constructor_visibility_public": true,
     "contains_tab": true,
-    "cyclic_oo": true,
+    "cyclic_oo": {
+      "exclude": [
+        "#apmg#cl_apm_arborist",
+        "#apmg#if_apm_arborist"
+      ]
+    },
     "cyclomatic_complexity": true,
     "dangerous_statement": {
       "exclude": [
