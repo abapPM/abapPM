@@ -38,13 +38,42 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
     DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
-        " Get old class
         DATA(class_key) = VALUE seoclskey( clsname = class_name ).
 
-        DATA(class_metadata) = zif_abapgit_oo_object_fnc~get_class_properties( class_key ).
+        " TODO: Make files mandatory
+        IF files IS INITIAL.
+          " Copy globally installed interface
+          DATA(class_metadata)   = zif_abapgit_oo_object_fnc~get_class_properties( class_key ).
+          DATA(class_attributes) = zif_abapgit_oo_object_fnc~read_attributes( class_name ).
+          DATA(class_text_pool) = zif_abapgit_oo_object_fnc~read_text_pool(
+            iv_class_name = class_name
+            iv_language   = sy-langu ).
 
-        IF class_metadata IS INITIAL.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Not found'.
+          IF class_metadata IS INITIAL.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Not found'.
+          ENDIF.
+
+          DATA(orig_class_code) = source( ).
+        ELSE.
+          orig_class_code = files->get_abap( ).
+
+          DATA(xml) = files->get_xml_parsed( ).
+
+          xml->read(
+            EXPORTING
+              iv_name = 'VSEOCLASS'
+            CHANGING
+              cg_data = class_metadata ).
+          xml->read(
+            EXPORTING
+              iv_name = 'ATTRIBUTES'
+            CHANGING
+              cg_data = class_attributes ).
+          xml->read(
+            EXPORTING
+              iv_name = 'TPOOL'
+            CHANGING
+              cg_data = class_text_pool ).
         ENDIF.
 
         " Rename and create new class
@@ -55,24 +84,18 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
           CLEAR class_metadata-with_unit_tests.
         ENDIF.
 
-        " TODO: Make files mandatory
-        IF files IS INITIAL.
-          DATA(orig_code) = source( ).
-        ELSE.
-          orig_code = files->get_abap( ).
-        ENDIF.
-
         DATA(class_code) = /apmg/cl_apm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
-          program_source = orig_code
+          program_source = orig_class_code
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_dry_run IS INITIAL AND class_code <> orig_code.
+        IF is_dry_run IS INITIAL AND class_code <> orig_class_code.
           zif_abapgit_oo_object_fnc~create(
             EXPORTING
               iv_check      = abap_false
               iv_package    = new_package
+              it_attributes = class_attributes
             CHANGING
               cg_properties = class_metadata ).
 
@@ -119,7 +142,6 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
             is_pretty      = is_pretty ).
         ENDIF.
 
-
         IF is_dry_run IS INITIAL.
           zif_abapgit_oo_object_fnc~generate_locals(
             iv_package               = new_package
@@ -129,6 +151,11 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
             it_local_implementations = local_implementations
             it_local_macros          = local_macros
             it_local_test_classes    = test_classes ).
+
+          zif_abapgit_oo_object_fnc~insert_text_pool(
+            iv_class_name = class_name
+            it_text_pool  = class_text_pool
+            iv_language   = sy-langu ).
         ENDIF.
 
       CATCH zcx_abapgit_exception INTO DATA(error).

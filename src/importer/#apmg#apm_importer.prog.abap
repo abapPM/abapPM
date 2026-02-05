@@ -40,6 +40,7 @@ SELECTION-SCREEN BEGIN OF BLOCK b4 WITH FRAME.
 SELECTION-SCREEN END OF BLOCK b4.
 
 INITIALIZATION.
+
   p_defrul = /apmg/if_apm_importer=>c_default_import_rule.
 
 START-OF-SELECTION.

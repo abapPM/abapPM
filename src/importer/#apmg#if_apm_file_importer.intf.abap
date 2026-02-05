@@ -20,6 +20,12 @@ INTERFACE /apmg/if_apm_file_importer PUBLIC.
     RAISING
       /apmg/cx_apm_error.
 
+  METHODS get_xml_parsed
+    RETURNING
+      VALUE(result) TYPE REF TO zif_abapgit_xml_input
+    RAISING
+      /apmg/cx_apm_error.
+
   METHODS get_json
     RETURNING
       VALUE(result) TYPE string

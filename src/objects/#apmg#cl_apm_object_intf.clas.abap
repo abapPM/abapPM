@@ -18,7 +18,14 @@ CLASS /apmg/cl_apm_object_intf DEFINITION PUBLIC FINAL CREATE PUBLIC
   PROTECTED SECTION.
   PRIVATE SECTION.
 
+    "! Original interface name
     DATA interface_name TYPE seoclsname.
+
+    METHODS source
+      RETURNING
+        VALUE(result) TYPE seop_source_string
+      RAISING
+        /apmg/cx_apm_error.
 
 ENDCLASS.
 
@@ -32,26 +39,33 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
     DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
-        " Get old interface
+        " Copy globally installed interface
         DATA(interface_key) = VALUE seoclskey( clsname = interface_name ).
 
-        DATA(interface_metadata) = zif_abapgit_oo_object_fnc~get_interface_properties( interface_key ).
+        " TODO: Make files mandatory
+        IF files IS INITIAL.
+          DATA(interface_metadata)  = zif_abapgit_oo_object_fnc~get_interface_properties( interface_key ).
 
-        IF interface_metadata IS INITIAL.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Not found'.
+          IF interface_metadata IS INITIAL.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Not found'.
+          ENDIF.
+
+          DATA(orig_interface_code) = source( ).
+        ELSE.
+          orig_interface_code = files->get_abap( ).
+
+          DATA(xml) = files->get_xml_parsed( ).
+
+          xml->read(
+            EXPORTING
+              iv_name = 'VSEOINTERF'
+            CHANGING
+              cg_data = interface_metadata ).
         ENDIF.
 
         " Rename and create new interface
         interface_key-clsname      = new_object.
         interface_metadata-clsname = new_object.
-
-        " TODO: Make files mandatory
-        IF files IS INITIAL.
-          DATA(orig_interface_code) = /apmg/cl_apm_code_importer=>read(
-            cl_oo_classname_service=>get_intfsec_name( interface_name ) ).
-        ELSE.
-          orig_interface_code = files->get_abap( ).
-        ENDIF.
 
         DATA(interface_code) = /apmg/cl_apm_code_importer=>import(
           program_name   = cl_oo_classname_service=>get_intfsec_name( interface_name )
@@ -85,6 +99,24 @@ CLASS /apmg/cl_apm_object_intf IMPLEMENTATION.
 
     super->constructor( ).
     interface_name = item-obj_name.
+
+  ENDMETHOD.
+
+
+  METHOD source.
+
+    " or /apmg/cl_apm_code_importer=>read( cl_oo_classname_service=>get_intfsec_name( interface_name ) ) ?
+    TRY.
+        DATA(instance) = cl_oo_factory=>create_instance( ).
+
+        DATA(source_handler) = instance->create_clif_source(
+          clif_name = interface_name
+          version   = 'A' ).
+
+        source_handler->get_source( IMPORTING source = result ).
+      CATCH cx_root INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
 
   ENDMETHOD.
 ENDCLASS.
