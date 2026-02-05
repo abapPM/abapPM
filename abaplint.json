@@ -171,7 +171,10 @@
     },
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
-      "allow": ["/APMG/CL_APM_STRING_MAP"]
+      "allow": [
+        "/APMG/CL_APM_ARBORIST_NODE",
+        "/APMG/CL_APM_STRING_MAP"
+      ]
     },
     "invalid_table_index": true,
     "keep_single_parameter_on_one_line": true,
