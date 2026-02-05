@@ -621,6 +621,8 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         DELETE result WHERE bundle = abap_true.
     ENDCASE.
 
+    SORT result.
+
   ENDMETHOD.
 
 

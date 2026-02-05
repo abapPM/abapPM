@@ -17,7 +17,7 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
   TYPES:
     ty_package_id TYPE n LENGTH 40, " numeric hash
     BEGIN OF ty_package,
-      key                   TYPE /apmg/if_apm_persist_apm=>ty_key,
+      key                   TYPE /apmg/if_apm_types=>ty_key,
       package               TYPE /apmg/if_apm_types=>ty_devclass,
       name                  TYPE /apmg/if_apm_types=>ty_package_json-name,
       version               TYPE /apmg/if_apm_types=>ty_package_json-version,

@@ -180,6 +180,17 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD /apmg/if_apm_pacote~get_versions.
+
+    LOOP AT pacote-packument-versions ASSIGNING FIELD-SYMBOL(<version>).
+      IF <version>-manifest-deprecated IS INITIAL OR with_deprecated = abap_true.
+        INSERT <version>-manifest-version INTO TABLE result.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_pacote~load.
 
     pacote-json      = db_persist->load( pacote-key )-value.
