@@ -19,9 +19,7 @@ CLASS /apmg/cl_apm_settings DEFINITION
       IMPORTING
         !name         TYPE /apmg/if_apm_settings=>ty_name DEFAULT sy-uname
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_settings
-      RAISING
-        /apmg/cx_apm_error.
+        VALUE(result) TYPE REF TO /apmg/if_apm_settings.
 
     CLASS-METHODS injector
       IMPORTING
@@ -30,9 +28,7 @@ CLASS /apmg/cl_apm_settings DEFINITION
 
     METHODS constructor
       IMPORTING
-        !name TYPE /apmg/if_apm_settings=>ty_name
-      RAISING
-        /apmg/cx_apm_error.
+        !name TYPE /apmg/if_apm_settings=>ty_name.
 
     CLASS-METHODS initialize_global_settings
       RAISING
@@ -227,9 +223,8 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF name IS INITIAL OR strlen( name ) > 12.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Invalid name: { name }|.
-    ENDIF.
+    " Expect ABAP user name or "GLOBAL"
+    ASSERT strlen( name ) BETWEEN 1 AND 12.
 
     me->name = name.
     key = get_setting_key( name ).
