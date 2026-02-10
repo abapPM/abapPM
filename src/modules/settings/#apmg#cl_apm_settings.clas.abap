@@ -116,7 +116,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
         ENDIF.
 
-        result = ajson->stringify( 2 ).
+        result = ajson->stringify( 2 ) && |\n|.
       CATCH /apmg/cx_apm_ajson_error INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
