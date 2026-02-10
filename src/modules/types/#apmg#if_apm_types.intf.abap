@@ -22,7 +22,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 
   TYPES:
     "! Key for DB persistence
-    ty_key      TYPE c LENGTH c_max_key_len,
+    ty_key      TYPE c LENGTH c_max_key_len ##NEEDED,
     "! SAP package (always upper case)
     ty_devclass TYPE devclass,
     "! Name of package in registry (always lower case)
