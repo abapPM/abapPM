@@ -27,6 +27,12 @@ CLASS /apmg/cl_apm_gui_menus DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_html_toolbar.
 
+    CLASS-METHODS registry
+      IMPORTING
+        registry      TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_html_toolbar.
+
     CLASS-METHODS experimental
       IMPORTING
         !menu TYPE REF TO /apmg/cl_apm_html_toolbar.
@@ -109,6 +115,23 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
     )->add(
       iv_txt = 'Hotkeys'
       iv_act = /apmg/if_apm_gui_router=>c_action-show_hotkeys ).
+
+  ENDMETHOD.
+
+
+  METHOD registry.
+
+    IF registry = /apmg/if_apm_settings=>c_registry.
+      DATA(fav_class) = `transport-box`. " green
+    ELSE.
+      fav_class = `user-box`. " blue
+    ENDIF.
+
+    result = /apmg/cl_apm_html_toolbar=>create( 'apm-toolbar-registry' )->add(
+      iv_title = 'Registry'
+      iv_txt   = registry
+      iv_class = fav_class
+      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ registry }| ).
 
   ENDMETHOD.
 

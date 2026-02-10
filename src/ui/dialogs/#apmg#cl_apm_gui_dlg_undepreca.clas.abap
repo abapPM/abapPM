@@ -12,8 +12,10 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES /apmg/if_apm_gui_event_handler.
-    INTERFACES /apmg/if_apm_gui_renderable.
+    INTERFACES:
+      /apmg/if_apm_gui_event_handler,
+      /apmg/if_apm_gui_menu_provider,
+      /apmg/if_apm_gui_renderable.
 
     CLASS-METHODS create
       IMPORTING
@@ -140,6 +142,13 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
         ENDIF.
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_gui_menu_provider~get_menu.
+
+    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( registry ).
 
   ENDMETHOD.
 
