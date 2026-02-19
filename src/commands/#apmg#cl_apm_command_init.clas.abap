@@ -37,6 +37,11 @@ CLASS /apmg/cl_apm_command_init IMPLEMENTATION.
 
   METHOD execute.
 
+    " Authorization check
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-display ).
+
     " Package JSON
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory(
       package = package
