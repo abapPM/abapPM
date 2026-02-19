@@ -93,7 +93,7 @@ CLASS /apmg/cl_apm_auth IMPLEMENTATION.
 
   METHOD _get_activity_text.
 
-    SELECT SINGLE ltext FROM tactt INTO result WHERE spras = sy-langu AND actvt = activity.
+    SELECT SINGLE ltext FROM tactt INTO @result WHERE spras = @sy-langu AND actvt = @activity.
     IF sy-subrc <> 0.
       result = '<undefined>' ##NO_TEXT.
     ENDIF.
