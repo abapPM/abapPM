@@ -11,6 +11,7 @@ CLASS /apmg/cl_apm_installer DEFINITION
 ************************************************************************
 * TODO: This installer is a copy from Marc Bernard Tools
 * Some of the features are not relevant for apm and can be removed
+* TODO: Support for data config
 ************************************************************************
   PUBLIC SECTION.
 
@@ -153,6 +154,14 @@ CLASS /apmg/cl_apm_installer DEFINITION
       IMPORTING
         !transport TYPE trkorr
         !tadir     TYPE zif_abapgit_definitions=>ty_tadir_tt.
+
+    CLASS-METHODS _delete_objects
+      IMPORTING
+        !transport TYPE trkorr
+        !tadir     TYPE zif_abapgit_definitions=>ty_tadir_tt
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -161,6 +170,10 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
 
   METHOD install.
+
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
 
     TRY.
         _log_start(
@@ -195,6 +208,8 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
           transport     = transport
           main_language = main_language ).
 
+        " TODO: Support data config
+
       CATCH cx_root INTO DATA(error).
         _transport_reset( ).
 
@@ -214,6 +229,10 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
 
   METHOD uninstall.
+
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
 
     TRY.
         _log_start(
@@ -243,13 +262,13 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
               tadir     = tadir
               transport = transport ).
 
-            " Bridge to abapGit
-            /apmg/cl_apm_abapgit_objects=>delete(
-              it_tadir     = tadir
-              iv_transport = transport
-              ii_log       = log ).
+            _delete_objects(
+              tadir     = tadir
+              transport = transport ).
           ENDIF.
         ENDDO.
+
+        " TODO: Support data config
 
       CATCH cx_root INTO DATA(error).
         _transport_reset( ).
@@ -327,6 +346,21 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
     customizing-obj_type = 'METH'.
     INSERT clmcus FROM @customizing ##SUBRC_OK.
+
+  ENDMETHOD.
+
+
+  METHOD _delete_objects.
+
+    " Bridge to abapGit
+    TRY.
+        /apmg/cl_apm_abapgit_objects=>delete(
+          it_tadir     = tadir
+          iv_transport = transport
+          ii_log       = log ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
 
   ENDMETHOD.
 

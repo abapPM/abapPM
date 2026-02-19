@@ -93,6 +93,10 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 
   METHOD execute.
 
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
+
     " 1. Check package is installed and get version details
     DATA(package_json) = get_package( package ).
 

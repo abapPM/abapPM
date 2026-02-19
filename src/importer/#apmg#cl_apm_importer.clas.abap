@@ -105,6 +105,14 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     TRY.
         LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <package>-source_package
+            activity = /apmg/cl_apm_auth=>c_activity-display ).
+
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <package>-target_package
+            activity = /apmg/cl_apm_auth=>c_activity-change ).
+
           DATA(source) = zcl_abapgit_factory=>get_sap_package( <package>-source_package ).
           DATA(target) = zcl_abapgit_factory=>get_sap_package( <package>-target_package ).
 
@@ -481,6 +489,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
   METHOD run.
 
     is_log = is_logging.
+
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
 
     " 1. Get all programs that contain IMPORT statements
     DATA(programs) = get_programs( package ).

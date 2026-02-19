@@ -327,6 +327,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     DATA package_json_init TYPE /apmg/if_apm_types=>ty_package_json.
 
+    " Authorization check
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-create ).
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
+
     " 1. Check if something else is already installed
     check_package(
       package = package
