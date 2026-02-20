@@ -54,7 +54,7 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
   METHOD trim.
     " Remove leading and trailing tab, cr, lf and spaces Like JavaScript trim
     result = condense(
-      val = replace(
+      val  = replace(
         val   = data
         regex = `[\t\n\r]`
         with  = ` `
