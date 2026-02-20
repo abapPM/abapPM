@@ -18,9 +18,12 @@ CLASS /apmg/cl_apm_object_clas DEFINITION PUBLIC FINAL CREATE PUBLIC
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    DATA class_name TYPE seoclsname.
+    DATA original_class_name TYPE seoclsname.
+    DATA original_class_key TYPE seoclskey.
 
     METHODS source
+      IMPORTING
+        class_name    TYPE seoclsname
       RETURNING
         VALUE(result) TYPE seop_source_string
       RAISING
@@ -38,123 +41,128 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
     DATA(is_pretty) = xsdbool( is_dry_run = abap_false ).
 
     TRY.
-        DATA(class_key) = VALUE seoclskey( clsname = class_name ).
-
         " TODO: Make files mandatory
         IF files IS INITIAL.
-          " Copy globally installed interface
-          DATA(class_metadata)   = zif_abapgit_oo_object_fnc~get_class_properties( class_key ).
-          DATA(class_attributes) = zif_abapgit_oo_object_fnc~read_attributes( class_name ).
-          DATA(class_text_pool) = zif_abapgit_oo_object_fnc~read_text_pool(
-            iv_class_name = class_name
+          " Copy globally installed class
+          DATA(import_metadata)   = zif_abapgit_oo_object_fnc~get_class_properties( original_class_key ).
+          DATA(import_attributes) = zif_abapgit_oo_object_fnc~read_attributes( original_class_name ).
+          DATA(import_text_pool) = zif_abapgit_oo_object_fnc~read_text_pool(
+            iv_class_name = original_class_name
             iv_language   = sy-langu ).
 
-          IF class_metadata IS INITIAL.
+          IF import_metadata IS INITIAL.
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Not found'.
           ENDIF.
 
-          DATA(orig_class_code) = source( ).
+          DATA(class_code) = source( original_class_name ).
         ELSE.
-          orig_class_code = files->get_abap( ).
-
+          " Import class from registry
           DATA(xml) = files->get_xml_parsed( ).
 
           xml->read(
             EXPORTING
               iv_name = 'VSEOCLASS'
             CHANGING
-              cg_data = class_metadata ).
+              cg_data = import_metadata ).
           xml->read(
             EXPORTING
               iv_name = 'ATTRIBUTES'
             CHANGING
-              cg_data = class_attributes ).
+              cg_data = import_attributes ).
           xml->read(
             EXPORTING
               iv_name = 'TPOOL'
             CHANGING
-              cg_data = class_text_pool ).
-        ENDIF.
+              cg_data = import_text_pool ).
 
-        " Rename and create new class
-        class_key-clsname      = new_object.
-        class_metadata-clsname = new_object.
+          class_code = files->get_abap( ).
 
-        IF is_production = abap_true.
-          CLEAR class_metadata-with_unit_tests.
-        ENDIF.
-
-        DATA(class_code) = /apmg/cl_apm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_classpool_name( class_name )
-          program_source = orig_class_code
-          map            = map
-          is_pretty      = is_pretty ).
-
-        IF is_dry_run IS INITIAL AND class_code <> orig_class_code.
-          zif_abapgit_oo_object_fnc~create(
-            EXPORTING
-              iv_check      = abap_false
-              iv_package    = new_package
-              it_attributes = class_attributes
-            CHANGING
-              cg_properties = class_metadata ).
-
-          zif_abapgit_oo_object_fnc~deserialize_source(
-            iv_package = new_package
-            iv_version = class_metadata-unicode
-            is_key     = class_key
-            it_source  = class_code ).
-        ENDIF.
-
-        " TODO: Make files mandatory
-        IF files IS NOT INITIAL.
           DATA(local_definitions)     = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_def ).
           DATA(local_implementations) = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-locals_imp ).
           DATA(local_macros)          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-macros ).
           DATA(test_classes)          = files->get_abap( zif_abapgit_oo_object_fnc=>c_parts-testclasses ).
         ENDIF.
 
-        local_definitions = /apmg/cl_apm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_ccdef_name( class_name )
+        " Rename and create new class
+        DATA(import_key)        = original_class_key.
+        import_key-clsname      = new_object.
+        import_metadata-clsname = new_object.
+
+        " No test classes in production
+        IF is_production = abap_true.
+          CLEAR import_metadata-with_unit_tests.
+        ENDIF.
+
+        " Get existing and to be imported code
+        IF zif_abapgit_oo_object_fnc~exists( import_key-clsname ).
+          DATA(existing_class_code) = source( import_key-clsname ).
+        ENDIF.
+
+        DATA(import_class_code) = /apmg/cl_apm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_classpool_name( original_class_name )
+          program_source = class_code
+          map            = map
+          is_pretty      = is_pretty ).
+
+        " Compare existing code to newly imported code to avoid slow REPOSRC updates
+        IF is_dry_run IS INITIAL AND import_class_code <> existing_class_code.
+          zif_abapgit_oo_object_fnc~create(
+            EXPORTING
+              iv_check      = abap_false
+              iv_package    = new_package
+              it_attributes = import_attributes
+            CHANGING
+              cg_properties = import_metadata ).
+
+          zif_abapgit_oo_object_fnc~deserialize_source(
+            iv_package = new_package
+            iv_version = import_metadata-unicode
+            is_key     = import_key
+            it_source  = import_class_code ).
+        ENDIF.
+
+        DATA(import_local_definitions) = /apmg/cl_apm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_ccdef_name( original_class_name )
           program_source = local_definitions
           map            = map
           is_pretty      = is_pretty ).
 
-        local_implementations = /apmg/cl_apm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_ccimp_name( class_name )
+        DATA(import_local_implementations) = /apmg/cl_apm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_ccimp_name( original_class_name )
           program_source = local_implementations
           map            = map
           is_pretty      = is_pretty ).
 
-        local_macros = /apmg/cl_apm_code_importer=>import(
-          program_name   = cl_oo_classname_service=>get_ccmac_name( class_name )
+        DATA(import_local_macros) = /apmg/cl_apm_code_importer=>import(
+          program_name   = cl_oo_classname_service=>get_ccmac_name( original_class_name )
           program_source = local_macros
           map            = map
           is_pretty      = is_pretty ).
 
-        IF is_production = abap_true.
-          CLEAR test_classes.
-        ELSE.
-          test_classes = /apmg/cl_apm_code_importer=>import(
-            program_name   = cl_oo_classname_service=>get_ccau_name( class_name )
+        " No test classes in production
+        IF is_production = abap_false.
+          DATA(import_test_classes) = /apmg/cl_apm_code_importer=>import(
+            program_name   = cl_oo_classname_service=>get_ccau_name( original_class_name )
             program_source = test_classes
             map            = map
             is_pretty      = is_pretty ).
+        ELSE.
+          CLEAR import_test_classes.
         ENDIF.
 
         IF is_dry_run IS INITIAL.
           zif_abapgit_oo_object_fnc~generate_locals(
             iv_package               = new_package
-            iv_version               = class_metadata-unicode
-            is_key                   = class_key
-            it_local_definitions     = local_definitions
-            it_local_implementations = local_implementations
-            it_local_macros          = local_macros
-            it_local_test_classes    = test_classes ).
+            iv_version               = import_metadata-unicode
+            is_key                   = import_key
+            it_local_definitions     = import_local_definitions
+            it_local_implementations = import_local_implementations
+            it_local_macros          = import_local_macros
+            it_local_test_classes    = import_test_classes ).
 
           zif_abapgit_oo_object_fnc~insert_text_pool(
-            iv_class_name = class_name
-            it_text_pool  = class_text_pool
+            iv_class_name = import_key-clsname
+            it_text_pool  = import_text_pool
             iv_language   = sy-langu ).
         ENDIF.
 
@@ -168,7 +176,9 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
   METHOD constructor.
 
     super->constructor( ).
-    class_name = item-obj_name.
+
+    original_class_name = item-obj_name.
+    original_class_key  = VALUE seoclskey( clsname = original_class_name ).
 
   ENDMETHOD.
 
