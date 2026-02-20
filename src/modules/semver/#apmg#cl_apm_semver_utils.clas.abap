@@ -59,7 +59,7 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
         regex = `[\t\n\r]`
         with  = ` `
         occ   = 0 )
-      del = ` ` ) ##REGEX_POSIX.
+      from = `` ) ##REGEX_POSIX.
   ENDMETHOD.
 
 
