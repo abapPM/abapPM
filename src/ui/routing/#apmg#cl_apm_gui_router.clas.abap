@@ -258,6 +258,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
         result-page  = /apmg/cl_apm_gui_page_list=>create( ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page_replacing.
 
+      WHEN /apmg/if_apm_gui_router=>c_action-go_package.
+
+        result-page  = /apmg/cl_apm_gui_page_package=>create( |{ event->query( )->get( 'KEY' ) }| ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-go_tree.
+
+        result-page  = /apmg/cl_apm_gui_page_tree=>create( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
       WHEN /apmg/if_apm_gui_router=>c_action-go_settings.
 
         DATA(key) = /apmg/cl_apm_settings=>get_setting_key( /apmg/if_apm_settings=>c_global ).

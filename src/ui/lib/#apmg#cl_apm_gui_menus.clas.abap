@@ -51,6 +51,9 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
     result = /apmg/cl_apm_html_toolbar=>create( 'apm-toolbar-advanced' ).
 
     result->add(
+      iv_txt = 'Package Tree'
+      iv_act = /apmg/if_apm_gui_router=>c_action-go_tree
+    )->add(
       iv_txt = 'Database Utility'
       iv_act = /apmg/if_apm_gui_router=>c_action-go_db
     )->add(
