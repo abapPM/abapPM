@@ -264,6 +264,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
     result-registry = /apmg/if_apm_settings=>c_playground.
 
     result-list_settings-order_by = 'PACKAGE'.
+    result-tree_settings-order_by = 'NAME'.
 
   ENDMETHOD.
 

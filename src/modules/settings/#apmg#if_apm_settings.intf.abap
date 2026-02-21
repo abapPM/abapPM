@@ -29,6 +29,12 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
       order_by         TYPE string,
       order_descending TYPE abap_bool,
     END OF ty_list_settings,
+    BEGIN OF ty_tree_settings,
+      filter           TYPE string,
+      " show_details     TYPE abap_bool, " uses JS windows.localStorage
+      order_by         TYPE string,
+      order_descending TYPE abap_bool,
+    END OF ty_tree_settings,
     BEGIN OF ty_package_settings,
       package         TYPE devclass,
       favorite        TYPE abap_bool,
@@ -45,6 +51,7 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
       gui_settings          TYPE ty_gui_settings,
       keyboard_settings     TYPE ty_keyboard_settings,
       list_settings         TYPE ty_list_settings,
+      tree_settings         TYPE ty_tree_settings,
       package_settings      TYPE SORTED TABLE OF ty_package_settings WITH UNIQUE KEY package,
     END OF ty_settings.
 
