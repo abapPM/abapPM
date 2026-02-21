@@ -38,6 +38,7 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
+      c_page_id TYPE string VALUE 'apm-package-list',
       BEGIN OF c_action,
         select           TYPE string VALUE 'select',
         apply_filter     TYPE string VALUE 'apply_filter',
@@ -55,6 +56,101 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
       all_labels   TYPE string_table,
       label_colors TYPE REF TO /apmg/cl_apm_string_map,
       settings     TYPE /apmg/if_apm_settings=>ty_settings.
+
+    " PREPARE
+
+    METHODS build_table_scheme
+      RETURNING
+        VALUE(result) TYPE /apmg/cl_apm_gui_chunk_lib=>ty_col_spec_tt.
+
+    METHODS prepare_packages
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_package_json=>ty_packages
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS prepare_labels
+      IMPORTING
+        !packages     TYPE /apmg/if_apm_package_json=>ty_packages
+      RETURNING
+        VALUE(result) TYPE string_table.
+
+    " CONTENT
+
+    METHODS render_package_list
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_table_header
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_table_body
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_table_item
+      IMPORTING
+        !html    TYPE REF TO /apmg/if_apm_html
+        !package TYPE /apmg/if_apm_package_json=>ty_package
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_table_footer
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    " HEADER
+
+    METHODS render_action_toolbar
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_header_bar
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_header_label_list
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_filter_bar
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_filter_help_hint
+      RETURNING
+        VALUE(result) TYPE string.
+
+    METHODS render_registry
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    " CSS + JS
+
+    METHODS render_styles
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS get_scripts
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS get_palette
+      IMPORTING
+        !action       TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
+    " ACTIONS
 
     METHODS set_order_by
       IMPORTING
@@ -78,94 +174,11 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
       CHANGING
         !packages TYPE /apmg/if_apm_package_json=>ty_packages.
 
-    METHODS render_package_list
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS get_palette
-      IMPORTING
-        !action       TYPE string
-      RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS render_styles
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_table_header
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_table_footer
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_table_body
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS render_table_item
-      IMPORTING
-        !html    TYPE REF TO /apmg/if_apm_html
-        !package TYPE /apmg/if_apm_package_json=>ty_package
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS render_header_bar
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_header_label_list
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
     METHODS apply_order_by
       CHANGING
         packages TYPE /apmg/if_apm_package_json=>ty_packages.
 
-    METHODS prepare_packages
-      RETURNING
-        VALUE(result) TYPE /apmg/if_apm_package_json=>ty_packages
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS get_scripts
-      RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS render_action_toolbar
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_filter_bar
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_registry
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS build_table_scheme
-      RETURNING
-        VALUE(result) TYPE /apmg/cl_apm_gui_chunk_lib=>ty_col_spec_tt.
-
-    METHODS collect_all_labels
-      IMPORTING
-        !packages     TYPE /apmg/if_apm_package_json=>ty_packages
-      RETURNING
-        VALUE(result) TYPE string_table.
-
-    METHODS render_filter_help_hint
-      RETURNING
-        VALUE(result) TYPE string.
+    " INIT
 
     METHODS load_package_list
       RAISING
@@ -259,6 +272,11 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     hotkey_action-description = |Personal Settings|.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings_personal.
     hotkey_action-hotkey      = |p|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = |Tree|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_tree.
+    hotkey_action-hotkey      = |e|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
     hotkey_action-description = |Refresh|.
@@ -363,6 +381,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
       io_sub      = commands
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
     )->add(
       iv_txt      = /apmg/cl_apm_gui_buttons=>settings( )
       io_sub      = /apmg/cl_apm_gui_menus=>settings( )
@@ -538,19 +558,6 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD collect_all_labels.
-
-    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
-      APPEND LINES OF <package>-labels TO result.
-    ENDLOOP.
-
-    SORT result.
-    DELETE result WHERE table_line IS INITIAL.
-    DELETE ADJACENT DUPLICATES FROM result.
-
-  ENDMETHOD.
-
-
   METHOD constructor.
 
     super->constructor( ).
@@ -619,7 +626,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
-    html->add( 'var gHelper = new RepoOverViewHelper({ focusFilterKey: "f", pageId: "apm-list" });' ).
+    html->add( |var gHelper = new RepoOverViewHelper(\{ focusFilterKey: "f", pageId: "{ c_page_id }" \});| ).
 
     result = html.
 
@@ -647,6 +654,19 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD prepare_labels.
+
+    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+      APPEND LINES OF <package>-labels TO result.
+    ENDLOOP.
+
+    SORT result.
+    DELETE result WHERE table_line IS INITIAL.
+    DELETE ADJACENT DUPLICATES FROM result.
+
+  ENDMETHOD.
+
+
   METHOD prepare_packages.
 
     result = packages.
@@ -666,7 +686,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     ENDIF.
 
     " Hmmm, side effect, not ideal, but we need label list before filter applied
-    all_labels = collect_all_labels( result ).
+    all_labels = prepare_labels( result ).
 
     apply_order_by( CHANGING packages = result ).
     apply_filter( CHANGING packages = result ).
@@ -814,8 +834,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     LOOP AT list ASSIGNING FIELD-SYMBOL(<package>).
       render_table_item(
-        html     = html
-        package  = <package> ).
+        html    = html
+        package = <package> ).
     ENDLOOP.
 
     html->add( |</tbody>| ).
@@ -861,7 +881,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       fav_color = 'grey'.
     ENDIF.
 
-    html->add( |<tr data-key="{ package-id }"{ fav_class }">| ).
+    html->add( |<tr data-key="{ package-id }"{ fav_class }>| ).
 
     " Favorite
     DATA(favorite_icon) = html->icon(
