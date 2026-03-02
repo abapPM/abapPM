@@ -12,7 +12,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 * but there are differences! Several fields are not included while
 * others have been added.
 *
-* https://docs.npmjs.com/cli/v10/configuring-npm/package-json
+* https://docs.npmjs.com/cli/v11/configuring-npm/package-json
 ************************************************************************
 
   CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
@@ -106,7 +106,8 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     "! SAP package
     BEGIN OF ty_sap_package,
       default               TYPE ty_devclass,
-      software_component    TYPE dlvunit,
+      software_component    TYPE string, "dlvunit
+      application_component TYPE string, "ufps_posid
       abap_language_version TYPE string,
     END OF ty_sap_package.
 
@@ -114,7 +115,8 @@ INTERFACE /apmg/if_apm_types PUBLIC.
 
   TYPES:
     "! Schema for package.abap.json
-    "! Everything but "icon" and "devclass" is also in regular npm package.json
+    "! This type is similar to npm's package.json with the following additions:
+    "! changelog, icon, and sap_package
     BEGIN OF ty_package_json,
       name                  TYPE ty_name,
       version               TYPE ty_version,
@@ -122,6 +124,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       type                  TYPE string,
       keywords              TYPE string_table,
       homepage              TYPE string,
+      changelog             TYPE string,
       icon                  TYPE string,
       bugs                  TYPE ty_bugs,
       license               TYPE string,
@@ -216,6 +219,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       readme       TYPE string,
       users        TYPE ty_users,
       homepage     TYPE string,
+      changelog    TYPE string,
       icon         TYPE string,
       bugs         TYPE ty_bugs,
       license      TYPE string,
@@ -258,6 +262,15 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       sep2      TYPE c LENGTH 1 VALUE '.',
       extension TYPE c LENGTH 4 VALUE 'json',
     END OF c_package_json_file.
+
+  CONSTANTS c_latest_version TYPE string VALUE 'latest'.
+
+  CONSTANTS:
+    "! Time entries
+    BEGIN OF c_time_entries,
+      created  TYPE string VALUE 'created',
+      modified TYPE string VALUE 'modified',
+    END OF c_time_entries.
 
   "! Package Readme File
   CONSTANTS c_readme_file TYPE string VALUE 'README.md'.

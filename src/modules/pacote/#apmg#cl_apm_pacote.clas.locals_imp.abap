@@ -57,7 +57,7 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Duplicate dist-tags| INTO TABLE result.
     ENDIF.
 
-    IF NOT line_exists( packument-dist_tags[ key = 'latest' ] ).
+    IF NOT line_exists( packument-dist_tags[ key = /apmg/if_apm_types=>c_latest_version ] ).
       INSERT |"latest" dist-tags is missing| INTO TABLE result.
     ENDIF.
 
@@ -71,7 +71,9 @@ CLASS lcl_validate IMPLEMENTATION.
     LOOP AT packument-time INTO DATA(time).
       COLLECT time-key INTO values.
 
-      IF time-key <> 'created' AND time-key <> 'modified' AND NOT line_exists( packument-versions[ key = time-key ] ).
+      IF time-key <> /apmg/if_apm_types=>c_time_entries-created AND
+         time-key <> /apmg/if_apm_types=>c_time_entries-modified AND
+         NOT line_exists( packument-versions[ key = time-key ] ).
         INSERT |Timestamp version does not exist: { time-key }| INTO TABLE result.
       ENDIF.
     ENDLOOP.

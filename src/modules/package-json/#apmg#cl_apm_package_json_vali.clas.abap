@@ -107,6 +107,18 @@ CLASS /apmg/cl_apm_package_json_vali DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool.
 
+    CLASS-METHODS is_valid_software_component
+      IMPORTING
+        !component    TYPE csequence
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS is_valid_application_component
+      IMPORTING
+        !component    TYPE string
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -148,6 +160,16 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
       vers_val = /apmg/if_apm_types=>c_abap_language_version-cloud_development OR
       vers_val = /apmg/if_apm_types=>c_abap_language_version-ignore OR
       vers_val = /apmg/if_apm_types=>c_abap_language_version-undefined ).
+
+  ENDMETHOD.
+
+
+  METHOD is_valid_application_component.
+
+    " Should match values from DF14L-PS_POSID but might not exist in all systems. Therefore, we use a regex here
+    FIND REGEX '^[A-Z][A-Z0-9]*(-[A-Z][A-Z0-9]*)*$' IN component ##REGEX_POSIX.
+
+    result = xsdbool( component IS INITIAL OR sy-subrc = 0 AND strlen( component ) <= 24 ).
 
   ENDMETHOD.
 
@@ -304,6 +326,16 @@ CLASS /apmg/cl_apm_package_json_vali IMPLEMENTATION.
     ELSE.
       result = abap_false.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD is_valid_software_component.
+
+    " Should match values from CVERS-COMPONENT but might not exist in all systems. Therefore, we use a regex here
+    FIND REGEX '^[A-Z][-A-Z0-9_]*$' IN component ##REGEX_POSIX.
+
+    result = xsdbool( component IS INITIAL OR sy-subrc = 0 AND strlen( component ) <= 30 ).
 
   ENDMETHOD.
 

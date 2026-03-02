@@ -259,6 +259,16 @@ CLASS lcl_validate IMPLEMENTATION.
       INSERT |Invalid default SAP package: { manifest-sap_package-default }| INTO TABLE result.
     ENDIF.
 
+    IF /apmg/cl_apm_package_json_vali=>is_valid_software_component( manifest-sap_package-software_component )
+      = abap_false.
+      INSERT |Invalid software component: { manifest-sap_package-software_component }| INTO TABLE result.
+    ENDIF.
+
+    IF /apmg/cl_apm_package_json_vali=>is_valid_application_component( manifest-sap_package-application_component )
+      = abap_false.
+      INSERT |Invalid application component: { manifest-sap_package-application_component }| INTO TABLE result.
+    ENDIF.
+
     IF /apmg/cl_apm_package_json_vali=>is_valid_abap_language_version( manifest-sap_package-abap_language_version )
       = abap_false.
       INSERT |Invalid ABAP language version: { manifest-sap_package-abap_language_version }| INTO TABLE result.

@@ -67,8 +67,8 @@ CLASS /apmg/cl_apm_arborist DEFINITION
     "! Process a single package and its dependencies
     METHODS process_package
       IMPORTING
-        !package_info TYPE /apmg/if_apm_package_json=>ty_package
-        !depth        TYPE i DEFAULT 0.
+        !package TYPE /apmg/if_apm_package_json=>ty_package
+        !depth   TYPE i DEFAULT 0.
 
     "! Process dependencies of a node
     METHODS process_dependencies
@@ -144,6 +144,7 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
     " Clear previous tree and state
     /apmg/cl_apm_arborist_node=>clear( ).
+
     CLEAR: log, visited, processing_stack.
 
     add_log(
@@ -185,8 +186,8 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     " Now that all nodes exist, create edges
     LOOP AT packages ASSIGNING <package>.
       process_package(
-        package_info = <package>
-        depth        = 0 ).
+        package = <package>
+        depth   = 0 ).
     ENDLOOP.
 
     " Step 4: Process uninstalled dependencies recursively
@@ -253,7 +254,7 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
   METHOD constructor.
 
-    me->registry                  = registry.
+    me->registry                 = registry.
     me->with_bundle_dependencies = with_bundle_dependencies.
 
   ENDMETHOD.
@@ -439,12 +440,12 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
   METHOD process_package.
 
     " Skip if no instance or no name
-    IF package_info-instance IS NOT BOUND OR package_info-name IS INITIAL.
+    IF package-instance IS NOT BOUND OR package-name IS INITIAL.
       RETURN.
     ENDIF.
 
     " Get the node from the tree
-    DATA(node) = /apmg/cl_apm_arborist_node=>get_by_name( package_info-name ).
+    DATA(node) = /apmg/cl_apm_arborist_node=>get_by_name( package-name ).
 
     IF node IS INITIAL.
       RETURN.
