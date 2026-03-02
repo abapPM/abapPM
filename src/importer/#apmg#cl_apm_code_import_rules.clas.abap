@@ -218,7 +218,7 @@ CLASS /apmg/cl_apm_code_import_rules IMPLEMENTATION.
             IF rule-name+1(*) CS '@'.
               SPLIT rule-name AT '@' INTO rule-name rule-version.
             ELSE.
-              rule-version = 'latest'.
+              rule-version = /apmg/if_apm_types=>c_latest_version.
             ENDIF.
 
             " Default mapping uses module name

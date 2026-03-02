@@ -306,8 +306,6 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
   METHOD init_package.
 
-    CONSTANTS c_latest TYPE string VALUE 'latest'.
-
     IF packument IS INITIAL.
       result        = CORRESPONDING #( package_json ).
       result-_id    = package_json-name.
@@ -334,7 +332,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     " Update LATEST dist-tag
     " TODO: Allow publishing with other tags
     DATA(dist_tag) = VALUE /apmg/if_apm_types=>ty_generic(
-      key   = c_latest
+      key   = /apmg/if_apm_types=>c_latest_version
       value = package_json-version ).
 
     INSERT dist_tag INTO TABLE result-dist_tags.

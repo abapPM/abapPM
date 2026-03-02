@@ -208,7 +208,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           parent_package = <rule>-parent_package ).
 
         CASE <rule>-version.
-          WHEN 'latest'.
+          WHEN /apmg/if_apm_types=>c_latest_version.
             IF dependencies IS NOT INITIAL.
               package-version = <dependency>-version.
             ELSE.
