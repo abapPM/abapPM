@@ -86,6 +86,12 @@ CLASS /apmg/cl_apm_command_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS find_latest_version
+      IMPORTING
+        !time         TYPE /apmg/if_apm_types=>ty_packument-time
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
@@ -109,7 +115,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD execute.
 
-    " 1. Get packument from registry
+    " 1. Get packument from registry for update
     DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
       registry = registry
       name     = name
@@ -171,6 +177,25 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD find_latest_version.
+
+    " Note: Returns the new latest version when sorted by timestamp. This can become confusing, if
+    " versions are not published sequentially, for example when using pre-releases for a new major
+    " mixed with patches for minor releases. It might be better to find the predecesor using
+    " semver-sorting.
+
+    DATA(time_list) = time.
+
+    DELETE time_list
+      WHERE key = /apmg/if_apm_types=>c_time_entries-created OR key = /apmg/if_apm_types=>c_time_entries-modified.
+
+    SORT time_list BY timestamp DESCENDING.
+
+    result = time_list[ 1 ]-key.
+
+  ENDMETHOD.
+
+
   METHOD get_tarball.
 
     READ TABLE packument-versions ASSIGNING FIELD-SYMBOL(<version>) WITH KEY key = version.
@@ -199,10 +224,18 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
     IF lines( result-versions ) = 0.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
-          text = |Version { version } is the last version of package { packument-name }. You may unpublish the complete package, instead|.
+          text = |Version { version } is the only version of package { packument-name }. | &&
+                 |You may unpublish the complete package, instead|.
     ENDIF.
 
     DELETE result-time WHERE key = version ##SUBRC_OK.
+
+    " Must have at last "created" and "modified" entries
+    IF lines( result-time ) < 2.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |Inconsistent time list for package { packument-name }.|.
+    ENDIF.
 
     DELETE result-_attachments WHERE key = tarball.
 
@@ -254,9 +287,15 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD update_dist_tags.
 
-    " TODO
-    DATA(ver) = version ##NEEDED.
     result = packument.
+
+    LOOP AT result-dist_tags ASSIGNING FIELD-SYMBOL(<dist_tag>) WHERE value = version.
+      IF <dist_tag>-key = /apmg/if_apm_types=>c_latest_version.
+        <dist_tag>-value = find_latest_version( result-time ).
+      ELSE.
+        DELETE result-dist_tags INDEX sy-tabix.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.
