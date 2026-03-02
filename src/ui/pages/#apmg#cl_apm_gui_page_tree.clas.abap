@@ -11,12 +11,13 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * CSS classes have to match repo-overview to allow JS to work properly
+* TODO: move tree to tree_list
+* TODO: apply filter and sorting to tree_list
 ************************************************************************
   PUBLIC SECTION.
 
     INTERFACES:
       /apmg/if_apm_gui_event_handler,
-      /apmg/if_apm_gui_hotkeys,
       /apmg/if_apm_gui_menu_provider,
       /apmg/if_apm_gui_renderable.
 
@@ -233,76 +234,6 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD /apmg/if_apm_gui_hotkeys~get_hotkey_actions.
-
-    DATA hotkey_action LIKE LINE OF rt_hotkey_actions.
-
-    hotkey_action-ui_component = 'Package List'.
-
-    hotkey_action-description = |Global Settings|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings.
-    hotkey_action-hotkey      = |x|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Personal Settings|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings_personal.
-    hotkey_action-hotkey      = |p|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Refresh|.
-    hotkey_action-action      = c_action-refresh.
-    hotkey_action-hotkey      = |r|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Init|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_init.
-    hotkey_action-hotkey      = |t|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Install|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_install.
-    hotkey_action-hotkey      = |i|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Uninstall|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_uninstall.
-    hotkey_action-hotkey      = |u|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Publish|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_publish.
-    hotkey_action-hotkey      = |p|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Unpublish|.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_unpublish.
-    hotkey_action-hotkey      = |q|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    " registered/handled in js
-    hotkey_action-description = |Previous Package|.
-    hotkey_action-action      = `#`.
-    hotkey_action-hotkey      = |4|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Next Package|.
-    hotkey_action-action      = `##`.
-    hotkey_action-hotkey      = |6|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Show Package|.
-    hotkey_action-action      = `###`.
-    hotkey_action-hotkey      = |Enter|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-    hotkey_action-description = |Focus Filter|.
-    hotkey_action-action      = `####`.
-    hotkey_action-hotkey      = |f|.
-    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
-
-  ENDMETHOD.
-
-
   METHOD /apmg/if_apm_gui_menu_provider~get_menu.
 
     DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-tree' ).
@@ -506,12 +437,12 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     result = '<div class="pad-1em">'.
 
-    result &&= 'Dependents'.
+    result &&= '<strong>Dependents</strong>'.
 
     result &&= '<div>'.
 
     LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= |<br>{ <edge>->to->name } < { <edge>->from->name }|.
+      result &&= '<br>' && <edge>->from->name.
     ENDLOOP.
 
     result &&= '</div></div>'.
@@ -525,12 +456,12 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     result = '<div class="pad-1em">'.
 
-    result &&= 'Dependencies'.
+    result &&= '<strong>Dependencies</strong>'.
 
     result &&= '<div>'.
 
     LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= |<br>{ <edge>->from->name } > { <edge>->to->name }|.
+      result &&= '<br>' && <edge>->to->name.
     ENDLOOP.
 
     result &&= '</div></div>'.
@@ -544,7 +475,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     result = '<div class="pad-1em">'.
 
-    result &&= 'Ranges'.
+    result &&= '<strong>Ranges</strong>'.
 
     result &&= '<div>'.
 
@@ -563,7 +494,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     result = '<div class="pad-1em">'.
 
-    result &&= 'Check'.
+    result &&= '<strong>Check</strong>'.
 
     result &&= '<div>'.
 
