@@ -87,6 +87,19 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS import_objects_start
+      IMPORTING
+        !transport TYPE trkorr
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS import_objects_end
+      IMPORTING
+        !transport TYPE trkorr
+        !log       TYPE REF TO zcl_abapgit_log
+      RAISING
+        /apmg/cx_apm_error.
+
     CLASS-METHODS save_packages
       IMPORTING
         !packages     TYPE /apmg/if_apm_importer=>ty_packages
@@ -166,9 +179,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
-    " XXX: Switch for self-update
     DATA(list) = /apmg/cl_apm_package_json=>list(
-      "DATA(list) = /apmg/cl_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
@@ -345,23 +356,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     DATA(progress) = /apmg/cl_apm_progress_bar=>get_instance( lines( map ) ).
 
-    IF is_log = abap_true.
-      FORMAT COLOR COL_HEADING.
-      WRITE: / 'Importing:', AT c_width space.
-      FORMAT COLOR OFF.
-      SKIP.
-    ENDIF.
-
-    TRY.
-        zcl_abapgit_objects_activation=>clear( ).
-
-        IF transport IS NOT INITIAL.
-          zcl_abapgit_factory=>get_default_transport( )->set( transport ).
-        ENDIF.
-
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
+    import_objects_start( transport ).
 
     LOOP AT map INTO DATA(mapping).
 
@@ -376,7 +371,6 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           'IN PACKAGE', mapping-target_package.
       ENDIF.
 
-      " TODO: i18n
       DATA(old_item) = VALUE /apmg/if_apm_object=>ty_item(
         obj_type = mapping-object_type
         obj_name = mapping-old_object
@@ -385,13 +379,12 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
       DATA(new_item) = VALUE /apmg/if_apm_object=>ty_item(
         obj_type = mapping-object_type
-        obj_name = map[ old_object = mapping-old_object ]-new_object
+        obj_name = mapping-new_object
         package  = mapping-target_package
         language = sy-langu ).
 
       ASSERT new_item-obj_name IS NOT INITIAL AND new_item-obj_name <> old_item-obj_name.
 
-      " XXX: Switch for apm self-update
       " Some modules are used by the importer and don't support self-update
       " If these items are changed, it would dump, so we skip them (requires manual update)
       IF new_item-package CP '/APMG/APM*' AND
@@ -434,7 +427,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
               iv_package  = new_item-package
               iv_language = new_item-language ).
           ENDIF.
-        CATCH zcx_abapgit_exception INTO error.
+        CATCH zcx_abapgit_exception INTO DATA(error).
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
       ENDTRY.
 
@@ -455,6 +448,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
             ENDIF.
           ENDIF.
 
+          zcl_abapgit_objects_activation=>add(
+            iv_type = new_item-obj_type
+            iv_name = new_item-obj_name ).
+
         CATCH cx_root INTO DATA(any_error).
           IF is_log = abap_true.
             DATA(msg) = any_error->get_text( ).
@@ -464,6 +461,17 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     ENDLOOP.
 
+    import_objects_end(
+      transport = transport
+      log       = log ).
+
+    progress->off( ).
+
+  ENDMETHOD.
+
+
+  METHOD import_objects_end.
+
     TRY.
         " TODO: support DDIC (eventually)
         zcl_abapgit_objects_activation=>activate( log ).
@@ -472,16 +480,50 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           zcl_abapgit_factory=>get_default_transport( )->reset( ).
         ENDIF.
 
-      CATCH zcx_abapgit_exception INTO error.
+      CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
 
-    progress->off( ).
-
     IF is_log = abap_true.
+      IF log->zif_abapgit_log~get_log_level( ) >= zif_abapgit_log=>c_log_level-warning.
+        LOOP AT log->zif_abapgit_log~get_messages( ) ASSIGNING FIELD-SYMBOL(<msg>).
+          CASE <msg>-type.
+            WHEN zif_abapgit_log=>c_status-error.
+              WRITE: / <msg>-text COLOR COL_NEGATIVE.
+            WHEN zif_abapgit_log=>c_status-warning.
+              WRITE: / <msg>-text COLOR COL_TOTAL.
+            WHEN OTHERS.
+              WRITE: / <msg>-text COLOR COL_NORMAL.
+          ENDCASE.
+        ENDLOOP.
+      ENDIF.
+
       FORMAT COLOR OFF.
       SKIP.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD import_objects_start.
+
+    IF is_log = abap_true.
+      FORMAT COLOR COL_HEADING.
+      WRITE: / 'Importing:', AT c_width space.
+      FORMAT COLOR OFF.
+      SKIP.
+    ENDIF.
+
+    TRY.
+        zcl_abapgit_objects_activation=>clear( ).
+
+        IF transport IS NOT INITIAL.
+          zcl_abapgit_factory=>get_default_transport( )->set( transport ).
+        ENDIF.
+
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -544,9 +586,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     " TODO: This should be using the complete manifest of the dependencies (and not just name/version)
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
 
-      " XXX: Switch for apm self-update
       DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( <package>-target_package ).
-      " DATA(package_json_service) = /apmg/cl_package_json=>factory( <package>-target_package )
 
       IF package_json_service->exists( ).
         DATA(package_json) = package_json_service->load( )->get( ).
@@ -557,9 +597,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         ENDIF.
         package_json-version = <package>-version.
       ELSE.
-        "XXX: Switch for apm self-update
         package_json = VALUE /apmg/if_apm_types=>ty_package_json(
-        " package_json = VALUE /apmg/if_types=>ty_package_json(
           name    = <package>-name
           version = <package>-version ).
       ENDIF.
@@ -571,9 +609,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     " Remove dependencies
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>) WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
-      " XXX: Switch for apm self-update
       package_json_service = /apmg/cl_apm_package_json=>factory( <dependency>-package ).
-      " package_json_service = /apmg/cl_package_json=>factory( <dependency>-package )
 
       IF package_json_service->exists( ).
         package_json_service->delete( ).
