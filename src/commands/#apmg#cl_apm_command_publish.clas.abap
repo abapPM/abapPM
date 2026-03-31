@@ -117,7 +117,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     " Include a list of all objects which the registry will compare against the global object
     " directory (GTADIR) to avoid name conflicts with other packages
-    LOOP AT files ASSIGNING FIELD-SYMBOL(<file>).
+    LOOP AT files ASSIGNING FIELD-SYMBOL(<file>) WHERE item-obj_type IS NOT INITIAL AND item-obj_name IS NOT INITIAL.
       DATA(item) = |{ <file>-item-obj_type },{ <file>-item-obj_name }|.
       COLLECT item INTO packument-_objects.
     ENDLOOP.
