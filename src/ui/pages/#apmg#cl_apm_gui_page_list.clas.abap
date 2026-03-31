@@ -43,6 +43,7 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
         select           TYPE string VALUE 'select',
         apply_filter     TYPE string VALUE 'apply_filter',
         label_filter     TYPE string VALUE 'label_filter',
+        clear_filter     TYPE string VALUE 'clear_filter',
         toggle_favorites TYPE string VALUE 'toggle_favorites',
         change_order_by  TYPE string VALUE 'change_order_by',
         direction        TYPE string VALUE 'direction',
@@ -191,7 +192,6 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
     METHODS save_settings
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -250,6 +250,12 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
         ELSE.
           CLEAR settings-list_settings-filter. " Unexpected request
         ENDIF.
+        save_settings( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-clear_filter.
+
+        CLEAR settings-list_settings-filter.
         save_settings( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
@@ -719,6 +725,14 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     ENDIF.
 
     html->add( '<span class="toolbar-light pad-sides">' ).
+
+    IF settings-list_settings-filter IS NOT INITIAL.
+      html->add( html->a(
+        iv_txt   = |<i id="icon-clear-filter" class="icon icon-times-solid"></i>|
+        iv_class = 'command'
+        iv_act   = |{ c_action-clear_filter }| ) ).
+    ENDIF.
+
     html->add( html->a(
       iv_txt   = |<i id="icon-filter-favorite" class="icon icon-check { icon_class }"></i> Only Favorites|
       iv_class = 'command'
