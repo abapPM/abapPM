@@ -489,11 +489,11 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         LOOP AT log->zif_abapgit_log~get_messages( ) ASSIGNING FIELD-SYMBOL(<msg>).
           CASE <msg>-type.
             WHEN zif_abapgit_log=>c_status-error.
-              WRITE: / <msg>-text COLOR COL_NEGATIVE.
+              WRITE / <msg>-text COLOR COL_NEGATIVE.
             WHEN zif_abapgit_log=>c_status-warning.
-              WRITE: / <msg>-text COLOR COL_TOTAL.
+              WRITE / <msg>-text COLOR COL_TOTAL.
             WHEN OTHERS.
-              WRITE: / <msg>-text COLOR COL_NORMAL.
+              WRITE / <msg>-text COLOR COL_NORMAL.
           ENDCASE.
         ENDLOOP.
       ENDIF.
