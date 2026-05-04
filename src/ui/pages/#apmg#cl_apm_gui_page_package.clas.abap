@@ -189,6 +189,13 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS render_engines_table
+      IMPORTING
+        !html    TYPE REF TO /apmg/if_apm_html
+        !engines TYPE /apmg/if_apm_types=>ty_dependencies
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS render_json
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html
@@ -758,6 +765,16 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       none = abap_false.
     ENDIF.
 
+    IF package_json-engines IS NOT INITIAL.
+      html->add( |<h2>Engines ({ lines( package_json-engines ) })</h2>| ).
+
+      render_engines_table(
+        html    = html
+        engines = package_json-engines ).
+
+      none = abap_false.
+    ENDIF.
+
     IF none = abap_true.
       html->add( '<h3>This package has no dependencies</h3>' ).
     ENDIF.
@@ -812,6 +829,57 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       DATA(satisfies) = /apmg/cl_apm_semver_functions=>satisfies(
         version = installed_package-version
         range   = <dependency>-range ).
+
+      IF satisfies = abap_true.
+        html->td( html->icon( 'check/success' ) ).
+      ELSE.
+        html->td( html->icon( 'bolt/warning' ) ).
+      ENDIF.
+
+      html->add( '</tr>' ).
+    ENDLOOP.
+
+    html->add( '</table>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_engines_table.
+
+    html->add( '<table width="100%">' ).
+    html->add( '<tr>' ).
+    html->add( '<th width="30%">Range</th>' ).
+    html->add( '<th width="10%">&nbsp;</th>' ).
+    html->add( '<th width="40%">&nbsp;</th>' ).
+    html->add( '<th width="10%">Version</th>' ).
+    html->add( '<th width="10%">Status</th>' ).
+    html->add( '</tr>' ).
+
+    LOOP AT engines ASSIGNING FIELD-SYMBOL(<engine>)
+      WHERE key = /apmg/if_apm_types=>c_engine-abap OR key = /apmg/if_apm_types=>c_engine-apm.
+
+      html->add( '<tr>' ).
+      html->td( get_package_boxed(
+        name  = <engine>-key
+        value = <engine>-range ) ).
+
+      html->td( '' ).
+
+      CASE <engine>-key.
+        WHEN /apmg/if_apm_types=>c_engine-abap.
+          DATA(version) = /apmg/cl_apm_command_utils=>get_abap_version( ).
+        WHEN /apmg/if_apm_types=>c_engine-apm.
+          version = /apmg/if_apm_version=>c_version.
+        WHEN OTHERS.
+          ASSERT 0 = 1.
+      ENDCASE.
+
+      html->td( '' ).
+      html->td( version ).
+
+      DATA(satisfies) = /apmg/cl_apm_semver_functions=>satisfies(
+        version = version
+        range   = <engine>-range ).
 
       IF satisfies = abap_true.
         html->td( html->icon( 'check/success' ) ).
