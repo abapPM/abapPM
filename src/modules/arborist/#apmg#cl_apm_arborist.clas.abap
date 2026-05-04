@@ -198,10 +198,10 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     DATA(final_nodes) = resolve( ).
 
     " Log summary
-    DATA(total_nodes) = lines( final_nodes ).
+    DATA(total_nodes)     = lines( final_nodes ).
     DATA(installed_count) = 0.
-    DATA(missing_count) = 0.
-    DATA(invalid_count) = 0.
+    DATA(missing_count)   = 0.
+    DATA(invalid_count)   = 0.
 
     LOOP AT final_nodes ASSIGNING FIELD-SYMBOL(<node>).
       IF <node>->installed = abap_true.
