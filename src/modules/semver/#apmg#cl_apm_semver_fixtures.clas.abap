@@ -319,173 +319,176 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
 
     " inc(version, re, options, identifier, identifier_base) -> result
     result = VALUE #(
-      ( version         = '1.2.3'                 release         = 'major'      res = '2.0.0' )
-      ( version         = '1.2.3'                 release         = 'minor'      res = '1.3.0' )
-      ( version         = '1.2.3'                 release         = 'patch'      res = '1.2.4' )
-      ( version         = '1.2.3tag'              release         = 'major'      res = '2.0.0'                 loose      = abap_true )
-      ( version         = '1.2.3-tag'             release         = 'major'      res = '2.0.0' )
-      ( version         = '1.2.3'                 release         = 'fake'       res = '' )
-      ( version         = '1.2.0-0'               release         = 'patch'      res = '1.2.0' )
-      ( version         = 'fake'                  release         = 'major'      res = '' )
-      ( version         = '1.2.3-4'               release         = 'major'      res = '2.0.0' )
-      ( version         = '1.2.3-4'               release         = 'minor'      res = '1.3.0' )
-      ( version         = '1.2.3-4'               release         = 'patch'      res = '1.2.3' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'major'      res = '2.0.0' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'minor'      res = '1.3.0' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'patch'      res = '1.2.3' )
-      ( version         = '1.2.4'                 release         = 'prerelease' res = '1.2.5-0' )
-      ( version         = '1.2.3-0'               release         = 'prerelease' res = '1.2.3-1' )
-      ( version         = '1.2.3-alpha.0'         release         = 'prerelease' res = '1.2.3-alpha.1' )
-      ( version         = '1.2.3-alpha.1'         release         = 'prerelease' res = '1.2.3-alpha.2' )
-      ( version         = '1.2.3-alpha.2'         release         = 'prerelease' res = '1.2.3-alpha.3' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'prerelease' res = '1.2.3-alpha.1.beta' )
-      ( version         = '1.2.3-alpha.1.beta'    release         = 'prerelease' res = '1.2.3-alpha.2.beta' )
-      ( version         = '1.2.3-alpha.2.beta'    release         = 'prerelease' res = '1.2.3-alpha.3.beta' )
-      ( version         = '1.2.3-alpha.10.0.beta' release         = 'prerelease' res = '1.2.3-alpha.10.1.beta' )
-      ( version         = '1.2.3-alpha.10.1.beta' release         = 'prerelease' res = '1.2.3-alpha.10.2.beta' )
-      ( version         = '1.2.3-alpha.10.2.beta' release         = 'prerelease' res = '1.2.3-alpha.10.3.beta' )
-      ( version         = '1.2.3-alpha.10.beta.0' release         = 'prerelease' res = '1.2.3-alpha.10.beta.1' )
-      ( version         = '1.2.3-alpha.10.beta.1' release         = 'prerelease' res = '1.2.3-alpha.10.beta.2' )
-      ( version         = '1.2.3-alpha.10.beta.2' release         = 'prerelease' res = '1.2.3-alpha.10.beta.3' )
-      ( version         = '1.2.3-alpha.9.beta'    release         = 'prerelease' res = '1.2.3-alpha.10.beta' )
-      ( version         = '1.2.3-alpha.10.beta'   release         = 'prerelease' res = '1.2.3-alpha.11.beta' )
-      ( version         = '1.2.3-alpha.11.beta'   release         = 'prerelease' res = '1.2.3-alpha.12.beta' )
-      ( version         = '1.0.0'                 release         = 'prepatch'   res = '1.0.1-alpha.1.1a.0'    identifier = 'alpha.1.1a' )
-      ( version         = '1.2.0'                 release         = 'prepatch'   res = '1.2.1-0' )
-      ( version         = '1.2.0-1'               release         = 'prepatch'   res = '1.2.1-0' )
-      ( version         = '1.2.0'                 release         = 'preminor'   res = '1.3.0-0' )
-      ( version         = '1.2.3-1'               release         = 'preminor'   res = '1.3.0-0' )
-      ( version         = '1.2.0'                 release         = 'premajor'   res = '2.0.0-0' )
-      ( version         = '1.2.3-1'               release         = 'premajor'   res = '2.0.0-0' )
-      ( version         = '1.2.0-1'               release         = 'minor'      res = '1.2.0' )
-      ( version         = '1.0.0-1'               release         = 'major'      res = '1.0.0' )
-      ( version         = '1.0.0-1'               release         = 'release'    res = '1.0.0' )
-      ( version         = '1.2.0-1'               release         = 'release'    res = '1.2.0' )
-      ( version         = '1.2.3-1'               release         = 'release'    res = '1.2.3' )
-      ( version         = '1.2.3'                 release         = 'release'    res = '' )
+      ( version         = '1.2.3'                  release         = 'major'      res = '2.0.0' )
+      ( version         = '1.2.3'                  release         = 'minor'      res = '1.3.0' )
+      ( version         = '1.2.3'                  release         = 'patch'      res = '1.2.4' )
+      ( version         = '1.2.3tag'               release         = 'major'      res = '2.0.0'                 loose      = abap_true )
+      ( version         = '1.2.3-tag'              release         = 'major'      res = '2.0.0' )
+      ( version         = '1.2.3'                  release         = 'fake'       res = '' )
+      ( version         = '1.2.0-0'                release         = 'patch'      res = '1.2.0' )
+      ( version         = 'fake'                   release         = 'major'      res = '' )
+      ( version         = '1.2.3-4'                release         = 'major'      res = '2.0.0' )
+      ( version         = '1.2.3-4'                release         = 'minor'      res = '1.3.0' )
+      ( version         = '1.2.3-4'                release         = 'patch'      res = '1.2.3' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'major'      res = '2.0.0' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'minor'      res = '1.3.0' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'patch'      res = '1.2.3' )
+      ( version         = '1.2.4'                  release         = 'prerelease' res = '1.2.5-0' )
+      ( version         = '1.2.3-0'                release         = 'prerelease' res = '1.2.3-1' )
+      ( version         = '1.2.3-alpha.0'          release         = 'prerelease' res = '1.2.3-alpha.1' )
+      ( version         = '1.2.3-alpha.1'          release         = 'prerelease' res = '1.2.3-alpha.2' )
+      ( version         = '1.2.3-alpha.2'          release         = 'prerelease' res = '1.2.3-alpha.3' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'prerelease' res = '1.2.3-alpha.1.beta' )
+      ( version         = '1.2.3-alpha.1.beta'     release         = 'prerelease' res = '1.2.3-alpha.2.beta' )
+      ( version         = '1.2.3-alpha.2.beta'     release         = 'prerelease' res = '1.2.3-alpha.3.beta' )
+      ( version         = '1.2.3-alpha.10.0.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.1.beta' )
+      ( version         = '1.2.3-alpha.10.1.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.2.beta' )
+      ( version         = '1.2.3-alpha.10.2.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.3.beta' )
+      ( version         = '1.2.3-alpha.10.beta.0'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.1' )
+      ( version         = '1.2.3-alpha.10.beta.1'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.2' )
+      ( version         = '1.2.3-alpha.10.beta.2'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.3' )
+      ( version         = '1.2.3-alpha.9.beta'     release         = 'prerelease' res = '1.2.3-alpha.10.beta' )
+      ( version         = '1.2.3-alpha.10.beta'    release         = 'prerelease' res = '1.2.3-alpha.11.beta' )
+      ( version         = '1.2.3-alpha.11.beta'    release         = 'prerelease' res = '1.2.3-alpha.12.beta' )
+      ( version         = '1.0.0'                  release         = 'prepatch'   res = '1.0.1-alpha.1.1a.0'    identifier = 'alpha.1.1a' )
+      ( version         = '1.2.0'                  release         = 'prepatch'   res = '1.2.1-0' )
+      ( version         = '1.2.0-1'                release         = 'prepatch'   res = '1.2.1-0' )
+      ( version         = '1.2.0'                  release         = 'preminor'   res = '1.3.0-0' )
+      ( version         = '1.2.3-1'                release         = 'preminor'   res = '1.3.0-0' )
+      ( version         = '1.2.0'                  release         = 'premajor'   res = '2.0.0-0' )
+      ( version         = '1.2.3-1'                release         = 'premajor'   res = '2.0.0-0' )
+      ( version         = '1.2.0-1'                release         = 'minor'      res = '1.2.0' )
+      ( version         = '1.0.0-1'                release         = 'major'      res = '1.0.0' )
+      ( version         = '1.0.0-1'                release         = 'release'    res = '1.0.0' )
+      ( version         = '1.2.0-1'                release         = 'release'    res = '1.2.0' )
+      ( version         = '1.2.3-1'                release         = 'release'    res = '1.2.3' )
+      ( version         = '1.2.3'                  release         = 'release'    res = '' )
       " identifier
-      ( version         = '1.2.3'                 release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
-      ( version         = '1.2.3'                 release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
-      ( version         = '1.2.3'                 release         = 'patch'      res = '1.2.4'                 identifier = 'dev' )
-      ( version         = '1.2.3tag'              release         = 'major'      res = '2.0.0'                 identifier = 'dev'
+      ( version         = '1.2.3'                  release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
+      ( version         = '1.2.3'                  release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
+      ( version         = '1.2.3'                  release         = 'patch'      res = '1.2.4'                 identifier = 'dev' )
+      ( version         = '1.2.3tag'               release         = 'major'      res = '2.0.0'                 identifier = 'dev'
         loose           = abap_true )
-      ( version         = '1.2.3-tag'             release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
-      ( version         = '1.2.3'                 release         = 'fake'       res = ''                      identifier = 'dev' )
-      ( version         = '1.2.0-0'               release         = 'patch'      res = '1.2.0'                 identifier = 'dev' )
-      ( version         = 'fake'                  release         = 'major'      res = ''                      identifier = 'dev' )
-      ( version         = '1.2.3-4'               release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
-      ( version         = '1.2.3-4'               release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
-      ( version         = '1.2.3-4'               release         = 'patch'      res = '1.2.3'                 identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'patch'      res = '1.2.3'                 identifier = 'dev' )
-      ( version         = '1.2.4'                 release         = 'prerelease' res = '1.2.5-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-0'               release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0'         release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0'         release         = 'prerelease' res = '1.2.3-alpha.1'         identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.0.beta'    release         = 'prerelease' res = '1.2.3-alpha.1.beta'    identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.0.beta' release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.10.0.beta' release         = 'prerelease' res = '1.2.3-alpha.10.1.beta' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.1.beta' release         = 'prerelease' res = '1.2.3-alpha.10.2.beta' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.2.beta' release         = 'prerelease' res = '1.2.3-alpha.10.3.beta' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.beta.0' release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.10.beta.0' release         = 'prerelease' res = '1.2.3-alpha.10.beta.1' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.beta.1' release         = 'prerelease' res = '1.2.3-alpha.10.beta.2' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.beta.2' release         = 'prerelease' res = '1.2.3-alpha.10.beta.3' identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.9.beta'    release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-alpha.9.beta'    release         = 'prerelease' res = '1.2.3-alpha.10.beta'   identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.10.beta'   release         = 'prerelease' res = '1.2.3-alpha.11.beta'   identifier = 'alpha' )
-      ( version         = '1.2.3-alpha.11.beta'   release         = 'prerelease' res = '1.2.3-alpha.12.beta'   identifier = 'alpha' )
-      ( version         = '1.2.0'                 release         = 'prepatch'   res = '1.2.1-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.0-1'               release         = 'prepatch'   res = '1.2.1-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.0'                 release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-1'               release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.0'                 release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-1'               release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.3-1'               release         = 'premajor'   res = '2.0.0-dev.1'           identifier = 'dev'
+      ( version         = '1.2.3-tag'              release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
+      ( version         = '1.2.3'                  release         = 'fake'       res = ''                      identifier = 'dev' )
+      ( version         = '1.2.0-0'                release         = 'patch'      res = '1.2.0'                 identifier = 'dev' )
+      ( version         = 'fake'                   release         = 'major'      res = ''                      identifier = 'dev' )
+      ( version         = '1.2.3-4'                release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
+      ( version         = '1.2.3-4'                release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
+      ( version         = '1.2.3-4'                release         = 'patch'      res = '1.2.3'                 identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'major'      res = '2.0.0'                 identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'minor'      res = '1.3.0'                 identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'patch'      res = '1.2.3'                 identifier = 'dev' )
+      ( version         = '1.2.4'                  release         = 'prerelease' res = '1.2.5-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-0'                release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0'          release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0'          release         = 'prerelease' res = '1.2.3-alpha.1'         identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.0.beta'     release         = 'prerelease' res = '1.2.3-alpha.1.beta'    identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.0.beta'  release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.10.0.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.1.beta' identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.1.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.2.beta' identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.2.beta'  release         = 'prerelease' res = '1.2.3-alpha.10.3.beta' identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.beta.0'  release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.10.beta.0'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.1' identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.beta.1'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.2' identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.beta.2'  release         = 'prerelease' res = '1.2.3-alpha.10.beta.3' identifier = 'alpha' )
+      ( version         = '3.0.0-alpha.beta.5.4'   release         = 'prerelease' res = '3.0.0-alpha.beta.5.5'  identifier = 'alpha.beta' )
+      ( version         = '3.0.0-alpha.beta.5.4'   release         = 'prerelease' res = '3.0.0-alpha.beta.5.5'  identifier = 'alpha.beta.5' )
+      ( version         = '3.0.0-alpha.beta.gamma' release         = 'prerelease' res = '3.0.0-alpha.beta.0'    identifier = 'alpha.beta' )
+      ( version         = '1.2.3-alpha.9.beta'     release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-alpha.9.beta'     release         = 'prerelease' res = '1.2.3-alpha.10.beta'   identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.10.beta'    release         = 'prerelease' res = '1.2.3-alpha.11.beta'   identifier = 'alpha' )
+      ( version         = '1.2.3-alpha.11.beta'    release         = 'prerelease' res = '1.2.3-alpha.12.beta'   identifier = 'alpha' )
+      ( version         = '1.2.0'                  release         = 'prepatch'   res = '1.2.1-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.0-1'                release         = 'prepatch'   res = '1.2.1-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.0'                  release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-1'                release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.0'                  release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-1'                release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.3-1'                release         = 'premajor'   res = '2.0.0-dev.1'           identifier = 'dev'
         identifier_base = '1' )
-      ( version         = '1.2.0-1'               release         = 'minor'      res = '1.2.0'                 identifier = 'dev' )
-      ( version         = '1.0.0-1'               release         = 'major'      res = '1.0.0'                 identifier = 'dev' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.0-1'                release         = 'minor'      res = '1.2.0'                 identifier = 'dev' )
+      ( version         = '1.0.0-1'                release         = 'major'      res = '1.0.0'                 identifier = 'dev' )
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev' )
       " prerelease
-      ( version         = '1.2.3-0'               release         = 'prerelease' res = '1.2.3-1.0'             identifier = '1' )
-      ( version         = '1.2.3-1.0'             release         = 'prerelease' res = '1.2.3-1.1'             identifier = '1' )
-      ( version         = '1.2.3-1.1'             release         = 'prerelease' res = '1.2.3-1.2'             identifier = '1' )
-      ( version         = '1.2.3-1.1'             release         = 'prerelease' res = '1.2.3-2.0'             identifier = '2' )
-      ( version         = '1.2.0-1'               release         = 'prerelease' res = '1.2.0-alpha.0'         identifier = 'alpha'
+      ( version         = '1.2.3-0'                release         = 'prerelease' res = '1.2.3-1.0'             identifier = '1' )
+      ( version         = '1.2.3-1.0'              release         = 'prerelease' res = '1.2.3-1.1'             identifier = '1' )
+      ( version         = '1.2.3-1.1'              release         = 'prerelease' res = '1.2.3-1.2'             identifier = '1' )
+      ( version         = '1.2.3-1.1'              release         = 'prerelease' res = '1.2.3-2.0'             identifier = '2' )
+      ( version         = '1.2.0-1'                release         = 'prerelease' res = '1.2.0-alpha.0'         identifier = 'alpha'
         identifier_base = '0' )
-      ( version         = '1.2.1'                 release         = 'prerelease' res = '1.2.2-alpha.0'         identifier = 'alpha'
+      ( version         = '1.2.1'                  release         = 'prerelease' res = '1.2.2-alpha.0'         identifier = 'alpha'
         identifier_base = '0' )
-      ( version         = '0.2.0'                 release         = 'prerelease' res = '0.2.1-alpha.0'         identifier = 'alpha'
+      ( version         = '0.2.0'                  release         = 'prerelease' res = '0.2.1-alpha.0'         identifier = 'alpha'
         identifier_base = '0' )
-      ( version         = '1.2.2'                 release         = 'prerelease' res = '1.2.3-alpha.1'         identifier = 'alpha'
+      ( version         = '1.2.2'                  release         = 'prerelease' res = '1.2.3-alpha.1'         identifier = 'alpha'
         identifier_base = '1' )
-      ( version         = '1.2.3'                 release         = 'prerelease' res = '1.2.4-alpha.1'         identifier = 'alpha'
+      ( version         = '1.2.3'                  release         = 'prerelease' res = '1.2.4-alpha.1'         identifier = 'alpha'
         identifier_base = '1' )
-      ( version         = '1.2.4'                 release         = 'prerelease' res = '1.2.5-alpha.1'         identifier = 'alpha'
+      ( version         = '1.2.4'                  release         = 'prerelease' res = '1.2.5-alpha.1'         identifier = 'alpha'
         identifier_base = '1' )
-      ( version         = '1.2.0'                 release         = 'prepatch'   res = '1.2.1-dev.1'           identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'prepatch'   res = '1.2.1-dev.1'           identifier = 'dev'
         identifier_base = '1' )
-      ( version         = '1.2.0-1'               release         = 'prepatch'   res = '1.2.1-dev.1'           identifier = 'dev'
+      ( version         = '1.2.0-1'                release         = 'prepatch'   res = '1.2.1-dev.1'           identifier = 'dev'
         identifier_base = '1' )
-      ( version         = '1.2.0'                 release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev'
         identifier_base = '0' )
-      ( version         = '1.2.3-1'               release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev'
+      ( version         = '1.2.3-1'                release         = 'premajor'   res = '2.0.0-dev.0'           identifier = 'dev'
         identifier_base = '0' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev'
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.0'           identifier = 'dev'
         identifier_base = '0' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.1'           identifier = 'dev'
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.1'           identifier = 'dev'
         identifier_base = '1' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.bar.0'       identifier = ''
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.bar.0'       identifier = ''
         identifier_base = '0' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.bar.1'       identifier = ''
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.bar.1'       identifier = ''
         identifier_base = '1' )
-      ( version         = '1.2.0'                 release         = 'preminor'   res = '1.3.0-dev.1'           identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'preminor'   res = '1.3.0-dev.1'           identifier = 'dev'
         identifier_base = '1' )
-      ( version         = '1.2.3-1'               release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
-      ( version         = '1.2.0'                 release         = 'prerelease' res = '1.2.1-1'               identifier = ''
+      ( version         = '1.2.3-1'                release         = 'preminor'   res = '1.3.0-dev.0'           identifier = 'dev' )
+      ( version         = '1.2.0'                  release         = 'prerelease' res = '1.2.1-1'               identifier = ''
         identifier_base = '1' )
-      ( version         = '1.2.0-1'               release         = 'prerelease' res = '1.2.0-alpha'           identifier = 'alpha'
+      ( version         = '1.2.0-1'                release         = 'prerelease' res = '1.2.0-alpha'           identifier = 'alpha'
         identifier_base = 'false' )
-      ( version         = '1.2.1'                 release         = 'prerelease' res = '1.2.2-alpha'           identifier = 'alpha'
+      ( version         = '1.2.1'                  release         = 'prerelease' res = '1.2.2-alpha'           identifier = 'alpha'
         identifier_base = 'false' )
-      ( version         = '1.2.2'                 release         = 'prerelease' res = '1.2.3-alpha'           identifier = 'alpha'
+      ( version         = '1.2.2'                  release         = 'prerelease' res = '1.2.3-alpha'           identifier = 'alpha'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.0-1'               release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
+      ( version         = '1.2.0-1'                release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.3-1'               release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
+      ( version         = '1.2.3-1'                release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev'             identifier = 'dev'
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.3-dev.bar'         release         = 'prerelease' res = '1.2.3-dev.baz'         identifier = 'dev.baz'
+      ( version         = '1.2.3-dev.bar'          release         = 'prerelease' res = '1.2.3-dev.baz'         identifier = 'dev.baz'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'preminor'   res = '1.3.0-dev'             identifier = 'dev'
+      ( version         = '1.2.0'                  release         = 'preminor'   res = '1.3.0-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.3-1'               release         = 'preminor'   res = '1.3.0-dev'             identifier = 'dev'
+      ( version         = '1.2.3-1'                release         = 'preminor'   res = '1.3.0-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.3-dev'             release         = 'prerelease' res = ''                      identifier = 'dev'
+      ( version         = '1.2.3-dev'              release         = 'prerelease' res = ''                      identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.0-dev'             release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
+      ( version         = '1.2.0-dev'              release         = 'premajor'   res = '2.0.0-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.0-dev'             release         = 'preminor'   res = '1.3.0-beta'            identifier = 'beta'
+      ( version         = '1.2.0-dev'              release         = 'preminor'   res = '1.3.0-beta'            identifier = 'beta'
         identifier_base = 'false' )
-      ( version         = '1.2.0-dev'             release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
+      ( version         = '1.2.0-dev'              release         = 'prepatch'   res = '1.2.1-dev'             identifier = 'dev'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'prerelease' res = ''                      identifier = ''
+      ( version         = '1.2.0'                  release         = 'prerelease' res = ''                      identifier = ''
         identifier_base = 'false' )
-      ( version         = '1.0.0-rc.1+build.4'    release         = 'prerelease' res = '1.0.0-rc.2'            identifier = 'rc'
+      ( version         = '1.0.0-rc.1+build.4'     release         = 'prerelease' res = '1.0.0-rc.2'            identifier = 'rc'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'prerelease' res = ''                      identifier = 'invalid/preid'
+      ( version         = '1.2.0'                  release         = 'prerelease' res = ''                      identifier = 'invalid/preid'
         identifier_base = 'false' )
-      ( version         = '1.2.0'                 release         = 'prerelease' res = ''                      identifier = 'invalid+build'
+      ( version         = '1.2.0'                  release         = 'prerelease' res = ''                      identifier = 'invalid+build'
         identifier_base = 'false' )
-      ( version         = '1.2.0beta'             release         = 'prerelease' res = ''                      identifier = 'invalid/preid'
-        loose           = abap_true               identifier_base = 'false' ) ).
+      ( version         = '1.2.0beta'              release         = 'prerelease' res = ''                      identifier = 'invalid/preid'
+        loose           = abap_true                identifier_base = 'false' ) ).
 
   ENDMETHOD.
 
@@ -607,6 +610,8 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
       ( range = '>=2'                     version = '' )
       " incpre
       ( range = '2.x'                     version = '3.0.0-pre.0' incpre = abap_true )
+      ( range = '^0.0.3'                  version = '0.0.3-alpha' incpre = abap_true )
+      ( range = '^0.2.3'                  version = '0.2.3-alpha' incpre = abap_true )
       ( range = '^1.0.0'                  version = '1.0.0-rc1'   incpre = abap_true )
       ( range = '^1.0.0'                  version = '2.0.0-rc1'   incpre = abap_true )
       ( range = '^1.2.3-rc2'              version = '2.0.0'       incpre = abap_true )
@@ -870,6 +875,12 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
       ( range = '2.x.x' res = '>=2.0.0 <3.0.0-0' )
       ( range = '1.2.x' res = '>=1.2.0 <1.3.0-0' )
       ( range = '1.2.x || 2.x' res = '>=1.2.0 <1.3.0-0||>=2.0.0 <3.0.0-0' )
+      ( range = '1.x.5' res = '' )
+      ( range = '1.*.5' res = '' )
+      ( range = '1.x.5 || 2.x' res = '' )
+      ( range = 'x.1' res = '' )
+      ( range = 'x.1.2' res = '' )
+      ( range = 'x.x.1' res = '' )
       ( range = 'x' res = '*' )
       ( range = '2.*.*' res = '>=2.0.0 <3.0.0-0' )
       ( range = '1.2.*' res = '>=1.2.0 <1.3.0-0' )

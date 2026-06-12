@@ -991,8 +991,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
   METHOD render_user_menu.
 
-    " TODO! Replace with get_username and show "User" with icon
-    DATA(auth) = /apmg/cl_apm_http_login_manage=>get( settings-registry ).
+    " TODO: Replace with get_username and show "User" with icon
+    DATA(auth) = /apmg/cl_apm_http_login_manage=>get_auth( settings-registry ).
 
     html->add( '<span>' ).
 

@@ -83,11 +83,10 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
         result = login_response ).
 
     " Set token for subsequent requests (overwrites basic authentication)
-* TODO!
-*    /apmg/cl_apm_http_login_manage=>set_token(
-*      host  = registry
-*      username = username
-*      token = login_response-token ).
+    /apmg/cl_apm_http_login_manage=>set_token(
+      host     = registry
+      username = username
+      token    = login_response-token ).
 
     IF message IS INITIAL.
       MESSAGE login_response-ok TYPE 'S'.

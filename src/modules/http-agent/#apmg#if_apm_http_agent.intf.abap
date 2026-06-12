@@ -7,7 +7,7 @@ INTERFACE /apmg/if_apm_http_agent PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.1' ##NEEDED.
+  CONSTANTS c_version TYPE string VALUE '1.2.0' ##NEEDED.
 
   CONSTANTS:
     BEGIN OF c_method,
@@ -40,7 +40,6 @@ INTERFACE /apmg/if_apm_http_agent PUBLIC.
   METHODS request
     IMPORTING
       !url          TYPE string
-      !ssl_id       TYPE ssfapplssl DEFAULT 'ANONYM'
       !method       TYPE string DEFAULT c_method-get
       !query        TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
       !headers      TYPE REF TO /apmg/cl_apm_string_map OPTIONAL

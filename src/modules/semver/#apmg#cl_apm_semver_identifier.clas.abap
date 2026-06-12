@@ -36,7 +36,7 @@ CLASS /apmg/cl_apm_semver_identifier IMPLEMENTATION.
 
   METHOD compare_identifiers.
 
-    " Using RTTI isn't faster and there's no built in typeof
+    " Using RTTI isn't faster and there's no built-in typeof
     " if (typeof a === 'number' && typeof b === 'number') {
     "  return a === b ? 0 : a < b ? -1 : 1
     " }

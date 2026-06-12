@@ -162,11 +162,10 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
     ENDIF.
 
     IF username IS NOT INITIAL AND password IS NOT INITIAL.
-* TODO!
-*      /apmg/cl_apm_http_login_manage=>set(
-*        host     = registry
-*        username = username
-*        password = password ).
+      /apmg/cl_apm_http_login_manage=>set_basic(
+        host     = registry
+        username = username
+        password = password ).
     ENDIF.
 
     /apmg/cl_apm_trace=>cdata( |{ method } { url }\n\n{ payload }| ).
@@ -201,7 +200,7 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
       iv_val = /apmg/cl_apm_utils=>get_user_agent( ) ).
 
     " Authorization (Basic or Bearer)
-    DATA(auth) = /apmg/cl_apm_http_login_manage=>get( host ).
+    DATA(auth) = /apmg/cl_apm_http_login_manage=>get_auth( host ).
 
     IF auth IS NOT INITIAL.
       result->global_headers( )->set(
@@ -237,16 +236,15 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
       registry = registry
       name     = name ).
 
-    " TODO!
-*    DATA(tags) = pacote->get_dist_tags( ).
-*
-*    IF line_exists( tags[ key = 'latest' ] ).
-*      result = tags[ key = 'latest' ]-value.
-*    ELSE.
-*      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-*        EXPORTING
-*          text = |"Latest" tag is missing for package { name }. Please, open an issue on GitHub|.
-*    ENDIF.
+    DATA(tags) = pacote->get_dist_tags( ).
+
+    IF line_exists( tags[ key = 'latest' ] ).
+      result = tags[ key = 'latest' ]-value.
+    ELSE.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |"Latest" tag is missing for package { name }. Please, open an issue on GitHub|.
+    ENDIF.
 
   ENDMETHOD.
 

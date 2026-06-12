@@ -120,6 +120,14 @@ CLASS /apmg/cl_apm_semver_range DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS is_invalid_x_range_order
+      IMPORTING
+        !major        TYPE string
+        !minor        TYPE string
+        !patch        TYPE string
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     CLASS-METHODS parse_comparator
       IMPORTING
         !comp         TYPE string
@@ -380,6 +388,11 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD is_invalid_x_range_order.
+    result = xsdbool( is_x( major ) AND NOT is_x( minor ) OR is_x( minor ) AND NOT is_x( patch ) ).
+  ENDMETHOD.
+
+
   METHOD is_null_set.
     result = xsdbool( comp->value = '<0.0.0-0' ).
   ENDMETHOD.
@@ -622,9 +635,9 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
           ELSE.
             IF ma = '0'.
               IF mi = '0'.
-                with = |>={ ma }.{ mi }.{ pa }{ z } <{ ma }.{ mi }.{ str( pa + 1 )  }-0|.
+                with = |>={ ma }.{ mi }.{ pa } <{ ma }.{ mi }.{ str( pa + 1 )  }-0|.
               ELSE.
-                with = |>={ ma }.{ mi }.{ pa }{ z } <{ ma }.{ str( mi + 1 ) }.0-0|.
+                with = |>={ ma }.{ mi }.{ pa } <{ ma }.{ str( mi + 1 ) }.0-0|.
               ENDIF.
             ELSE.
               with = |>={ ma }.{ mi }.{ pa } <{ str( ma + 1 ) }.0.0-0|.
@@ -848,6 +861,10 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
           DATA(pa) = m->get_submatch( 4 ).
           DATA(pr) = m->get_submatch( 5 ).
           "DATA(bi)  = m->get_submatch( 6 )
+
+          IF is_invalid_x_range_order( major = ma minor = mi patch = pa ).
+            RETURN.
+          ENDIF.
 
           DATA(xma) = is_x( ma ).
           DATA(xmi) = xsdbool( xma = abap_true OR is_x( mi ) ).

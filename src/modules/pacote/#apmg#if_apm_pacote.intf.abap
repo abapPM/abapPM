@@ -8,7 +8,7 @@ INTERFACE /apmg/if_apm_pacote PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+  CONSTANTS c_version TYPE string VALUE '1.0.1' ##NEEDED.
 
   TYPES:
     BEGIN OF ty_pacote,
@@ -39,6 +39,10 @@ INTERFACE /apmg/if_apm_pacote PUBLIC.
       !with_deprecated TYPE abap_bool DEFAULT abap_false
     RETURNING
       VALUE(result)    TYPE /apmg/if_apm_types=>ty_versions.
+
+  METHODS get_dist_tags
+    RETURNING
+      VALUE(result) TYPE /apmg/if_apm_types=>ty_dist_tags.
 
   METHODS set
     IMPORTING

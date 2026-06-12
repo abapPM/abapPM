@@ -99,6 +99,7 @@ CLASS /apmg/cl_apm_pacote DEFINITION
 
     METHODS request
       IMPORTING
+        !command      TYPE string
         !url          TYPE string
         !abbreviated  TYPE abap_bool DEFAULT abap_false
       RETURNING
@@ -166,6 +167,13 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD /apmg/if_apm_pacote~get_dist_tags.
+
+    result = pacote-packument-dist_tags.
+
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_pacote~get_json.
 
     result = pacote-json.
@@ -175,7 +183,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD /apmg/if_apm_pacote~get_version.
 
-    result = pacote-packument-versions[ key = version ]-manifest.
+    IF line_exists( pacote-packument-versions[ key = version ] ).
+      result = pacote-packument-versions[ key = version ]-manifest.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -204,6 +214,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
   METHOD /apmg/if_apm_pacote~manifest.
 
     result = request(
+      command     = 'package'
       url         = |{ registry }/{ pacote-name }/{ version }{ write_request( write ) }|
       abbreviated = abbreviated )->cdata( ).
 
@@ -214,7 +225,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD /apmg/if_apm_pacote~packument.
 
-    result = request( |{ registry }/{ pacote-name }{ write_request( write ) }| )->cdata( ).
+    result = request(
+      command = 'package'
+      url     = |{ registry }/{ pacote-name }{ write_request( write ) }| )->cdata( ).
 
     check_result( result ).
 
@@ -254,7 +267,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD /apmg/if_apm_pacote~tarball.
 
-    DATA(response) = request( filename ).
+    DATA(response) = request(
+      command = 'tarball'
+      url     = filename ).
 
     IF response->is_ok( ) = abap_false.
       check_result( response->cdata( ) ).
@@ -536,7 +551,7 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
     DATA(components) = /apmg/cl_apm_url=>parse( url )->components.
 
     " Get/set auth token
-    DATA(auth) = /apmg/cl_apm_http_login_manage=>get( components-host ).
+    DATA(auth) = /apmg/cl_apm_http_login_manage=>get_auth( components-host ).
 
     IF auth IS NOT INITIAL.
       result->global_headers( )->set(
@@ -579,17 +594,23 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
 
   METHOD request.
 
-    IF abbreviated IS INITIAL.
-      result = get_agent( registry )->request( url ).
-    ELSE.
-      DATA(headers) = NEW /apmg/cl_apm_string_map( )->set(
+    DATA(headers) = NEW /apmg/cl_apm_string_map( ).
+
+    IF command IS NOT INITIAL.
+      headers->set(
+        iv_key = 'apm-command'
+        iv_val = command ).
+    ENDIF.
+
+    IF abbreviated IS NOT INITIAL.
+      headers->set(
         iv_key = 'Accept'
         iv_val = 'application/vnd.npm.install-v1+json' ).
-
-      result = get_agent( registry )->request(
-        url     = url
-        headers = headers ).
     ENDIF.
+
+    result = get_agent( registry )->request(
+      url     = url
+      headers = headers ).
 
   ENDMETHOD.
 

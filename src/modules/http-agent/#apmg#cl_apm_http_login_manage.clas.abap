@@ -11,27 +11,49 @@ CLASS /apmg/cl_apm_http_login_manage DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CLASS-METHODS get
+    CLASS-METHODS get_auth
       IMPORTING
         !host         TYPE csequence
       RETURNING
         VALUE(result) TYPE string.
 
-    CLASS-METHODS set
+    CLASS-METHODS get_username
+      IMPORTING
+        !host         TYPE csequence
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS get_host
+      IMPORTING
+        !host         TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS set_basic
       IMPORTING
         !host         TYPE csequence
         !username     TYPE csequence
         !password     TYPE csequence
-        !is_basic     TYPE abap_bool DEFAULT abap_true
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS set_token
+      IMPORTING
+        !host         TYPE csequence
+        !username     TYPE csequence
+        !token        TYPE csequence
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS save
       IMPORTING
-        !host TYPE csequence
-        !auth TYPE csequence.
+        !host     TYPE csequence
+        !auth     TYPE csequence
+        !username TYPE csequence OPTIONAL.
 
-    CLASS-METHODS clear.
+    CLASS-METHODS clear
+      IMPORTING
+        !host TYPE csequence OPTIONAL.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -40,20 +62,16 @@ CLASS /apmg/cl_apm_http_login_manage DEFINITION
       BEGIN OF ty_auth,
         host TYPE string,
         auth TYPE string,
+        user TYPE string,
       END OF ty_auth.
 
     CLASS-DATA auths TYPE TABLE OF ty_auth WITH DEFAULT KEY.
 
-    CLASS-METHODS get_host
-      IMPORTING
-        !host         TYPE string
-      RETURNING
-        VALUE(result) TYPE string.
-
     CLASS-METHODS append
       IMPORTING
         !host TYPE string
-        !auth TYPE string.
+        !auth TYPE string
+        !user TYPE string.
 
 ENDCLASS.
 
@@ -70,6 +88,7 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
       APPEND INITIAL LINE TO auths ASSIGNING FIELD-SYMBOL(<auth>).
       <auth>-host = hostname.
       <auth>-auth = auth.
+      <auth>-user = user.
     ENDIF.
 
   ENDMETHOD.
@@ -77,12 +96,16 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
 
   METHOD clear.
 
-    CLEAR auths.
+    IF host IS INITIAL.
+      CLEAR auths.
+    ELSE.
+      DELETE auths WHERE host = host ##SUBRC_OK.
+    ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD get.
+  METHOD get_auth.
 
     READ TABLE auths INTO DATA(auth) WITH KEY host = get_host( host ).
     IF sy-subrc = 0.
@@ -109,17 +132,28 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD save.
+  METHOD get_username.
 
-    IF auth IS NOT INITIAL.
-      append( host = host
-              auth = auth ).
+    READ TABLE auths INTO DATA(auth) WITH KEY host = get_host( host ).
+    IF sy-subrc = 0.
+      result = auth-user.
     ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD set.
+  METHOD save.
+
+    IF auth IS NOT INITIAL.
+      append( host = host
+              auth = auth
+              user = |{ username }| ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD set_basic.
 
     ASSERT host IS NOT INITIAL.
 
@@ -127,14 +161,28 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    IF is_basic = abap_true.
-      result = |Basic { cl_http_utility=>encode_base64( |{ username }:{ password }| ) }|.
-    ELSE.
-      result = |Bearer { password }|.
-    ENDIF.
+    result = |Basic { cl_http_utility=>encode_base64( |{ username }:{ password }| ) }|.
 
     append( host = host
-            auth = result ).
+            auth = result
+            user = username ).
+
+  ENDMETHOD.
+
+
+  METHOD set_token.
+
+    ASSERT host IS NOT INITIAL.
+
+    IF token IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    result = |Bearer { token }|.
+
+    append( host = host
+            auth = result
+            user = username ).
 
   ENDMETHOD.
 ENDCLASS.

@@ -27,6 +27,9 @@ CLASS /apmg/cl_apm_markdown DEFINITION
 * - Remove variable prefixes, strict abaplint rules
 ************************************************************************
 * TODO: Add "copy-to-clipboard" for code blocks
+* TODO: More GFM - task lists, strikethrough (~~), autolinks, tagfilter
+*       https://github.github.com/gfm/
+* TODO: Support for footnotes
 ************************************************************************
   PUBLIC SECTION.
 

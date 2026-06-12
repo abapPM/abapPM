@@ -11,12 +11,17 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
 
   TYPES:
     BEGIN OF ty_registry_settings,
-      name     TYPE string,
-      url      TYPE string,
-      rfcdest  TYPE rfcdest,
-      user     TYPE string,
-      password TYPE string,
-      token    TYPE string,
+      name           TYPE string, " mandatory
+      url            TYPE string, " mandatory
+      rfcdest        TYPE rfcdest, " either rfc destination or the rest
+      user           TYPE string, " registry username
+      password       TYPE string, " password (only store if you're the only user on the system!)
+      token          TYPE string, " FUTURE: api token
+      ssl_id         TYPE ssfapplssl,
+      proxy_host     TYPE string,
+      proxy_service  TYPE string,
+      proxy_user     TYPE string,
+      proxy_password TYPE string,
     END OF ty_registry_settings,
     BEGIN OF ty_gui_settings,
       adt_jump_enabled  TYPE abap_bool,

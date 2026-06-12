@@ -287,17 +287,6 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           data      = get_json_data( ) ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
-* TODO! replace with dialog (router)
-*      WHEN c_action-update_dependencies.
-*
-*        DATA(registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
-*
-*        /apmg/cl_apm_command_update=>run(
-*          registry = registry
-*          package  = package ).
-*
-*        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
-
       WHEN c_action-add_dependency OR c_action-remove_dependency.
 
         /apmg/cl_apm_roadmap=>planned( `The feature has not been implemented yet. `

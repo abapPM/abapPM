@@ -60,11 +60,7 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
         result = logout_response ).
 
     " Clear token
-* TODO!
-*    /apmg/cl_apm_http_logout_manage=>clear(
-*      host  = registry
-*      username = username
-*      token = logout_response-token ).
+    /apmg/cl_apm_http_login_manage=>clear( registry ).
 
     IF message IS INITIAL.
       MESSAGE logout_response-ok TYPE 'S'.
