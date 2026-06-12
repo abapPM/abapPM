@@ -442,7 +442,10 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
       comp_values TYPE string_table,
       comparators TYPE ty_comparators.
 
-    DATA(range) = range_string.
+    DATA(range) = replace(
+      val   = range_string
+      regex = /apmg/cl_apm_semver_re=>token-build-src
+      with  = '' ) ##REGEX_POSIX.
 
     " memoize range parsing for performance
     " this is a very hot path, and fully deterministic

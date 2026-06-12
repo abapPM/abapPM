@@ -18,6 +18,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
       IMPORTING
         !registry   TYPE string
         !package    TYPE devclass
+        !tag        TYPE string OPTIONAL
         !is_dry_run TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
@@ -29,6 +30,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
       IMPORTING
         !registry   TYPE string
         !package    TYPE devclass
+        !tag        TYPE string
         !is_dry_run TYPE abap_bool
       RAISING
         /apmg/cx_apm_error ##NEEDED.
@@ -129,9 +131,9 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     DATA(tarball) = tar->gzip( tar->save( ) ).
 
-    DATA(dist) = /apmg/cl_apm_command_integrity=>get_integrity( tarball ).
+    DATA(dist) = /apmg/cl_apm_integrity=>get( tarball ).
 
-    DATA(package_name) = /apmg/cl_apm_command_utils=>get_package_from_name( packument-name ).
+    DATA(package_name) = /apmg/cl_apm_registry=>get_package_from_name( packument-name ).
     DATA(filename) = |{ package_name }-{ version }.tgz|.
 
     dist-file_count    = tar->file_count( ).
@@ -158,7 +160,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     IF package_json_service->exists( ) = abap_false.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
-          text = |{ package } does not exist or is not initialized|.
+          text = |SAP package { package } does not exist or is not initialized|.
     ENDIF.
 
   ENDMETHOD.
@@ -184,12 +186,20 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     DATA(package_json) = get_package_json( package ).
 
     IF package_json-private = abap_true.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Private packages can not be published'.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = 'Private packages can not be published'.
+    ENDIF.
+
+    IF /apmg/cl_apm_semver_functions=>prerelease( package_json-version ) IS NOT INITIAL AND tag IS INITIAL.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = 'You must specify a tag when publishing a prerelease version'.
     ENDIF.
 
     " 3. Get packument from registry
     TRY.
-        DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
+        DATA(packument) = /apmg/cl_apm_registry=>get_packument(
           registry = registry
           name     = package_json-name
           write    = abap_true ).
@@ -342,7 +352,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     version-manifest               = CORRESPONDING #( package_json ).
     version-manifest-_id           = |{ package_json-name }@{ package_json-version }|.
-    version-manifest-_abap_version = /apmg/cl_apm_command_utils=>get_abap_version( ).
+    version-manifest-_abap_version = /apmg/cl_apm_utils=>get_abap_version( ).
     version-manifest-_apm_version  = /apmg/if_apm_version=>c_version.
 
     INSERT version INTO TABLE result-versions.
@@ -354,13 +364,14 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
     DATA(json) = /apmg/cl_apm_pacote=>convert_packument_to_json( packument ).
 
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
+      command  = 'publish'
       registry = registry
       url      = |{ registry }/{ packument-name }|
       method   = /apmg/if_apm_http_agent=>c_method-put
       payload  = json ).
 
-    result = /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Error publishing package' ).
 
@@ -374,6 +385,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     command->execute(
       registry   = registry
       package    = package
+      tag        = tag
       is_dry_run = is_dry_run ).
 
   ENDMETHOD.
@@ -389,7 +401,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
           only_local_objects = abap_false ).
 
         " Hardcoded to prefix folder logic and /src/ starting folder
-        " TODO!: Support full and mixed folder logic
+        " TODO: Support full and mixed folder logic
         DATA(dot_abapgit) = zcl_abapgit_dot_abapgit=>build_default( ).
 
         DATA(serializer) = NEW /apmg/cl_apm_abapgit_serialize(

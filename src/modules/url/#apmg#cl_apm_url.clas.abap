@@ -14,7 +14,7 @@ CLASS /apmg/cl_apm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 ************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '1.0.1' ##NEEDED.
 
     TYPES:
       "! scheme://username:password@host:port/path?query#fragment

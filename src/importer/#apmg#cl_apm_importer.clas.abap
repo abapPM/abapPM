@@ -179,6 +179,8 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD get_packages.
 
+    DATA dependency LIKE LINE OF dependencies.
+
     DATA(list) = /apmg/cl_apm_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
@@ -191,14 +193,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
     ENDIF.
 
     LOOP AT rules ASSIGNING FIELD-SYMBOL(<rule>).
-      IF dependencies IS NOT INITIAL.
-        READ TABLE dependencies ASSIGNING FIELD-SYMBOL(<dependency>)
-          WITH KEY name = <rule>-name.
-        IF sy-subrc <> 0.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-            EXPORTING
-              text = |Package { <rule>-name } used in IMPORT statement but not a dependency|.
-        ENDIF.
+      READ TABLE dependencies INTO dependency
+        WITH KEY name = <rule>-name.
+      IF sy-subrc <> 0.
+        CLEAR dependency.
       ENDIF.
 
       " TODO!: Instead of using the globally installed package as a source,
@@ -218,16 +216,19 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           target_package = <rule>-target_package
           parent_package = <rule>-parent_package ).
 
+        " Latest, fixed version, or dist-tag
         CASE <rule>-version.
           WHEN /apmg/if_apm_types=>c_latest_version.
-            IF dependencies IS NOT INITIAL.
-              package-version = <dependency>-version.
+            IF dependency IS NOT INITIAL.
+              package-version = dependency-version.
             ELSE.
               package-version = <package_json>-version.
             ENDIF.
           WHEN <package_json>-version.
             " TODO: better error
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Version mismatch'.
+          WHEN OTHERS.
+            " TODO: check if it's a tag
         ENDCASE.
 
         INSERT package INTO TABLE result.

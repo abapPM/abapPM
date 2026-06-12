@@ -23,6 +23,7 @@ CLASS /apmg/cl_apm_semver_cli DEFINITION
   PRIVATE SECTION.
 
     CLASS-DATA:
+      warnings        TYPE string_table,
       argv            TYPE string_table,
       versions        TYPE string_table,
       ranges          TYPE string_table,
@@ -35,6 +36,8 @@ CLASS /apmg/cl_apm_semver_cli DEFINITION
       coerce          TYPE abap_bool,
       rtl             TYPE abap_bool,
       reverse         TYPE abap_bool.
+
+    CLASS-METHODS _clear.
 
     CLASS-METHODS _argv
       IMPORTING
@@ -63,6 +66,8 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
 
   METHOD main.
 
+    _clear( ).
+
     _argv( args ).
 
     IF help = abap_true.
@@ -77,10 +82,6 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
 
 
   METHOD _argv.
-
-    CLEAR:
-      argv, versions, ranges, inc, identifier, identifier_base,
-      help, loose, incpre, coerce, rtl, reverse.
 
     IF args IS INITIAL.
       help = abap_true.
@@ -122,6 +123,8 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
               inc = VALUE #( argv[ idx ] OPTIONAL ).
             WHEN OTHERS.
               inc = 'patch'.
+              DATA(inc_maybe_errant_value) = val.
+              DATA(inc_option)             = a.
           ENDCASE.
         WHEN '--preid'.
           idx = idx + 1.
@@ -150,6 +153,30 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
 
       idx = idx + 1.
     ENDDO.
+
+    IF inc IS NOT INITIAL AND inc_maybe_errant_value IS NOT INITIAL.
+      FIND inc_maybe_errant_value IN TABLE versions.
+      IF sy-subrc = 0.
+        DATA(valid) = /apmg/cl_apm_semver_functions=>valid(
+          version = inc_maybe_errant_value
+          loose   = loose
+          incpre  = incpre ).
+        IF valid IS INITIAL.
+          DATA(msg) = |WARN: Invalid value for { inc_option }; defaulting to 'patch'. |
+                   && |This may become a failure in future major versions.|.
+          INSERT msg INTO TABLE warnings.
+        ENDIF.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD _clear.
+
+    CLEAR:
+      argv, versions, ranges, inc, identifier, identifier_base,
+      help, loose, incpre, coerce, rtl, reverse, warnings.
 
   ENDMETHOD.
 
@@ -185,11 +212,6 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
       ( `-l --loose` )
       ( `        Interpret versions and ranges loosely` )
       ( `` )
-      ( `-n <base>` )
-      ( `        Base number to be used for the prerelease identifier.` )
-      ( `        Can be either 0 or 1, or false to omit the number altogether.` )
-      ( `        Defaults to 0.` )
-      ( `` )
       ( `-p --include-prerelease` )
       ( `        Always include prerelease versions in range matching` )
       ( `` )
@@ -203,9 +225,16 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
       ( `--ltr` )
       ( `        Coerce version strings left to right (default)` )
       ( `` )
+      ( `-n <base>` )
+      ( `        Base number to be used for the prerelease identifier.` )
+      ( `        Can be either 0 or 1, or false to omit the number altogether.` )
+      ( `        Defaults to 0.` )
+      ( `` )
       ( `Program exits successfully if any valid version satisfies` )
       ( `all supplied ranges, and prints all satisfying versions.` )
+      ( `` )
       ( `If no satisfying versions are found, then exits failure.` )
+      ( `` )
       ( `Versions are printed in ascending order, so supplying` )
       ( `multiple versions to the utility will just sort them.` ) ).
 
@@ -213,6 +242,8 @@ CLASS /apmg/cl_apm_semver_cli IMPLEMENTATION.
 
 
   METHOD _success.
+
+    INSERT LINES OF warnings INTO TABLE result.
 
     IF reverse = abap_true.
       versions = /apmg/cl_apm_semver_functions=>rsort( versions ).

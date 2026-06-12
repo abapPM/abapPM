@@ -1,5 +1,10 @@
 *&---------------------------------------------------------------------*
 *& Include          /APMG/IMPORTS
+*&
+*& Note: These IMPORT statements are not executable code but are
+*& interpreted by apm when running the UPDATE command for dependencies.
+*&
+*&
 *&---------------------------------------------------------------------*
 
 * core apm modules
@@ -14,6 +19,7 @@ IMPORT '*' TO '/apmg/$1_apm$2'              FROM '@apm/types'.
 * other apm modules
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'ajson-extensions'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'emoji'.
+IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'env'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'error'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'syntax-highlighter'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'http-agent'.

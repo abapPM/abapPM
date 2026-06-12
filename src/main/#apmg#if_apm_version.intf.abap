@@ -7,6 +7,6 @@ INTERFACE /apmg/if_apm_version PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0'.
+  CONSTANTS c_version TYPE string VALUE '1.1.0'.
 
 ENDINTERFACE.

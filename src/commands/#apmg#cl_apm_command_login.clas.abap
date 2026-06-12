@@ -4,7 +4,7 @@ CLASS /apmg/cl_apm_command_login DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* apm Install Login
+* apm Login Command
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -60,7 +60,7 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
     DATA(payload) = /apmg/cl_apm_json=>to_string( login_request ).
 
     " Send login request
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
       command   = 'login'
       registry  = registry
       url       = |{ registry }/-/user/org.couchdb.user:{ username }|
@@ -70,7 +70,7 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
       username  = username
       password  = password ).
 
-    DATA(message) = /apmg/cl_apm_command_utils=>check_response(
+    DATA(message) = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Login error' ).
 
@@ -83,11 +83,11 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
         result = login_response ).
 
     " Set token for subsequent requests (overwrites basic authentication)
-    /apmg/cl_apm_http_login_manage=>set(
-      host     = registry
-      username = username
-      password = login_response-token
-      is_basic = abap_false ).
+* TODO!
+*    /apmg/cl_apm_http_login_manage=>set_token(
+*      host  = registry
+*      username = username
+*      token = login_response-token ).
 
     IF message IS INITIAL.
       MESSAGE login_response-ok TYPE 'S'.
@@ -99,6 +99,10 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
 
 
   METHOD run.
+
+    IF auth_type <> 'legacy'.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Unsupported auth type'.
+    ENDIF.
 
     DATA(command) = NEW /apmg/cl_apm_command_login( ).
 

@@ -15,6 +15,9 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
+        !to_version    TYPE string
+        !transport     TYPE trkorr OPTIONAL
+        !force         TYPE abap_bool DEFAULT abap_false
         !is_dry_run    TYPE abap_bool DEFAULT abap_false
         !is_production TYPE abap_bool DEFAULT abap_false
       RAISING
@@ -27,6 +30,9 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !registry      TYPE string
         !package       TYPE devclass
+        !to_version    TYPE string
+        !transport     TYPE trkorr
+        !force         TYPE abap_bool
         !is_dry_run    TYPE abap_bool
         !is_production TYPE abap_bool
       RAISING
@@ -59,10 +65,32 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS process_dependencies
+    METHODS get_dependencies_to_import
       IMPORTING
         !registry     TYPE string
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
+        !force        TYPE abap_bool
+      RETURNING
+        VALUE(result) TYPE /apmg/if_apm_importer=>ty_dependencies
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS add_dependencies
+      IMPORTING
+        !package       TYPE devclass
+        !dependencies  TYPE /apmg/if_apm_importer=>ty_dependencies
+        !transport     TYPE trkorr
+        !is_dry_run    TYPE abap_bool
+        !is_production TYPE abap_bool
+      RETURNING
+        VALUE(result)  TYPE /apmg/if_apm_importer=>ty_dependencies
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS remove_dependencies
+      IMPORTING
+        !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
+        !transport    TYPE trkorr
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_importer=>ty_dependencies
       RAISING
@@ -91,6 +119,19 @@ ENDCLASS.
 CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 
 
+  METHOD add_dependencies.
+
+    /apmg/cl_apm_importer=>run(
+      package       = package
+      dependencies  = dependencies
+      transport     = transport
+      is_dry_run    = is_dry_run
+      is_production = is_production
+      is_logging    = abap_false ).
+
+  ENDMETHOD.
+
+
   METHOD execute.
 
     /apmg/cl_apm_auth=>check_package_authorized(
@@ -100,47 +141,59 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     " 1. Check package is installed and get version details
     DATA(package_json) = get_package( package ).
 
-    " 2. Get updated manifest
-    DATA(manifest) = /apmg/cl_apm_command_utils=>get_manifest_from_registry(
-      registry = registry
-      name     = package_json-name
-      version  = package_json-version ).
+    " 2. Get manifest for target version
+    TRY.
+        DATA(manifest) = /apmg/cl_apm_registry=>get_manifest(
+          registry = registry
+          name     = package_json-name
+          version  = to_version ).
+      CATCH /apmg/cx_apm_error.
+        " If version does not exist in registry, use local definition
+        manifest = CORRESPONDING /apmg/if_apm_types=>ty_manifest( package_json ).
+    ENDTRY.
 
     " 3. Update the package
     DATA(is_newer) = is_newer(
       version_installed = package_json-version
       version_next      = manifest-version ).
 
-    " 4. Get vendored dependencies
+    " 4. Get bundled dependencies
     DATA(dependencies) = get_bundle_dependencies(
       package  = package
       manifest = manifest ).
 
     " 5. Add, remove, or update dependencies
-    DATA(import_dependencies) = process_dependencies(
+    DATA(import_dependencies) = get_dependencies_to_import(
       registry     = registry
-      dependencies = dependencies ).
+      dependencies = dependencies
+      force        = force ).
 
-    " 6. Import dependencies
-    /apmg/cl_apm_importer=>run(
+    " 6. Import bundled dependencies
+    add_dependencies(
       package       = package
       dependencies  = import_dependencies
+      transport     = transport
       is_dry_run    = is_dry_run
-      is_production = is_production
-      is_logging    = abap_false ).
+      is_production = is_production ).
 
-    " 7. Update package
-    IF is_newer = abap_true.
+    " 7. Uninstall bundled dependencies that have been removed
+    remove_dependencies(
+      dependencies = dependencies
+      transport    = transport ).
+
+    " 8. Update package
+    IF is_newer = abap_true OR force = abap_true.
       /apmg/cl_apm_command_installer=>install_package(
         registry      = registry
         manifest      = manifest
         package       = package
         name          = manifest-name
         version       = manifest-version
+        transport     = transport
         is_production = is_production ).
     ENDIF.
 
-    " 8. Save package to apm
+    " 9. Save package to apm
     save_package(
       package  = package
       manifest = manifest ).
@@ -153,6 +206,8 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
   METHOD get_bundle_dependencies.
 
     " XXX: Major rewrite
+    " Instead of scanning sub-packages and comparing to list of installed packages (apm persistence),
+    " Use the existing package manifest and compare it to the new one from the registry
 
     " Get all installed packages
     DATA(list) = /apmg/cl_apm_package_json=>list( instanciate = abap_true ).
@@ -212,11 +267,51 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_dependencies_to_import.
+
+    " Install new or update existing dependencies
+    LOOP AT dependencies INTO DATA(dependency) WHERE action <> /apmg/if_apm_importer=>c_action-remove.
+
+      DATA(max_version) = get_max_satisfying_version(
+        registry = registry
+        name     = dependency-name
+        range    = dependency-range ).
+
+      IF max_version IS INITIAL.
+        " TODO: log errors and raise at end
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |No matching version found in registry for package { dependency-name }| &&
+                   | and range { dependency-range }|.
+      ENDIF.
+
+      CASE dependency-action.
+        WHEN /apmg/if_apm_importer=>c_action-add.
+          " Install the maximum satisfying version
+          dependency-version = max_version.
+          INSERT dependency INTO TABLE result.
+        WHEN /apmg/if_apm_importer=>c_action-update.
+          DATA(is_newer) = is_newer(
+            version_installed = dependency-version
+            version_next      = max_version ).
+
+          IF is_newer = abap_true OR force = abap_true.
+            " Update to this newer version
+            dependency-version = max_version.
+            INSERT dependency INTO TABLE result.
+          ENDIF.
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD get_max_satisfying_version.
 
     DATA versions TYPE string_table.
 
-    DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
+    DATA(packument) = /apmg/cl_apm_registry=>get_packument(
       registry = registry
       name     = name ).
 
@@ -256,49 +351,17 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD process_dependencies.
-
-    " Install new or update existing dependencies
-    LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>)
-      WHERE action <> /apmg/if_apm_importer=>c_action-remove.
-
-      DATA(max_version) = get_max_satisfying_version(
-        registry = registry
-        name     = <dependency>-name
-        range    = <dependency>-range ).
-
-      IF max_version IS INITIAL.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |No matching version found for package { <dependency>-name }| &&
-                   | and range { <dependency>-range }|.
-      ENDIF.
-
-      CASE <dependency>-action.
-        WHEN /apmg/if_apm_importer=>c_action-add.
-          <dependency>-version = max_version.
-          INSERT <dependency> INTO TABLE result.
-        WHEN /apmg/if_apm_importer=>c_action-update.
-          DATA(is_newer) = is_newer(
-            version_installed = <dependency>-version
-            version_next      = max_version ).
-
-          IF is_newer = abap_true.
-            " Update to this version
-            <dependency>-version = max_version.
-            INSERT <dependency> INTO TABLE result.
-          ENDIF.
-      ENDCASE.
-    ENDLOOP.
+  METHOD remove_dependencies.
 
     " Uninstall removed dependencies
-    LOOP AT dependencies ASSIGNING <dependency>
-      WHERE action = /apmg/if_apm_importer=>c_action-remove.
+    LOOP AT dependencies INTO DATA(dependency) WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
       /apmg/cl_apm_command_installer=>uninstall_package(
-        name    = <dependency>-name
-        version = <dependency>-version
-        package = <dependency>-package ).
+        name      = dependency-name
+        version   = dependency-version
+        package   = dependency-package
+        transport = transport ).
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -311,6 +374,9 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     command->execute(
       registry      = registry
       package       = package
+      to_version    = to_version
+      transport     = transport
+      force         = force
       is_dry_run    = is_dry_run
       is_production = is_production ).
 

@@ -4,7 +4,7 @@ CLASS /apmg/cl_apm_command_deprecate DEFINITION
   CREATE PRIVATE.
 
 ************************************************************************
-* apm Deprecate
+* apm Deprecate Command
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -66,13 +66,14 @@ CLASS /apmg/cl_apm_command_deprecate IMPLEMENTATION.
       packument     = packument
       is_deprecated = abap_true ).
 
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
+      command  = 'deprecate'
       registry = registry
       url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-put
       payload  = payload ).
 
-    result = /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Error deprecating package version' ).
 
@@ -82,7 +83,7 @@ CLASS /apmg/cl_apm_command_deprecate IMPLEMENTATION.
   METHOD execute.
 
     " 1. Get packument from registry
-    DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
+    DATA(packument) = /apmg/cl_apm_registry=>get_packument(
       registry = registry
       name     = name
       write    = abap_true ).

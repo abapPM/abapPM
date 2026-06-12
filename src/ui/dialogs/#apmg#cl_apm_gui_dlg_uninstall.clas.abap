@@ -35,21 +35,24 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
-        package TYPE devclass,
-        name    TYPE string,
-        version TYPE string,
+        package   TYPE devclass,
+        name      TYPE string,
+        version   TYPE string,
+        transport TYPE trkorr,
       END OF ty_params.
 
     CONSTANTS:
       BEGIN OF c_id,
-        package TYPE string VALUE 'package',
-        name    TYPE string VALUE 'name',
-        version TYPE string VALUE 'version',
+        package   TYPE string VALUE 'package',
+        name      TYPE string VALUE 'name',
+        version   TYPE string VALUE 'version',
+        transport TYPE string VALUE 'transport',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
         choose_package    TYPE string VALUE 'choose-package',
+        choose_transport  TYPE string VALUE 'choose-transport',
         uninstall_package TYPE string VALUE 'uninstall-package',
         refresh           TYPE string VALUE 'refresh',
       END OF c_action.
@@ -121,6 +124,19 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
         ENDIF.
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
+      WHEN c_action-choose_transport.
+
+        form_data->set(
+          iv_key = c_id-transport
+          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_select_transport( ) ).
+
+        IF form_data->get( c_id-transport ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+        ENDIF.
+
       WHEN c_action-refresh.
 
         form_data = read_package( |{ form_data->get( c_id-package ) }| ).
@@ -134,7 +150,9 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
           DATA(params) = get_parameters( form_data ).
 
           IF confirm_popup( params ) = abap_true.
-            /apmg/cl_apm_command_uninstall=>run( params-package ).
+            /apmg/cl_apm_command_uninstall=>run(
+              package   = params-package
+              transport = params-transport ).
           ENDIF.
 
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
@@ -242,7 +260,13 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
     )->text(
       iv_name        = c_id-version
       iv_label       = 'Version'
-      iv_readonly    = abap_true ).
+      iv_readonly    = abap_true
+    )->text(
+      iv_name        = c_id-transport
+      iv_side_action = c_action-choose_transport
+      iv_label       = 'Transport'
+      iv_upper_case  = abap_true
+      iv_max         = 20 ).
 
     result->command(
       iv_label       = 'Uninstall Package'
@@ -289,19 +313,22 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
     result = form_util->validate( io_form_data ).
 
     DATA(package) = CONV devclass( io_form_data->get( c_id-package ) ).
-    IF package IS NOT INITIAL.
-      TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          result->set(
-            iv_key = c_id-package
-            iv_val = error->get_text( ) ).
-      ENDTRY.
 
-      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
+    DATA(msg) = /apmg/cl_apm_auth=>check_package_allowed( package ).
+    IF msg IS NOT INITIAL.
+      result->set(
+        iv_key = c_id-package
+        iv_val = msg ).
+    ENDIF.
+
+    DATA(transport) = CONV trkorr( form_data->get( c_id-transport ) ).
+
+    IF transport IS NOT INITIAL.
+      msg = /apmg/cl_apm_auth=>check_transport_required( package ).
+      IF msg IS NOT INITIAL.
         result->set(
-          iv_key = c_id-package
-          iv_val = 'Package not allowed (responsible user = "SAP")' ).
+          iv_key = c_id-transport
+          iv_val = msg ).
       ENDIF.
     ENDIF.
 

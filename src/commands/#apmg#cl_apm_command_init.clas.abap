@@ -46,7 +46,8 @@ CLASS /apmg/cl_apm_command_init IMPLEMENTATION.
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory(
       package = package
       name    = package_json-name
-      version = package_json-version ).
+      version = package_json-version
+      private = package_json-private ).
 
     IF package_json_service->exists( ) = abap_true.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Package { package } is already initialized|.

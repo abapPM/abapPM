@@ -342,29 +342,21 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
     result = form_util->validate( form_data ).
 
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
-    IF package IS NOT INITIAL.
-      TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          result->set(
-            iv_key = c_id-package
-            iv_val = error->get_text( ) ).
-      ENDTRY.
 
-      IF /apmg/cl_apm_auth=>is_package_allowed( package ) = abap_false.
-        result->set(
-          iv_key = c_id-package
-          iv_val = 'Package not allowed (responsible user = "SAP")' ).
-      ENDIF.
+    DATA(msg) = /apmg/cl_apm_auth=>check_package_allowed( package ).
+    IF msg IS NOT INITIAL.
+      result->set(
+        iv_key = c_id-package
+        iv_val = msg ).
     ENDIF.
 
-    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ).
       result->set(
         iv_key = c_id-name
         iv_val = 'Invalid name' ).
     ENDIF.
 
-    IF /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
       result->set(
         iv_key = c_id-version
         iv_val = 'Invalid version' ).

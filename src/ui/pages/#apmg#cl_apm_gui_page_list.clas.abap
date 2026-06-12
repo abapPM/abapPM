@@ -40,6 +40,7 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
     CONSTANTS:
       c_page_id TYPE string VALUE 'apm-package-list',
       BEGIN OF c_action,
+        login            TYPE string VALUE 'login',
         select           TYPE string VALUE 'select',
         apply_filter     TYPE string VALUE 'apply_filter',
         label_filter     TYPE string VALUE 'label_filter',
@@ -107,10 +108,6 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
 
     " HEADER
 
-    METHODS render_action_toolbar
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
     METHODS render_header_bar
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html.
@@ -128,6 +125,10 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
         VALUE(result) TYPE string.
 
     METHODS render_registry
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html.
+
+    METHODS render_user_menu
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html.
 
@@ -192,6 +193,7 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
     METHODS save_settings
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -270,70 +272,75 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     hotkey_action-ui_component = 'Package List'.
 
-    hotkey_action-description = |Global Settings|.
+    hotkey_action-description = 'Global Settings'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings.
-    hotkey_action-hotkey      = |x|.
+    hotkey_action-hotkey      = 'x'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Personal Settings|.
+    hotkey_action-description = 'Personal Settings'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings_personal.
-    hotkey_action-hotkey      = |p|.
+    hotkey_action-hotkey      = 'p'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Tree|.
+    hotkey_action-description = 'Tree'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_tree.
-    hotkey_action-hotkey      = |e|.
+    hotkey_action-hotkey      = 'e'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Refresh|.
+    hotkey_action-description = 'Refresh'.
     hotkey_action-action      = c_action-refresh.
-    hotkey_action-hotkey      = |r|.
+    hotkey_action-hotkey      = 'r'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Init|.
+    hotkey_action-description = 'Login'.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_login.
+    hotkey_action-hotkey      = 'l'.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
+    hotkey_action-description = 'Init'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_init.
-    hotkey_action-hotkey      = |t|.
+    hotkey_action-hotkey      = 't'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Install|.
+    hotkey_action-description = 'Install'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_install.
-    hotkey_action-hotkey      = |i|.
+    hotkey_action-hotkey      = 'i'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Uninstall|.
+    hotkey_action-description = 'Uninstall'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_uninstall.
-    hotkey_action-hotkey      = |u|.
+    hotkey_action-hotkey      = 'u'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Publish|.
+    hotkey_action-description = 'Publish'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_publish.
-    hotkey_action-hotkey      = |p|.
+    hotkey_action-hotkey      = 'p'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Unpublish|.
+    hotkey_action-description = 'Unpublish'.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_unpublish.
-    hotkey_action-hotkey      = |q|.
+    hotkey_action-hotkey      = 'q'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
     " registered/handled in js
-    hotkey_action-description = |Previous Package|.
-    hotkey_action-action      = `#`.
-    hotkey_action-hotkey      = |4|.
+    hotkey_action-description = 'Previous Package'.
+    hotkey_action-action      = '#'.
+    hotkey_action-hotkey      = '4'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Next Package|.
-    hotkey_action-action      = `##`.
-    hotkey_action-hotkey      = |6|.
+    hotkey_action-description = 'Next Package'.
+    hotkey_action-action      = '##'.
+    hotkey_action-hotkey      = '6'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Show Package|.
-    hotkey_action-action      = `###`.
-    hotkey_action-hotkey      = |Enter|.
+    hotkey_action-description = 'Show Package'.
+    hotkey_action-action      = '###'.
+    hotkey_action-hotkey      = 'Enter'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
-    hotkey_action-description = |Focus Filter|.
-    hotkey_action-action      = `####`.
-    hotkey_action-hotkey      = |f|.
+    hotkey_action-description = 'Focus Filter'.
+    hotkey_action-action      = '####'.
+    hotkey_action-hotkey      = 'f'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
   ENDMETHOD.
@@ -348,6 +355,14 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-list-commands' ).
 
     commands->add(
+      iv_txt      = 'Update'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_update }{ c_dummy_key }|
+      iv_class    = c_action_class
+      iv_li_class = c_action_class
+    )->add(
+      iv_txt      = 'Registry'
+      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
       iv_txt      = 'Deprecate'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_dummy_key }|
       iv_class    = c_action_class
@@ -421,13 +436,13 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     render_styles( html ).
 
-    html->add( |<div class="repo-overview">| ).
+    html->add( '<div class="repo-overview">' ).
 
     render_header_bar( html ).
     render_header_label_list( html ).
     render_package_list( html ).
 
-    html->add( |</div>| ).
+    html->add( '</div>' ).
 
     register_deferred_script( get_scripts( ) ).
     register_deferred_script( get_palette( c_action-select ) ).
@@ -700,23 +715,15 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_action_toolbar.
-
-    " FUTURE
-    html->add( '' ).
-
-  ENDMETHOD.
-
-
   METHOD render_filter_bar.
 
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_text_input(
-      iv_name      = |filter|
+      iv_name      = 'filter'
       iv_label     = |Filter: { render_filter_help_hint( ) }|
       iv_value     = settings-list_settings-filter ) ).
-    html->add( |<input type="submit" class="hidden-submit">| ).
-    html->add( |</form>| ).
+    html->add( '<input type="submit" class="hidden-submit">' ).
+    html->add( '</form>' ).
 
     IF settings-list_settings-only_favorites = abap_true.
       DATA(icon_class) = `blue`.
@@ -728,7 +735,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     IF settings-list_settings-filter IS NOT INITIAL.
       html->add( html->a(
-        iv_txt   = |<i id="icon-clear-filter" class="icon icon-times-solid"></i>|
+        iv_txt   = '<i id="icon-clear-filter" class="icon icon-times-solid"></i>'
         iv_class = 'command'
         iv_act   = |{ c_action-clear_filter }| ) ).
     ENDIF.
@@ -739,7 +746,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_act   = |{ c_action-toggle_favorites }| ) ).
     html->add( html->a(
       iv_txt   = '<i id="icon-filter-detail" class="icon icon-check"></i> Detail'
-      iv_act   = |gHelper.toggleRepoListDetail()|
+      iv_act   = 'gHelper.toggleRepoListDetail()'
       iv_class = 'command'
       iv_typ   = /apmg/if_apm_html=>c_action_type-onclick ) ).
     html->add( '</span>' ).
@@ -765,13 +772,16 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
   METHOD render_header_bar.
 
-    html->add( |<div class="repo-overview-toolbar">| ).
+    html->add( '<div class="repo-overview-toolbar">' ).
 
     render_filter_bar( html ).
-    render_registry( html ).
-    render_action_toolbar( html ).
 
-    html->add( |</div>| ).
+    "html->add( '<span style="float:right">' ).
+    render_registry( html ).
+    "render_user_menu( html ).
+    "html->add( '</span' ).
+
+    html->add( '</div>' ).
 
   ENDMETHOD.
 
@@ -782,26 +792,26 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    html->add( |<div class="repo-label-catalog">| ).
+    html->add( '<div class="repo-label-catalog">' ).
     html->add( '<label>Filter by label:</label>' ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_label_list(
       it_labels           = all_labels
       io_label_colors     = label_colors
       iv_clickable_action = c_action-label_filter ) ).
-    html->add( |</div>| ).
+    html->add( '</div>' ).
 
   ENDMETHOD.
 
 
   METHOD render_package_list.
 
-    html->add( |<table>| ).
+    html->add( '<table>' ).
 
     render_table_header( html ).
     render_table_body( html ).
     render_table_footer( html ).
 
-    html->add( |</table>| ).
+    html->add( '</table>' ).
 
   ENDMETHOD.
 
@@ -821,6 +831,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_txt   = settings-registry
       iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ settings-registry }| ).
     html->add( '</span>' ).
+    render_user_menu( html ).
     html->add( '</span>' ).
 
   ENDMETHOD.
@@ -852,7 +863,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
         package = <package> ).
     ENDLOOP.
 
-    html->add( |</tbody>| ).
+    html->add( '</tbody>' ).
 
   ENDMETHOD.
 
@@ -974,6 +985,30 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
         iv_act   = |{ c_action-select }?key={ package-package }| ) ).
 
     html->add( `</tr>` ).
+
+  ENDMETHOD.
+
+
+  METHOD render_user_menu.
+
+    " TODO! Replace with get_username and show "User" with icon
+    DATA(auth) = /apmg/cl_apm_http_login_manage=>get( settings-registry ).
+
+    html->add( '<span>' ).
+
+    IF auth IS INITIAL.
+      html->add_a(
+        iv_txt = 'Login'
+        iv_act = /apmg/if_apm_gui_router=>c_action-apm_login ).
+    ELSE.
+      " TODO: Change to "User" icon with drop-down menu:
+      " Links to user profile/account on www.abappm.com and logout
+      html->add_a(
+        iv_txt = 'Logout'
+        iv_act = /apmg/if_apm_gui_router=>c_action-apm_logout ).
+    ENDIF.
+
+    html->add( '</span>' ).
 
   ENDMETHOD.
 

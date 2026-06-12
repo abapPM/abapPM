@@ -13,7 +13,8 @@ CLASS /apmg/cl_apm_command_uninstall DEFINITION
 
     CLASS-METHODS run
       IMPORTING
-        !package TYPE devclass
+        !package   TYPE devclass
+        !transport TYPE trkorr
       RAISING
         /apmg/cx_apm_error.
 
@@ -22,7 +23,8 @@ CLASS /apmg/cl_apm_command_uninstall DEFINITION
 
     METHODS execute
       IMPORTING
-        !package TYPE devclass
+        !package   TYPE devclass
+        !transport TYPE trkorr
       RAISING
         /apmg/cx_apm_error.
 
@@ -63,9 +65,10 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
       activity = /apmg/cl_apm_auth=>c_activity-delete ).
 
     /apmg/cl_apm_command_installer=>uninstall_package(
-      name    = package_json-name
-      version = package_json-version
-      package = package ).
+      name      = package_json-name
+      version   = package_json-version
+      package   = package
+      transport = transport ).
 
     MESSAGE 'Package successfully uninstalled' TYPE 'S'.
 
@@ -76,7 +79,9 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
 
     DATA(command) = NEW /apmg/cl_apm_command_uninstall( ).
 
-    command->execute( package ).
+    command->execute(
+      package   = package
+      transport = transport ).
 
   ENDMETHOD.
 ENDCLASS.

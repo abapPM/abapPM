@@ -101,12 +101,12 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD delete_tarball.
 
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
       registry = registry
       url      = |{ tarball }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-delete ).
 
-    result = /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Error deleting tarball' ).
 
@@ -116,7 +116,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
   METHOD execute.
 
     " 1. Get packument from registry for update
-    DATA(packument) = /apmg/cl_apm_command_utils=>get_packument_from_registry(
+    DATA(packument) = /apmg/cl_apm_registry=>get_packument(
       registry = registry
       name     = name
       write    = abap_true ).
@@ -256,12 +256,13 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD unpublish_complete_package.
 
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
+      command  = 'unpublish'
       registry = registry
       url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-delete ).
 
-    result = /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Error unpublishing complete package' ).
 
@@ -272,13 +273,14 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
     DATA(payload) = /apmg/cl_apm_pacote=>convert_packument_to_json( packument ).
 
-    DATA(response) = /apmg/cl_apm_command_utils=>fetch_registry(
+    DATA(response) = /apmg/cl_apm_registry=>fetch(
+      command  = 'unpublish'
       registry = registry
       url      = |{ registry }/{ packument-name }/-rev/{ packument-_rev }|
       method   = /apmg/if_apm_http_agent=>c_method-put
       payload  = payload ).
 
-    result = /apmg/cl_apm_command_utils=>check_response(
+    result = /apmg/cl_apm_registry=>check_response(
       response = response
       text     = 'Error unpublishing package version' ).
 

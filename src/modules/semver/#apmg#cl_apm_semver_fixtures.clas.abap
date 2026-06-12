@@ -159,6 +159,18 @@ CLASS /apmg/cl_apm_semver_fixtures DEFINITION
       RETURNING
         VALUE(result) TYPE ty_valid_versions.
 
+    TYPES:
+      BEGIN OF ty_truncate,
+        version TYPE string,
+        release TYPE string,
+        res     TYPE string,
+      END OF ty_truncate,
+      ty_truncates TYPE STANDARD TABLE OF ty_truncate WITH KEY version release res.
+
+    CLASS-METHODS truncations
+      RETURNING
+        VALUE(result) TYPE ty_truncates.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -826,7 +838,6 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
     " '*' is the return value from functions.validRange(), but
     " new Range().range will be '' in those cases
     result = VALUE #(
-      ( range = '1.x.x+build >2.x+build' res = '>=1.0.0 <2.0.0-0 >=3.0.0' )
       ( range = '1.0.0 - 2.0.0' res = '>=1.0.0 <=2.0.0' )
       ( range = '1.0.0 - 2.0.0' res = '>=1.0.0-0 <2.0.1-0' incpre = abap_true )
       ( range = '1 - 2' res = '>=1.0.0 <3.0.0-0' )
@@ -939,7 +950,60 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
       ( range = '1.x.x-alpha+build' res = '>=1.0.0 <2.0.0-0' )
       ( range = '>1.x.x-alpha+build' res = '>=2.0.0' )
       ( range = '>=1.x.x-alpha+build <2.x.x+build' res = '>=1.0.0 <2.0.0-0' )
-      ( range = '1.x.x-alpha+build || 2.x.x+build' res = '>=1.0.0 <2.0.0-0||>=2.0.0 <3.0.0-0' ) ).
+      ( range = '1.x.x-alpha+build || 2.x.x+build' res = '>=1.0.0 <2.0.0-0||>=2.0.0 <3.0.0-0' )
+      " long build metadata must be stripped, not bled into the version
+      ( range = '4.17.0+' && repeat( val = 'a' occ = 250 ) && '3' res = '4.17.0' loose = abap_true )
+      ( range = '4.17.0+' && repeat( val = 'a' occ = 251 ) res = '4.17.0' loose = abap_true )
+      ( range = 'v1.0+' && repeat( val = 'a' occ = 249 ) && 'x6' res = '>=1.0.0 <1.1.0-0' )
+      ( range = '1.2.3+' && repeat( val = 'a' occ = 251 ) && ' - 2.0.0' res = '>=1.2.3 <=2.0.0' )
+      ( range = '1.2.3+' && repeat( val = 'a' occ = 251 ) && ' - 2.0.0' res = '>=1.2.3 <=2.0.0' loose = abap_true )
+      ( range = '> 1.2.3+' && repeat( val = 'a' occ = 251 ) res = '>1.2.3' )
+      ( range = '>= 1.2.3+' && repeat( val = 'a' occ = 251 ) res = '>=1.2.3' loose = abap_true )
+      ( range = '~1.2.3+' && repeat( val = 'a' occ = 251 ) res = '>=1.2.3 <1.3.0-0' )
+      ( range = '^1.2.3+' && repeat( val = 'a' occ = 251 ) res = '>=1.2.3 <2.0.0-0' )
+      ( range = '1.2.3+sha512.' && repeat( val = 'a' occ = 251 ) res = '1.2.3' loose = abap_true )
+      ( range = '1.2.3+sha256.' && repeat( val = 'a' occ = 200 ) && '.' && repeat( val = 'b' occ = 200 )
+        res = '1.2.3' loose = abap_true )
+      ( range = '1.2.3+' && repeat( val = 'a' occ = 251 ) && ' || 2.0.0+' && repeat( val = 'b' occ = 251 )
+        res = '1.2.3||2.0.0' loose = abap_true ) ).
+
+  ENDMETHOD.
+
+
+  METHOD truncations.
+    " [version, releaseType, result]
+    " truncate(version, releaseType) -> result
+
+    result = VALUE #(
+      ( version = '1.2.3-foo'        release = 'patch'      res = '1.2.3' )
+      ( version = '1.2.3'            release = 'patch'      res = '1.2.3' )
+      ( version = '1.2.3'            release = 'minor'      res = '1.2.0' )
+      ( version = '1.2.3'            release = 'major'      res = '1.0.0' )
+      " invalid inputs
+      ( version = '1.2.3'            release = 'fake'       res = '' )
+      ( version = 'fake'             release = 'major'      res = '' )
+      " additional pre-release, build, and pre+build inputs
+      ( version = '4.5.6-rc2'        release = 'prerelease' res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2'        release = 'prepatch'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2'        release = 'preminor'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2'        release = 'premajor'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2'        release = 'patch'      res = '4.5.6' )
+      ( version = '4.5.6-rc2'        release = 'minor'      res = '4.5.0' )
+      ( version = '4.5.6-rc2'        release = 'major'      res = '4.0.0' )
+      ( version = '4.5.6+dadb0d'     release = 'prerelease' res = '4.5.6' )
+      ( version = '4.5.6+dadb0d'     release = 'prepatch'   res = '4.5.6' )
+      ( version = '4.5.6+dadb0d'     release = 'preminor'   res = '4.5.6' )
+      ( version = '4.5.6+dadb0d'     release = 'premajor'   res = '4.5.6' )
+      ( version = '4.5.6+dadb0d'     release = 'patch'      res = '4.5.6' )
+      ( version = '4.5.6+dadb0d'     release = 'minor'      res = '4.5.0' )
+      ( version = '4.5.6+dadb0d'     release = 'major'      res = '4.0.0' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'prerelease' res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'prepatch'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'preminor'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'premajor'   res = '4.5.6-rc2' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'patch'      res = '4.5.6' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'minor'      res = '4.5.0' )
+      ( version = '4.5.6-rc2+dadb0d' release = 'major'      res = '4.0.0' ) ).
 
   ENDMETHOD.
 
@@ -985,7 +1049,6 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
   METHOD version_gt_range.
     " [range, version, options]
 
-    " Version should be greater than range
     result = VALUE #(
       ( range = '~1.2.2'          version = '1.3.0' )
       ( range = '~0.6.1-1'        version = '0.7.1-1' )
@@ -1050,7 +1113,6 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
   METHOD version_lt_range.
     " [range, version, options]
 
-    " Version should be less than range
     result = VALUE #(
       ( range = '~1.2.2'          version = '1.2.1' )
       ( range = '~0.6.1-1'        version = '0.6.1-0' )

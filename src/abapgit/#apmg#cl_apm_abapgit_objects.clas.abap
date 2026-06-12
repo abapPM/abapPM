@@ -12,6 +12,8 @@ CLASS /apmg/cl_apm_abapgit_objects DEFINITION
 *
 * Using ZCL_ABAPGIT_OBJECTS would drag in many other dependencies
 * which are unnecessary for apm (like the abapGit repo layer).
+* Eventually, abapGit should get refactored to clearly separate those
+* layers.
 ************************************************************************
   PUBLIC SECTION.
 

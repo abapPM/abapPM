@@ -35,21 +35,24 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
         package      TYPE devclass,
         name         TYPE string,
         version      TYPE string,
+        transport    TYPE trkorr,
         package_json TYPE /apmg/if_apm_types=>ty_package_json,
       END OF ty_params.
 
     CONSTANTS:
       BEGIN OF c_id,
-        package TYPE string VALUE 'package',
-        name    TYPE string VALUE 'name',
-        version TYPE string VALUE 'version',
+        package   TYPE string VALUE 'package',
+        name      TYPE string VALUE 'name',
+        version   TYPE string VALUE 'version',
+        transport TYPE string VALUE 'transport',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
-        choose_package  TYPE string VALUE 'choose-package',
-        create_package  TYPE string VALUE 'create-package',
-        install_package TYPE string VALUE 'install-package',
+        choose_package   TYPE string VALUE 'choose-package',
+        create_package   TYPE string VALUE 'create-package',
+        install_package  TYPE string VALUE 'install-package',
+        choose_transport TYPE string VALUE 'choose-transport',
       END OF c_action .
 
     DATA:
@@ -115,6 +118,19 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
         ENDIF.
 
+      WHEN c_action-choose_transport.
+
+        form_data->set(
+          iv_key = c_id-transport
+          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_select_transport( ) ).
+
+        IF form_data->get( c_id-transport ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+        ENDIF.
+
       WHEN c_action-install_package.
 
         validation_log = validate_form( form_data ).
@@ -125,7 +141,8 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
           /apmg/cl_apm_command_install=>run(
             registry     = registry
             package      = params-package
-            package_json = params-package_json ).
+            package_json = params-package_json
+            transport    = params-transport ).
 
           rs_handled-page  = /apmg/cl_apm_gui_page_package=>create( params-package ).
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page_replacing.
@@ -200,7 +217,7 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_upper_case  = abap_true
       iv_label       = 'Package'
       iv_hint        = 'SAP package (should be a dedicated one)'
-      iv_placeholder = 'Z... / $...'
+      iv_placeholder = '$..., Z..., /NSPC/...'
       iv_min         = 2
       iv_max         = 30
     )->text(
@@ -214,7 +231,13 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_name        = c_id-version
       iv_required    = abap_true
       iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)' ).
+      iv_hint        = 'Semantic version (x.y.z)'
+    )->text(
+      iv_name        = c_id-transport
+      iv_side_action = c_action-choose_transport
+      iv_label       = 'Transport'
+      iv_upper_case  = abap_true
+      iv_max         = 20 ).
 
     result->command(
       iv_label       = 'Install Package'
@@ -244,31 +267,32 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
     result = form_util->validate( form_data ).
 
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
-    IF package IS NOT INITIAL.
-      TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
 
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          result->set(
-            iv_key = c_id-package
-            iv_val = error->get_text( ) ).
-      ENDTRY.
+    DATA(msg) = /apmg/cl_apm_auth=>check_package_allowed( package ).
+    IF msg IS NOT INITIAL.
+      result->set(
+        iv_key = c_id-package
+        iv_val = msg ).
     ENDIF.
 
-    IF /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ) = abap_false.
+    DATA(transport) = CONV trkorr( form_data->get( c_id-transport ) ).
+
+    IF transport IS NOT INITIAL.
+      msg = /apmg/cl_apm_auth=>check_transport_required( package ).
+      IF msg IS NOT INITIAL.
+        result->set(
+          iv_key = c_id-transport
+          iv_val = msg ).
+      ENDIF.
+    ENDIF.
+
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ).
       result->set(
         iv_key = c_id-name
         iv_val = 'Invalid name' ).
     ENDIF.
 
-    IF /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ) = abap_false.
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
       result->set(
         iv_key = c_id-version
         iv_val = 'Invalid version' ).

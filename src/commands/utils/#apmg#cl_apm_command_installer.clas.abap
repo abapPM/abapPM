@@ -20,15 +20,17 @@ CLASS /apmg/cl_apm_command_installer DEFINITION
         !package       TYPE devclass
         !name          TYPE string
         !version       TYPE string
+        !transport     TYPE trkorr
         !is_production TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
     CLASS-METHODS uninstall_package
       IMPORTING
-        !name    TYPE string
-        !version TYPE string
-        !package TYPE devclass
+        !name      TYPE string
+        !version   TYPE string
+        !package   TYPE devclass
+        !transport TYPE trkorr
       RAISING
         /apmg/cx_apm_error.
 
@@ -44,15 +46,12 @@ CLASS /apmg/cl_apm_command_installer IMPLEMENTATION.
 
   METHOD install_package.
 
-    " TODO: Currently hardcoded to local packages (no transport)
-    DATA transport TYPE trkorr.
-
-    DATA(tarball) = /apmg/cl_apm_command_utils=>get_tarball_from_registry(
+    DATA(tarball) = /apmg/cl_apm_registry=>get_tarball(
       registry = registry
       name     = name
       tarball  = manifest-dist-tarball ).
 
-    /apmg/cl_apm_command_integrity=>check_integrity(
+    /apmg/cl_apm_integrity=>check(
       tarball = tarball
       dist    = manifest-dist ).
 
@@ -73,9 +72,10 @@ CLASS /apmg/cl_apm_command_installer IMPLEMENTATION.
   METHOD uninstall_package.
 
     /apmg/cl_apm_installer=>uninstall(
-      name    = name
-      version = version
-      package = package ).
+      name      = name
+      version   = version
+      package   = package
+      transport = transport ).
 
   ENDMETHOD.
 ENDCLASS.

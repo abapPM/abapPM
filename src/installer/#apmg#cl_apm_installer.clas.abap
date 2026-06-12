@@ -10,7 +10,7 @@ CLASS /apmg/cl_apm_installer DEFINITION
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * TODO: This installer is a copy from Marc Bernard Tools
-* Some of the features are not relevant for apm and can be removed
+* Some of the features are not relevant for apm and might be removed!
 * TODO: Support for data config
 ************************************************************************
   PUBLIC SECTION.
@@ -209,6 +209,7 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
           main_language = main_language ).
 
         " TODO: Support data config
+        " _deserialize_data( ... )
 
       CATCH cx_root INTO DATA(error).
         _transport_reset( ).
@@ -247,6 +248,9 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
         _confirm_messages( ).
 
+        " TODO: Support data config
+        " _delete_data( ... )
+
         " A few tries to tackle dependencies
         DO 3 TIMES.
           DATA(tadir) = zcl_abapgit_factory=>get_tadir( )->read( package ).
@@ -267,8 +271,6 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
               transport = transport ).
           ENDIF.
         ENDDO.
-
-        " TODO: Support data config
 
       CATCH cx_root INTO DATA(error).
         _transport_reset( ).
@@ -540,7 +542,10 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
       CATCH cx_root ##NO_HANDLER.
     ENDTRY.
 
-    DELETE FROM clmcus WHERE username = @sy-uname ##SUBRC_OK.
+    DELETE FROM clmcus
+      WHERE username = @sy-uname
+        AND ( obj_type = 'CLAS' OR obj_type = 'INTF' OR obj_type = 'METH' ) ##SUBRC_OK.
+
     INSERT clmcus FROM TABLE @clmcus_backup ##SUBRC_OK.
 
   ENDMETHOD.

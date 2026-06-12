@@ -44,20 +44,19 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        view_readme         TYPE string VALUE 'view_readme',
-        view_readme_code    TYPE string VALUE 'view_readme_code',
-        view_readme_raw     TYPE string VALUE 'view_readme_raw',
-        edit_readme         TYPE string VALUE 'edit_readme',
-        copy_readme         TYPE string VALUE 'copy_readme',
-        download_readme     TYPE string VALUE 'download_readme',
-        view_json           TYPE string VALUE 'view_json',
-        edit_json           TYPE string VALUE 'edit_json',
-        copy_json           TYPE string VALUE 'copy_json',
-        download_json       TYPE string VALUE 'download_json',
-        view_dependencies   TYPE string VALUE 'view_dependencies',
-        add_dependency      TYPE string VALUE 'add_dependency',
-        remove_dependency   TYPE string VALUE 'remove_dependency',
-        update_dependencies TYPE string VALUE 'update_dependencies',
+        view_readme       TYPE string VALUE 'view_readme',
+        view_readme_code  TYPE string VALUE 'view_readme_code',
+        view_readme_raw   TYPE string VALUE 'view_readme_raw',
+        edit_readme       TYPE string VALUE 'edit_readme',
+        copy_readme       TYPE string VALUE 'copy_readme',
+        download_readme   TYPE string VALUE 'download_readme',
+        view_json         TYPE string VALUE 'view_json',
+        edit_json         TYPE string VALUE 'edit_json',
+        copy_json         TYPE string VALUE 'copy_json',
+        download_json     TYPE string VALUE 'download_json',
+        view_dependencies TYPE string VALUE 'view_dependencies',
+        add_dependency    TYPE string VALUE 'add_dependency',
+        remove_dependency TYPE string VALUE 'remove_dependency',
       END OF c_action.
 
     CONSTANTS:
@@ -288,15 +287,16 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           data      = get_json_data( ) ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
-      WHEN c_action-update_dependencies.
-
-        DATA(registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
-
-        /apmg/cl_apm_command_update=>run(
-          registry = registry
-          package  = package ).
-
-        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+* TODO! replace with dialog (router)
+*      WHEN c_action-update_dependencies.
+*
+*        DATA(registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+*
+*        /apmg/cl_apm_command_update=>run(
+*          registry = registry
+*          package  = package ).
+*
+*        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-add_dependency OR c_action-remove_dependency.
 
@@ -354,6 +354,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     CONSTANTS:
       c_key          TYPE string VALUE `?key=`,
+      c_release_type TYPE string VALUE `&release_type=`,
       c_action_class TYPE string VALUE `action_link`.
 
     DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view-commands' ).
@@ -361,6 +362,24 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     DATA(id) = /apmg/cl_apm_package_json=>get_id_from_package( package ).
 
     commands->add(
+      iv_txt      = 'Version'
+      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
+      iv_txt      = '+ Major'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_version }{ c_key }{ id }{ c_release_type }major|
+    )->add(
+      iv_txt      = '+ Minor'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_version }{ c_key }{ id }{ c_release_type }minor|
+    )->add(
+      iv_txt      = '+ Patch'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_version }{ c_key }{ id }{ c_release_type }patch|
+    )->add(
+      iv_txt      = 'Update to Latest'
+      iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_update }{ c_key }{ id }|
+    )->add(
+      iv_txt      = 'Registry'
+      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+    )->add(
       iv_txt      = 'Publish'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_key }{ id }|
     )->add(
@@ -655,10 +674,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           iv_act = |{ c_action-add_dependency }?key={ package }|
         )->add(
           iv_txt = 'Remove'
-          iv_act = |{ c_action-remove_dependency }?key={ package }|
-        )->add(
-          iv_txt = 'Update'
-          iv_act = |{ c_action-update_dependencies }?key={ package }| ).
+          iv_act = |{ c_action-remove_dependency }?key={ package }| ).
 
       WHEN c_action-view_json.
 
@@ -867,7 +883,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
       CASE <engine>-key.
         WHEN /apmg/if_apm_types=>c_engine-abap.
-          DATA(version) = /apmg/cl_apm_command_utils=>get_abap_version( ).
+          DATA(version) = /apmg/cl_apm_utils=>get_abap_version( ).
         WHEN /apmg/if_apm_types=>c_engine-apm.
           version = /apmg/if_apm_version=>c_version.
         WHEN OTHERS.

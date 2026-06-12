@@ -201,6 +201,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
     DATA(package) = /apmg/cl_apm_package_json=>get_package_from_id( id ).
 
     CASE event->mv_action.
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_login.
+
+        result-page  = /apmg/cl_apm_gui_dlg_login=>create( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_logout.
+
+        /apmg/cl_apm_http_login_manage=>clear( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
       WHEN /apmg/if_apm_gui_router=>c_action-apm_init.
 
         result-page  = /apmg/cl_apm_gui_dlg_init=>create( ).
@@ -209,6 +219,11 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_install.
 
         result-page  = /apmg/cl_apm_gui_dlg_install=>create( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_update.
+
+        result-page  = /apmg/cl_apm_gui_dlg_update=>create( package ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_uninstall.
@@ -235,6 +250,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
         result-page  = /apmg/cl_apm_gui_dlg_undepreca=>create( package ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_version.
+
+        DATA(release_type) = event->query( )->get( 'RELEASE_TYPE' ).
+
+        /apmg/cl_apm_command_version=>run(
+          package      = package
+          release_type = release_type ).
+
+        result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
     ENDCASE.
 

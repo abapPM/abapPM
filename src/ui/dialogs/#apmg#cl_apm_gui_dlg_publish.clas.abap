@@ -39,6 +39,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         package TYPE devclass,
         name    TYPE string,
         version TYPE string,
+        tag     TYPE string,
       END OF ty_params.
 
     CONSTANTS:
@@ -46,6 +47,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         package TYPE string VALUE 'package',
         name    TYPE string VALUE 'name',
         version TYPE string VALUE 'version',
+        tag     TYPE string VALUE 'tag',
       END OF c_id.
 
     CONSTANTS:
@@ -96,7 +98,6 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         VALUE(result) TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -136,8 +137,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
           IF confirm_popup( params ) = abap_true.
             /apmg/cl_apm_command_publish=>run(
-              registry     = registry
-              package      = params-package ).
+              registry = registry
+              package  = params-package
+              tag      = params-tag ).
           ENDIF.
 
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
@@ -210,12 +212,12 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     pubish_package = package.
     IF pubish_package IS NOT INITIAL.
       form_data = read_package( pubish_package ).
     ENDIF.
-
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
   ENDMETHOD.
 
@@ -253,7 +255,11 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     )->text(
       iv_name        = c_id-version
       iv_label       = 'Version'
-      iv_readonly    = abap_true ).
+      iv_readonly    = abap_true
+    )->text(
+      iv_name        = c_id-tag
+      iv_label       = 'Tag'
+      iv_hint        = 'Distribution Tag' ).
 
     result->command(
       iv_label       = 'Publish Package'
@@ -292,6 +298,20 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_key = c_id-version
       iv_val = package_json-version ).
 
+    DATA(prerelease) = /apmg/cl_apm_semver_functions=>prerelease( package_json-version ).
+
+    IF prerelease IS NOT INITIAL.
+      DATA(tag) = prerelease[ 1 ].
+
+      result->set(
+        iv_key = c_id-tag
+        iv_val = tag ).
+    ELSE.
+      result->set(
+        iv_key = c_id-tag
+        iv_val = 'latest' ).
+    ENDIF.
+
   ENDMETHOD.
 
 
@@ -300,23 +320,15 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     result = form_util->validate( form_data ).
 
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
-    IF package IS NOT INITIAL.
-      TRY.
-          zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
 
-          " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-          DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
-
-          IF sy-subrc = 0 AND username = 'SAP' AND
-            zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_false.
-            zcx_abapgit_exception=>raise( |Package { package } not allowed, responsible user = 'SAP'| ).
-          ENDIF.
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          result->set(
-            iv_key = c_id-package
-            iv_val = error->get_text( ) ).
-      ENDTRY.
+    DATA(msg) = /apmg/cl_apm_auth=>check_package_allowed( package ).
+    IF msg IS NOT INITIAL.
+      result->set(
+        iv_key = c_id-package
+        iv_val = msg ).
     ENDIF.
+
+    " TODO: Validate dist-tag
 
   ENDMETHOD.
 ENDCLASS.

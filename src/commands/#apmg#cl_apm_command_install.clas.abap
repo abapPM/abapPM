@@ -16,6 +16,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !registry      TYPE string
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
+        !transport     TYPE trkorr OPTIONAL
         !is_production TYPE abap_bool DEFAULT abap_false
         !is_force      TYPE abap_bool DEFAULT abap_false
         !is_dry_run    TYPE abap_bool DEFAULT abap_false
@@ -44,6 +45,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !registry      TYPE string
         !package       TYPE devclass
         !package_json  TYPE /apmg/if_apm_types=>ty_package_json
+        !transport     TYPE trkorr
         !is_production TYPE abap_bool
         !is_force      TYPE abap_bool
         !is_dry_run    TYPE abap_bool
@@ -270,7 +272,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     READ TABLE manifest-engines ASSIGNING <dependency>
       WITH KEY key = 'abap'.
     IF sy-subrc = 0.
-      DATA(abap_version) = /apmg/cl_apm_command_utils=>get_abap_version( ).
+      DATA(abap_version) = /apmg/cl_apm_utils=>get_abap_version( ).
 
       check_semver(
         name     = 'ABAP'
@@ -341,7 +343,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       name    = package_json-name ).
 
     " 2. Get manifest
-    DATA(manifest) = /apmg/cl_apm_command_utils=>get_manifest_from_registry(
+    DATA(manifest) = /apmg/cl_apm_registry=>get_manifest(
       registry = registry
       name     = package_json-name
       version  = package_json-version ).
@@ -372,6 +374,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       package       = package
       name          = package_json-name
       version       = package_json-version
+      transport     = transport
       is_production = is_production ).
 
     " 7. Save package.abap.json and readme
@@ -394,6 +397,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       registry      = registry
       package       = package
       package_json  = package_json
+      transport     = transport
       is_production = is_production
       is_force      = is_force
       is_dry_run    = is_dry_run ).

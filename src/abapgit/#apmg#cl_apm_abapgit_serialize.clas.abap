@@ -12,6 +12,8 @@ CLASS /apmg/cl_apm_abapgit_serialize DEFINITION
 *
 * Using ZCL_ABAPGIT_SERIALIZE would include APACK and TABUs which are
 * not supported in apm
+* Eventually, abapGit should get refactored to clearly separate those
+* layers.
 ************************************************************************
   PUBLIC SECTION.
 

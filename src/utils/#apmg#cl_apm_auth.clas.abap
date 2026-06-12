@@ -19,18 +19,18 @@ CLASS /apmg/cl_apm_auth DEFINITION
         delete  TYPE activ_auth VALUE '06',
       END OF c_activity.
 
-    CLASS-METHODS is_package_allowed
-      IMPORTING
-        package       TYPE devclass
-      RETURNING
-        VALUE(result) TYPE abap_bool.
-
     CLASS-METHODS is_package_authorized
       IMPORTING
         package       TYPE devclass
         activity      TYPE activ_auth
       RETURNING
         VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS check_package_allowed
+      IMPORTING
+        package       TYPE devclass
+      RETURNING
+        VALUE(result) TYPE string.
 
     CLASS-METHODS check_package_authorized
       IMPORTING
@@ -39,8 +39,26 @@ CLASS /apmg/cl_apm_auth DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS check_transport_required
+      IMPORTING
+        package       TYPE devclass
+      RETURNING
+        VALUE(result) TYPE string.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    CLASS-METHODS is_package_allowed
+      IMPORTING
+        package       TYPE devclass
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS is_package_transported
+      IMPORTING
+        package       TYPE devclass
+      RETURNING
+        VALUE(result) TYPE abap_bool.
 
     CLASS-METHODS _get_activity_text
       IMPORTING
@@ -55,6 +73,24 @@ ENDCLASS.
 CLASS /apmg/cl_apm_auth IMPLEMENTATION.
 
 
+  METHOD check_package_allowed.
+
+    CHECK package IS NOT INITIAL.
+
+    TRY.
+        zcl_abapgit_factory=>get_sap_package( package )->validate_name( ).
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        result = error->get_text( ).
+        RETURN.
+    ENDTRY.
+
+    IF NOT is_package_allowed( package ).
+      result = |Package { package } not allowed (SAP is responsible user)|.
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD check_package_authorized.
 
     IF NOT is_package_authorized( package = package activity = activity ).
@@ -62,6 +98,19 @@ CLASS /apmg/cl_apm_auth IMPLEMENTATION.
         EXPORTING
           text = |Not authorized to { _get_activity_text( activity ) } package { package }|.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD check_transport_required.
+
+    CHECK package IS NOT INITIAL.
+
+    IF is_package_transported( package ).
+      result = 'A transport is required for this package'.
+    ENDIF.
+
+    " TODO: Potentially check type of transport required and auth to use transport
 
   ENDMETHOD.
 
@@ -80,13 +129,23 @@ CLASS /apmg/cl_apm_auth IMPLEMENTATION.
   METHOD is_package_authorized.
 
     AUTHORITY-CHECK OBJECT 'S_DEVELOP'
-     ID 'DEVCLASS' FIELD package
-     ID 'OBJTYPE' FIELD 'DEVC'
-     ID 'OBJNAME' FIELD package
-     ID 'P_GROUP' FIELD '*'
-     ID 'ACTVT' FIELD activity.
+      ID 'DEVCLASS' FIELD package
+      ID 'OBJTYPE' FIELD 'DEVC'
+      ID 'OBJNAME' FIELD package
+      ID 'P_GROUP' FIELD '*'
+      ID 'ACTVT' FIELD activity.
 
     result = xsdbool( sy-subrc = 0 ).
+
+  ENDMETHOD.
+
+
+  METHOD is_package_transported.
+
+    TRY.
+        result = xsdbool( zcl_abapgit_factory=>get_sap_package( package )->are_changes_recorded_in_tr_req( ) = abap_true ).
+      CATCH zcx_abapgit_exception.
+    ENDTRY.
 
   ENDMETHOD.
 

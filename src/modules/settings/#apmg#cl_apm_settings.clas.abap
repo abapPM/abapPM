@@ -65,13 +65,19 @@ CLASS /apmg/cl_apm_settings DEFINITION
 
     CLASS-METHODS check_settings
       IMPORTING
-        !is_settings  TYPE /apmg/if_apm_settings=>ty_settings
+        !settings     TYPE /apmg/if_apm_settings=>ty_settings
+      RETURNING
+        VALUE(result) TYPE string_table.
+
+    CLASS-METHODS check_registry_url
+      IMPORTING
+        !registry_url TYPE string
       RETURNING
         VALUE(result) TYPE string_table.
 
     CLASS-METHODS merge_settings
       CHANGING
-        !cs_settings TYPE /apmg/if_apm_settings=>ty_settings.
+        !settings TYPE /apmg/if_apm_settings=>ty_settings.
 
 ENDCLASS.
 
@@ -96,7 +102,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
     result = settings.
 
     IF name <> /apmg/if_apm_settings=>c_global.
-      merge_settings( CHANGING cs_settings = result ).
+      merge_settings( CHANGING settings = result ).
     ENDIF.
 
   ENDMETHOD.
@@ -190,26 +196,37 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD check_settings.
+  METHOD check_registry_url.
 
     TRY.
-        IF is_settings-registry IS NOT INITIAL.
-          DATA(url) = /apmg/cl_apm_url=>parse( is_settings-registry ).
+        IF registry_url IS NOT INITIAL.
+          DATA(url) = /apmg/cl_apm_url=>parse( registry_url ).
 
           IF url->components-path IS NOT INITIAL.
-            INSERT |Registry URL must not include any trailing slash or path: { is_settings-registry }|
+            INSERT |Registry URL must not include any trailing slash or path: { registry_url }|
               INTO TABLE result.
           ENDIF.
           IF url->components-query IS NOT INITIAL.
-            INSERT |Registry URL must not include any query: { is_settings-registry }| INTO TABLE result.
+            INSERT |Registry URL must not include any query: { registry_url }| INTO TABLE result.
           ENDIF.
           IF url->components-fragment IS NOT INITIAL.
-            INSERT |Registry URL must not include any fragment: { is_settings-registry }| INTO TABLE result.
+            INSERT |Registry URL must not include any fragment: { registry_url }| INTO TABLE result.
           ENDIF.
         ENDIF.
       CATCH /apmg/cx_apm_error.
-        INSERT |Invalid registry URL: { is_settings-registry }| INTO TABLE result.
+        INSERT |Invalid registry URL: { registry_url }| INTO TABLE result.
     ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD check_settings.
+
+    INSERT LINES OF check_registry_url( settings-registry ) INTO TABLE result.
+
+    LOOP AT settings-registry_settings ASSIGNING FIELD-SYMBOL(<registry>).
+      INSERT LINES OF check_registry_url( <registry>-url ) INTO TABLE result.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -265,6 +282,10 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
 
     result-list_settings-order_by = 'PACKAGE'.
     result-tree_settings-order_by = 'NAME'.
+
+    result-registry_settings = VALUE #(
+      ( name = 'production' url = /apmg/if_apm_settings=>c_registry )
+      ( name = 'playground' url = /apmg/if_apm_settings=>c_playground ) ).
 
   ENDMETHOD.
 
@@ -331,7 +352,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
 
     DO.
       " Current settings
-      ASSIGN COMPONENT sy-index OF STRUCTURE cs_settings TO FIELD-SYMBOL(<value>).
+      ASSIGN COMPONENT sy-index OF STRUCTURE settings TO FIELD-SYMBOL(<value>).
       IF sy-subrc <> 0.
         EXIT.
       ENDIF.

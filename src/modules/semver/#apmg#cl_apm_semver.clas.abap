@@ -87,10 +87,19 @@ CLASS /apmg/cl_apm_semver DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS truncate
+      IMPORTING
+        !release_type TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_semver
+      RAISING
+        /apmg/cx_apm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CONSTANTS false TYPE string VALUE 'false'.
+    CONSTANTS release_type_pre TYPE string VALUE 'pre'.
 
     DATA:
       raw     TYPE string,
@@ -356,39 +365,57 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
       identifier_base = identifier_base ).
 
     CASE release_type.
-      WHEN 'premajor'.
+      WHEN /apmg/if_semver_constants=>release_types-premajor.
         CLEAR prerelease.
         patch = 0.
         minor = 0.
         major = major + 1.
-        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
-      WHEN 'preminor'.
+        inc(
+          release_type    = release_type_pre
+          identifier      = identifier
+          identifier_base = identifier_base ).
+      WHEN /apmg/if_semver_constants=>release_types-preminor.
         CLEAR prerelease.
         patch = 0.
         minor = minor + 1.
-        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
-      WHEN 'prepatch'.
+        inc(
+          release_type    = release_type_pre
+          identifier      = identifier
+          identifier_base = identifier_base ).
+      WHEN /apmg/if_semver_constants=>release_types-prepatch.
         " If this is already a prerelease, it will bump to the next version
         " drop any prereleases that might already exist, since they are not
         " relevant at this point.
         CLEAR prerelease.
-        inc( release_type = 'patch' identifier = identifier identifier_base = identifier_base ).
-        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
-      WHEN 'prerelease'.
+        inc(
+          release_type    = /apmg/if_semver_constants=>release_types-patch
+          identifier      = identifier
+          identifier_base = identifier_base ).
+        inc(
+          release_type    = release_type_pre
+          identifier      = identifier
+          identifier_base = identifier_base ).
+      WHEN /apmg/if_semver_constants=>release_types-prerelease.
         " If the input is a non-prerelease version, this acts the same as
         " prepatch.
         IF prerelease IS INITIAL.
-          inc( release_type = 'patch' identifier = identifier identifier_base = identifier_base ).
+          inc(
+            release_type    = /apmg/if_semver_constants=>release_types-patch
+            identifier      = identifier
+            identifier_base = identifier_base ).
         ENDIF.
-        inc( release_type = 'pre' identifier = identifier identifier_base = identifier_base ).
-      WHEN 'release'.
+        inc(
+          release_type    = release_type_pre
+          identifier      = identifier
+          identifier_base = identifier_base ).
+      WHEN /apmg/if_semver_constants=>release_types-release.
         IF prerelease IS INITIAL.
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
             EXPORTING
               text = |Version { raw } is not a prerelease|.
         ENDIF.
         CLEAR prerelease.
-      WHEN 'major'.
+      WHEN /apmg/if_semver_constants=>release_types-major.
         " If this is a pre-major version, bump up to the same major version.
         " Otherwise increment major.
         " 1.0.0-5 bumps to 1.0.0
@@ -399,7 +426,7 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
         minor = 0.
         patch = 0.
         CLEAR prerelease.
-      WHEN 'minor'.
+      WHEN /apmg/if_semver_constants=>release_types-minor.
         " If this is a pre-minor version, bump up to the same minor version.
         " Otherwise increment minor.
         " 1.2.0-5 bumps to 1.2.0
@@ -409,7 +436,7 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
         ENDIF.
         patch = 0.
         CLEAR prerelease.
-      WHEN 'patch'.
+      WHEN /apmg/if_semver_constants=>release_types-patch.
         " If this is not a pre-release version, it will increment the patch.
         " If it is a pre-release it will bump up to the same patch version.
         " 1.2.0-5 patches to 1.2.0
@@ -418,7 +445,7 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
           patch = patch + 1.
         ENDIF.
         CLEAR prerelease.
-      WHEN 'pre'.
+      WHEN release_type_pre.
         " This probably shouldn't be used publicly.
         " 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
         IF identifier_base IS INITIAL OR identifier_base = `0`.
@@ -491,6 +518,37 @@ CLASS /apmg/cl_apm_semver IMPLEMENTATION.
 
   METHOD to_string.
     result = version.
+  ENDMETHOD.
+
+
+  METHOD truncate.
+
+    result = me.
+
+    CASE release_type.
+      WHEN /apmg/if_semver_constants=>release_types-major.
+        minor = 0.
+        patch = 0.
+        CLEAR: prerelease, build.
+      WHEN /apmg/if_semver_constants=>release_types-minor.
+        patch = 0.
+        CLEAR: prerelease, build.
+      WHEN /apmg/if_semver_constants=>release_types-patch.
+        CLEAR: prerelease, build.
+      WHEN /apmg/if_semver_constants=>release_types-premajor
+        OR /apmg/if_semver_constants=>release_types-preminor
+        OR /apmg/if_semver_constants=>release_types-prepatch
+        OR /apmg/if_semver_constants=>release_types-prerelease
+        OR /apmg/if_semver_constants=>release_types-release.
+        CLEAR build.
+      WHEN OTHERS.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Invalid release type argument { release_type }|.
+    ENDCASE.
+
+    format( ).
+
   ENDMETHOD.
 
 

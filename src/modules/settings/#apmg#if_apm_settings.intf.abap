@@ -7,9 +7,17 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NO_TEXT.
+  CONSTANTS c_version TYPE string VALUE '1.0.1' ##NO_TEXT.
 
   TYPES:
+    BEGIN OF ty_registry_settings,
+      name     TYPE string,
+      url      TYPE string,
+      rfcdest  TYPE rfcdest,
+      user     TYPE string,
+      password TYPE string,
+      token    TYPE string,
+    END OF ty_registry_settings,
     BEGIN OF ty_gui_settings,
       adt_jump_enabled  TYPE abap_bool,
       activate_wo_popup TYPE abap_bool,
@@ -45,6 +53,7 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
   TYPES:
     BEGIN OF ty_settings,
       registry              TYPE string,
+      registry_settings     TYPE SORTED TABLE OF ty_registry_settings WITH UNIQUE KEY name,
       last_package          TYPE devclass,
       show_last_package     TYPE abap_bool,
       experimental_features TYPE string,

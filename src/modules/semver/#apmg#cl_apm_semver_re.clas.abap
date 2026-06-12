@@ -155,7 +155,7 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
 
     " ## Pre-release Version Identifier
     " A numeric identifier, or a non-numeric identifier.
-    " Non-numberic identifiers include numeric identifiers but can be longer.
+    " Non-numeric identifiers include numeric identifiers but can be longer.
     " Therefore non-numeric identifiers must go first.
 
     create_token(
@@ -232,7 +232,7 @@ CLASS /apmg/cl_apm_semver_re IMPLEMENTATION.
       value = |((?:<\|>)?=?)| ).
 
     " Something like "2.*" or "1.2.x".
-    " Note that "x.x" is a valid xRange identifer, meaning "any version"
+    " Note that "x.x" is a valid xRange identifier, meaning "any version"
     " Only the first item is strictly required.
 
     create_token(
