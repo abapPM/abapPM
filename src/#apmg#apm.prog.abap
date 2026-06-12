@@ -34,6 +34,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 * @@require devc /apmg/apm_main
 * @@require devc /apmg/apm_modules*
 * @@require devc /apmg/apm_objects
+* @@require devc /apmg/apm_registry
 * @@require devc /apmg/apm_ui*
 * @@require devc /apmg/apm_utils
 
@@ -97,32 +98,22 @@ SELECTION-SCREEN END OF SCREEN 1001.
 
 TABLES sscrfields.
 
-INCLUDE /apmg/apm_password_dialog. " Contains SELECTION SCREEN
-
 INCLUDE /apmg/apm_forms.
 
 **********************************************************************
 
 INITIALIZATION.
+
   PERFORM adjust_toolbar USING '1001'.
-  lcl_password_dialog=>on_screen_init( ).
 
-* Hide Execute button from screen
 AT SELECTION-SCREEN OUTPUT.
-  IF sy-dynnr = lcl_password_dialog=>c_dynnr.
-    lcl_password_dialog=>on_screen_output( ).
-  ELSE.
-    PERFORM output.
-  ENDIF.
 
-* SAP back command re-direction
+  PERFORM output.
+
 AT SELECTION-SCREEN ON EXIT-COMMAND.
+
   PERFORM exit.
 
-AT SELECTION-SCREEN.
-  IF sy-dynnr = lcl_password_dialog=>c_dynnr.
-    lcl_password_dialog=>on_screen_event( sscrfields-ucomm ).
-  ENDIF.
-
 START-OF-SELECTION.
+
   PERFORM run.

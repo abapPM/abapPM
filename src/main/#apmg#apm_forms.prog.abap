@@ -54,6 +54,8 @@ ENDFORM.
 
 FORM output.
 
+  " Hide Execute button from screen
+
   DATA excluded_commands TYPE STANDARD TABLE OF sy-ucomm WITH KEY table_line.
 
   PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
@@ -77,9 +79,12 @@ ENDFORM.
 
 FORM exit.
 
+  " SAP back command re-direction
+  "
   " The exit logic should only be applied for our 'main' selection screen 1001.
   " All other selection-screens are called as popups and shouldn't influence
-  " the gui navigation as it would lead to inpredictable behaviour like dumps.
+  " the gui navigation as it would lead to unpredictable behaviour like dumps.
+
   IF sy-dynnr <> 1001.
     RETURN.
   ENDIF.
