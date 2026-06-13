@@ -94,6 +94,7 @@
     "cyclomatic_complexity": true,
     "dangerous_statement": {
       "exclude": [
+        "#apmg#cl_apm_env",
         "#apmg#cl_apm_persist_apm",
         "#apmg#cl_apm_object_prog",
         "#apmg#cl_apm_tap"
