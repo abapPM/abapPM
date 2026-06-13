@@ -82,8 +82,6 @@ CLASS /apmg/cl_apm_command_update DEFINITION
         !transport     TYPE trkorr
         !is_dry_run    TYPE abap_bool
         !is_production TYPE abap_bool
-      RETURNING
-        VALUE(result)  TYPE /apmg/if_apm_importer=>ty_dependencies
       RAISING
         /apmg/cx_apm_error.
 
@@ -91,8 +89,6 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
         !transport    TYPE trkorr
-      RETURNING
-        VALUE(result) TYPE /apmg/if_apm_importer=>ty_dependencies
       RAISING
         /apmg/cx_apm_error.
 
@@ -111,7 +107,6 @@ CLASS /apmg/cl_apm_command_update DEFINITION
         !manifest TYPE /apmg/if_apm_types=>ty_manifest
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 

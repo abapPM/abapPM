@@ -272,7 +272,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     IF sy-subrc = 0.
       result-other = to_lower( kernel_info->data ).
       REPLACE 'amd64' IN result-other WITH 'x86_64'.
-      IF kernel_info->data CS '64'.
+      IF result-other CS '64'.
         result-version = 64.
       ELSE.
         result-version = 32.
