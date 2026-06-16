@@ -760,7 +760,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     APPEND `Filter is applied to all text fields in the below table.` TO fragments.
     APPEND ` Search works for any portion of the text (so can be a mid part as well).` TO fragments.
-    APPEND `<br>Starting query from <code>label:xxx</code> will filter appropriate label.` TO fragments.
+    APPEND `<br>Starting query from <code>label:xyz</code> will filter appropriate label.` TO fragments.
     APPEND `Two "special" label queries are available:` TO fragments.
     APPEND ` <code>all</code> (to select all packages that have at least one label)` TO fragments.
     APPEND ` and <code>none</code> (to select unlabeled packages).` TO fragments.

@@ -112,6 +112,12 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
+    METHODS validate_package_json
+      IMPORTING
+        !json TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -129,9 +135,19 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
 
       WHEN c_action-update.
 
+        DATA(key) = ii_event->form_data( )->get( 'KEYS' ).
+        DATA(val) = ii_event->form_data( )->get( 'VALUE' ).
+
+        " Validate manifest
+        " TODO: In case of errors, the editor reverts to the stored version and edits get lost
+        " Ideally, it should retain the edits without saving them... but how?
+        IF key CP 'PACKAGE:*:PACKAGE_JSON'.
+          validate_package_json( val ).
+        ENDIF.
+
         do_update(
-          key   = ii_event->form_data( )->get( 'KEYS' )
-          value = ii_event->form_data( )->get( 'VALUE' ) ).
+          key   = key
+          value = val ).
 
         edit_mode = abap_false.
         IF back_on_save = abap_true.
@@ -305,8 +321,11 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
-    " TODO: Replace with
-    " html->add( lcl_json_editor=>get_javascript( ) )
+
+    " TODO: Replace with full-featured JSON editor; needs testing
+    " IF content_type = /apmg/if_apm_persist_apm=>c_content_type-json.
+      " html->add( lcl_json_editor=>get_javascript( ) )
+    " ENDIF.
 
     result = html.
 
@@ -371,6 +390,15 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
 
     " Better not to use syntax highlighter so we see the actual, unmodified data
     html->add( |<pre class="syntax-hl">{ db_entry-value }</pre>| ).
+
+  ENDMETHOD.
+
+
+  METHOD validate_package_json.
+
+    DATA(manifest) = /apmg/cl_apm_package_json=>convert_json_to_manifest( json ).
+
+    /apmg/cl_apm_package_json=>check_manifest( manifest ).
 
   ENDMETHOD.
 ENDCLASS.

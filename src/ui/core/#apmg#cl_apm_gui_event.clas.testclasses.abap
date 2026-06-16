@@ -23,7 +23,7 @@ CLASS ltcl_event IMPLEMENTATION.
 
     CREATE OBJECT li_cut TYPE /apmg/cl_apm_gui_event
       EXPORTING
-        iv_action  = 'XXX'
+        iv_action  = 'XYZ'
         iv_getdata = 'not_a_param'.
 
     lo_map = li_cut->query( ).
@@ -40,7 +40,7 @@ CLASS ltcl_event IMPLEMENTATION.
 
     CREATE OBJECT li_cut TYPE /apmg/cl_apm_gui_event
       EXPORTING
-        iv_action = 'XXX'.
+        iv_action = 'XYZ'.
 
     lo_map = li_cut->form_data( ).
     cl_abap_unit_assert=>assert_equals(
@@ -56,7 +56,7 @@ CLASS ltcl_event IMPLEMENTATION.
 
     CREATE OBJECT li_cut TYPE /apmg/cl_apm_gui_event
       EXPORTING
-        iv_action  = 'XXX'
+        iv_action  = 'XYZ'
         iv_getdata = 'a=b&b=c'.
 
     " Cross check just in case
@@ -95,7 +95,7 @@ CLASS ltcl_event IMPLEMENTATION.
     APPEND 'a=b&b=c' TO lt_postdata.
     CREATE OBJECT li_cut TYPE /apmg/cl_apm_gui_event
       EXPORTING
-        iv_action   = 'XXX'
+        iv_action   = 'XYZ'
         it_postdata = lt_postdata.
 
     " Cross check just in case
@@ -135,8 +135,8 @@ CLASS ltcl_event IMPLEMENTATION.
 
     CREATE OBJECT li_cut TYPE /apmg/cl_apm_gui_event
       EXPORTING
-        iv_getdata = 'a=b&b=c'
-        iv_action  = 'XXX'.
+        iv_action  = 'XYZ'
+        iv_getdata = 'a=b&b=c'.
 
     TRY.
         li_cut->form_data( )->set(
