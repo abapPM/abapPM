@@ -89,6 +89,7 @@ CLASS /apmg/cl_apm_command_update DEFINITION
       IMPORTING
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
         !transport    TYPE trkorr
+        !is_dry_run   TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
 
@@ -174,7 +175,8 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     " 7. Uninstall bundled dependencies that have been removed
     remove_dependencies(
       dependencies = dependencies
-      transport    = transport ).
+      transport    = transport
+      is_dry_run   = is_dry_run ).
 
     " 8. Update package
     IF is_newer = abap_true OR force = abap_true.
@@ -351,11 +353,13 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     " Uninstall removed dependencies
     LOOP AT dependencies INTO DATA(dependency) WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
-      /apmg/cl_apm_command_installer=>uninstall_package(
-        name      = dependency-name
-        version   = dependency-version
-        package   = dependency-package
-        transport = transport ).
+      IF is_dry_run = abap_false.
+        /apmg/cl_apm_command_installer=>uninstall_package(
+          name      = dependency-name
+          version   = dependency-version
+          package   = dependency-package
+          transport = transport ).
+      ENDIF.
 
     ENDLOOP.
 

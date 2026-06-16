@@ -10,7 +10,7 @@
 * IMPORT statements found in sub-packages. Dependencies between the
 * imported modules are taken into consideration.
 *
-* The tool will eventually become the "Update Command" and will be
+* The tool is called by the "Update Command" and will be
 * integrated into the apm UI.
 ************************************************************************
 REPORT /apmg/apm_importer LINE-SIZE 255.

@@ -4,7 +4,24 @@
 *& Note: These IMPORT statements are not executable code but are
 *& interpreted by apm when running the UPDATE command for dependencies.
 *&
+*& Each import statement represents a from/to regex mapping for the
+*& objects included in the packagae. The default from rule (*) is regex
+*& (?:\/.+\/|Y|Z)(..)(.*).
 *&
+*& Examples for class and interface regex matching:
+*&
+*& IMPORT '*' TO '/apmg/$1_apm$2'
+*&
+*& From              -> Prefix, Name       -> Result
+*& --------------------------------------------------------------------
+*& YCL_TEST          -> $1 = CL, $2 = TEST -> /APMG/CL_APM_TEST
+*& ZIF_TEST          -> $1 = IF, $2 = TEST -> /APMG/IF_APM_TEST
+*& /MBTOOLS/CL_UTIL  -> $1 = CL, $2 = UTIL -> /APMG/CL_APM_UTIL
+*& /MBTOOLS/IF_UTIL  -> $1 = IF, $2 = UTIL -> /APMG/CL_APM_UTIL
+*&
+*& - You can define multiple rules per package (first match wins)
+*& - You can comment out the IMPORT statements (works the same)
+*& - The FROM package must be type "module"
 *&---------------------------------------------------------------------*
 
 * core apm modules
