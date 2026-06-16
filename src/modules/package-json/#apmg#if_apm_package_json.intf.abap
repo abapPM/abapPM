@@ -10,7 +10,7 @@ INTERFACE /apmg/if_apm_package_json PUBLIC.
 * https://www.npmjs.com/package/@npmcli/package-json
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+  CONSTANTS c_version TYPE string VALUE '1.0.1' ##NEEDED.
 
   INTERFACES /apmg/if_apm_types.
 

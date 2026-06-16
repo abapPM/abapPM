@@ -108,15 +108,17 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       default               TYPE ty_devclass,
       software_component    TYPE string, "dlvunit
       application_component TYPE string, "ufps_posid
-      abap_language_version TYPE string,
+      abap_language_version TYPE string, "see c_abap_language_version below
     END OF ty_sap_package.
 
   " *** PACKAGE.ABAP.JSON ***
 
   TYPES:
     "! Schema for package.abap.json
-    "! This type is similar to npm's package.json with the following additions:
-    "! changelog, icon, and sap_package
+    "!
+    "! This type is similar to npm's package.json
+    "! https://docs.npmjs.com/cli/v11/configuring-npm/package-json
+    "! with the following additions: changelog, icon, and sap_package
     BEGIN OF ty_package_json,
       name                  TYPE ty_name,
       version               TYPE ty_version,
@@ -132,6 +134,8 @@ INTERFACE /apmg/if_apm_types PUBLIC.
       contributors          TYPE ty_persons,
       maintainers           TYPE ty_persons,
       main                  TYPE string,
+      files                 TYPE string_table, " FUTURE: files to include
+      ignore                TYPE string_table, " FUTURE: files to exclude
       man                   TYPE string_table,
       repository            TYPE ty_repository,
       funding               TYPE ty_funding,

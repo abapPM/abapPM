@@ -101,6 +101,12 @@ CLASS /apmg/cl_apm_package_json DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS check_manifest
+      IMPORTING
+        !manifest TYPE /apmg/if_apm_types=>ty_manifest
+      RAISING
+        /apmg/cx_apm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -121,12 +127,6 @@ CLASS /apmg/cl_apm_package_json DEFINITION
       key      TYPE /apmg/if_apm_persist_apm=>ty_key,
       package  TYPE devclass,
       manifest TYPE /apmg/if_apm_types=>ty_manifest.
-
-    CLASS-METHODS check_manifest
-      IMPORTING
-        !manifest TYPE /apmg/if_apm_types=>ty_manifest
-      RAISING
-        /apmg/cx_apm_error.
 
     CLASS-METHODS sort_manifest
       IMPORTING

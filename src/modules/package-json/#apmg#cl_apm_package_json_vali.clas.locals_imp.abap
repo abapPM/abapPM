@@ -244,6 +244,8 @@ CLASS lcl_validate IMPLEMENTATION.
       ENDIF.
       IF NOT line_exists( manifest-dependencies[ key = value ] ).
         INSERT |Bundle dependency { value } not included in dependencies| INTO TABLE result.
+      ELSEIF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( manifest-dependencies[ key = value ]-range ).
+        INSERT |Bundle dependency { value } must be pinned to a version| INTO TABLE result.
       ENDIF.
     ENDLOOP.
     IF lines( manifest-bundle_dependencies ) <> lines( values ).
