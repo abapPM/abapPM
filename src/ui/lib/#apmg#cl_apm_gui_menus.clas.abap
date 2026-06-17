@@ -57,6 +57,9 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
       iv_txt = 'Database Utility'
       iv_act = /apmg/if_apm_gui_router=>c_action-go_db
     )->add(
+      iv_txt = 'Whoami'
+      iv_act = /apmg/if_apm_gui_router=>c_action-apm_whoami
+    )->add(
       iv_txt = 'Debug Info'
       iv_act = /apmg/if_apm_gui_router=>c_action-go_debuginfo ).
 

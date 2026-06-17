@@ -1,10 +1,10 @@
-CLASS /apmg/cl_apm_command_logout DEFINITION
+CLASS /apmg/cl_apm_command_whoami DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
 
 ************************************************************************
-* apm Logout Command
+* apm Whoami Command
 *
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -13,7 +13,9 @@ CLASS /apmg/cl_apm_command_logout DEFINITION
 
     CLASS-METHODS run
       IMPORTING
-        !registry TYPE string
+        !registry     TYPE string
+      RETURNING
+        VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
 
@@ -22,12 +24,14 @@ CLASS /apmg/cl_apm_command_logout DEFINITION
 
     TYPES:
       BEGIN OF ty_response,
-        ok TYPE string,
+        username TYPE string,
       END OF ty_response.
 
     METHODS execute
       IMPORTING
         !registry TYPE string
+      RETURNING
+        VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
 
@@ -35,7 +39,7 @@ ENDCLASS.
 
 
 
-CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
+CLASS /apmg/cl_apm_command_whoami IMPLEMENTATION.
 
 
   METHOD execute.
@@ -43,28 +47,24 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
     /apmg/cl_apm_registry=>check_logged_in( registry ).
 
     DATA(response) = /apmg/cl_apm_registry=>fetch(
-      command  = 'logout'
+      command  = 'whoami'
       registry = registry
-      url      = |{ registry }/-/user/token/$apm$|
-      method   = /apmg/if_apm_http_agent=>c_method-delete ).
+      url      = |{ registry }/-/whoami| ).
 
     DATA(message) = /apmg/cl_apm_registry=>check_response(
       response = response
-      text     = 'Logout error' ).
+      text     = 'Whoami error' ).
 
-    DATA(logout_response) = VALUE ty_response( ).
+    DATA(whoami_response) = VALUE ty_response( ).
 
     /apmg/cl_apm_json=>to_abap(
       EXPORTING
         json   = response->cdata( )
       CHANGING
-        result = logout_response ).
-
-    " Clear token
-    /apmg/cl_apm_http_login_manage=>clear( registry ).
+        result = whoami_response ).
 
     IF message IS INITIAL.
-      MESSAGE logout_response-ok TYPE 'S'.
+      result = whoami_response-username.
     ELSE.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
     ENDIF.
@@ -74,9 +74,9 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
 
   METHOD run.
 
-    DATA(command) = NEW /apmg/cl_apm_command_logout( ).
+    DATA(command) = NEW /apmg/cl_apm_command_whoami( ).
 
-    command->execute( registry ).
+    result = command->execute( registry ).
 
   ENDMETHOD.
 ENDCLASS.

@@ -53,13 +53,14 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
 
   METHOD execute.
 
+    /apmg/cl_apm_registry=>check_logged_out( registry ).
+
     DATA(login_request) = VALUE ty_request(
       name     = username
       password = password ).
 
     DATA(payload) = /apmg/cl_apm_json=>to_string( login_request ).
 
-    " Send login request
     DATA(response) = /apmg/cl_apm_registry=>fetch(
       command   = 'login'
       registry  = registry

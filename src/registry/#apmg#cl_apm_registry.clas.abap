@@ -13,6 +13,18 @@ CLASS /apmg/cl_apm_registry DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
+    CLASS-METHODS check_logged_in
+      IMPORTING
+        !registry TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS check_logged_out
+      IMPORTING
+        !registry TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
     CLASS-METHODS fetch
       IMPORTING
         !registry     TYPE string
@@ -134,6 +146,24 @@ ENDCLASS.
 
 
 CLASS /apmg/cl_apm_registry IMPLEMENTATION.
+
+
+  METHOD check_logged_in.
+
+    IF /apmg/cl_apm_http_login_manage=>get_username( registry ) IS INITIAL.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'This command requires you to be logged in.'.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD check_logged_out.
+
+    IF /apmg/cl_apm_http_login_manage=>get_username( registry ) IS NOT INITIAL.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'You have to log out to log in again.'.
+    ENDIF.
+
+  ENDMETHOD.
 
 
   METHOD check_response.

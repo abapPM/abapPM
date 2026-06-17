@@ -20,6 +20,7 @@ INTERFACE /apmg/if_apm_gui_router PUBLIC.
       apm_unpublish        TYPE string VALUE 'apm_unpublish',
       apm_update           TYPE string VALUE 'apm_update',
       apm_version          TYPE string VALUE 'apm_version',
+      apm_whoami           TYPE string VALUE 'apm_whoami',
       change_order_by      TYPE string VALUE 'change_order_by',
       changelog            TYPE string VALUE 'changelog',
       clipboard            TYPE string VALUE 'clipboard',

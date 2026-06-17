@@ -73,18 +73,21 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
         !iv_scrollable TYPE abap_bool DEFAULT abap_true
         !io_content    TYPE REF TO /apmg/if_apm_html
       RETURNING
-        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
+        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html.
+
+    CLASS-METHODS render_registry
+      IMPORTING
+        !iv_registry   TYPE string
+      RETURNING
+        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html.
 
     CLASS-METHODS render_registry_link
       IMPORTING
+        !iv_registry   TYPE string
         !iv_name       TYPE string
         !iv_version    TYPE string OPTIONAL
       RETURNING
-        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
+        VALUE(ri_html) TYPE REF TO /apmg/if_apm_html.
 
     CLASS-METHODS render_package_name
       IMPORTING
@@ -494,16 +497,42 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_registry.
+
+    IF iv_registry = /apmg/if_apm_settings=>c_registry.
+      DATA(fav_class) = 'transport-box'. " green
+    ELSE.
+      fav_class = 'user-box'. " blue
+    ENDIF.
+
+    ri_html = /apmg/cl_apm_html=>create( ).
+
+    ri_html->add( |<span class="{ fav_class }">| ).
+    ri_html->add_a(
+      iv_title = 'Registry'
+      iv_txt   = iv_registry
+      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ iv_registry }| ).
+    ri_html->add( '</span>' ).
+
+  ENDMETHOD.
+
+
   METHOD render_registry_link.
 
     ri_html = /apmg/cl_apm_html=>create( ).
 
+    DATA(link) = |{ iv_registry }/package/{ iv_name }|.
+
+    IF iv_version IS NOT INITIAL.
+      link = link && |?v={ iv_version }|.
+    ENDIF.
+
     ri_html->add( |<span class="registry-link">| ).
-*    ri_html = ri_html->add_a(
-*      iv_txt   = shorten_repo_url( lv_url )
-*      iv_title = lv_url
-*      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ lv_url }|
-*      iv_class = 'url' )
+    ri_html = ri_html->add_a(
+      iv_txt   = ri_html->icon( 'link-solid' )
+      iv_title = link
+      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ link }|
+      iv_class = 'url' ).
     ri_html->add( '</span>' ).
 
   ENDMETHOD.

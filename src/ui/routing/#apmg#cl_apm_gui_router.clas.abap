@@ -198,7 +198,8 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
     DATA(id) = CONV /apmg/if_apm_package_json=>ty_package_id( event->query( )->get( 'KEY' ) ).
 
-    DATA(package) = /apmg/cl_apm_package_json=>get_package_from_id( id ).
+    DATA(package)  = /apmg/cl_apm_package_json=>get_package_from_id( id ).
+    DATA(registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
     CASE event->mv_action.
       WHEN /apmg/if_apm_gui_router=>c_action-apm_login.
@@ -208,7 +209,13 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_logout.
 
-        /apmg/cl_apm_http_login_manage=>clear( ).
+        /apmg/cl_apm_http_login_manage=>clear( registry ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-apm_whoami.
+
+        data(whoami) = /apmg/cl_apm_command_whoami=>run( registry ).
+        MESSAGE |Registry { registry }, User { whoami }| TYPE 'S'.
         result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_init.

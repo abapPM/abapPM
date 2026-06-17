@@ -54,10 +54,10 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
       c_raw_field_suffix    TYPE string VALUE '_RAW' ##NO_TEXT.
 
     DATA:
+      settings     TYPE /apmg/if_apm_settings=>ty_settings,
       packages     TYPE /apmg/if_apm_package_json=>ty_packages,
       all_labels   TYPE string_table,
-      label_colors TYPE REF TO /apmg/cl_apm_string_map,
-      settings     TYPE /apmg/if_apm_settings=>ty_settings.
+      label_colors TYPE REF TO /apmg/cl_apm_string_map.
 
     " PREPARE
 
@@ -818,19 +818,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
   METHOD render_registry.
 
-    IF settings-registry = /apmg/if_apm_settings=>c_registry.
-      DATA(fav_class) = 'transport-box'. " green
-    ELSE.
-      fav_class = 'user-box'. " blue
-    ENDIF.
-
     html->add( '<span style="float:right">' ).
-    html->add( |<span class="{ fav_class }">| ).
-    html->add_a(
-      iv_title = 'Registry'
-      iv_txt   = settings-registry
-      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ settings-registry }| ).
-    html->add( '</span>' ).
+    html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry( settings-registry ) ).
     render_user_menu( html ).
     html->add( '</span>' ).
 

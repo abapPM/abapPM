@@ -73,10 +73,16 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
       END OF ty_markdown.
 
     DATA:
+      registry     TYPE string,
       package      TYPE devclass,
       view         TYPE string,
       markdown     TYPE ty_markdown,
+      settings     TYPE /apmg/if_apm_settings=>ty_settings,
       package_json TYPE /apmg/if_apm_types=>ty_package_json.
+
+    METHODS load_settings
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS get_toolbar
       RETURNING
@@ -440,6 +446,8 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     super->constructor( ).
 
+    load_settings( ).
+
     IF package IS INITIAL.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Missing package'.
     ENDIF.
@@ -681,6 +689,18 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
         ASSERT 0 = 1.
     ENDCASE.
 
+
+  ENDMETHOD.
+
+
+  METHOD load_settings.
+
+    TRY.
+        settings = /apmg/cl_apm_settings=>factory( )->get( ).
+      CATCH /apmg/cx_apm_error.
+        " Settings didn't exist, so save the defaults
+        /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -1093,12 +1113,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       name  = package_json-name
       value = package_json-version ) ).
     html->add( '</span>' ).
-    " TODO: link to apm registry
-*    html->add( '<span class="indent5em">' )
-*    html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry_link(
-*      iv_name    = package_json-name
-*      iv_version = package_json-version ) )
-*    html->add( '</span>' )
+    html->add( '<span class="indent5em">' ).
+    html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry_link(
+      iv_registry = settings-registry
+      iv_name     = package_json-name
+      iv_version  = package_json-version ) ).
+    html->add( '</span>' ).
     html->add( '</td>' ).
     html->add( '<td class="right">' ).
     html->add( get_toolbar( )->render( iv_right = abap_true ) ).
