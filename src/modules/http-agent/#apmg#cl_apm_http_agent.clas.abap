@@ -181,7 +181,7 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     me->proxy_host      = proxy_host.
     me->proxy_service   = proxy_service.
     me->proxy_user      = proxy_user.
-    me->proxy_password    = proxy_password.
+    me->proxy_password  = proxy_password.
 
     global_headers = NEW #( ).
 

@@ -148,6 +148,10 @@ CLASS lcl_abap_environment DEFINITION.
       RETURNING
         VALUE(result) TYPE ty_release_patch.
 
+    METHODS is_kernel_64bit
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     METHODS get_kernel_cryptolib
       RETURNING
         VALUE(result) TYPE ty_release_patch.
@@ -176,7 +180,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
   METHOD get.
 
-    IF name CP 'KERNEL*' OR name = /apmg/if_apm_env=>is_64bit.
+    IF name CP 'KERNEL*'.
       result = get_kernel( name ).
     ELSEIF name CP 'HOST*'.
       result = get_host( name ).
@@ -204,6 +208,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
       result = is_gui( name ).
     ELSEIF name CP 'IS_ECATT*'.
       result = is_ecatt( name ).
+    ELSEIF name = /apmg/if_apm_env=>is_64bit.
+      result = is_kernel_64bit( ).
     ELSE.
       result = get_other( name ).
     ENDIF.
@@ -227,8 +233,6 @@ CLASS lcl_abap_environment IMPLEMENTATION.
         result = get_kernel_release( )-other.
       WHEN /apmg/if_apm_env=>kernel_cryptolib.
         result = get_kernel_cryptolib( ).
-      WHEN /apmg/if_apm_env=>is_64bit.
-        result = xsdbool( get_kernel_release( )-version = 64 ).
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -237,15 +241,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
   METHOD get_kernel_release.
 
-    " Kernel Info retrival copied from function group SHSY get_kinfo
-    TYPES:
-      BEGIN OF ty_kernel_info,
-        key  TYPE c LENGTH 21,
-        data TYPE c LENGTH 400,
-      END OF ty_kernel_info.
-
     DATA:
-      kernel_infos      TYPE STANDARD TABLE OF ty_kernel_info WITH KEY key,
       kern_rel          TYPE thllines-thline,
       kern_make_variant TYPE thllines-thline,
       kern_dblib        TYPE thllines-thline,
@@ -262,22 +258,38 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     result-release  = kern_rel.
     result-patch    = kern_patchlevel.
 
-    " Kernel Release Information
-    CALL 'SAPCORE'
-      ID 'ID'    FIELD 'VERSION'
-      ID 'TABLE' FIELD kernel_infos.                      "#EC CI_CCALL
+  ENDMETHOD.
 
-    " Machine type: 32- or 64-bit Kernel
-    READ TABLE kernel_infos REFERENCE INTO DATA(kernel_info) INDEX 3.
-    IF sy-subrc = 0.
-      result-other = to_lower( kernel_info->data ).
-      REPLACE 'amd64' IN result-other WITH 'x86_64'.
-      IF result-other CS '64'.
-        result-version = 64.
-      ELSE.
-        result-version = 32.
+  METHOD is_kernel_64bit.
+
+    DATA environment TYPE STANDARD TABLE OF thenv WITH KEY line.
+
+    CALL FUNCTION 'TH_ENVIRONMENT'
+      TABLES
+        environment = environment.
+
+    " Check MACHTYPE first since HOSTTYPE is not set on some shells
+
+    " Examples of MACHTYPE:
+    " x86_64-pc-linux-gnu, arm64-apple-darwin, sparc64-pc-linux
+    LOOP AT environment ASSIGNING FIELD-SYMBOL(<env>) WHERE line CS 'MACHTYPE='.
+      SPLIT <env>-line AT '=' INTO DATA(rest) DATA(machtype).
+      SPLIT machtype AT '-' INTO machtype rest.
+      IF machtype CS '64'.
+        result = abap_true.
       ENDIF.
-    ENDIF.
+      RETURN.
+    ENDLOOP.
+
+    " Examples of HOSTTYPE:
+    " x86_64, amd64, i686, powerpc, powerpc64
+    LOOP AT environment ASSIGNING <env> WHERE line CS 'HOSTTYPE='.
+      SPLIT <env>-line AT '=' INTO rest DATA(hosttype).
+      IF hosttype CS '64'.
+        result = abap_true.
+      ENDIF.
+      RETURN.
+    ENDLOOP.
 
   ENDMETHOD.
 
