@@ -29,12 +29,11 @@ CLASS /apmg/cl_apm_command_whoami DEFINITION
 
     METHODS execute
       IMPORTING
-        !registry TYPE string
+        !registry     TYPE string
       RETURNING
         VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 

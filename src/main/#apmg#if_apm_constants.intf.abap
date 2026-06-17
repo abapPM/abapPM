@@ -11,6 +11,7 @@ INTERFACE /apmg/if_apm_constants PUBLIC.
     c_website       TYPE string VALUE 'https://abappm.com',
     c_documentation TYPE string VALUE 'https://docs.abappm.com',
     c_registry      TYPE string VALUE 'https://registry.abappm.com',
+    c_playground    TYPE string VALUE 'https://playground.abappm.com',
     c_repository    TYPE string VALUE 'https://github.com/abapPM/abapPM',
     c_new_issue     TYPE string VALUE 'https://github.com/abapPM/abapPM/issues/new/choose',
     c_sponsor       TYPE string VALUE 'https://github.com/sponsors/abapPM',
