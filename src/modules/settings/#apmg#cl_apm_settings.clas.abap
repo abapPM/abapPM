@@ -277,6 +277,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
   METHOD get_default.
 
     " Default values for settings
+    " TODO: Change to production registry
     result-registry = /apmg/if_apm_settings=>c_playground_url.
 
     result-list_settings-order_by = 'PACKAGE'.

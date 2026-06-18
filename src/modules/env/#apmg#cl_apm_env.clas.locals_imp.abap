@@ -140,6 +140,10 @@ CLASS lcl_abap_environment DEFINITION.
       RETURNING
         VALUE(result) TYPE ty_release_patch.
 
+    METHODS get_hana_license
+      RETURNING
+        VALUE(result) TYPE hdb_m_license.
+
     METHODS get_spam_release
       RETURNING
         VALUE(result) TYPE ty_release_patch.
@@ -186,7 +190,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
       result = get_host( name ).
     ELSEIF name CP 'CONN*' OR name = /apmg/if_apm_env=>is_secure_conn.
       result = get_connection( name ).
-    ELSEIF name CP 'LICENSE*'.
+    ELSEIF name CP 'LICENSE*' OR name = /apmg/if_apm_env=>hardware_key.
       result = get_license( name ).
     ELSEIF name CP 'DATABASE*' OR name CP 'DBSL*'.
       result = get_database( name ).
@@ -219,6 +223,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
   METHOD get_kernel.
 
     CASE name.
+      WHEN /apmg/if_apm_env=>kernel_platform.
+        result = to_upper( sy-opsys ).
       WHEN /apmg/if_apm_env=>kernel.
         DATA(release) = format( get_kernel_release( )-release ).
         DATA(patch) = format( get_kernel_release( )-patch ).
@@ -227,7 +233,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
         result = format( get_kernel_release( )-release ).
       WHEN /apmg/if_apm_env=>kernel_patch.
         result = format( get_kernel_release( )-patch ).
-      WHEN /apmg/if_apm_env=>kernel_platform.
+      WHEN /apmg/if_apm_env=>kernel_type.
         result = get_kernel_release( )-platform.
       WHEN /apmg/if_apm_env=>kernel_arch.
         result = get_kernel_release( )-other.
@@ -316,6 +322,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     DATA rest TYPE string.
 
     CASE name.
+      WHEN /apmg/if_apm_env=>database_platform.
+        result = to_upper( sy-dbsys ).
       WHEN /apmg/if_apm_env=>database.
         result = get_database_release( )-srvrel.
       WHEN /apmg/if_apm_env=>database_schema.
@@ -387,8 +395,15 @@ CLASS lcl_abap_environment IMPLEMENTATION.
           CATCH cx_dba_adbc INTO error.
             result = error->get_text( ).
         ENDTRY.
+      WHEN /apmg/if_apm_env=>hana_hardware_key.
+        result = get_hana_license( )-hardware_key.
+      WHEN /apmg/if_apm_env=>hana_license_number.
+        result = get_hana_license( )-install_no.
+      WHEN /apmg/if_apm_env=>hana_license_exp_date.
+        result = get_hana_license( )-expiration_date(10).
       WHEN OTHERS.
-        ASSERT 0 = 1.
+        result = /apmg/if_apm_env=>c_todo.
+        " ASSERT 0 = 1
     ENDCASE.
 
   ENDMETHOD.
@@ -437,6 +452,27 @@ CLASS lcl_abap_environment IMPLEMENTATION.
         ENDIF.
       ENDIF.
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_hana_license.
+
+    DATA hdb_license TYPE STANDARD TABLE OF hdb_m_license WITH KEY hardware_key system_id system_no.
+
+    TRY.
+        DATA(system) = cl_db6_sys=>get_sys_ref( sy-sysid ).
+        DATA(rdi)    = cl_dba_rdi=>get_instance( system ).
+        rdi->query->reset( ).
+        rdi->query->get_snapshot(
+          EXPORTING
+            ddic_src = cl_hdb_rdi_meta=>co_ddic_m_license
+          IMPORTING
+            data     = hdb_license ).
+      CATCH cx_dba_root.
+        RETURN.
+    ENDTRY.
+
+    READ TABLE hdb_license INTO result INDEX 1 ##SUBRC_OK.
 
   ENDMETHOD.
 
@@ -547,11 +583,22 @@ CLASS lcl_abap_environment IMPLEMENTATION.
   METHOD get_license.
 
     DATA:
+      license_hwkey  TYPE license-custkey,
       license_date   TYPE sy-datum,
       license_number TYPE c LENGTH 10.
 
     CASE name.
-      WHEN /apmg/if_apm_env=>license_date.
+      WHEN /apmg/if_apm_env=>hardware_key.
+        CALL FUNCTION 'SLIC_GET_CUSTKEY'
+          IMPORTING
+            custkey            = license_hwkey
+          EXCEPTIONS
+            slic_bad_parameter = 1
+            OTHERS             = 2.
+        IF sy-subrc = 0.
+          result = license_hwkey.
+        ENDIF.
+      WHEN /apmg/if_apm_env=>license_exp_date.
         CALL FUNCTION 'SLIC_GET_LICENCE_DATE'
           IMPORTING
             licence_date = license_date.

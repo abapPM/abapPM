@@ -18,7 +18,7 @@ CLASS /apmg/cl_apm_env DEFINITION
       IMPORTING
         !env_type     TYPE string DEFAULT /apmg/if_apm_env=>c_env-abap
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/cl_apm_env.
+        VALUE(result) TYPE REF TO /apmg/if_apm_env.
 
     METHODS constructor
       IMPORTING
@@ -176,7 +176,7 @@ CLASS /apmg/cl_apm_env IMPLEMENTATION.
 
   METHOD create.
 
-    result = NEW #( env_type ).
+    result = NEW /apmg/cl_apm_env( env_type ).
 
   ENDMETHOD.
 
