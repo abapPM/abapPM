@@ -212,11 +212,15 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
-
     pubish_package = package.
     IF pubish_package IS NOT INITIAL.
       form_data = read_package( pubish_package ).
+    ENDIF.
+
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
     ENDIF.
 
   ENDMETHOD.

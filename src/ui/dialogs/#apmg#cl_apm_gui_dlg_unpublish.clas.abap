@@ -270,6 +270,10 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
+    ENDIF.
+
   ENDMETHOD.
 
 

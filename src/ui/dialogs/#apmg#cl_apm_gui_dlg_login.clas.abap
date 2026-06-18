@@ -92,12 +92,12 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
           DATA(params) = get_parameters( form_data ).
 
 *          TRY.
-              /apmg/cl_apm_command_login=>run(
-                registry = registry
-                username = params-username
-                password = params-password ).
+          /apmg/cl_apm_command_login=>run(
+            registry = registry
+            username = params-username
+            password = params-password ).
 
-              rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
 *            CATCH /apmg/cx_apm_error INTO DATA(error).
 *              rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 *          ENDTRY.
@@ -144,6 +144,8 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+    /apmg/cl_apm_registry=>check_logged_out( registry ).
 
   ENDMETHOD.
 

@@ -173,15 +173,18 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
 
     validation_log = NEW #( ).
     form_data      = NEW #( ).
-
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
-
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
     update_package = package.
     IF update_package IS NOT INITIAL.
       form_data = read_package( update_package ).
+    ENDIF.
+
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
     ENDIF.
 
   ENDMETHOD.
