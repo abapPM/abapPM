@@ -87,15 +87,7 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     http_client->request->set_version( if_http_request=>co_protocol_version_1_1 ).
     http_client->request->set_method( method ).
 
-    IF query IS BOUND.
-      LOOP AT query->mt_entries ASSIGNING FIELD-SYMBOL(<entry>).
-        http_client->request->set_form_field(
-          name  = <entry>-k
-          value = <entry>-v ).
-      ENDLOOP.
-    ENDIF.
-
-    LOOP AT global_headers->mt_entries ASSIGNING <entry>.
+    LOOP AT global_headers->mt_entries ASSIGNING FIELD-SYMBOL(<entry>).
       http_client->request->set_header_field(
         name  = <entry>-k
         value = <entry>-v ).
@@ -118,7 +110,7 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     ENDIF.
 
     " If "Authorization" header is set, disable standard SAP login popup
-    IF http_client->request->get_header_field( 'authorization' ) IS NOT INITIAL.
+    IF http_client->request->get_header_field( /apmg/if_apm_http_agent=>c_header-authorization ) IS NOT INITIAL.
       http_client->propertytype_logon_popup = http_client->co_disabled.
     ENDIF.
 

@@ -41,7 +41,6 @@ INTERFACE /apmg/if_apm_http_agent PUBLIC.
     IMPORTING
       !url          TYPE string
       !method       TYPE string DEFAULT c_method-get
-      !query        TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
       !headers      TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
       !payload      TYPE any OPTIONAL " can be char, string, xstring
     RETURNING
