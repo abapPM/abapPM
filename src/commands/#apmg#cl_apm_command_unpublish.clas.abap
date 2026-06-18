@@ -115,6 +115,10 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
 
   METHOD execute.
 
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
+    ENDIF.
+
     " 1. Get packument from registry for update
     DATA(packument) = /apmg/cl_apm_registry=>get_packument(
       registry = registry

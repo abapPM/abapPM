@@ -179,6 +179,10 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
   METHOD execute.
 
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
+    ENDIF.
+
     " 1. Check if package exists and is initialized
     check_package( package ).
 

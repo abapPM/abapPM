@@ -329,6 +329,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     DATA package_json_init TYPE /apmg/if_apm_types=>ty_package_json.
 
+    IF registry = /apmg/if_apm_constants=>c_registry.
+      /apmg/cl_apm_registry=>check_logged_in( registry ).
+    ENDIF.
+
     " Authorization check
     /apmg/cl_apm_auth=>check_package_authorized(
       package  = package
