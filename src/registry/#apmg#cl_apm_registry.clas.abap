@@ -262,18 +262,18 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
 
   METHOD get_latest_version.
 
-    DATA(pacote) = /apmg/cl_apm_pacote=>factory(
+    DATA(packument) = get_packument(
       registry = registry
       name     = name ).
 
-    DATA(tags) = pacote->get_dist_tags( ).
+    DATA(tags) = packument-dist_tags.
 
     IF line_exists( tags[ key = 'latest' ] ).
       result = tags[ key = 'latest' ]-value.
     ELSE.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
-          text = |"Latest" tag is missing for package { name }. Please, open an issue on GitHub|.
+          text = |"latest" tag is missing for package { name }. Please, open an issue on GitHub|.
     ENDIF.
 
   ENDMETHOD.
