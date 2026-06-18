@@ -214,7 +214,7 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_whoami.
 
-        data(whoami) = /apmg/cl_apm_command_whoami=>run( registry ).
+        DATA(whoami) = /apmg/cl_apm_command_whoami=>run( registry ).
         MESSAGE |Registry { registry }, User { whoami }| TYPE 'S'.
         result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 

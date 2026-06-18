@@ -572,7 +572,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
   METHOD render_registry.
 
-    IF settings-registry = /apmg/if_apm_settings=>c_registry.
+    IF settings-registry = /apmg/if_apm_constants=>c_registry.
       DATA(fav_class) = 'transport-box'. " green
     ELSE.
       fav_class = 'user-box'. " blue

@@ -499,7 +499,7 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
 
   METHOD render_registry.
 
-    IF iv_registry = /apmg/if_apm_settings=>c_registry.
+    IF iv_registry = /apmg/if_apm_constants=>c_registry.
       DATA(fav_class) = 'transport-box'. " green
     ELSE.
       fav_class = 'user-box'. " blue
