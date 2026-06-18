@@ -90,6 +90,9 @@ CLASS /apmg/cl_apm_object_clas IMPLEMENTATION.
 
         " No test classes in production
         IF is_production = abap_true.
+          " TODO: If target class had tests, then removing tests leads to warning
+          " |Byte code of program [CLASS...==CP] does not contain test classes|
+          " We need to update metadata in this case
           CLEAR import_metadata-with_unit_tests.
         ENDIF.
 
