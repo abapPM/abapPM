@@ -26,6 +26,7 @@ CLASS /apmg/cl_apm_html_form DEFINITION
     METHODS render
       IMPORTING
         !iv_form_class     TYPE csequence DEFAULT 'dialog-form'
+        !iv_focus_field    TYPE string OPTIONAL
         !io_values         TYPE REF TO /apmg/cl_apm_string_map
         !io_validation_log TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
       RETURNING
@@ -233,7 +234,7 @@ CLASS /apmg/cl_apm_html_form IMPLEMENTATION.
     DATA: ls_hotkey_action LIKE LINE OF rt_hotkey_actions.
     FIELD-SYMBOLS: <ls_command> TYPE /apmg/if_apm_html_form=>ty_command.
 
-    ls_hotkey_action-ui_component = |Form-{ mv_form_id }|.
+    ls_hotkey_action-ui_component = |form-{ mv_form_id }|.
 
     READ TABLE mt_commands ASSIGNING <ls_command> WITH KEY cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main.
     IF sy-subrc = 0.
@@ -443,7 +444,10 @@ CLASS /apmg/cl_apm_html_form IMPLEMENTATION.
       EXIT.
     ENDLOOP.
 
-    lv_autofocus = abap_true.
+    IF iv_focus_field IS INITIAL.
+      lv_autofocus = abap_true.
+    ENDIF.
+
     LOOP AT mt_fields ASSIGNING <ls_field>.
       AT FIRST.
         IF <ls_field>-type <> /apmg/if_apm_html_form=>c_field_type-field_group.
@@ -466,6 +470,10 @@ CLASS /apmg/cl_apm_html_form IMPLEMENTATION.
         ri_html->add( |<legend{ lv_hint }>{ <ls_field>-label }</legend>| ).
         ri_html->add( |<ul>| ).
         CONTINUE.
+      ENDIF.
+
+      IF iv_focus_field = <ls_field>-name.
+        lv_autofocus = abap_true.
       ENDIF.
 
       render_field(

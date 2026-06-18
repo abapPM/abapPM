@@ -144,6 +144,8 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
             package_json = params-package_json
             transport    = params-transport ).
 
+          " TODO: Set package to write-protected (see settings-package_settings)
+
           rs_handled-page  = /apmg/cl_apm_gui_page_package=>create( params-package ).
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page_replacing.
         ELSE.

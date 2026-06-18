@@ -182,6 +182,11 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
         call_browser( /apmg/if_apm_constants=>c_sponsor ).
         result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
+      WHEN /apmg/if_apm_gui_router=>c_action-tutorial.
+
+        call_browser( /apmg/if_apm_constants=>c_tutorial ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -300,11 +305,13 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
         result-page  = /apmg/cl_apm_gui_page_tree=>create( ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
-      WHEN /apmg/if_apm_gui_router=>c_action-go_settings.
+      WHEN /apmg/if_apm_gui_router=>c_action-go_settings_global.
 
         DATA(key) = /apmg/cl_apm_settings=>get_setting_key( /apmg/if_apm_settings=>c_global ).
         result-page  = /apmg/cl_apm_gui_page_db_entry=>create( key ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
+        /apmg/cl_apm_settings=>factory( /apmg/if_apm_settings=>c_global )->load( ).
 
       WHEN /apmg/if_apm_gui_router=>c_action-go_settings_personal.
 
@@ -312,10 +319,7 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
         result-page  = /apmg/cl_apm_gui_page_db_entry=>create( key ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
-* FUTURE
-*      WHEN /apmg/if_apm_gui_router=>c_action-go_tutorial
-*        result-page  = /apmg/cl_apm_gui_page_tutorial=>create( )
-*        result-state = /apmg/cl_apm_gui=>c_event_state-new_page
+        /apmg/cl_apm_settings=>factory( )->load( ).
 
       WHEN /apmg/if_apm_gui_router=>c_action-favorite_package.
 

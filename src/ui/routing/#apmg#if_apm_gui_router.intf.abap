@@ -33,10 +33,9 @@ INTERFACE /apmg/if_apm_gui_router PUBLIC.
       go_debuginfo         TYPE string VALUE 'go_debuginfo',
       go_home              TYPE string VALUE 'go_home',
       go_package           TYPE string VALUE 'go_package',
-      go_settings          TYPE string VALUE 'go_settings',
+      go_settings_global   TYPE string VALUE 'go_settings_global',
       go_settings_personal TYPE string VALUE 'go_settings_personal',
       go_tree              TYPE string VALUE 'go_tree',
-      go_tutorial          TYPE string VALUE 'go_tutorial',
       goto_message         TYPE string VALUE 'goto_message',
       goto_source          TYPE string VALUE 'goto_source',
       homepage             TYPE string VALUE 'homepage',
@@ -49,6 +48,7 @@ INTERFACE /apmg/if_apm_gui_router PUBLIC.
       show_callstack       TYPE string VALUE 'show_callstack',
       show_hotkeys         TYPE string VALUE 'show_hotkeys',
       sponsor              TYPE string VALUE 'sponsor',
+      tutorial             TYPE string VALUE 'tutorial',
       url                  TYPE string VALUE 'url',
     END OF c_action.
 

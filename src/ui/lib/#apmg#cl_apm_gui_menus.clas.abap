@@ -89,7 +89,7 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
         IF /apmg/cl_apm_settings=>factory( )->get( )-experimental_features IS NOT INITIAL. "apm
           menu->add(
             iv_txt = /apmg/cl_apm_gui_buttons=>experimental( )
-            iv_act = /apmg/if_apm_gui_router=>c_action-go_settings ).
+            iv_act = /apmg/if_apm_gui_router=>c_action-go_settings_global ).
         ENDIF.
       CATCH /apmg/cx_apm_error ##NO_HANDLER.
     ENDTRY.
@@ -102,16 +102,11 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
     result = /apmg/cl_apm_html_toolbar=>create( 'apm-toolbar-help' ).
 
     result->add(
-      iv_txt = 'Feedback'
-      iv_class = 'red'
-      iv_act = /apmg/if_apm_gui_router=>c_action-feedback
-    )->add(
       iv_txt = 'Registry'
       iv_act = /apmg/if_apm_gui_router=>c_action-registry
-* FUTURE
-*    )->add(
-*      iv_txt = 'Tutorial'
-*      iv_act = /apmg/if_apm_gui_router=>c_action-go_tutorial
+    )->add(
+      iv_txt = 'Tutorial'
+      iv_act = /apmg/if_apm_gui_router=>c_action-tutorial
     )->add(
       iv_txt = 'Documentation'
       iv_act = /apmg/if_apm_gui_router=>c_action-documentation
@@ -120,7 +115,11 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
       iv_act = /apmg/if_apm_gui_router=>c_action-changelog
     )->add(
       iv_txt = 'Hotkeys'
-      iv_act = /apmg/if_apm_gui_router=>c_action-show_hotkeys ).
+      iv_act = /apmg/if_apm_gui_router=>c_action-show_hotkeys
+    )->add(
+      iv_txt   = 'Feedback'
+      iv_class = 'red'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-feedback ).
 
   ENDMETHOD.
 
@@ -148,7 +147,7 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
 
     result->add(
       iv_txt = 'Global'
-      iv_act = /apmg/if_apm_gui_router=>c_action-go_settings
+      iv_act = /apmg/if_apm_gui_router=>c_action-go_settings_global
     )->add(
       iv_txt = 'Personal'
       iv_act = /apmg/if_apm_gui_router=>c_action-go_settings_personal ).

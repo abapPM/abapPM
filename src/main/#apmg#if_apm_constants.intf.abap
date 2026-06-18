@@ -9,6 +9,7 @@ INTERFACE /apmg/if_apm_constants PUBLIC.
 
   CONSTANTS:
     c_website       TYPE string VALUE 'https://abappm.com',
+    c_tutorial      TYPE string VALUE 'https://abappm.com/tutorial',
     c_documentation TYPE string VALUE 'https://docs.abappm.com',
     c_registry      TYPE string VALUE 'https://registry.abappm.com',
     c_playground    TYPE string VALUE 'https://playground.abappm.com',

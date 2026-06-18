@@ -1103,6 +1103,9 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD render_top.
 
+    " TODO: Add 'favorite' (star icon), 'write_protected' (lock icon) with toggles
+    " FUTURE: Add 'labels'
+    " See settings-package_settings
     html->add( '<div class="paddings">' ).
 
     html->add( '<table class="w100"><tr>' ).

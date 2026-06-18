@@ -273,7 +273,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     hotkey_action-ui_component = 'Package List'.
 
     hotkey_action-description = 'Global Settings'.
-    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-go_settings_global.
     hotkey_action-hotkey      = 'x'.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 

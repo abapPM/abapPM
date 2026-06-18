@@ -72,10 +72,12 @@ INTERFACE /apmg/if_apm_settings PUBLIC.
   TYPES ty_name TYPE syst_uname.
 
   CONSTANTS:
-    c_registry   TYPE string VALUE 'https://registry.abappm.com',
-    c_playground TYPE string VALUE 'https://playground.abappm.com',
-    c_global     TYPE ty_name VALUE /apmg/if_apm_persist_apm=>c_key_name-global_settings,
-    c_user       TYPE ty_name VALUE /apmg/if_apm_persist_apm=>c_key_name-user_settings.
+    c_registry_name   TYPE string VALUE 'global',
+    c_playground_name TYPE string VALUE 'playground',
+    c_registry_url    TYPE string VALUE 'https://registry.abappm.com',
+    c_playground_url  TYPE string VALUE 'https://playground.abappm.com',
+    c_global          TYPE ty_name VALUE /apmg/if_apm_persist_apm=>c_key_name-global_settings,
+    c_user            TYPE ty_name VALUE /apmg/if_apm_persist_apm=>c_key_name-user_settings.
 
   METHODS get
     RETURNING

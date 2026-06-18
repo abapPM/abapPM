@@ -48,11 +48,19 @@ CLASS /apmg/cl_apm_gui_dlg_login DEFINITION
       END OF c_action.
 
     DATA:
-      registry       TYPE string,
+      settings       TYPE /apmg/if_apm_settings=>ty_settings,
+      defaults       TYPE /apmg/if_apm_settings=>ty_registry_settings,
+      focus_field    TYPE string,
       form           TYPE REF TO /apmg/cl_apm_html_form,
       form_data      TYPE REF TO /apmg/cl_apm_string_map,
       form_util      TYPE REF TO /apmg/cl_apm_html_form_utils,
       validation_log TYPE REF TO /apmg/cl_apm_string_map.
+
+    METHODS get_login_default
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS get_form_schema
       RETURNING
@@ -91,16 +99,12 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-*          TRY.
           /apmg/cl_apm_command_login=>run(
-            registry = registry
+            registry = settings-registry
             username = params-username
             password = params-password ).
 
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-*            CATCH /apmg/cx_apm_error INTO DATA(error).
-*              rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
-*          ENDTRY.
         ELSE.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
@@ -112,7 +116,7 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_menu_provider~get_menu.
 
-    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( registry ).
+    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( settings-registry ).
 
   ENDMETHOD.
 
@@ -125,6 +129,7 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
     html->add( '<div class="form-container">' ).
     html->add( form->render(
+      iv_focus_field    = focus_field
       io_values         = form_data
       io_validation_log = validation_log ) ).
     html->add( '</div>' ).
@@ -143,9 +148,11 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+    settings = /apmg/cl_apm_settings=>factory( )->get( ).
 
-    /apmg/cl_apm_registry=>check_logged_out( registry ).
+    /apmg/cl_apm_registry=>check_logged_out( settings-registry ).
+
+    form_data = get_login_default( ).
 
   ENDMETHOD.
 
@@ -187,6 +194,30 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
     )->command(
       iv_label       = 'Back'
       iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+
+  ENDMETHOD.
+
+
+  METHOD get_login_default.
+
+    CHECK line_exists( settings-registry_settings[ url = settings-registry ] ).
+
+    defaults = settings-registry_settings[ url = settings-registry ].
+
+    IF defaults-user IS INITIAL.
+      focus_field = c_id-username.
+    ELSE.
+      focus_field = c_id-password.
+    ENDIF.
+
+    result = NEW #( ).
+
+    result->set(
+      iv_key = c_id-username
+      iv_val = defaults-user
+    )->set(
+      iv_key = c_id-password
+      iv_val = defaults-password ).
 
   ENDMETHOD.
 
