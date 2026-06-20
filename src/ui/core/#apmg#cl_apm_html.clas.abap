@@ -9,33 +9,39 @@ CLASS /apmg/cl_apm_html DEFINITION
     CONSTANTS c_indent_size TYPE i VALUE 2 ##NO_TEXT.
 
     CLASS-METHODS class_constructor.
+
     CLASS-METHODS create
       IMPORTING
         !iv_initial_chunk  TYPE any OPTIONAL
       RETURNING
         VALUE(ri_instance) TYPE REF TO /apmg/if_apm_html.
+
     CLASS-METHODS icon
       IMPORTING
-        !iv_name      TYPE string
-        !iv_hint      TYPE string OPTIONAL
-        !iv_class     TYPE string OPTIONAL
-        !iv_onclick   TYPE string OPTIONAL
+        !iv_name      TYPE csequence
+        !iv_hint      TYPE csequence OPTIONAL
+        !iv_class     TYPE csequence OPTIONAL
+        !iv_onclick   TYPE csequence OPTIONAL
       RETURNING
         VALUE(rv_str) TYPE string.
+
     CLASS-METHODS checkbox
       IMPORTING
-        !iv_id         TYPE string OPTIONAL
+        !iv_id         TYPE csequence OPTIONAL
         !iv_checked    TYPE abap_bool OPTIONAL
       RETURNING
         VALUE(rv_html) TYPE string.
+
     CLASS-METHODS parse_data_attr
       IMPORTING
-        !iv_str             TYPE string OPTIONAL
+        !iv_str             TYPE csequence OPTIONAL
       RETURNING
         VALUE(rs_data_attr) TYPE /apmg/if_apm_html=>ty_data_attr.
+
     CLASS-METHODS set_debug_mode
       IMPORTING
         !iv_mode TYPE abap_bool.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -77,11 +83,11 @@ CLASS /apmg/cl_apm_html DEFINITION
     METHODS indent_line
       CHANGING
         !cs_context TYPE ty_indent_context
-        !cv_line    TYPE string.
+        !cv_line    TYPE csequence.
 
     METHODS study_line
       IMPORTING
-        !iv_line         TYPE string
+        !iv_line         TYPE csequence
         !is_context      TYPE ty_indent_context
       RETURNING
         VALUE(rs_result) TYPE ty_study_result.
@@ -252,13 +258,13 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
 
   METHOD /apmg/if_apm_html~div.
     /apmg/if_apm_html~wrap(
-      iv_tag   = 'div'
-      iv_content = iv_content
-      ii_content = ii_content
+      iv_tag        = 'div'
+      iv_content    = iv_content
+      ii_content    = ii_content
       is_data_attr  = is_data_attr
       it_data_attrs = it_data_attrs
-      iv_id    = iv_id
-      iv_class = iv_class ).
+      iv_id         = iv_id
+      iv_class      = iv_class ).
     ri_self = me.
   ENDMETHOD.
 
@@ -312,14 +318,14 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
   METHOD /apmg/if_apm_html~td.
     /apmg/if_apm_html~wrap(
       iv_format_single_line = iv_format_single_line
-      iv_tag   = 'td'
-      iv_content = iv_content
-      ii_content = ii_content
-      iv_id    = iv_id
-      iv_class = iv_class
-      is_data_attr  = is_data_attr
-      it_data_attrs = it_data_attrs
-      iv_hint  = iv_hint ).
+      iv_tag                = 'td'
+      iv_content            = iv_content
+      ii_content            = ii_content
+      iv_id                 = iv_id
+      iv_class              = iv_class
+      is_data_attr          = is_data_attr
+      it_data_attrs         = it_data_attrs
+      iv_hint               = iv_hint ).
     ri_self = me.
   ENDMETHOD.
 
@@ -327,14 +333,14 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
   METHOD /apmg/if_apm_html~th.
     /apmg/if_apm_html~wrap(
       iv_format_single_line = iv_format_single_line
-      iv_tag   = 'th'
-      iv_content = iv_content
-      ii_content = ii_content
-      iv_id    = iv_id
-      iv_class = iv_class
-      is_data_attr  = is_data_attr
-      it_data_attrs = it_data_attrs
-      iv_hint  = iv_hint ).
+      iv_tag                = 'th'
+      iv_content            = iv_content
+      ii_content            = ii_content
+      iv_id                 = iv_id
+      iv_class              = iv_class
+      is_data_attr          = is_data_attr
+      it_data_attrs         = it_data_attrs
+      iv_hint               = iv_hint ).
     ri_self = me.
   ENDMETHOD.
 

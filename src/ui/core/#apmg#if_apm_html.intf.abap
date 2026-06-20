@@ -28,7 +28,7 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS set_title
     IMPORTING
-      !iv_title      TYPE string
+      !iv_title      TYPE csequence
     RETURNING
       VALUE(ri_self) TYPE REF TO /apmg/if_apm_html.
 
@@ -51,15 +51,15 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS add_a
     IMPORTING
-      !iv_txt        TYPE string
-      !iv_act        TYPE string
-      !iv_query      TYPE string OPTIONAL
+      !iv_txt        TYPE csequence
+      !iv_act        TYPE csequence
+      !iv_query      TYPE csequence OPTIONAL
       !iv_typ        TYPE c DEFAULT c_action_type-sapevent
       !iv_opt        TYPE clike OPTIONAL
-      !iv_class      TYPE string OPTIONAL
-      !iv_id         TYPE string OPTIONAL
-      !iv_style      TYPE string OPTIONAL
-      !iv_title      TYPE string OPTIONAL
+      !iv_class      TYPE csequence OPTIONAL
+      !iv_id         TYPE csequence OPTIONAL
+      !iv_style      TYPE csequence OPTIONAL
+      !iv_title      TYPE csequence OPTIONAL
     RETURNING
       VALUE(ri_self) TYPE REF TO /apmg/if_apm_html.
 
@@ -72,44 +72,44 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS a
     IMPORTING
-      !iv_txt       TYPE string
-      !iv_act       TYPE string
-      !iv_query     TYPE string OPTIONAL
+      !iv_txt       TYPE csequence
+      !iv_act       TYPE csequence
+      !iv_query     TYPE csequence OPTIONAL
       !iv_typ       TYPE c DEFAULT /apmg/if_apm_html=>c_action_type-sapevent
       !iv_opt       TYPE clike OPTIONAL
-      !iv_class     TYPE string OPTIONAL
-      !iv_id        TYPE string OPTIONAL
-      !iv_style     TYPE string OPTIONAL
-      !iv_title     TYPE string OPTIONAL
+      !iv_class     TYPE csequence OPTIONAL
+      !iv_id        TYPE csequence OPTIONAL
+      !iv_style     TYPE csequence OPTIONAL
+      !iv_title     TYPE csequence OPTIONAL
     RETURNING
       VALUE(rv_str) TYPE string.
 
   METHODS icon
     IMPORTING
-      !iv_name      TYPE string
-      !iv_hint      TYPE string OPTIONAL
-      !iv_class     TYPE string OPTIONAL
-      !iv_onclick   TYPE string OPTIONAL
+      !iv_name      TYPE csequence
+      !iv_hint      TYPE csequence OPTIONAL
+      !iv_class     TYPE csequence OPTIONAL
+      !iv_onclick   TYPE csequence OPTIONAL
     RETURNING
       VALUE(rv_str) TYPE string.
 
   METHODS add_icon
     IMPORTING
-      !iv_name       TYPE string
-      !iv_hint       TYPE string OPTIONAL
-      !iv_class      TYPE string OPTIONAL
-      !iv_onclick    TYPE string OPTIONAL
+      !iv_name       TYPE csequence
+      !iv_hint       TYPE csequence OPTIONAL
+      !iv_class      TYPE csequence OPTIONAL
+      !iv_onclick    TYPE csequence OPTIONAL
     RETURNING
       VALUE(ri_self) TYPE REF TO /apmg/if_apm_html.
 
   METHODS wrap
     IMPORTING
-      !iv_tag                TYPE string
-      !iv_content            TYPE string OPTIONAL
+      !iv_tag                TYPE csequence
+      !iv_content            TYPE csequence OPTIONAL
       !ii_content            TYPE REF TO /apmg/if_apm_html OPTIONAL
-      !iv_id                 TYPE string OPTIONAL
-      !iv_class              TYPE string OPTIONAL
-      !iv_hint               TYPE string OPTIONAL
+      !iv_id                 TYPE csequence OPTIONAL
+      !iv_class              TYPE csequence OPTIONAL
+      !iv_hint               TYPE csequence OPTIONAL
       !iv_format_single_line TYPE abap_bool DEFAULT abap_false
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
@@ -118,11 +118,11 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS td
     IMPORTING
-      !iv_content            TYPE string OPTIONAL
+      !iv_content            TYPE csequence OPTIONAL
       !ii_content            TYPE REF TO /apmg/if_apm_html OPTIONAL
-      !iv_id                 TYPE string OPTIONAL
-      !iv_class              TYPE string OPTIONAL
-      !iv_hint               TYPE string OPTIONAL
+      !iv_id                 TYPE csequence OPTIONAL
+      !iv_class              TYPE csequence OPTIONAL
+      !iv_hint               TYPE csequence OPTIONAL
       !iv_format_single_line TYPE abap_bool DEFAULT abap_true
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
@@ -132,11 +132,11 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS th
     IMPORTING
-      !iv_content            TYPE string OPTIONAL
+      !iv_content            TYPE csequence OPTIONAL
       !ii_content            TYPE REF TO /apmg/if_apm_html OPTIONAL
-      !iv_id                 TYPE string OPTIONAL
-      !iv_class              TYPE string OPTIONAL
-      !iv_hint               TYPE string OPTIONAL
+      !iv_id                 TYPE csequence OPTIONAL
+      !iv_class              TYPE csequence OPTIONAL
+      !iv_hint               TYPE csequence OPTIONAL
       !iv_format_single_line TYPE abap_bool DEFAULT abap_true
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
@@ -146,10 +146,10 @@ INTERFACE /apmg/if_apm_html PUBLIC.
 
   METHODS div
     IMPORTING
-      !iv_content    TYPE string OPTIONAL
+      !iv_content    TYPE csequence OPTIONAL
       !ii_content    TYPE REF TO /apmg/if_apm_html OPTIONAL
-      !iv_id         TYPE string OPTIONAL
-      !iv_class      TYPE string OPTIONAL
+      !iv_id         TYPE csequence OPTIONAL
+      !iv_class      TYPE csequence OPTIONAL
       !is_data_attr  TYPE ty_data_attr OPTIONAL
       !it_data_attrs TYPE ty_data_attrs OPTIONAL
         PREFERRED PARAMETER iv_content

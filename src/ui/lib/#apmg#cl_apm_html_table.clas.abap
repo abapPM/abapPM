@@ -13,6 +13,7 @@ CLASS /apmg/cl_apm_html_table DEFINITION
           PREFERRED PARAMETER ii_renderer
       RETURNING
         VALUE(ro_instance)        TYPE REF TO /apmg/cl_apm_html_table.
+
     " maybe also th css_class
     METHODS define_column
       IMPORTING
@@ -22,6 +23,7 @@ CLASS /apmg/cl_apm_html_table DEFINITION
         !iv_sortable     TYPE abap_bool DEFAULT abap_true
       RETURNING
         VALUE(ro_self)   TYPE REF TO /apmg/cl_apm_html_table.
+
     METHODS define_column_group
       IMPORTING
         !iv_group_id    TYPE string OPTIONAL " not mandatory, but can be used for CSS (TODO data-gid)
@@ -31,6 +33,7 @@ CLASS /apmg/cl_apm_html_table DEFINITION
         VALUE(ro_self)  TYPE REF TO /apmg/cl_apm_html_table
       RAISING
         /apmg/cx_apm_error.
+
     " Maybe also data_provider
     " TODO record Limiter
     METHODS render
@@ -46,17 +49,20 @@ CLASS /apmg/cl_apm_html_table DEFINITION
         VALUE(ri_html)    TYPE REF TO /apmg/if_apm_html
       RAISING
         /apmg/cx_apm_error.
+
     " Sorting utils
     CLASS-METHODS detect_sorting_request
       IMPORTING
         !iv_event                 TYPE string
       RETURNING
         VALUE(rs_sorting_request) TYPE /apmg/if_apm_html_table=>ty_sorting_state.
+
     METHODS process_sorting_request
       IMPORTING
         !iv_event           TYPE string
       RETURNING
         VALUE(rv_processed) TYPE abap_bool.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -341,8 +347,8 @@ CLASS /apmg/cl_apm_html_table IMPLEMENTATION.
       ENDIF.
 
       rv_text = mi_html->a(
-        iv_txt   = is_col-column_title
-        iv_act   = |{ c_sort_by_event_prefix }{ is_col-column_id }:{ lv_direction }| ).
+        iv_txt = is_col-column_title
+        iv_act = |{ c_sort_by_event_prefix }{ is_col-column_id }:{ lv_direction }| ).
 
       rv_text = rv_text && |<span class="{ mv_sort_span_class }{ lv_sort_active }">{ lv_arrow }</span>|.
 
@@ -403,10 +409,10 @@ CLASS /apmg/cl_apm_html_table IMPLEMENTATION.
       ENDIF.
 
       mi_html->td(
-        iv_content = ls_render-content
-        ii_content = ls_render-html
+        iv_content    = ls_render-content
+        ii_content    = ls_render-html
         it_data_attrs = lt_attrs
-        iv_class   = ls_render-css_class ).
+        iv_class      = ls_render-css_class ).
     ENDLOOP.
 
   ENDMETHOD.
