@@ -16,6 +16,8 @@ CLASS /apmg/cl_apm_gui_menus DEFINITION
         VALUE(result) TYPE REF TO /apmg/cl_apm_html_toolbar.
 
     CLASS-METHODS help
+      IMPORTING
+        with_welcome  TYPE abap_bool DEFAULT abap_true
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_html_toolbar.
 
@@ -101,23 +103,39 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
 
     result = /apmg/cl_apm_html_toolbar=>create( 'apm-toolbar-help' ).
 
+    IF with_welcome = abap_true.
+      result->add(
+        iv_txt = 'Welcome'
+        iv_act = /apmg/if_apm_gui_router=>c_action-go_welcome ).
+    ENDIF.
+
     result->add(
-      iv_txt = 'Registry'
-      iv_act = /apmg/if_apm_gui_router=>c_action-registry
+      iv_txt   = 'Registry'
+      iv_title = 'Global apm registry'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-registry
     )->add(
-      iv_txt = 'Tutorial'
-      iv_act = /apmg/if_apm_gui_router=>c_action-tutorial
+      iv_txt   = 'Playground'
+      iv_title = 'Playground registry'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-playground
     )->add(
-      iv_txt = 'Documentation'
-      iv_act = /apmg/if_apm_gui_router=>c_action-documentation
+      iv_txt   = 'Tutorial'
+      iv_title = 'Instructions for trying apm features'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-tutorial
     )->add(
-      iv_txt = 'Changelog'
-      iv_act = /apmg/if_apm_gui_router=>c_action-changelog
+      iv_txt   = 'Documentation'
+      iv_title = 'Full documentation of apm registry and client'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-documentation
     )->add(
-      iv_txt = 'Hotkeys'
-      iv_act = /apmg/if_apm_gui_router=>c_action-show_hotkeys
+      iv_txt   = 'Changelog'
+      iv_title = 'Release notes for apm'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-changelog
+    )->add(
+      iv_txt   = 'Hotkeys'
+      iv_title = 'Keyboard shortcuts'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-show_hotkeys
     )->add(
       iv_txt   = 'Feedback'
+      iv_title = 'We are happy to hear from you, good or bad!'
       iv_class = 'red'
       iv_act   = /apmg/if_apm_gui_router=>c_action-feedback ).
 

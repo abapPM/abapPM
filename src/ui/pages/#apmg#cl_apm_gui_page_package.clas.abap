@@ -1023,7 +1023,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     " Output with Emoji
     html->add( '<div class="html">' ).
-    html->add( /apmg/cl_apm_emoji=>create( )->format_emoji( markdown_text ) ).
+    html->add( /apmg/cl_apm_emoji=>create( )->format( markdown_text ) ).
     html->add( '</div>' ).
 
   ENDMETHOD.
@@ -1086,7 +1086,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     " Emoji Styles
     DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_emoji_css( )
+      table = /apmg/cl_apm_emoji=>create( )->get_css( )
       sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).

@@ -13,7 +13,7 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '3.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '3.0.1' ##NEEDED.
 
     TYPES:
       ty_code    TYPE string_table,
@@ -34,23 +34,23 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 
     METHODS constructor.
 
-    METHODS get_emoji_css
+    METHODS get_css
       IMPORTING
         size_in_px    TYPE i DEFAULT 20
       RETURNING
         VALUE(result) TYPE ty_code.
 
-    METHODS get_emoji_list
+    METHODS get_list
       RETURNING
         VALUE(result) TYPE ty_code.
 
-    METHODS find_emoji
+    METHODS search
       IMPORTING
         !regex        TYPE string
       RETURNING
         VALUE(result) TYPE ty_results.
 
-    METHODS format_emoji
+    METHODS format
       IMPORTING
         !line         TYPE string
         !base_url     TYPE string OPTIONAL
@@ -66,7 +66,7 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 
     DATA emojis TYPE ty_emojis.
 
-    METHODS init_emoji_list.
+    METHODS init_list.
 
 ENDCLASS.
 
@@ -77,7 +77,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
 
   METHOD constructor.
 
-    init_emoji_list( ).
+    init_list( ).
 
   ENDMETHOD.
 
@@ -93,21 +93,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD find_emoji.
-
-    LOOP AT emojis ASSIGNING FIELD-SYMBOL(<emoji>).
-      IF find(
-           val   = <emoji>-name
-           regex = regex
-           case  = abap_false ) >= 0 ##REGEX_POSIX.
-        INSERT <emoji>-name INTO TABLE result.
-      ENDIF.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD format_emoji.
+  METHOD format.
 
     result = line.
 
@@ -144,7 +130,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_emoji_css.
+  METHOD get_css.
     INSERT `.emoji {` INTO TABLE result.
     INSERT `  display: inline-block;` INTO TABLE result.
     INSERT `  min-width: 1ch;` INTO TABLE result.
@@ -160,7 +146,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_emoji_list.
+  METHOD get_list.
 
     LOOP AT emojis ASSIGNING FIELD-SYMBOL(<emoji>).
       INSERT <emoji>-name INTO TABLE result.
@@ -169,9 +155,23 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD init_emoji_list.
+  METHOD init_list.
 
     emojis = lcl_github_emoji=>get( ).
+
+  ENDMETHOD.
+
+
+  METHOD search.
+
+    LOOP AT emojis ASSIGNING FIELD-SYMBOL(<emoji>).
+      IF find(
+           val   = <emoji>-name
+           regex = regex
+           case  = abap_false ) >= 0 ##REGEX_POSIX.
+        INSERT <emoji>-name INTO TABLE result.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

@@ -18,7 +18,7 @@ CLASS /apmg/cl_apm_gui DEFINITION
         new_page_replacing  TYPE i VALUE 7,
       END OF c_event_state.
 
-    METHODS go_home
+    METHODS start
       IMPORTING
         !iv_action TYPE string
       RAISING
@@ -378,26 +378,6 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD go_home.
-
-    DATA ls_stack LIKE LINE OF mt_stack.
-
-    IF mi_router IS BOUND.
-      CLEAR: mt_stack, mt_event_handlers.
-      APPEND mi_router TO mt_event_handlers.
-
-      on_event( action = |{ iv_action }| ).
-    ELSE.
-      IF lines( mt_stack ) > 0.
-        READ TABLE mt_stack INTO ls_stack INDEX 1.
-        mi_cur_page = ls_stack-page.
-      ENDIF.
-      render( ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD handle_action.
 
     DATA:
@@ -564,6 +544,26 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
 
   METHOD set_focus.
     mi_html_viewer->set_focus( ).
+  ENDMETHOD.
+
+
+  METHOD start.
+
+    DATA ls_stack LIKE LINE OF mt_stack.
+
+    IF mi_router IS BOUND.
+      CLEAR: mt_stack, mt_event_handlers.
+      APPEND mi_router TO mt_event_handlers.
+
+      on_event( action = |{ iv_action }| ).
+    ELSE.
+      IF lines( mt_stack ) > 0.
+        READ TABLE mt_stack INTO ls_stack INDEX 1.
+        mi_cur_page = ls_stack-page.
+      ENDIF.
+      render( ).
+    ENDIF.
+
   ENDMETHOD.
 
 

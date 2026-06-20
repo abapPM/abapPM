@@ -37,14 +37,17 @@ FORM open_gui RAISING /apmg/cx_apm_error.
     " TODO: Add startup option to jump to a specific package
     GET PARAMETER ID 'DBT' FIELD mode.
     CASE mode.
-      WHEN 'ZAPM'.
+      WHEN 'DB'.
         " Emergency mode: jump to database utility
         action = /apmg/if_apm_gui_router=>c_action-go_db.
+      WHEN 'INIT'.
+        " Initial mode: jump to welcome page
+        action = /apmg/if_apm_gui_router=>c_action-go_welcome.
       WHEN OTHERS.
         action = /apmg/if_apm_gui_router=>c_action-go_home.
     ENDCASE.
 
-    /apmg/cl_apm_gui_factory=>get_gui( )->go_home( action ).
+    /apmg/cl_apm_gui_factory=>get_gui( )->start( action ).
 
     CALL SELECTION-SCREEN 1001. " trigger screen
 

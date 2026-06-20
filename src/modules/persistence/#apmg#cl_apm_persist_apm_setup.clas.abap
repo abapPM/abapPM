@@ -291,6 +291,12 @@ CLASS /apmg/cl_apm_persist_apm_setup IMPLEMENTATION.
       maskklen   = 2
       prim_table = abap_true ).
 
+    " TODO: Replace
+    RETURN. ">>>>>
+
+    " This raises "Object type L invalid" OZ(099) in 8.16
+    " Object ZAPM with object type L is not valid.
+    " Looks like we can't use this function
     CALL FUNCTION 'OBJ_GENERATE'
       EXPORTING
         iv_objectname         = objh-objectname

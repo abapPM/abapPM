@@ -594,7 +594,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     " Emoji Styles
     DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_emoji_css( )
+      table = /apmg/cl_apm_emoji=>create( )->get_css( )
       sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).
@@ -673,9 +673,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         iv_class   = 'top' ).
     ELSE.
       DATA(error_count) = lines( node->errors ).
-      DATA(error_text) = 'error'.
+      DATA(error_text) = `error`.
       IF error_count <> 1.
-        error_text = 'errors'.
+        error_text = `errors`.
       ENDIF.
       html->td(
         iv_content = |<span class="boxed red-filled-set">{ error_count } { error_text }</span>|

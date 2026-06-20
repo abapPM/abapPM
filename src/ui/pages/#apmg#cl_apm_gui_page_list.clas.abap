@@ -830,7 +830,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     " Emoji Styles
     DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_emoji_css( )
+      table = /apmg/cl_apm_emoji=>create( )->get_css( )
       sep   = cl_abap_char_utilities=>newline ).
 
     html->add( '<style>' ).
@@ -945,7 +945,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     " Description
     html->td(
       html->a(
-        iv_txt = /apmg/cl_apm_emoji=>create( )->format_emoji( package-description )
+        iv_txt = /apmg/cl_apm_emoji=>create( )->format( package-description )
         iv_act = |{ c_action-select }?key={ package-package }| ) ).
 
     " Details: changed by
@@ -979,6 +979,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
 
   METHOD render_user_menu.
+
+    " Playground does not need login
+    CHECK settings-registry <> /apmg/if_apm_constants=>c_playground.
 
     " TODO: Replace with get_username and show "User" with icon
     DATA(auth) = /apmg/cl_apm_http_login_manage=>get_auth( settings-registry ).

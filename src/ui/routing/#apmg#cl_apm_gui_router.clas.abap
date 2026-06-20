@@ -160,11 +160,13 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
         result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
       WHEN /apmg/if_apm_gui_router=>c_action-registry.
-        TRY.
-            DATA(registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
-            call_browser( registry ).
-          CATCH /apmg/cx_apm_error ##NO_HANDLER.
-        ENDTRY.
+
+        call_browser( /apmg/if_apm_constants=>c_registry ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-playground.
+
+        call_browser( /apmg/if_apm_constants=>c_playground ).
         result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
       WHEN /apmg/if_apm_gui_router=>c_action-documentation.
@@ -281,9 +283,14 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
   METHOD general_page_routing.
 
     CASE event->mv_action.
+      WHEN /apmg/if_apm_gui_router=>c_action-go_welcome.
+
+        result-page  = /apmg/cl_apm_gui_page_welcome=>create( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
       WHEN /apmg/if_apm_gui_router=>c_action-go_home.
 
-        result-page  = /apmg/cl_apm_gui_page_list=>create( ). "TODO main_page( ).
+        result-page  = /apmg/cl_apm_gui_page_list=>create( ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
       WHEN /apmg/if_apm_gui_router=>c_action-go_back.
