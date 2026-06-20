@@ -387,7 +387,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_publish( ).
 
     command->execute(
-      registry   = registry
+      registry   = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       package    = package
       tag        = tag
       is_dry_run = is_dry_run ).

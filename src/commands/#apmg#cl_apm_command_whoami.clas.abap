@@ -75,7 +75,7 @@ CLASS /apmg/cl_apm_command_whoami IMPLEMENTATION.
 
     DATA(command) = NEW /apmg/cl_apm_command_whoami( ).
 
-    result = command->execute( registry ).
+    result = command->execute( /apmg/cl_apm_utils=>remove_trailing_slash( registry ) ).
 
   ENDMETHOD.
 ENDCLASS.

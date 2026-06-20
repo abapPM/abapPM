@@ -114,7 +114,7 @@ CLASS /apmg/cl_apm_command_deprecate IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_deprecate( ).
 
     command->execute(
-      registry     = registry
+      registry     = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       name         = name
       range        = range
       message_text = message_text ).

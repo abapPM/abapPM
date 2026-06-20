@@ -76,7 +76,7 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
 
     DATA(command) = NEW /apmg/cl_apm_command_logout( ).
 
-    command->execute( registry ).
+    command->execute( /apmg/cl_apm_utils=>remove_trailing_slash( registry ) ).
 
   ENDMETHOD.
 ENDCLASS.

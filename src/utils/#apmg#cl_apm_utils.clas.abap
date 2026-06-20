@@ -5,6 +5,13 @@ CLASS /apmg/cl_apm_utils DEFINITION
 
   PUBLIC SECTION.
 
+    "! Remove trailing slash
+    CLASS-METHODS remove_trailing_slash
+      IMPORTING
+        val           TYPE csequence
+      RETURNING
+        VALUE(result) TYPE string.
+
     "! Return semantic version of SAP Basis
     CLASS-METHODS get_abap_version
       RETURNING
@@ -85,6 +92,16 @@ CLASS /apmg/cl_apm_utils IMPLEMENTATION.
     DATA(db) = env->get( /apmg/if_apm_env=>database_platform ) && '@' && get_database_version( ).
 
     result = to_lower( |apm/{ /apmg/if_apm_version=>c_version } abap/{ get_abap_version( ) } os/{ os } db/{ db }| ).
+
+  ENDMETHOD.
+
+
+  METHOD remove_trailing_slash.
+
+    result = replace(
+      val   = val
+      regex = '(.*)/$'
+      with  = '$1' ) ##REGEX_POSIX.
 
   ENDMETHOD.
 ENDCLASS.

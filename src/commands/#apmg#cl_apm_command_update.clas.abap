@@ -375,7 +375,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_update( ).
 
     command->execute(
-      registry      = registry
+      registry      = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       package       = package
       to_version    = to_version
       transport     = transport

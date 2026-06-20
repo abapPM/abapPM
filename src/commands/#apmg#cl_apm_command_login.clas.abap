@@ -107,7 +107,7 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_login( ).
 
     command->execute(
-      registry  = registry
+      registry  = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       username  = username
       password  = password
       auth_type = auth_type ).

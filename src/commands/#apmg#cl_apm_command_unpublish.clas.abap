@@ -251,7 +251,7 @@ CLASS /apmg/cl_apm_command_unpublish IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_unpublish( ).
 
     command->execute(
-      registry = registry
+      registry = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       name     = name
       version  = version ).
 
