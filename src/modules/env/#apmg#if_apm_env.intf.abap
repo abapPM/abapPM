@@ -21,6 +21,7 @@ INTERFACE /apmg/if_apm_env PUBLIC.
 
   " Note: When adding or changing constants, ...
   " - names must not match SAP software components
+  " - add value to cl_env=>init_abap
   " - check mapping in lcl_abap_environment=>get
   " - implement getter method in lcl_abap_environment
   CONSTANTS:

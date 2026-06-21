@@ -99,7 +99,7 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
     IF host IS INITIAL.
       CLEAR auths.
     ELSE.
-      DELETE auths WHERE host = host ##SUBRC_OK.
+      DELETE auths WHERE host = get_host( host ) ##SUBRC_OK.
     ENDIF.
 
   ENDMETHOD.

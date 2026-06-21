@@ -222,21 +222,89 @@ CLASS /apmg/cl_apm_env IMPLEMENTATION.
   METHOD init_abap.
 
     DATA:
-      env_names  TYPE string_table,
       components TYPE STANDARD TABLE OF comp_props WITH KEY component,
       swproducts TYPE tt_instswprod_sps.
 
     " Initialize all environment variables with "undefined"
     " Getting the proper value for all variables would take too long
-    DATA(class_name) = cl_abap_classdescr=>describe_by_object_ref( me )->get_relative_name( ).
-
-    SELECT SINGLE refclsname FROM seometarel INTO @DATA(interface_name)
-      WHERE clsname = @class_name AND version = '1'.
-    ASSERT sy-subrc = 0.
-
-    SELECT attvalue FROM seocompodf INTO TABLE @env_names
-      WHERE clsname = @interface_name AND cmpname NOT LIKE 'C#_%' ESCAPE '#' AND attdecltyp = '2'.
-    ASSERT sy-subrc = 0.
+    DATA(env_names) = VALUE string_table(
+                       ( `ABAP_ENV` )
+                       ( `CODEPAGE` )
+                       ( `CONN_SNC_NAME` )
+                       ( `DATABASE` )
+                       ( `DATABASE_CHARSET` )
+                       ( `DATABASE_HOST` )
+                       ( `DATABASE_NAME` )
+                       ( `DATABASE_PATCH` )
+                       ( `DATABASE_PLATFORM` )
+                       ( `DATABASE_RELEASE` )
+                       ( `DATABASE_SCHEMA` )
+                       ( `DBSL` )
+                       ( `DBSL_PATCH` )
+                       ( `DBSL_RELEASE` )
+                       ( `ENDIAN` )
+                       ( `HANA_HARDWARE` )
+                       ( `HANA_HARDWARE_KEY` )
+                       ( `HANA_LICENSE_EXP_DATE` )
+                       ( `HANA_LICENSE_NUMBER` )
+                       ( `HANA_PATCH` )
+                       ( `HANA_PLATFORM` )
+                       ( `HANA_RELEASE` )
+                       ( `HANA_REVISION` )
+                       ( `HANA_SP` )
+                       ( `HARDWARE_KEY` )
+                       ( `HAS_PROCESS_ATP` )
+                       ( `HAS_PROCESS_BATCH` )
+                       ( `HAS_PROCESS_DIALOG` )
+                       ( `HAS_PROCESS_ENQUEUE` )
+                       ( `HAS_PROCESS_ICMAN` )
+                       ( `HAS_PROCESS_J2EE` )
+                       ( `HAS_PROCESS_SPOOL` )
+                       ( `HAS_PROCESS_UPDATE` )
+                       ( `HAS_PROCESS_UPDATE2` )
+                       ( `HAS_PROCESS_VMC` )
+                       ( `HOST_INSTANCE` )
+                       ( `HOST_INSTANCE_NO` )
+                       ( `HOST_NAME` )
+                       ( `HOST_STATE` )
+                       ( `IS_64BIT` )
+                       ( `IS_PROCESS_BATCH` )
+                       ( `IS_CLIENT_CUSTOMIZING` )
+                       ( `IS_CLIENT_DEMO` )
+                       ( `IS_PROCESS_DIALOG` )
+                       ( `IS_ECATT_ACTIVE` )
+                       ( `IS_ECATT_PLAYBACK` )
+                       ( `IS_ECATT_RECORDING` )
+                       ( `IS_PROCESS_ENQUEUE` )
+                       ( `IS_GUI_ACTIVEX` )
+                       ( `IS_GUI_JAVA` )
+                       ( `IS_GUI_WEB` )
+                       ( `IS_GUI_WINDOWS` )
+                       ( `IS_HANA` )
+                       ( `IS_CLIENT_PRODUTION` )
+                       ( `IS_CLIENT_SAP` )
+                       ( `IS_SECURE_CONN` )
+                       ( `IS_PROCESS_SPOOL` )
+                       ( `IS_CLIENT_TEST` )
+                       ( `IS_CLIENT_TRAINING` )
+                       ( `IS_UNICODE` )
+                       ( `IS_PROCESS_UPDATE` )
+                       ( `IS_PROCESS_UPDATE2` )
+                       ( `KERNEL` )
+                       ( `KERNEL_ARCH` )
+                       ( `KERNEL_CRYPTOLIB` )
+                       ( `KERNEL_PATCH` )
+                       ( `KERNEL_PLATFORM` )
+                       ( `KERNEL_RELEASE` )
+                       ( `KERNEL_TYPE` )
+                       ( `LANGUAGE_PRIMARY` )
+                       ( `LANGUAGE_SECONDARY` )
+                       ( `LICENSE_EXP_DATE` )
+                       ( `LICENSE_NUMBER` )
+                       ( `SPAM_RELEASE` )
+                       ( `SPAM_VERSION` )
+                       ( `TIMEZONE_SYSTEM` )
+                       ( `TIMEZONE_USER` ) ).
 
     LOOP AT env_names INTO DATA(env_name).
       env_name = replace(
