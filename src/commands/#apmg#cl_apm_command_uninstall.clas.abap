@@ -70,6 +70,10 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
       package   = package
       transport = transport ).
 
+    /apmg/cl_apm_package_json=>factory( package )->delete( ).
+
+    /apmg/cl_apm_readme=>factory( package )->delete( ).
+
     MESSAGE 'Package successfully uninstalled' TYPE 'S'.
 
   ENDMETHOD.

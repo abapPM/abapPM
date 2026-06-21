@@ -131,7 +131,9 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
   METHOD check_dependencies.
 
     " Get all installed packages
-    DATA(list) = /apmg/cl_apm_package_json=>list( ).
+    DATA(list) = /apmg/cl_apm_package_json=>list(
+      instanciate = abap_true
+      is_bundle   = abap_false ).
 
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
       IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
