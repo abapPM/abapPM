@@ -143,7 +143,6 @@ CLASS /apmg/cl_apm_strust DEFINITION
     METHODS remove
       IMPORTING
         !subject      TYPE string
-        !comment      TYPE string OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_strust
       RAISING
@@ -151,9 +150,7 @@ CLASS /apmg/cl_apm_strust DEFINITION
 
     METHODS update
       IMPORTING
-        !comment        TYPE string OPTIONAL
         !remove_expired TYPE abap_bool DEFAULT abap_false
-          PREFERRED PARAMETER comment
       RETURNING
         VALUE(result)   TYPE ty_update_result
       RAISING
@@ -166,7 +163,6 @@ CLASS /apmg/cl_apm_strust DEFINITION
     CLASS-METHODS f4_application
       RETURNING
         VALUE(result) TYPE ssfappl.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 

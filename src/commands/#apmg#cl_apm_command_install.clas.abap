@@ -211,20 +211,20 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
       IF satisfies = abap_false.
         IF is_optional = abap_true OR is_force = abap_true.
-          result-warning = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+          result-warning = |{ category } "{ dependency-key }" is installed in version { <package>-version } | &&
                            |and does not satisfy { dependency-range } but is optional|.
         ELSE.
           result-invalid = dependency.
-          result-error   = |{ category } { dependency-key } is installed in version { <package>-version } | &&
+          result-error   = |{ category } "{ dependency-key }" is installed in version { <package>-version } | &&
                            |but does not satisfy { dependency-range }|.
         ENDIF.
       ENDIF.
     ELSE.
       IF is_optional = abap_true OR is_force = abap_true.
-        result-warning = |{ category } { dependency-key } is not installed but optional|.
+        result-warning = |{ category } "{ dependency-key }" is not installed but optional|.
       ELSE.
         result-missing = dependency.
-        result-error   = |{ category } { dependency-key } is not installed|.
+        result-error   = |{ category } "{ dependency-key }" is not installed|.
       ENDIF.
     ENDIF.
 
@@ -301,7 +301,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       ELSE.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
           EXPORTING
-            text = |{ category } { name } is installed in version { version } | &&
+            text = |{ category } "{ name }" is installed in version { version } | &&
                    |but does not satisfy { range }|.
       ENDIF.
     ENDIF.
@@ -370,8 +370,8 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     check_actions( actions ).
 
-    " TODO: 4. Get dependencies
-    " TODO: 5. Install dependencies
+    " TODO!: 4. Get dependencies
+    " TODO!: 5. Install dependencies
 
     " 6. Get tarball from registry and install it into package
     /apmg/cl_apm_command_installer=>install_package(
