@@ -34,15 +34,15 @@ FORM open_gui RAISING /apmg/cx_apm_error.
     MESSAGE s000(oo) WITH 'apm does not support background processing'.
   ELSE.
 
-    " TODO: Add startup option to jump to a specific package
     GET PARAMETER ID 'DBT' FIELD mode.
+
     CASE mode.
-      WHEN 'DB'.
-        " Emergency mode: jump to database utility
-        action = /apmg/if_apm_gui_router=>c_action-go_db.
       WHEN 'INIT'.
-        " Initial mode: jump to welcome page
+        " Initial mode: welcome page
         action = /apmg/if_apm_gui_router=>c_action-go_welcome.
+      WHEN 'DB'.
+        " Emergency mode: database utility
+        action = /apmg/if_apm_gui_router=>c_action-go_db.
       WHEN OTHERS.
         action = /apmg/if_apm_gui_router=>c_action-go_home.
     ENDCASE.

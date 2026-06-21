@@ -31,6 +31,10 @@ CLASS /apmg/cl_apm_gui_buttons DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
+    CLASS-METHODS refresh
+      RETURNING
+        VALUE(result) TYPE string.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -65,6 +69,13 @@ CLASS /apmg/cl_apm_gui_buttons IMPLEMENTATION.
     result = /apmg/cl_apm_html=>icon(
       iv_name = 'bars'
       iv_hint = 'Package List' ) && ' Package List'.
+  ENDMETHOD.
+
+
+  METHOD refresh.
+    result = /apmg/cl_apm_html=>icon(
+      iv_name = 'redo-alt-solid'
+      iv_hint = 'Refresh' ).
   ENDMETHOD.
 
 

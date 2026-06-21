@@ -408,7 +408,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_txt      = /apmg/cl_apm_gui_buttons=>settings( )
       io_sub      = /apmg/cl_apm_gui_menus=>settings( )
     )->add(
-      iv_txt      = /apmg/cl_apm_html=>icon( 'redo-alt-solid' )
+      iv_txt      = /apmg/cl_apm_gui_buttons=>refresh( )
       iv_act      = c_action-refresh
     )->add(
       iv_txt      = /apmg/cl_apm_gui_buttons=>advanced( )

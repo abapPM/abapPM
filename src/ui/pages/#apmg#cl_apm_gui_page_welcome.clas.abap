@@ -28,7 +28,8 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        save TYPE string VALUE 'save',
+        setup   TYPE string VALUE 'setup',
+        refresh TYPE string VALUE 'refresh',
       END OF c_action.
 
     CONSTANTS c_ping_pong TYPE string VALUE 'PONG'.
@@ -51,6 +52,12 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS confirm_popup
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -61,7 +68,16 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
     CASE ii_event->mv_action.
-      WHEN c_action-save.
+      WHEN c_action-refresh.
+
+        " Re-runs connection check
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-setup.
+
+        IF confirm_popup( ) = abap_true.
+          /apmg/cl_apm_certificates=>setup( ).
+        ENDIF.
 
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
@@ -83,6 +99,9 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
       iv_txt = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
       iv_act = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
+      iv_txt = /apmg/cl_apm_gui_buttons=>refresh( )
+      iv_act = c_action-refresh
+    )->add(
       iv_txt = /apmg/cl_apm_gui_buttons=>help( )
       io_sub = /apmg/cl_apm_gui_menus=>help( abap_false ) ).
 
@@ -103,6 +122,31 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     render_connections( html ).
 
     ri_html = html.
+
+  ENDMETHOD.
+
+
+  METHOD confirm_popup.
+
+    DATA(question) = |This will install certificates for the apm Registry and Playground|.
+
+    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
+      iv_titlebar              = 'Setup'
+      iv_text_question         = question
+      iv_text_button_1         = 'Install Certificates'
+      iv_icon_button_1         = 'ICON_EXPORT'
+      iv_text_button_2         = 'Cancel'
+      iv_icon_button_2         = 'ICON_CANCEL'
+      iv_default_button        = '2'
+      iv_display_cancel_button = abap_false
+      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
+
+    IF answer = '2'.
+      MESSAGE 'Setup cancelled' TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    result = abap_true.
 
   ENDMETHOD.
 
@@ -131,6 +175,8 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( '<table class="repo_tab w100 paddings">' ).
     html->add( '<tbody>' ).
 
+    DATA(missing_certificates) = abap_false.
+
     DO 2 TIMES.
       IF sy-index = 2.
         DATA(name)     = 'Playground'.
@@ -146,22 +192,40 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
           DATA(ping) = /apmg/cl_apm_command_ping=>run( registry ).
         CATCH /apmg/cx_apm_error INTO DATA(error).
           ping = error->get_text( ).
+          IF ping CS '421'.
+            missing_certificates = abap_true.
+          ENDIF.
       ENDTRY.
+
 
       html->add( '<tr>' ).
       html->td( name ).
       html->td( html->a( iv_txt = registry iv_act = action ) ).
+
       IF ping = c_ping_pong.
         html->td( emoji->format( ':heavy_check_mark:' ) ).
       ELSE.
         html->td( emoji->format( ':x:' ) ).
         html->add( '<tr>' ).
         html->td( '' ).
-        html->td( iv_content = ping is_data_attr = VALUE #( name = 'colspan' value = 2 ) ).
+        html->td(
+          iv_content   = ping
+          is_data_attr = VALUE #( name = 'colspan' value = 2 ) ).
+        html->add( '</tr>' ).
         html->add( '</tr>' ).
       ENDIF.
-      html->add( '</tr>' ).
     ENDDO.
+
+    IF missing_certificates = abap_true.
+      html->add( '<tr>' ).
+      html->td( '' ).
+      html->td(
+        iv_content   = html->a(
+          iv_txt = 'Install missing certificates...'
+          iv_act = c_action-setup )
+        is_data_attr = VALUE #( name = 'colspan' value = 2 ) ).
+      html->add( '</tr>' ).
+    ENDIF.
 
     html->add( '</tbody>' ).
     html->add( '</table>' ).
@@ -189,6 +253,11 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     DATA(emoji) = /apmg/cl_apm_emoji=>create( ).
 
     DATA(apm) = |<strong>apm</strong>|.
+
+    DATA(first_package) = html->a(
+      iv_txt   = 'first package'
+      iv_title = 'Tutorial'
+      iv_act   = /apmg/if_apm_gui_router=>c_action-tutorial ).
 
     html->add( '<div style="padding:20px 150px 0;font-size:large;">' ).
     html->add( '<h1>' ).
@@ -232,11 +301,11 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( |keep the feedback coming. This ecosystem grows because of developers like you.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |Now go install your first package. Welcome aboard.| ).
+    html->add( |Now go install your { first_package }. Welcome aboard.| ).
     html->add( emoji->format( ':tada:' ) ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |—<br>Marc & the ABAP open-source community<br>| ).
+    html->add( |Marc & the ABAP open-source community<br>| ).
     html->add( emoji->format( 'Made with :heart: in Canada' ) ).
     html->add( '</p>' ).
     html->add( '</div>' ).

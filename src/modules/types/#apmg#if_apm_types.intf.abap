@@ -106,8 +106,8 @@ INTERFACE /apmg/if_apm_types PUBLIC.
     "! SAP package
     BEGIN OF ty_sap_package,
       default               TYPE ty_devclass,
-      software_component    TYPE string, "dlvunit
-      application_component TYPE string, "ufps_posid
+      software_component    TYPE string, "see table cvers-dlvunit
+      application_component TYPE string, "see table df14l-ps_posid
       abap_language_version TYPE string, "see c_abap_language_version below
     END OF ty_sap_package.
 

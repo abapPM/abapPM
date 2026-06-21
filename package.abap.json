@@ -90,6 +90,8 @@
     "apm": ">=1"
   },
   "sapPackage": {
-    "default": "/APMG/APM"
+    "default": "/APMG/APM",
+    "applicationComponent": "BC",
+    "abapLanguageVersion": "standard"
   }
 }

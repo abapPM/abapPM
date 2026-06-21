@@ -216,7 +216,7 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_logout.
 
-        /apmg/cl_apm_http_login_manage=>clear( registry ).
+        /apmg/cl_apm_command_logout=>run( registry ).
         result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_whoami.
@@ -283,19 +283,19 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
   METHOD general_page_routing.
 
     CASE event->mv_action.
-      WHEN /apmg/if_apm_gui_router=>c_action-go_welcome.
-
-        result-page  = /apmg/cl_apm_gui_page_welcome=>create( ).
-        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
-
       WHEN /apmg/if_apm_gui_router=>c_action-go_home.
 
-        result-page  = /apmg/cl_apm_gui_page_list=>create( ).
+        result-page  = main_page( ).
         result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
       WHEN /apmg/if_apm_gui_router=>c_action-go_back.
 
         result-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+
+      WHEN /apmg/if_apm_gui_router=>c_action-go_welcome.
+
+        result-page  = /apmg/cl_apm_gui_page_welcome=>create( ).
+        result-state = /apmg/cl_apm_gui=>c_event_state-new_page.
 
       WHEN /apmg/if_apm_gui_router=>c_action-apm_home.
 
@@ -442,14 +442,14 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
       ENDTRY.
     ENDIF.
 
-    " Prio 2: Show list of packages
+    " Prio 2: Package list
     DATA(package_list) = /apmg/cl_apm_package_json=>list( ).
+
     IF package_list IS NOT INITIAL.
       result = /apmg/cl_apm_gui_page_list=>create( ).
     ELSE.
-      " TODO: Prio 3: Show tutorial
-      " ri_page = /apmg/cl_apm_gui_page_tutorial=>create( )
-      /apmg/cl_apm_roadmap=>planned( ).
+      " Prio 3: Welcome page
+      result = /apmg/cl_apm_gui_page_welcome=>create( ).
     ENDIF.
 
   ENDMETHOD.
