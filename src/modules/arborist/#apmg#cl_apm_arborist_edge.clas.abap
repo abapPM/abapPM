@@ -10,16 +10,12 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
 * edgesIn set and an edgesOut set. Each edge has a type which specifies
 * what kind of dependency it represents.
 *
+* edge.from is a reference to the node that has the dependency,
+* edge.to is a reference to the node that requires the dependency.
+*
 * Copyright 2025 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* An Edge represents a dependency relationship. Each node has an edgesIn
-* set, and an edgesOut map. Each edge has a type which specifies what
-* kind of dependency it represents. edge.from is a reference to the node
-* that has the dependency, and edge.to is a reference to the node that
-* requires the dependency.
-************************************************************************
-
   PUBLIC SECTION.
 
     "! Source node (the package that has the dependency)
@@ -121,17 +117,17 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
 
     CASE error.
       WHEN /apmg/if_apm_arborist=>c_error_type-missing.
-        result = |Dependency { name }@{ spec } is not installed|.
+        result = |Dependency "{ name }@{ spec }" is not installed|.
       WHEN /apmg/if_apm_arborist=>c_error_type-invalid.
         IF to IS BOUND.
-          result = |Dependency { name }@{ spec } not satisfied by installed { to->version }|.
+          result = |Dependency "{ name }@{ spec }" not satisfied by installed { to->version }|.
         ELSE.
-          result = |Dependency { name }@{ spec } is invalid|.
+          result = |Dependency "{ name }@{ spec }" is invalid|.
         ENDIF.
       WHEN /apmg/if_apm_arborist=>c_error_type-peer_local.
-        result = |Peer dependency { name }@{ spec } should be installed at root level|.
+        result = |Peer dependency "{ name }@{ spec }" should be installed at root level|.
       WHEN /apmg/if_apm_arborist=>c_error_type-detached.
-        result = |Dependency { name } is detached from the tree|.
+        result = |Dependency "{ name }" is detached from the tree|.
       WHEN OTHERS.
         result = ''.
     ENDCASE.

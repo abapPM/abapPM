@@ -7,14 +7,11 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
 * Arborist - Node
 *
 * A node represents a package that is installed on this system, either
-* as a global package, or as a bundle of another package.
+* as a global package, or as a bundle of another package (bundle).
 *
 * Copyright 2025 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* A node represents a package that is installed on this system, either
-* as a global package, or as a modules of another package (bundle).
-*
 * https://www.npmjs.com/package/@npmcli/arborist
 * https://github.com/npm/cli/tree/latest/workspaces/arborist
 ************************************************************************

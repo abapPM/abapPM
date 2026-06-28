@@ -30,6 +30,12 @@ CLASS lcl_abap_environment DEFINITION.
       RETURNING
         VALUE(result) TYPE string.
 
+    METHODS get_abap_env
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
     METHODS get_database
       IMPORTING
         name          TYPE string
@@ -84,6 +90,12 @@ CLASS lcl_abap_environment DEFINITION.
       RETURNING
         VALUE(result) TYPE string.
 
+    METHODS get_system
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
+
     METHODS get_timezone
       IMPORTING
         name          TYPE string
@@ -114,15 +126,7 @@ CLASS lcl_abap_environment DEFINITION.
       RETURNING
         VALUE(result) TYPE string.
 
-*    METHODS is_system_modifiable
-*      RETURNING
-*        VALUE(result) TYPE abap_bool
-*
 *    METHODS is_snote_allowed
-*      RETURNING
-*        VALUE(result) TYPE abap_bool
-*
-*    METHODS is_upgrage_running
 *      RETURNING
 *        VALUE(result) TYPE abap_bool
 *
@@ -186,6 +190,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
     IF name CP 'KERNEL*'.
       result = get_kernel( name ).
+    ELSEIF name CP 'ABAP*'.
+      result = get_abap_env( name ).
     ELSEIF name CP 'HOST*'.
       result = get_host( name ).
     ELSEIF name CP 'CONN*' OR name = /apmg/if_apm_env=>is_secure_conn.
@@ -196,13 +202,15 @@ CLASS lcl_abap_environment IMPLEMENTATION.
       result = get_database( name ).
     ELSEIF name CP 'HANA*' OR name = /apmg/if_apm_env=>is_hana.
       result = get_hana( name ).
-    ELSEIF name CP 'ABAP*' OR name CP 'IS_CLIENT*'.
+    ELSEIF name CP 'CLIENT*' OR name CP 'IS_*CLIENT*' OR name CP 'IS_REPOSITORY*'.
       result = get_client( name ).
+    ELSEIF name CP 'SYSTEM*' OR name CP 'IS_*SYSTEM*'.
+      result = get_system( name ).
     ELSEIF name CP 'LANGUAGE*'.
       result = get_language( name ).
     ELSEIF name CP 'TIMEZONE*'.
       result = get_timezone( name ).
-    ELSEIF name CP 'SPAM*'.
+    ELSEIF name CP 'SPAM*' OR name = /apmg/if_apm_env=>is_spam_locked.
       result = get_spam( name ).
     ELSEIF name CP 'HAS_PROCESS*'.
       result = has_process( name ).
@@ -212,11 +220,44 @@ CLASS lcl_abap_environment IMPLEMENTATION.
       result = is_gui( name ).
     ELSEIF name CP 'IS_ECATT*'.
       result = is_ecatt( name ).
-    ELSEIF name = /apmg/if_apm_env=>is_64bit.
-      result = is_kernel_64bit( ).
     ELSE.
       result = get_other( name ).
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_abap_env.
+
+    DATA client_role TYPE t000-cccategory.
+
+    CALL FUNCTION 'TR_SYS_PARAMS'
+      IMPORTING
+        system_client_role = client_role
+      EXCEPTIONS
+        no_systemname      = 1
+        no_systemtype      = 2
+        OTHERS             = 3.
+    IF sy-subrc <> 0.
+      result = '<error>'.
+      RETURN.
+    ENDIF.
+
+    CASE client_role.
+      WHEN 'P'.
+        result = /apmg/if_apm_env=>c_client_role-production.
+      WHEN 'T'.
+        result = /apmg/if_apm_env=>c_client_role-test.
+      WHEN 'D'.
+        result = /apmg/if_apm_env=>c_client_role-demo.
+      WHEN 'E'.
+        result = /apmg/if_apm_env=>c_client_role-training.
+      WHEN 'S'.
+        result = /apmg/if_apm_env=>c_client_role-sap.
+      WHEN 'C'.
+        result = /apmg/if_apm_env=>c_client_role-customizing.
+      WHEN OTHERS.
+        result = /apmg/if_apm_env=>c_client_role-unknown.
+    ENDCASE.
 
   ENDMETHOD.
 
@@ -700,39 +741,97 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
   METHOD get_client.
 
-    SELECT SINGLE cccategory FROM t000 INTO @DATA(client_type) WHERE mandt = @sy-mandt.
-    ASSERT sy-subrc = 0.
+    DATA:
+      client_edit        TYPE t000-cccoractiv,
+      client_inddep_edit TYPE t000-ccnocliind,
+      client_role        TYPE t000-cccategory.
+
+    CALL FUNCTION 'TR_SYS_PARAMS'
+      IMPORTING
+        system_client_edit = client_edit
+        sys_cliinddep_edit = client_inddep_edit
+        system_client_role = client_role
+      EXCEPTIONS
+        no_systemname      = 1
+        no_systemtype      = 2
+        OTHERS             = 3.
+    IF sy-subrc <> 0.
+      result = '<error>'.
+      RETURN.
+    ENDIF.
 
     CASE name.
-      WHEN /apmg/if_apm_env=>abap_env.
-        CASE client_type.
-          WHEN 'P'.
-            result = /apmg/if_apm_env=>c_client-production.
-          WHEN 'T'.
-            result = /apmg/if_apm_env=>c_client-test.
-          WHEN 'D'.
-            result = /apmg/if_apm_env=>c_client-demo.
-          WHEN 'E'.
-            result = /apmg/if_apm_env=>c_client-training.
-          WHEN 'S'.
-            result = /apmg/if_apm_env=>c_client-sap.
-          WHEN 'C'.
-            result = /apmg/if_apm_env=>c_client-customizing.
-          WHEN OTHERS.
-            result = /apmg/if_apm_env=>c_client-unknown.
-        ENDCASE.
+      WHEN /apmg/if_apm_env=>client.
+        result = sy-mandt.
       WHEN /apmg/if_apm_env=>is_production_client.
-        result = xsdbool( client_type = 'P' ).
+        result = xsdbool( client_role = 'P' ).
       WHEN /apmg/if_apm_env=>is_test_client.
-        result = xsdbool( client_type = 'T' ).
+        result = xsdbool( client_role = 'T' ).
       WHEN /apmg/if_apm_env=>is_demo_client.
-        result = xsdbool( client_type = 'D' ).
+        result = xsdbool( client_role = 'D' ).
       WHEN /apmg/if_apm_env=>is_training_client.
-        result = xsdbool( client_type = 'E' ).
+        result = xsdbool( client_role = 'E' ).
       WHEN /apmg/if_apm_env=>is_sap_client.
-        result = xsdbool( client_type = 'S' ).
-      WHEN /apmg/if_apm_env=>is_customzing_client.
-        result = xsdbool( client_type = 'C' ).
+        result = xsdbool( client_role = 'S' ).
+      WHEN /apmg/if_apm_env=>is_customizing_client.
+        result = xsdbool( client_role = 'C' ).
+      WHEN /apmg/if_apm_env=>is_client_changeable.
+        result = xsdbool( client_edit <> '2' ).
+      WHEN /apmg/if_apm_env=>is_cross_client_changeable.
+        result = xsdbool( client_inddep_edit = space OR client_inddep_edit = '2' ).
+      WHEN /apmg/if_apm_env=>is_repository_changeable.
+        result = xsdbool( client_inddep_edit = space OR client_inddep_edit = '1' ).
+      WHEN OTHERS.
+        ASSERT 0 = 1.
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD get_system.
+
+    DATA:
+      is_flag     TYPE flag,
+      system_edit TYPE tadir-edtflag,
+      system_type TYPE sy-sysid.
+
+    CASE name.
+      WHEN /apmg/if_apm_env=>system_type.
+        CALL FUNCTION 'TR_SYS_PARAMS'
+          IMPORTING
+            systemtype    = system_type
+          EXCEPTIONS
+            no_systemname = 1
+            no_systemtype = 2
+            OTHERS        = 3.
+        IF sy-subrc = 0.
+          result = system_type.
+        ENDIF.
+      WHEN /apmg/if_apm_env=>is_system_changeable.
+        CALL FUNCTION 'TR_SYS_PARAMS'
+          IMPORTING
+            systemedit    = system_edit
+          EXCEPTIONS
+            no_systemname = 1
+            no_systemtype = 2
+            OTHERS        = 3.
+        IF sy-subrc = 0.
+          result = xsdbool( system_edit <> 'N' ).
+        ENDIF.
+      WHEN /apmg/if_apm_env=>is_cloud_system.
+        CALL FUNCTION 'OCS_CHECK_CLOUD_SYSTEM'
+          IMPORTING
+            ev_is_cloud = is_flag.
+        result = is_flag.
+      WHEN /apmg/if_apm_env=>is_s4hana_system.
+        CALL FUNCTION 'OCS_CHECK_CLOUD_SYSTEM'
+          IMPORTING
+            ev_is_s4hc = is_flag.
+        result = is_flag.
+      WHEN /apmg/if_apm_env=>is_shadow_system.
+        CALL FUNCTION 'UPG_IS_SHADOW_SYSTEM'
+          IMPORTING
+            ev_shadow = is_flag.
+        result = is_flag.
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -762,6 +861,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
         result = format( get_spam_release( )-release ).
       WHEN /apmg/if_apm_env=>spam_version.
         result = format( get_spam_release( )-version ).
+      WHEN /apmg/if_apm_env=>is_spam_locked.
+        " TODO
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -894,12 +995,14 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD get_other.
 
     DATA codepage TYPE cpcodepage.
+    DATA shadow_system TYPE c LENGTH 1.
 
     CASE name.
+      WHEN /apmg/if_apm_env=>is_64bit.
+        result = is_kernel_64bit( ).
       WHEN /apmg/if_apm_env=>endian.
         result = cl_abap_char_utilities=>endian.
       WHEN /apmg/if_apm_env=>is_unicode.
@@ -910,8 +1013,14 @@ CLASS lcl_abap_environment IMPLEMENTATION.
             database_also = space
           IMPORTING
             appl_codepage = codepage.
-
         result = codepage.
+      WHEN /apmg/if_apm_env=>is_upgrade_running.
+        CALL FUNCTION 'CHECK_ZDM_EU_LOCK'
+          EXCEPTIONS
+            zdm_upgrade_in_process = 1
+            upgrade_in_process     = 2
+            OTHERS                 = 3.
+        result = xsdbool( sy-subrc <> 0 ).
       WHEN OTHERS.
         WRITE: / '>>>', name, '(NOT IMPLEMENTED)'.
         " ASSERT 0 = 1

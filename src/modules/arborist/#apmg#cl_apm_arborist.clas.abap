@@ -317,20 +317,22 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
           registry = registry
           name     = name ).
 
-        IF pacote->exists( ).
-          DATA(packument) = pacote->get( ).
+        IF pacote->get( ) IS INITIAL.
+          pacote->packument( ).
+        ENDIF.
 
-          IF version IS NOT INITIAL.
-            DATA(manifest) = pacote->get_version( version ).
+        DATA(packument) = pacote->get( ).
+
+        IF version IS NOT INITIAL.
+          DATA(manifest) = pacote->get_version( version ).
+          result = CORRESPONDING #( manifest ).
+        ELSEIF packument-dist_tags IS NOT INITIAL.
+          " Get latest version
+          READ TABLE packument-dist_tags ASSIGNING FIELD-SYMBOL(<tag>)
+            WITH KEY key = 'latest'.
+          IF sy-subrc = 0.
+            manifest = pacote->get_version( <tag>-value ).
             result = CORRESPONDING #( manifest ).
-          ELSEIF packument-dist_tags IS NOT INITIAL.
-            " Get latest version
-            READ TABLE packument-dist_tags ASSIGNING FIELD-SYMBOL(<tag>)
-              WITH KEY key = 'latest'.
-            IF sy-subrc = 0.
-              manifest = pacote->get_version( <tag>-value ).
-              result = CORRESPONDING #( manifest ).
-            ENDIF.
           ENDIF.
         ENDIF.
       CATCH /apmg/cx_apm_error INTO DATA(error).
@@ -350,6 +352,7 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
           registry = registry
           name     = name ).
 
+        " Get fresh from registry
         pacote->packument( ).
 
         result = pacote->get_versions( ).
@@ -526,6 +529,13 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
     LOOP AT result ASSIGNING FIELD-SYMBOL(<node>).
       LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
         <edge>->resolve( ).
+
+        " Check if dependency is valid
+        IF <edge>->is_invalid( ).
+          <node>->add_error( |Dependency "{ <edge>->name }" does not match specs| ).
+        ELSEIF <edge>->is_missing( ).
+          <node>->add_error( |Dependency "{ <edge>->name }" is not installed| ).
+        ENDIF.
       ENDLOOP.
 
       " Aggregate required versions from incoming edges and check satisfaction
