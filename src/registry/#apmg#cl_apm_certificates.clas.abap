@@ -137,6 +137,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
 
   METHOD setup.
 
+    " Note: Authorization for object S_PSE_ADM is required
     TRY.
         DATA(strust) = NEW /apmg/cl_apm_strust(
           context     = c_sslc

@@ -99,6 +99,9 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
       iv_txt = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
       iv_act = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
+      iv_txt = /apmg/cl_apm_gui_buttons=>settings( )
+      io_sub = /apmg/cl_apm_gui_menus=>settings( )
+    )->add(
       iv_txt = /apmg/cl_apm_gui_buttons=>refresh( )
       iv_act = c_action-refresh
     )->add(
@@ -128,7 +131,8 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
   METHOD confirm_popup.
 
-    DATA(question) = |This will install certificates for the apm Registry and Playground|.
+    DATA(question) =
+      `This will install certificates for the apm Registry and Playground into Trust Management (STRUST)`.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Setup'
