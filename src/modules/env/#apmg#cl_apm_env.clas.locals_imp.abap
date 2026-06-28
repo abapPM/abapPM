@@ -31,8 +31,6 @@ CLASS lcl_abap_environment DEFINITION.
         VALUE(result) TYPE string.
 
     METHODS get_abap_env
-      IMPORTING
-        name          TYPE string
       RETURNING
         VALUE(result) TYPE string.
 
@@ -191,7 +189,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     IF name CP 'KERNEL*'.
       result = get_kernel( name ).
     ELSEIF name CP 'ABAP*'.
-      result = get_abap_env( name ).
+      result = get_abap_env( ).
     ELSEIF name CP 'HOST*'.
       result = get_host( name ).
     ELSEIF name CP 'CONN*' OR name = /apmg/if_apm_env=>is_secure_conn.
@@ -790,7 +788,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
   METHOD get_system.
 
     DATA:
-      is_flag     TYPE flag,
+      is_flag     TYPE c LENGTH 1,
       system_edit TYPE tadir-edtflag,
       system_type TYPE sy-sysid.
 
@@ -998,7 +996,6 @@ CLASS lcl_abap_environment IMPLEMENTATION.
   METHOD get_other.
 
     DATA codepage TYPE cpcodepage.
-    DATA shadow_system TYPE c LENGTH 1.
 
     CASE name.
       WHEN /apmg/if_apm_env=>is_64bit.
