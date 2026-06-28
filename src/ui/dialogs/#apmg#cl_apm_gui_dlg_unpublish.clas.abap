@@ -77,6 +77,7 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
     METHODS validate_form
       IMPORTING
         !form_data    TYPE REF TO /apmg/cl_apm_string_map
+        !check_vers   TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_string_map
       RAISING
@@ -156,7 +157,9 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
       WHEN c_action-unpublish_version.
 
-        validation_log = validate_form( form_data ).
+        validation_log = validate_form(
+          form_data  = form_data
+          check_vers = abap_true ).
 
         IF validation_log->is_empty( ) = abap_true.
           params = get_parameters( form_data ).
@@ -204,7 +207,7 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD confirm_popup_package.
 
-    DATA(question) = |This will UNPUBLISH the COMPLETE { params-name } package | &&
+    DATA(question) = |This will UNPUBLISH the COMPLETE "{ params-name }" package | &&
                      |from the registry (Note: Terms will apply)|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
@@ -230,7 +233,7 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD confirm_popup_version.
 
-    DATA(question) = |This will UNPUBLISH { params-name } { params-version } | &&
+    DATA(question) = |This will UNPUBLISH "{ params-name }" { params-version } | &&
                      |from the registry (Note: Terms will apply)|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
@@ -269,10 +272,6 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
     ENDIF.
 
     registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
-
-    IF registry = /apmg/if_apm_constants=>c_registry.
-      /apmg/cl_apm_registry=>check_logged_in( registry ).
-    ENDIF.
 
   ENDMETHOD.
 
@@ -360,7 +359,8 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
         iv_val = 'Invalid name' ).
     ENDIF.
 
-    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
+    IF check_vers = abap_true AND
+      NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
       result->set(
         iv_key = c_id-version
         iv_val = 'Invalid version' ).
