@@ -188,7 +188,7 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
     IF name CP 'KERNEL*'.
       result = get_kernel( name ).
-    ELSEIF name CP 'ABAP*'.
+    ELSEIF name = 'ABAP_ENV'.
       result = get_abap_env( ).
     ELSEIF name CP 'HOST*'.
       result = get_host( name ).
@@ -790,7 +790,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     DATA:
       is_flag     TYPE c LENGTH 1,
       system_edit TYPE tadir-edtflag,
-      system_type TYPE sy-sysid.
+      system_type TYPE sy-sysid,
+      tenant_type TYPE ocs_system_type.
 
     CASE name.
       WHEN /apmg/if_apm_env=>system_type.
@@ -825,6 +826,11 @@ CLASS lcl_abap_environment IMPLEMENTATION.
           IMPORTING
             ev_is_s4hc = is_flag.
         result = is_flag.
+      WHEN /apmg/if_apm_env=>is_multi_tenant_system.
+        CALL FUNCTION 'OCS_CHECK_MT_SYSTEM'
+          IMPORTING
+            ev_system_type = tenant_type.
+        result = xsdbool( tenant_type IS NOT INITIAL ).
       WHEN /apmg/if_apm_env=>is_shadow_system.
         CALL FUNCTION 'UPG_IS_SHADOW_SYSTEM'
           IMPORTING
@@ -854,13 +860,31 @@ CLASS lcl_abap_environment IMPLEMENTATION.
 
   METHOD get_spam.
 
+    DATA:
+      locked TYPE abap_bool,
+      sema   TYPE pat10.
+
     CASE name.
       WHEN /apmg/if_apm_env=>spam_release.
         result = format( get_spam_release( )-release ).
       WHEN /apmg/if_apm_env=>spam_version.
         result = format( get_spam_release( )-version ).
       WHEN /apmg/if_apm_env=>is_spam_locked.
-        " TODO
+        CALL FUNCTION 'OCS_QUEUE_SEMAPHORE'
+          EXPORTING
+            iv_tool        = 'SPAM'
+            iv_read_only   = abap_true
+          IMPORTING
+            ev_locked      = locked
+          CHANGING
+            cs_sema        = sema
+          EXCEPTIONS
+            foreign_lock   = 1
+            internal_error = 2
+            OTHERS         = 3.
+        IF sy-subrc = 0.
+          result = locked.
+        ENDIF.
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -1018,6 +1042,8 @@ CLASS lcl_abap_environment IMPLEMENTATION.
             upgrade_in_process     = 2
             OTHERS                 = 3.
         result = xsdbool( sy-subrc <> 0 ).
+      WHEN /apmg/if_apm_env=>is_called_by_rfc.
+        result = cl_ocs_helper=>is_called_by_rfc( ).
       WHEN OTHERS.
         WRITE: / '>>>', name, '(NOT IMPLEMENTED)'.
         " ASSERT 0 = 1

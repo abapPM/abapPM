@@ -78,6 +78,7 @@ INTERFACE /apmg/if_apm_env PUBLIC.
     is_cloud_system            TYPE string VALUE 'IS_CLOUD_SYSTEM',
     is_s4hana_system           TYPE string VALUE 'IS_S4HANA_SYSTEM',
     is_shadow_system           TYPE string VALUE 'IS_SHADOW_SYSTEM',
+    is_multi_tenant_system     TYPE string VALUE 'IS_MULTI_TENANT_SYSTEM',
     " Client
     client                     TYPE string VALUE 'CLIENT',
     is_client_changeable       TYPE string VALUE 'IS_CLIENT_CHANGEABLE',
@@ -129,6 +130,7 @@ INTERFACE /apmg/if_apm_env PUBLIC.
     is_ecatt_recording         TYPE string VALUE 'IS_ECATT_RECORDING',
     is_ecatt_playback          TYPE string VALUE 'IS_ECATT_PLAYBACK',
     " Status
+    is_called_by_rfc           TYPE string VALUE 'IS_CALLED_BY_RFC',
     is_upgrade_running         TYPE string VALUE 'IS_UPGRADE_RUNNING'.
 
   CONSTANTS:
