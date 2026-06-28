@@ -37,7 +37,7 @@ IMPORT '*' TO '/apmg/$1_apm$2'              FROM '@apm/types'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'ajson-extensions'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'emoji'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'env'.
-IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'error'.
+IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'exceptions'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'syntax-highlighter'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'http-agent'.
 IMPORT '*' TO '/apmg/$1_apm$2'              FROM 'markdown'.
