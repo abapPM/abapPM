@@ -124,11 +124,7 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
-    METHODS render_registry
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
-    METHODS render_user_menu
+    METHODS render_registry_bar
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html.
 
@@ -775,11 +771,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     html->add( '<div class="repo-overview-toolbar">' ).
 
     render_filter_bar( html ).
-
-    "html->add( '<span style="float:right">' ).
-    render_registry( html ).
-    "render_user_menu( html ).
-    "html->add( '</span' ).
+    render_registry_bar( html ).
 
     html->add( '</div>' ).
 
@@ -816,11 +808,10 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_registry.
+  METHOD render_registry_bar.
 
     html->add( '<span style="float:right">' ).
-    html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry( settings-registry ) ).
-    render_user_menu( html ).
+    html->add( /apmg/cl_apm_gui_menus=>registry( settings-registry )->render( ) ).
     html->add( '</span>' ).
 
   ENDMETHOD.
@@ -974,33 +965,6 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
         iv_act   = |{ c_action-select }?key={ package-package }| ) ).
 
     html->add( `</tr>` ).
-
-  ENDMETHOD.
-
-
-  METHOD render_user_menu.
-
-    " Playground does not need login
-    CHECK settings-registry <> /apmg/if_apm_constants=>c_playground.
-
-    " TODO: Replace with get_username and show "User" with icon
-    DATA(auth) = /apmg/cl_apm_http_login_manage=>get_auth( settings-registry ).
-
-    html->add( '<span>' ).
-
-    IF auth IS INITIAL.
-      html->add_a(
-        iv_txt = 'Login'
-        iv_act = /apmg/if_apm_gui_router=>c_action-apm_login ).
-    ELSE.
-      " TODO: Change to "User" icon with drop-down menu:
-      " Links to user profile/account on www.abappm.com and logout
-      html->add_a(
-        iv_txt = 'Logout'
-        iv_act = /apmg/if_apm_gui_router=>c_action-apm_logout ).
-    ENDIF.
-
-    html->add( '</span>' ).
 
   ENDMETHOD.
 

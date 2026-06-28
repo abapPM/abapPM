@@ -156,6 +156,25 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
       iv_class = fav_class
       iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ registry }| ).
 
+    " Playground is anonymous i.e. no login required
+    IF registry = /apmg/if_apm_constants=>c_playground.
+      RETURN.
+    ENDIF.
+
+    DATA(username) = /apmg/cl_apm_http_login_manage=>get_username( registry ).
+
+    IF username IS INITIAL.
+      result->add(
+        iv_txt = 'Login'
+        iv_act = /apmg/if_apm_gui_router=>c_action-apm_login ).
+    ELSE.
+      " TODO: Change to "User" icon with drop-down menu:
+      " Links to user profile/account on www.abappm.com and logout
+      result->add(
+        iv_txt = 'Logout'
+        iv_act = /apmg/if_apm_gui_router=>c_action-apm_logout ).
+    ENDIF.
+
   ENDMETHOD.
 
 

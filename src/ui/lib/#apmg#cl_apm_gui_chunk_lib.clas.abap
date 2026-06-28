@@ -13,6 +13,7 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
         add_tz         TYPE abap_bool,
         title          TYPE string,
         allow_order_by TYPE abap_bool,
+        width          TYPE string,
       END OF ty_col_spec,
       ty_col_spec_tt TYPE STANDARD TABLE OF ty_col_spec WITH NON-UNIQUE KEY tech_name.
 
@@ -584,6 +585,9 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
       lv_tmp = '<th'.
       IF <ls_col>-css_class IS NOT INITIAL.
         lv_tmp = lv_tmp && | class="{ <ls_col>-css_class }"|.
+      ENDIF.
+      IF <ls_col>-width IS NOT INITIAL.
+        lv_tmp = lv_tmp && | width="{ <ls_col>-width }"|.
       ENDIF.
       lv_tmp = lv_tmp && '>'.
 
