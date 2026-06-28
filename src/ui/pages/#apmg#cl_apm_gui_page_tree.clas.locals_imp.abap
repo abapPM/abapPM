@@ -12,6 +12,7 @@ CLASS lcl_table_scheme DEFINITION FINAL.
         add_tz         TYPE abap_bool OPTIONAL
         title          TYPE string OPTIONAL
         allow_order_by TYPE any OPTIONAL
+        width          TYPE string OPTIONAL
       RETURNING
         VALUE(result)  TYPE REF TO lcl_table_scheme.
 
@@ -28,6 +29,7 @@ CLASS lcl_table_scheme IMPLEMENTATION.
     <column>-css_class      = css_class.
     <column>-add_tz         = add_tz.
     <column>-allow_order_by = allow_order_by.
+    <column>-width          = width.
 
     result = me.
 

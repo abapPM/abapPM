@@ -49,6 +49,7 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 
     DATA:
       tree     TYPE /apmg/if_apm_arborist=>ty_node_refs,
+      log      TYPE /apmg/if_apm_arborist=>ty_log,
       settings TYPE /apmg/if_apm_settings=>ty_settings.
 
     " PREPARE
@@ -58,6 +59,12 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
         VALUE(result) TYPE /apmg/cl_apm_gui_chunk_lib=>ty_col_spec_tt.
 
     " CONTENT
+
+    METHODS render_log
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS render_package_tree
       IMPORTING
@@ -82,33 +89,37 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS render_table_errors
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+        !node TYPE /apmg/if_apm_arborist=>ty_node_ref
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_table_edges_in
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+        !node TYPE /apmg/if_apm_arborist=>ty_node_ref
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_table_edges_out
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+        !node TYPE /apmg/if_apm_arborist=>ty_node_ref
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS render_table_footer
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html.
 
     " EDGES
 
-    METHODS render_edges_out
+    METHODS render_edges
       IMPORTING
         !edges        TYPE /apmg/cl_apm_arborist_node=>ty_edges
-      RETURNING
-        VALUE(result) TYPE string.
-
-    METHODS render_edges_in
-      IMPORTING
-        !edges        TYPE /apmg/cl_apm_arborist_node=>ty_edges
-      RETURNING
-        VALUE(result) TYPE string.
-
-    METHODS render_edges_ranges
-      IMPORTING
-        !edges        TYPE /apmg/cl_apm_arborist_node=>ty_edges
-      RETURNING
-        VALUE(result) TYPE string.
-
-    METHODS render_edges_status
-      IMPORTING
-        !edges        TYPE /apmg/cl_apm_arborist_node=>ty_edges
+        !view         TYPE i
       RETURNING
         VALUE(result) TYPE string.
 
@@ -257,6 +268,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
     render_styles( html ).
+    render_log( html ).
 
     html->add( |<div class="repo-overview">| ).
 
@@ -357,6 +369,11 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       css_class      = 'ro-detail count'
       allow_order_by = abap_true
     )->add_column(
+      tech_name      = 'BUNDLE_DEPENDENCIES'
+      display_name   = 'bundleDeps'
+      css_class      = 'ro-detail count'
+      allow_order_by = abap_true
+    )->add_column(
       tech_name      = 'KEY'
       display_name   = 'Key'
       css_class      = 'ro-detail nodisplay'
@@ -406,7 +423,10 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
   METHOD load_package_tree.
 
-    tree = /apmg/cl_apm_arborist=>factory( settings-registry )->load_actual_tree( ).
+    DATA(arborist) = /apmg/cl_apm_arborist=>factory( settings-registry ).
+
+    tree = arborist->load_actual_tree( ).
+    log  = arborist->get_log( ).
 
   ENDMETHOD.
 
@@ -431,79 +451,53 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_edges_in.
+  METHOD render_edges.
 
     CHECK edges IS NOT INITIAL.
 
     result = '<div class="pad-1em">'.
 
-    result &&= '<strong>Dependents</strong>'.
+    result &&= '<strong>'.
+
+    CASE view.
+      WHEN 1.
+        result &&= 'Dependencies'.
+      WHEN 2.
+        result &&= 'Dependents'.
+      WHEN 3.
+        result &&= 'Ranges'.
+      WHEN 4.
+        result &&= 'Messages'.
+      WHEN 5.
+        result &&= 'Checks'.
+    ENDCASE.
+
+    result &&= '</strong>'.
 
     result &&= '<div>'.
 
     LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= '<br>' && <edge>->from->name.
-    ENDLOOP.
-
-    result &&= '</div></div>'.
-
-  ENDMETHOD.
-
-
-  METHOD render_edges_out.
-
-    CHECK edges IS NOT INITIAL.
-
-    result = '<div class="pad-1em">'.
-
-    result &&= '<strong>Dependencies</strong>'.
-
-    result &&= '<div>'.
-
-    LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= '<br>' && <edge>->to->name.
-    ENDLOOP.
-
-    result &&= '</div></div>'.
-
-  ENDMETHOD.
-
-
-  METHOD render_edges_ranges.
-
-    CHECK edges IS NOT INITIAL.
-
-    result = '<div class="pad-1em">'.
-
-    result &&= '<strong>Ranges</strong>'.
-
-    result &&= '<div>'.
-
-    LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= |<br>{ <edge>->name }: { <edge>->spec }|.
-    ENDLOOP.
-
-    result &&= '</div></div>'.
-
-  ENDMETHOD.
-
-
-  METHOD render_edges_status.
-
-    CHECK edges IS NOT INITIAL.
-
-    result = '<div class="pad-1em">'.
-
-    result &&= '<strong>Check</strong>'.
-
-    result &&= '<div>'.
-
-    LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      IF <edge>->error IS INITIAL.
-        result &&= |<br><span style="color:green">ok</span>|.
-      ELSE.
-        result &&= |<br><span style="color:red">{ <edge>->error }</span>|.
-      ENDIF.
+      result &&= '<br>'.
+      CASE view.
+        WHEN 1.
+          result &&= <edge>->to->name.
+        WHEN 2.
+          result &&= <edge>->from->name.
+        WHEN 3.
+          result &&= |{ <edge>->name }: { <edge>->spec }|.
+        WHEN 4.
+          IF <edge>->error IS INITIAL.
+            result &&= |<span>&nbsp;</span>|. " to keep spacing
+          ELSE.
+            result &&= |<span class="red">{ <edge>->get_error_description( ) }</span>|.
+          ENDIF.
+        WHEN 5.
+          IF <edge>->error IS INITIAL.
+            result &&= |<span style="color:green">ok</span>|.
+          ELSE.
+            result &&= |<span style="color:red">{ <edge>->error }</span>|.
+          ENDIF.
+      ENDCASE.
     ENDLOOP.
 
     result &&= '</div></div>'.
@@ -515,9 +509,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_text_input(
-      iv_name      = |filter|
-      iv_label     = |Filter: { render_filter_help_hint( ) }|
-      iv_value     = settings-tree_settings-filter ) ).
+      iv_name  = |filter|
+      iv_label = |Filter: { render_filter_help_hint( ) }|
+      iv_value = settings-tree_settings-filter ) ).
     html->add( |<input type="submit" class="hidden-submit">| ).
     html->add( |</form>| ).
 
@@ -553,6 +547,20 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     render_action_toolbar( html ).
 
     html->add( |</div>| ).
+
+  ENDMETHOD.
+
+
+  METHOD render_log.
+
+    html->add( '<div>' ).
+
+    " TODO: Improve formatting/color by type
+    LOOP AT log ASSIGNING FIELD-SYMBOL(<log>).
+      html->add( |{ <log>-type } { <log>-message }<br>| ).
+    ENDLOOP.
+
+    html->add( '</div>' ).
 
   ENDMETHOD.
 
@@ -612,6 +620,15 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       render_table_item(
         html = html
         node = <node> ).
+      render_table_errors(
+        html = html
+        node = <node> ).
+      render_table_edges_out(
+        html = html
+        node = <node> ).
+      render_table_edges_in(
+        html = html
+        node = <node> ).
     ENDLOOP.
 
     html->add( |</tbody>| ).
@@ -619,8 +636,139 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_table_footer.
+  METHOD render_table_edges_in.
 
+    CHECK node->edges_in IS NOT INITIAL.
+
+    html->add( '<tr>' ).
+
+    " Name
+    html->td(
+      iv_content = render_edges( edges = node->edges_in view = 2 )
+      iv_class   = 'top' ).
+
+    " Version
+    html->td(
+      iv_content = render_edges( edges = node->edges_in view = 3 )
+      iv_class   = 'top' ).
+
+    " Messages
+    html->td(
+      iv_content = render_edges( edges = node->edges_in view = 4 )
+      iv_class   = 'top' ).
+
+    " Status
+    html->td(
+      iv_content = render_edges( edges = node->edges_in view = 5 )
+      iv_class   = 'top' ).
+
+    " Remaining columns
+    DO 5 TIMES.
+      html->td(
+        iv_class   = 'ro-detail top'
+        iv_content = '' ).
+    ENDDO.
+
+    html->td(
+      iv_class   = 'ro-detail nodisplay top'
+      iv_content = '' ).
+
+    html->td(
+      iv_class   = 'ro-go wmin top'
+      iv_content = '' ).
+
+    html->add( '</tr>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_table_edges_out.
+
+    CHECK node->edges_out IS NOT INITIAL.
+
+    html->add( '<tr>' ).
+
+    " Name
+    html->td(
+      iv_content = render_edges( edges = node->edges_out view = 1 )
+      iv_class   = 'top' ).
+
+    " Version
+    html->td(
+      iv_content = render_edges( edges = node->edges_out view = 3 )
+      iv_class   = 'top' ).
+
+    " Messages
+    html->td(
+      iv_content = render_edges( edges = node->edges_out view = 4 )
+      iv_class   = 'top' ).
+
+    " Status
+    html->td(
+      iv_content = render_edges( edges = node->edges_out view = 5 )
+      iv_class   = 'top' ).
+
+    " Remaining columns
+    DO 5 TIMES.
+      html->td(
+        iv_class   = 'ro-detail top'
+        iv_content = '' ).
+    ENDDO.
+
+    html->td(
+      iv_class   = 'ro-detail nodisplay top'
+      iv_content = '' ).
+
+    html->td(
+      iv_class   = 'ro-go wmin top'
+      iv_content = '' ).
+
+    html->add( '</tr>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_table_errors.
+
+    CHECK node->errors IS NOT INITIAL.
+
+    DATA(out) = ``.
+    LOOP AT node->errors ASSIGNING FIELD-SYMBOL(<error>).
+      IF sy-tabix > 1.
+        out &&= '<br>'.
+      ENDIF.
+      out &&= <error>.
+    ENDLOOP.
+
+    html->add( '<tr>' ).
+
+    html->td(
+      iv_content   = out
+      is_data_attr = VALUE #( name = 'colspan' value = 2 )
+      iv_class     = 'top' ).
+
+    " Remaining columns
+    DO 5 TIMES.
+      html->td(
+        iv_class   = 'ro-detail top'
+        iv_content = '' ).
+    ENDDO.
+
+    html->td(
+      iv_class   = 'ro-detail nodisplay top'
+      iv_content = '' ).
+
+    html->td(
+      iv_class   = 'ro-go wmin top'
+      iv_content = '' ).
+
+    html->add( '</tr>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_table_footer.
+    ASSERT 1 = 1.
   ENDMETHOD.
 
 
@@ -645,8 +793,6 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         html->a(
           iv_txt = node->name
           iv_act = |{ c_action-select }?key={ node->package }| )
-        && render_edges_out( node->edges_out )
-        && render_edges_in( node->edges_in )
       iv_class = 'top' ).
 
     " Version
@@ -655,21 +801,26 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         html->a(
           iv_txt = node->version
           iv_act = |{ c_action-select }?key={ node->package }| )
-        && render_edges_ranges( node->edges_out )
-        && render_edges_ranges( node->edges_in )
       iv_class = 'top' ).
 
     " Package
+    " FIX: node->installed flag should be evaluated but it's not correct in arborist
+    IF node->package IS INITIAL.
+      DATA(package) = /apmg/cl_apm_gui_chunk_lib=>render_package_name(
+        iv_package     = 'N/A'
+        iv_interactive = abap_false ).
+    ELSE.
+      package = /apmg/cl_apm_gui_chunk_lib=>render_package_name( node->package ).
+    ENDIF.
+
     html->td(
-      ii_content = /apmg/cl_apm_gui_chunk_lib=>render_package_name( node->package )
+      iv_content = package->render( )
       iv_class   = 'top' ).
 
     " Status
     IF node->errors IS INITIAL.
       html->td(
         iv_content = |<span class="boxed green-filled-set">OK</span>|
-                     && render_edges_status( node->edges_out )
-                     && render_edges_status( node->edges_in )
         iv_class   = 'top' ).
     ELSE.
       DATA(error_count) = lines( node->errors ).
@@ -679,8 +830,6 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       ENDIF.
       html->td(
         iv_content = |<span class="boxed red-filled-set">{ error_count } { error_text }</span>|
-                     && render_edges_status( node->edges_out )
-                     && render_edges_status( node->edges_in )
         iv_class   = 'top' ).
     ENDIF.
 
@@ -697,6 +846,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     html->td(
       iv_class   = 'ro-detail top'
       iv_content = |{ lines( node->peer_dependencies ) }| ).
+    html->td(
+      iv_class   = 'ro-detail top'
+      iv_content = |{ lines( node->bundle_dependencies ) }| ).
 
     " Details: key for navigation
     html->td(
@@ -711,7 +863,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         iv_txt   = '&rtrif;'
         iv_act   = |{ c_action-select }?key={ node->package }| ) ).
 
-    html->add( `</tr>` ).
+    html->add( '</tr>' ).
 
   ENDMETHOD.
 
