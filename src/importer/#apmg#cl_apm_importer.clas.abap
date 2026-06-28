@@ -7,7 +7,6 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * SPDX-License-Identifier: MIT
 ************************************************************************
 * TODO!: use registry as package source, instead of installed packages
-* TODO: change to factory
 * TODO: replace logging with ABAP Logger (wait for v2 of logger)
 ************************************************************************
   PUBLIC SECTION.
@@ -31,9 +30,23 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     CONSTANTS c_width TYPE i VALUE 150.
 
-    CLASS-DATA is_log TYPE abap_bool.
+    DATA is_log TYPE abap_bool.
 
-    CLASS-METHODS get_programs
+    METHODS execute
+      IMPORTING
+        !package       TYPE devclass
+        !dependencies  TYPE /apmg/if_apm_importer=>ty_dependencies
+        !object_types  TYPE /apmg/if_apm_importer=>ty_object_types
+        !object_names  TYPE /apmg/if_apm_importer=>ty_object_names
+        !transport     TYPE trkorr
+        !default_rule  TYPE string
+        !is_dry_run    TYPE abap_bool
+        !is_production TYPE abap_bool
+        !is_logging    TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS get_programs
       IMPORTING
         !package      TYPE devclass
       RETURNING
@@ -41,7 +54,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS get_rules
+    METHODS get_rules
       IMPORTING
         !programs     TYPE /apmg/if_apm_importer=>ty_programs
         !default_rule TYPE string
@@ -50,7 +63,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS get_packages
+    METHODS get_packages
       IMPORTING
         !rules        TYPE /apmg/if_apm_importer=>ty_rules
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
@@ -59,7 +72,7 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS get_map
+    METHODS get_map
       IMPORTING
         !rules         TYPE /apmg/if_apm_importer=>ty_rules
         !packages      TYPE /apmg/if_apm_importer=>ty_packages
@@ -71,14 +84,14 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS create_packages
+    METHODS create_packages
       IMPORTING
         !packages   TYPE /apmg/if_apm_importer=>ty_packages
         !is_dry_run TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS import_objects
+    METHODS import_objects
       IMPORTING
         !map           TYPE /apmg/if_apm_importer=>ty_map
         !transport     TYPE trkorr
@@ -87,20 +100,20 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS import_objects_start
+    METHODS import_objects_start
       IMPORTING
         !transport TYPE trkorr
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS import_objects_end
+    METHODS import_objects_end
       IMPORTING
         !transport TYPE trkorr
         !log       TYPE REF TO zcl_abapgit_log
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS save_packages
+    METHODS save_packages
       IMPORTING
         !packages     TYPE /apmg/if_apm_importer=>ty_packages
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
@@ -148,6 +161,56 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD execute.
+
+    is_log = is_logging.
+
+    /apmg/cl_apm_auth=>check_package_authorized(
+      package  = package
+      activity = /apmg/cl_apm_auth=>c_activity-change ).
+
+    " 1. Get all programs that contain IMPORT statements
+    DATA(programs) = get_programs( package ).
+
+    " 2. Get the import rules from the programs
+    DATA(rules) = get_rules(
+      programs     = programs
+      default_rule = default_rule ).
+
+    " 3. Get name/version from the rules
+    DATA(packages) = get_packages(
+      rules        = rules
+      dependencies = dependencies ).
+
+    " TODO: 4. Download the tarballs for all packages
+
+    " 5. Get the object mapping
+    DATA(map) = get_map(
+      rules        = rules
+      packages     = packages
+      object_types = object_types
+      object_names = object_names ).
+
+    " 6. Create packages (if necessary)
+    create_packages(
+      packages   = packages
+      is_dry_run = is_dry_run ).
+
+    " 7. Import the tarballs using the mapping
+    import_objects(
+      map           = map
+      transport     = transport
+      is_dry_run    = is_dry_run
+      is_production = is_production ).
+
+    " 8. Save packages to apm
+    save_packages(
+      packages     = packages
+      dependencies = dependencies ).
 
   ENDMETHOD.
 
@@ -531,50 +594,18 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
   METHOD run.
 
-    is_log = is_logging.
+    DATA(import) = NEW /apmg/cl_apm_importer( ).
 
-    /apmg/cl_apm_auth=>check_package_authorized(
-      package  = package
-      activity = /apmg/cl_apm_auth=>c_activity-change ).
-
-    " 1. Get all programs that contain IMPORT statements
-    DATA(programs) = get_programs( package ).
-
-    " 2. Get the import rules from the programs
-    DATA(rules) = get_rules(
-      programs     = programs
-      default_rule = default_rule ).
-
-    " 3. Get name/version from the rules
-    DATA(packages) = get_packages(
-      rules        = rules
-      dependencies = dependencies ).
-
-    " TODO: 4. Download the tarballs for all packages
-
-    " 5. Get the object mapping
-    DATA(map) = get_map(
-      rules        = rules
-      packages     = packages
-      object_types = object_types
-      object_names = object_names ).
-
-    " 6. Create packages (if necessary)
-    create_packages(
-      packages   = packages
-      is_dry_run = is_dry_run ).
-
-    " 7. Import the tarballs using the mapping
-    import_objects(
-      map           = map
+    import->execute(
+      package       = package
+      dependencies  = dependencies
+      object_types  = object_types
+      object_names  = object_names
       transport     = transport
+      default_rule  = default_rule
       is_dry_run    = is_dry_run
-      is_production = is_production ).
-
-    " 8. Save packages to apm
-    save_packages(
-      packages     = packages
-      dependencies = dependencies ).
+      is_production = is_production
+      is_logging    = is_logging ).
 
   ENDMETHOD.
 
