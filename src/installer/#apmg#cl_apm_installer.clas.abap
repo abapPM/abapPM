@@ -553,27 +553,16 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
   METHOD _system_check.
 
-    DATA:
-      systemedit         TYPE tadir-edtflag,
-      sys_cliinddep_edit TYPE t000-ccnocliind.
+    DATA(env) = /apmg/cl_apm_env=>create( ).
 
-    CALL FUNCTION 'TR_SYS_PARAMS'
-      IMPORTING
-        systemedit         = systemedit
-        sys_cliinddep_edit = sys_cliinddep_edit
-      EXCEPTIONS
-        no_systemname      = 1
-        no_systemtype      = 2
-        OTHERS             = 3.
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
-    ENDIF.
-
-    IF systemedit = 'N'.
+    IF env->get( /apmg/if_apm_env=>is_system_changeable ) = abap_false.
+      " Not modifiable
       MESSAGE e102(tk) INTO /apmg/cx_apm_error=>null.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
     ENDIF.
-    IF sys_cliinddep_edit CA '23'.
+
+    IF env->get( /apmg/if_apm_env=>is_cross_client_changeable ) = abap_false.
+      " Changes not permitted
       MESSAGE e729(tk) INTO /apmg/cx_apm_error=>null.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
     ENDIF.
