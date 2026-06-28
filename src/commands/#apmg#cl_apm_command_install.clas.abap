@@ -40,6 +40,8 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         warnings TYPE string_table,
       END OF ty_actions.
 
+    DATA list TYPE /apmg/if_apm_package_json=>ty_packages.
+
     METHODS execute
       IMPORTING
         !registry      TYPE string
@@ -90,7 +92,6 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 
     METHODS check_dependency
       IMPORTING
-        !list         TYPE /apmg/if_apm_package_json=>ty_packages
         !dependency   TYPE /apmg/if_apm_types=>ty_dependency
         !category     TYPE string
         !is_force     TYPE abap_bool DEFAULT abap_false
@@ -130,15 +131,9 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_dependencies.
 
-    " Get all installed packages
-    DATA(list) = /apmg/cl_apm_package_json=>list(
-      instanciate = abap_true
-      is_bundle   = abap_false ).
-
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
       IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
         DATA(action) = check_dependency(
-          list       = list
           dependency = <dependency>
           category   = 'Dependency'
           is_force   = is_force ).
@@ -154,7 +149,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     IF is_production = abap_false.
       LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
         action = check_dependency(
-          list       = list
           dependency = <dependency>
           category   = 'devDependency'
           is_force   = is_force ).
@@ -169,7 +163,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     LOOP AT manifest-optional_dependencies ASSIGNING <dependency>.
       action = check_dependency(
-        list        = list
         dependency  = <dependency>
         category    = 'optionalDependency'
         is_force    = is_force
@@ -184,7 +177,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
       action = check_dependency(
-        list        = list
         dependency  = <dependency>
         category    = 'peerDependency'
         is_force    = is_force
@@ -233,6 +225,12 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_package.
 
+    IF line_exists( list[ name = name ] ) ##PRIMKEY[NAME].
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |Package "{ name }" is already installed in { list[ name = name ]-package }| ##PRIMKEY[NAME].
+    ENDIF.
+
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( package ).
 
     IF package_json_service->exists( ) = abap_true.
@@ -250,7 +248,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     IF count > 1.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
-          text = |{ package } already contains { count } objects|.
+          text = |{ package } already contains { count } objects but must be empty|.
     ENDIF.
 
   ENDMETHOD.
@@ -342,6 +340,11 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     /apmg/cl_apm_auth=>check_package_authorized(
       package  = package
       activity = /apmg/cl_apm_auth=>c_activity-change ).
+
+    " Get all installed packages
+    list = /apmg/cl_apm_package_json=>list(
+      instanciate = abap_true
+      is_bundle   = abap_false ).
 
     " 1. Check if something else is already installed
     check_package(
