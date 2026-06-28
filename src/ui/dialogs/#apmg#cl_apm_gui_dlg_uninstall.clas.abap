@@ -323,7 +323,7 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
 
     DATA(transport) = CONV trkorr( form_data->get( c_id-transport ) ).
 
-    IF transport IS NOT INITIAL.
+    IF transport IS INITIAL.
       msg = /apmg/cl_apm_auth=>check_transport_required( package ).
       IF msg IS NOT INITIAL.
         result->set(
