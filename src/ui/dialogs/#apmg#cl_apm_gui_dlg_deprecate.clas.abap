@@ -91,7 +91,7 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup_version
+    METHODS confirm_popup
       IMPORTING
         !params       TYPE ty_params
       RETURNING
@@ -136,7 +136,7 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          IF confirm_popup_version( params ) = abap_true.
+          IF confirm_popup( params ) = abap_true.
             /apmg/cl_apm_command_deprecate=>run(
               registry     = registry
               name         = params-name
@@ -178,9 +178,9 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD confirm_popup_version.
+  METHOD confirm_popup.
 
-    DATA(question) = |This will DEPRECATE { params-name } { params-version }|.
+    DATA(question) = |This will DEPRECATE package "{ params-name }" { params-version }|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
       iv_titlebar              = 'Deprecate Version'

@@ -179,7 +179,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   METHOD confirm_popup.
 
     DATA(question) = |This will PUBLISH all objects in { params-package } | &&
-                     |including subpackages as { params-name } { params-version } | &&
+                     |including subpackages as "{ params-name }" { params-version } | &&
                      |to the registry|.
 
     DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
