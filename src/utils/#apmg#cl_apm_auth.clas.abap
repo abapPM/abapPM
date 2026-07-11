@@ -13,10 +13,12 @@ CLASS /apmg/cl_apm_auth DEFINITION
 
     CONSTANTS:
       BEGIN OF c_activity,
-        create  TYPE activ_auth VALUE '01',
-        change  TYPE activ_auth VALUE '02',
-        display TYPE activ_auth VALUE '03',
-        delete  TYPE activ_auth VALUE '06',
+        create    TYPE activ_auth VALUE '01',
+        change    TYPE activ_auth VALUE '02',
+        display   TYPE activ_auth VALUE '03',
+        delete    TYPE activ_auth VALUE '06',
+        execute   TYPE activ_auth VALUE '16',
+        transport TYPE activ_auth VALUE '21',
       END OF c_activity.
 
     CLASS-METHODS is_package_authorized

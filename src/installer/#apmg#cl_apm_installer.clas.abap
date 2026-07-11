@@ -243,9 +243,6 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
         _system_check( ).
 
-        " TODO: needs to work for apm
-        " _transport( c_enum_transport-prompt )
-
         _confirm_messages( ).
 
         " TODO: Support data config

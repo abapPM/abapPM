@@ -528,7 +528,6 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
       iv_txt = /apmg/cl_apm_logo=>svg_logo_with_text( 28 ) ).
     html->add( '</div>' ).
 
-    " TODO: add inline-style to page-title
     html->add( '<div class="page-title" style="vertical-align:top">' ).
     html->add( |<span class="spacer">&#x25BA;</span>{ page_title }| ).
     html->add( '</div>' ).

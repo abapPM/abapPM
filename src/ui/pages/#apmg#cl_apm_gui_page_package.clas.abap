@@ -607,12 +607,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD get_root_href.
 
-    IF url CS 'github.com'.
+    IF url CS 'github.com' OR url CS 'bitbucket.org'.
       result = |{ url }/blob/{ branch }|.
     ELSEIF url CS 'gitlab.com'.
       result = |{ url }/-/blob/{ branch }|.
     ELSE.
-      " TODO: Add other git hosts
+      " Add other git hosts here...
       result = |{ url }/blob/{ branch }|.
     ENDIF.
 
@@ -621,12 +621,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD get_root_img.
 
-    IF url CS 'github.com'.
+    IF url CS 'github.com' OR url CS 'bitbucket.org'.
       result = |{ url }/raw/{ branch }|.
     ELSEIF url CS 'gitlab.com'.
       result = |{ url }/-/raw/{ branch }|.
     ELSE.
-      " TODO: Add other git hosts
+      " Add other git hosts here...
       result = |{ url }/raw/{ branch }|.
     ENDIF.
 
