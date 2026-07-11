@@ -23,9 +23,9 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
     li_assetman = /apmg/cl_apm_gui_asset_manager=>create( ).
 
     li_assetman->register_asset(
-      iv_url       = 'css/common.css'
-      iv_type      = 'text/css'
-      iv_inline    = 'ABC' ).
+      iv_url    = 'css/common.css'
+      iv_type   = 'text/css'
+      iv_inline = 'ABC' ).
 
     ls_asset = li_assetman->get_asset( 'css/common.css' ).
 
@@ -33,10 +33,16 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
                                         exp = 'text' ).
     cl_abap_unit_assert=>assert_equals( act = ls_asset-subtype
                                         exp = 'css' ).
-    " TODO
-*    cl_abap_unit_assert=>assert_equals(
-*      act = zcl_abapgit_convert=>xstring_to_string_utf8( ls_asset-content )
-*      exp = 'ABC' ).
+
+    TRY.
+        DATA(act) = zcl_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
+      CATCH zcx_abapgit_exception.
+        cl_abap_unit_assert=>fail( ).
+    ENDTRY.
+
+    cl_abap_unit_assert=>assert_equals(
+      act = act
+      exp = 'ABC' ).
 
   ENDMETHOD.
 
@@ -47,9 +53,9 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
     li_assetman = /apmg/cl_apm_gui_asset_manager=>create( ).
 
     li_assetman->register_asset(
-      iv_url       = 'css/common.css'
-      iv_type      = 'text/css'
-      iv_inline    = 'ABC' ).
+      iv_url    = 'css/common.css'
+      iv_type   = 'text/css'
+      iv_inline = 'ABC' ).
 
     cl_abap_unit_assert=>assert_equals(
       act = li_assetman->get_text_asset( 'css/common.css' )
@@ -63,7 +69,7 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
 
     TRY.
         li_assetman->get_text_asset(
-          iv_url = 'css/common.css'
+          iv_url            = 'css/common.css'
           iv_assert_subtype = 'xyz' ).
         cl_abap_unit_assert=>fail( ).
       CATCH /apmg/cx_apm_error.
@@ -71,9 +77,9 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
     ENDTRY.
 
     li_assetman->register_asset(
-      iv_url       = 'css/common.xyz'
-      iv_type      = 'nottext/bin'
-      iv_inline    = 'XYZ' ).
+      iv_url    = 'css/common.xyz'
+      iv_type   = 'nottext/bin'
+      iv_inline = 'XYZ' ).
 
     TRY.
         li_assetman->get_text_asset( 'css/common.xyz' ).
