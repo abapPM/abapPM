@@ -9,8 +9,6 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* TODO: Support dist-tags
-************************************************************************
 
   PUBLIC SECTION.
 
@@ -85,6 +83,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
       IMPORTING
         !packument    TYPE /apmg/if_apm_types=>ty_packument
         !package_json TYPE /apmg/if_apm_types=>ty_package_json
+        !tag          TYPE string
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_types=>ty_packument
       RAISING
@@ -179,9 +178,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
   METHOD execute.
 
-    IF registry = /apmg/if_apm_constants=>c_registry.
-      /apmg/cl_apm_registry=>check_logged_in( registry ).
-    ENDIF.
+    /apmg/cl_apm_registry=>check_logged_in( registry ).
 
     " 1. Check if package exists and is initialized
     check_package( package ).
@@ -219,7 +216,8 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
     " 5. Initialize packument for publishing
     DATA(packument_publish) = init_package(
       packument    = packument
-      package_json = package_json ).
+      package_json = package_json
+      tag          = tag ).
 
     " 6. Serialize all objects of package
     DATA(files) = serialize_package( package ).
@@ -269,10 +267,9 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
 
   METHOD get_tar.
 
-    " TODO: Move this and all called methods to local part of class
     CONSTANTS c_null TYPE xstring VALUE ''.
 
-    " 2. Tar and gzip files
+    " Tar all files
     DATA(tar) = /apmg/cl_apm_tar=>new( ).
 
     LOOP AT files ASSIGNING FIELD-SYMBOL(<file>).
@@ -294,7 +291,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
         content = <file>-file-data ).
     ENDLOOP.
 
-    " 3. Add package.json and readme
+    " Add package.abap.json and readme
     DATA(manifest) = CORRESPONDING /apmg/if_apm_types=>ty_manifest( package_json ).
 
     DATA(json) = /apmg/cl_apm_package_json=>convert_manifest_to_json(
@@ -343,10 +340,9 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       result-users,
       result-versions.
 
-    " Update LATEST dist-tag
-    " TODO: Allow publishing with other tags
+    " Set dist-tag to LATEST or given tag
     DATA(dist_tag) = VALUE /apmg/if_apm_types=>ty_generic(
-      key   = /apmg/if_apm_types=>c_latest_version
+      key   = COND #( WHEN tag IS INITIAL THEN /apmg/if_apm_types=>c_latest_version ELSE tag )
       value = package_json-version ).
 
     INSERT dist_tag INTO TABLE result-dist_tags.

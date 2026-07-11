@@ -82,9 +82,7 @@ CLASS /apmg/cl_apm_command_deprecate IMPLEMENTATION.
 
   METHOD execute.
 
-    IF registry = /apmg/if_apm_constants=>c_registry.
-      /apmg/cl_apm_registry=>check_logged_in( registry ).
-    ENDIF.
+    /apmg/cl_apm_registry=>check_logged_in( registry ).
 
     DATA(packument) = /apmg/cl_apm_registry=>get_packument(
       registry = registry

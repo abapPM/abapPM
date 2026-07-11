@@ -150,6 +150,9 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
 
   METHOD check_logged_in.
 
+    " No login for playground
+    CHECK registry <> /apmg/if_apm_constants=>c_playground.
+
     IF /apmg/cl_apm_http_login_manage=>get_username( registry ) IS INITIAL.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'This command requires you to be logged in.'.
     ENDIF.
