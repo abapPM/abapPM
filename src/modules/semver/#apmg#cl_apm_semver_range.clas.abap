@@ -73,6 +73,8 @@ CLASS /apmg/cl_apm_semver_range DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS clear_cache.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -240,11 +242,17 @@ CLASS /apmg/cl_apm_semver_range DEFINITION
         !value        TYPE i
       RETURNING
         VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
 
 CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
+
+
+  METHOD clear_cache.
+    CLEAR cache.
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -788,6 +796,11 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
       THEN /apmg/cl_apm_semver_re=>token-tildeloose-safe_regex
       ELSE /apmg/cl_apm_semver_re=>token-tilde-safe_regex ).
 
+    " if we're including prereleases in the match, then the lower bound is
+    " -0, the lowest possible prerelease value, just like x-ranges and carets.
+    " this keeps `~1.2` equivalent to the `1.2.x` x-range it's documented as.
+    DATA(z) = COND #( WHEN incpre = abap_true THEN '-0' ELSE '' ).
+
     TRY.
         DATA(m) = r->create_matcher( text = result ).
 
@@ -803,10 +816,10 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
           IF is_x( ma ).
             with = ''.
           ELSEIF is_x( mi ).
-            with = |>={ ma }.0.0 <{ str( ma + 1 ) }.0.0-0|.
+            with = |>={ ma }.0.0{ z } <{ str( ma + 1 ) }.0.0-0|.
           ELSEIF is_x( pa ).
             " ~1.2 == >=1.2.0 <1.3.0-0
-            with = |>={ ma }.{ mi }.0 <{ ma }.{ str( mi + 1 ) }.0-0|.
+            with = |>={ ma }.{ mi }.0{ z } <{ ma }.{ str( mi + 1 ) }.0-0|.
           ELSEIF pr IS NOT INITIAL.
             with = |>={ ma }.{ mi }.{ pa }-{ pr } <{ ma }.{ str( mi + 1 ) }.0-0|.
           ELSE.

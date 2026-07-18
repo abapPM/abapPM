@@ -756,6 +756,13 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
       ( range = '2.x' version = '2.1.0-pre.0' incpre = abap_true )
       ( range = '1.1.x' version = '1.1.0-a' incpre = abap_true )
       ( range = '1.1.x' version = '1.1.1-a' incpre = abap_true )
+      " tilde ranges are documented as equivalent to the matching x-range,
+      " so with includePrerelease they must accept the same prereleases.
+      ( range = '~1.1' version = '1.1.0-a' incpre = abap_true )
+      ( range = '1.1.x' version = '1.1.0-a' incpre = abap_true )
+      ( range = '1.1' version = '1.1.1-a' incpre = abap_true )
+      ( range = '2' version = '2.0.0-pre.0' incpre = abap_true )
+      ( range = '2.x' version = '2.0.0-pre.0' incpre = abap_true )
       ( range = '*' version = '1.0.0-rc1' incpre = abap_true )
       ( range = '^1.0.0-0' version = '1.0.1-rc1' incpre = abap_true )
       ( range = '^1.0.0-rc2' version = '1.0.1-rc1' incpre = abap_true )
@@ -894,6 +901,18 @@ CLASS /apmg/cl_apm_semver_fixtures IMPLEMENTATION.
       ( range = '~> 1' res = '>=1.0.0 <2.0.0-0' )
       ( range = '~1.0' res = '>=1.0.0 <1.1.0-0' )
       ( range = '~ 1.0' res = '>=1.0.0 <1.1.0-0' )
+      " tilde with includePrerelease must lower-bound at -0 just like the
+      " equivalent x-range (e.g. ~1.2 is documented as the same as 1.2.x),
+      " so that prereleases such as 1.2.0-rc match.
+      ( range = '~1' res = '>=1.0.0-0 <2.0.0-0' incpre = abap_true )
+      ( range = '~1.x' res = '>=1.0.0-0 <2.0.0-0' incpre = abap_true )
+      ( range = '~1.2' res = '>=1.2.0-0 <1.3.0-0' incpre = abap_true )
+      ( range = '~1.2.x' res = '>=1.2.0-0 <1.3.0-0' incpre = abap_true )
+      ( range = '~0.0' res = '<0.1.0-0' incpre = abap_true )
+      " a fully-specified tilde keeps its exact lower bound (matches caret),
+      " and an explicit prerelease is preserved as-is
+      ( range = '~1.2.3' res = '>=1.2.3 <1.3.0-0' incpre = abap_true )
+      ( range = '~1.2.3-beta.4' res = '>=1.2.3-beta.4 <1.3.0-0' incpre = abap_true )
       ( range = '^0' res = '<1.0.0-0' )
       ( range = '^ 1' res = '>=1.0.0 <2.0.0-0' )
       ( range = '^0.1' res = '>=0.1.0 <0.2.0-0' )

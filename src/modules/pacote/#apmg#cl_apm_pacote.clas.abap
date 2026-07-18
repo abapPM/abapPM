@@ -19,7 +19,7 @@ CLASS /apmg/cl_apm_pacote DEFINITION
       IMPORTING
         !registry     TYPE string
         !name         TYPE string
-        !packument    TYPE string OPTIONAL
+        !json         TYPE string OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_pacote
       RAISING
@@ -32,9 +32,9 @@ CLASS /apmg/cl_apm_pacote DEFINITION
 
     METHODS constructor
       IMPORTING
-        !registry  TYPE string
-        !name      TYPE string
-        !packument TYPE string OPTIONAL
+        !registry TYPE string
+        !name     TYPE string
+        !json     TYPE string OPTIONAL
       RAISING
         /apmg/cx_apm_error.
 
@@ -333,9 +333,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
       val    = name
       format = cl_abap_format=>e_url_full ).
 
-    IF packument IS NOT INITIAL.
-      pacote-json      = packument.
-      pacote-packument = convert_json_to_packument( pacote-json ).
+    IF json IS NOT INITIAL.
+      pacote-json      = json.
+      pacote-packument = convert_json_to_packument( json ).
     ELSE.
       TRY.
           /apmg/if_apm_pacote~load( ).
@@ -355,16 +355,16 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         description TYPE string,
         readme      TYPE string,
         homepage    TYPE string,
+        changelog   TYPE string,
         icon        TYPE string,
         bugs        TYPE /apmg/if_apm_types=>ty_bugs,
         license     TYPE string,
         keywords    TYPE string_table,
-        main        TYPE string,
-        man         TYPE string_table,
         author      TYPE /apmg/if_apm_types=>ty_person,
         repository  TYPE /apmg/if_apm_types=>ty_repository,
         _id         TYPE string,
         _rev        TYPE string,
+        _objects    TYPE string_table,
         access      TYPE string,
       END OF ty_packument_partial.
 
@@ -521,9 +521,9 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
       result = <instance>-instance.
     ELSE.
       result = NEW /apmg/cl_apm_pacote(
-        registry  = registry
-        name      = name
-        packument = packument ).
+        registry = registry
+        name     = name
+        json     = json ).
 
       DATA(instance) = VALUE ty_instance(
         name     = name
