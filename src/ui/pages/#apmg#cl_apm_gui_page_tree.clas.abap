@@ -110,6 +110,12 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS render_table_edges_fill
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS render_table_footer
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html.
@@ -332,16 +338,19 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       tech_name      = 'NAME'
       display_name   = 'Name'
       css_class      = 'name'
+      width          = '25%'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'VERSION'
       display_name   = 'Version'
       css_class      = 'version'
+      width          = '25%'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'PACKAGE'
       display_name   = 'Package'
       css_class      = 'package'
+      width          = '40%'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'STATUS'
@@ -453,6 +462,8 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
   METHOD render_edges.
 
+    CONSTANTS c_spacer TYPE string VALUE `<span>&nbsp;</span>`.
+
     CHECK edges IS NOT INITIAL.
 
     result = '<div class="pad-1em">'.
@@ -480,14 +491,22 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       result &&= '<br>'.
       CASE view.
         WHEN 1.
-          result &&= <edge>->to->name.
+          IF <edge>->to IS INITIAL.
+            result &&= c_spacer.
+          ELSE.
+            result &&= <edge>->to->name.
+          ENDIF.
         WHEN 2.
-          result &&= <edge>->from->name.
+          IF <edge>->from IS INITIAL.
+            result &&= c_spacer.
+          ELSE.
+            result &&= <edge>->from->name.
+          ENDIF.
         WHEN 3.
           result &&= |{ <edge>->name }: { <edge>->spec }|.
         WHEN 4.
           IF <edge>->error IS INITIAL.
-            result &&= |<span>&nbsp;</span>|. " to keep spacing
+            result &&= c_spacer.
           ELSE.
             result &&= |<span class="red">{ <edge>->get_error_description( ) }</span>|.
           ENDIF.
@@ -607,6 +626,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     html->add( '<style>' ).
     html->add( emoji_styles ).
+    html->add( 'tr.border-top td { border-top: 1px solid darkgray; }' ).
     html->add( '</style>' ).
 
   ENDMETHOD.
@@ -623,15 +643,35 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       render_table_errors(
         html = html
         node = <node> ).
+      " Dependencies
       render_table_edges_out(
         html = html
         node = <node> ).
+      " Dependents
       render_table_edges_in(
         html = html
         node = <node> ).
     ENDLOOP.
 
-    html->add( |</tbody>| ).
+    html->add( '</tbody>' ).
+
+  ENDMETHOD.
+
+
+  METHOD render_table_edges_fill.
+
+    html->td(
+      iv_class     = 'ro-detail top'
+      is_data_attr = VALUE #( name = 'colspan' value = 5 )
+      iv_content   = '' ).
+
+    html->td(
+      iv_class   = 'ro-detail nodisplay top'
+      iv_content = '' ).
+
+    html->td(
+      iv_class   = 'ro-go wmin top'
+      iv_content = '' ).
 
   ENDMETHOD.
 
@@ -663,19 +703,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       iv_class   = 'top' ).
 
     " Remaining columns
-    DO 5 TIMES.
-      html->td(
-        iv_class   = 'ro-detail top'
-        iv_content = '' ).
-    ENDDO.
-
-    html->td(
-      iv_class   = 'ro-detail nodisplay top'
-      iv_content = '' ).
-
-    html->td(
-      iv_class   = 'ro-go wmin top'
-      iv_content = '' ).
+    render_table_edges_fill( html ).
 
     html->add( '</tr>' ).
 
@@ -709,19 +737,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
       iv_class   = 'top' ).
 
     " Remaining columns
-    DO 5 TIMES.
-      html->td(
-        iv_class   = 'ro-detail top'
-        iv_content = '' ).
-    ENDDO.
-
-    html->td(
-      iv_class   = 'ro-detail nodisplay top'
-      iv_content = '' ).
-
-    html->td(
-      iv_class   = 'ro-go wmin top'
-      iv_content = '' ).
+    render_table_edges_fill( html ).
 
     html->add( '</tr>' ).
 
@@ -744,23 +760,11 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     html->td(
       iv_content   = out
-      is_data_attr = VALUE #( name = 'colspan' value = 2 )
-      iv_class     = 'top' ).
+      is_data_attr = VALUE #( name = 'colspan' value = 4 )
+      iv_class     = 'top red' ).
 
     " Remaining columns
-    DO 5 TIMES.
-      html->td(
-        iv_class   = 'ro-detail top'
-        iv_content = '' ).
-    ENDDO.
-
-    html->td(
-      iv_class   = 'ro-detail nodisplay top'
-      iv_content = '' ).
-
-    html->td(
-      iv_class   = 'ro-go wmin top'
-      iv_content = '' ).
+    render_table_edges_fill( html ).
 
     html->add( '</tr>' ).
 
@@ -785,7 +789,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   METHOD render_table_item.
 
     " Start of row
-    html->add( |<tr data-key="{ node->package }">| ).
+    html->add( |<tr data-key="{ node->package }" class="border-top">| ).
 
     " Name
     html->td(
