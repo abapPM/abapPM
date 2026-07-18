@@ -90,6 +90,10 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS get_repository_url
+      RETURNING
+        VALUE(result) TYPE string.
+
     METHODS get_markdown
       RETURNING
         VALUE(result) TYPE string
@@ -605,6 +609,25 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_repository_url.
+
+    result = package_json-repository-url.
+
+    IF result CS 'github.com'.
+      result = replace(
+        val  = result
+        sub  = '.git'
+        with = '' ).
+    ENDIF.
+
+    result = replace(
+      val  = result
+      sub  = 'git+http'
+      with = 'http' ).
+
+  ENDMETHOD.
+
+
   METHOD get_root_href.
 
     IF url CS 'github.com' OR url CS 'bitbucket.org'.
@@ -1000,7 +1023,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD render_markdown.
 
-    DATA(url) = package_json-repository-url.
+    DATA(url) = get_repository_url( ).
 
     " Heuristic to determine which branch was used for README urls and images
     IF markdown-data CS '/master/'.
