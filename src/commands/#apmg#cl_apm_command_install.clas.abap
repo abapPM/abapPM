@@ -111,6 +111,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !is_optional TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -257,32 +258,35 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
   METHOD check_prerequisites.
 
     " apm version
-    READ TABLE manifest-engines ASSIGNING FIELD-SYMBOL(<dependency>)
-      WITH KEY key = 'apm'.
-    IF sy-subrc = 0.
+    IF line_exists( manifest-engines[ key = 'apm' ] ).
       check_semver(
         name     = 'apm'
         version  = /apmg/if_apm_version=>c_version
-        range    = <dependency>-range
+        range    = manifest-engines[ key = 'apm' ]-range
         category = 'Engine'
         is_force = is_force ).
     ENDIF.
 
     " abap release
-    READ TABLE manifest-engines ASSIGNING <dependency>
-      WITH KEY key = 'abap'.
-    IF sy-subrc = 0.
-      DATA(abap_version) = /apmg/cl_apm_utils=>get_abap_version( ).
-
+    IF line_exists( manifest-engines[ key = 'abap' ] ).
       check_semver(
         name     = 'ABAP'
-        version  = abap_version
-        range    = <dependency>-range
+        version  = /apmg/cl_apm_utils=>get_abap_version( )
+        range    = manifest-engines[ key = 'abap' ]-range
         category = 'Engine'
         is_force = is_force ).
     ENDIF.
 
-    " TODO: Check os & cpu (requires "env" package which is =WIP=)
+    " db platform
+    DATA(db) = /apmg/cl_apm_utils=>get_database_platform( ).
+
+    IF manifest-db IS NOT INITIAL AND NOT line_exists( manifest-db[ db ] ).
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+        EXPORTING
+          text = |Database platform "{ db }" is not supported with this package|.
+    ENDIF.
+
+    " TODO: Check os & cpu (requires "env" package enhancement)
 
   ENDMETHOD.
 
@@ -371,7 +375,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
     check_actions( actions ).
 
-    " TODO!: 4. Get dependencies
     " TODO!: 5. Install dependencies
 
     " 6. Get tarball from registry and install it into package

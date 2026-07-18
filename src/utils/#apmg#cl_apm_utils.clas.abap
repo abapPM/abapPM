@@ -5,6 +5,8 @@ CLASS /apmg/cl_apm_utils DEFINITION
 
   PUBLIC SECTION.
 
+    CLASS-METHODS class_constructor.
+
     "! Remove trailing slash
     CLASS-METHODS remove_trailing_slash
       IMPORTING
@@ -26,6 +28,13 @@ CLASS /apmg/cl_apm_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    "! Return database platform
+    CLASS-METHODS get_database_platform
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
     "! Return semantic version of database
     CLASS-METHODS get_database_version
       RETURNING
@@ -42,11 +51,19 @@ CLASS /apmg/cl_apm_utils DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    CLASS-DATA env TYPE REF TO /apmg/if_apm_env.
+
 ENDCLASS.
 
 
 
 CLASS /apmg/cl_apm_utils IMPLEMENTATION.
+
+
+  METHOD class_constructor.
+    env = /apmg/cl_apm_env=>create( ).
+  ENDMETHOD.
 
 
   METHOD get_abap_version.
@@ -60,9 +77,39 @@ CLASS /apmg/cl_apm_utils IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_database_platform.
+
+    DATA(db) = env->get( /apmg/if_apm_env=>database_platform ).
+
+    CASE db.
+      WHEN 'DB2'.
+        result = /apmg/if_apm_types=>c_db-db2.
+      WHEN 'DB4'.
+        result = /apmg/if_apm_types=>c_db-db400.
+      WHEN 'DB6'.
+        result = /apmg/if_apm_types=>c_db-db6.
+      WHEN 'HDB'.
+        result = /apmg/if_apm_types=>c_db-hdb.
+      WHEN 'INF'.
+        result = /apmg/if_apm_types=>c_db-informix.
+      WHEN 'MSS'.
+        result = /apmg/if_apm_types=>c_db-mssql.
+      WHEN 'ORA'.
+        result = /apmg/if_apm_types=>c_db-oracle.
+      WHEN 'SDB'.
+        result = /apmg/if_apm_types=>c_db-sap_db.
+      WHEN 'SYB'.
+        result = /apmg/if_apm_types=>c_db-sybase.
+      WHEN OTHERS.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Unknown DB platform'.
+    ENDCASE.
+
+  ENDMETHOD.
+
+
   METHOD get_database_version.
 
-    DATA(db) = /apmg/cl_apm_env=>create( )->get( /apmg/if_apm_env=>database ).
+    DATA(db) = env->get( /apmg/if_apm_env=>database ).
 
     result = /apmg/cl_apm_semver_functions=>coerce(
       version = db
@@ -73,7 +120,7 @@ CLASS /apmg/cl_apm_utils IMPLEMENTATION.
 
   METHOD get_kernel_version.
 
-    DATA(kernel) = /apmg/cl_apm_env=>create( )->get( /apmg/if_apm_env=>kernel_release ).
+    DATA(kernel) = env->get( /apmg/if_apm_env=>kernel_release ).
 
     TRY.
         result = NEW /apmg/cl_apm_semver_sap( )->sap_release_to_semver( |{ kernel }| ).
@@ -85,8 +132,6 @@ CLASS /apmg/cl_apm_utils IMPLEMENTATION.
 
 
   METHOD get_user_agent.
-
-    DATA(env) = /apmg/cl_apm_env=>create( ).
 
     DATA(os) = env->get( /apmg/if_apm_env=>kernel_platform ) && '@' && get_kernel_version( ).
     DATA(db) = env->get( /apmg/if_apm_env=>database_platform ) && '@' && get_database_version( ).
