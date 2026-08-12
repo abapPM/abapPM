@@ -41,7 +41,6 @@ CLASS /apmg/cl_apm_installer DEFINITION
         !transport         TYPE trkorr OPTIONAL
         !enum_source       TYPE i " FUTURE
         !enum_folder_logic TYPE i " FUTURE
-        !is_production     TYPE abap_bool
       RAISING
         /apmg/cx_apm_error ##NEEDED.
 

@@ -15,13 +15,12 @@ CLASS /apmg/cl_apm_command_installer DEFINITION
 
     CLASS-METHODS install_package
       IMPORTING
-        !registry      TYPE string
-        !manifest      TYPE /apmg/if_apm_types=>ty_manifest
-        !package       TYPE devclass
-        !name          TYPE string
-        !version       TYPE string
-        !transport     TYPE trkorr
-        !is_production TYPE abap_bool
+        !registry  TYPE string
+        !manifest  TYPE /apmg/if_apm_types=>ty_manifest
+        !package   TYPE devclass
+        !name      TYPE string
+        !version   TYPE string
+        !transport TYPE trkorr
       RAISING
         /apmg/cx_apm_error.
 
@@ -63,8 +62,7 @@ CLASS /apmg/cl_apm_command_installer IMPLEMENTATION.
       package           = package
       transport         = transport
       enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
-      enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix
-      is_production     = is_production ).
+      enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix ).
 
   ENDMETHOD.
 

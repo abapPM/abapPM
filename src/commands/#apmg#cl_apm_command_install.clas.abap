@@ -40,7 +40,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         warnings TYPE string_table,
       END OF ty_actions.
 
-    DATA list TYPE /apmg/if_apm_package_json=>ty_packages.
+    DATA packages TYPE /apmg/if_apm_package_json=>ty_packages.
 
     METHODS execute
       IMPORTING
@@ -112,6 +112,14 @@ CLASS /apmg/cl_apm_command_install DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS take_actions
+      IMPORTING
+        !registry  TYPE string
+        !transport TYPE trkorr
+        !actions   TYPE ty_actions
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -132,6 +140,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_dependencies.
 
+    " Dependencies: Install, if not bundled
     LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
       IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
         DATA(action) = check_dependency(
@@ -147,6 +156,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
+    " DevDependencies: Install, if not production
     IF is_production = abap_false.
       LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
         action = check_dependency(
@@ -162,6 +172,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       ENDLOOP.
     ENDIF.
 
+    " OptionalDepedencies: Install, if possible and ignore failures
     LOOP AT manifest-optional_dependencies ASSIGNING <dependency>.
       action = check_dependency(
         dependency  = <dependency>
@@ -176,18 +187,16 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
           result = result ).
     ENDLOOP.
 
+    " PeerDepdencies: Expected to be installed already
     LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
       action = check_dependency(
-        dependency  = <dependency>
-        category    = 'peerDependency'
-        is_force    = is_force
-        is_optional = abap_true ).
+        dependency = <dependency>
+        category   = 'peerDependency'
+        is_force   = is_force ).
 
-      collect_actions(
-        EXPORTING
-          action = action
-        CHANGING
-          result = result ).
+      IF action-error IS NOT INITIAL.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = action-error.
+      ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
@@ -195,7 +204,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_dependency.
 
-    READ TABLE list ASSIGNING FIELD-SYMBOL(<package>)
+    READ TABLE packages ASSIGNING FIELD-SYMBOL(<package>)
       WITH KEY name COMPONENTS name = dependency-key.
     IF sy-subrc = 0.
       DATA(satisfies) = /apmg/cl_apm_semver_functions=>satisfies(
@@ -226,10 +235,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_package.
 
-    IF line_exists( list[ name = name ] ) ##PRIMKEY[NAME].
+    IF line_exists( packages[ name = name ] ) ##PRIMKEY[NAME].
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
-          text = |Package "{ name }" is already installed in { list[ name = name ]-package }| ##PRIMKEY[NAME].
+          text = |Package "{ name }" is already installed in { packages[ name = name ]-package }| ##PRIMKEY[NAME].
     ENDIF.
 
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( package ).
@@ -344,7 +353,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       activity = /apmg/cl_apm_auth=>c_activity-change ).
 
     " Get all installed packages
-    list = /apmg/cl_apm_package_json=>list(
+    packages = /apmg/cl_apm_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
@@ -364,28 +373,31 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       manifest = manifest
       is_force = is_force ).
 
-    " TODO!: Instead of just checking if dependencies are installed, it should install them.
-    " For that to happen, we need arborist to build the dependency tree and pass it here.
-    " This needs to include the target SAP package for each dependency :-)
-
-    " 4. Check dependencies (not recursive!)
+    " 4. Check dependencies (not recursive)
     DATA(actions) = check_dependencies(
       manifest = manifest
       is_force = is_force ).
 
     check_actions( actions ).
 
-    " TODO!: 5. Install dependencies
+    " TODO!: Instead of just checking if dependencies are installed, it should install them.
+    " For that to happen, we need arborist to build the dependency tree and pass it here.
+    " This needs to include the target version and SAP package for each dependency :-)
+
+    " 5. Install and update dependencies
+    take_actions(
+      registry  = registry
+      actions   = actions
+      transport = transport ).
 
     " 6. Get tarball from registry and install it into package
     /apmg/cl_apm_command_installer=>install_package(
-      registry      = registry
-      manifest      = manifest
-      package       = package
-      name          = package_json-name
-      version       = package_json-version
-      transport     = transport
-      is_production = is_production ).
+      registry  = registry
+      manifest  = manifest
+      package   = package
+      name      = package_json-name
+      version   = package_json-version
+      transport = transport ).
 
     " 7. Save package.abap.json and readme
     package_json_init = CORRESPONDING #( manifest ).
@@ -411,6 +423,42 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       is_production = is_production
       is_force      = is_force
       is_dry_run    = is_dry_run ).
+
+  ENDMETHOD.
+
+
+  METHOD take_actions.
+
+    DATA package TYPE devclass.
+    DATA package_json TYPE /apmg/if_apm_types=>ty_package_json.
+
+    " Install missing dependencies
+    LOOP AT actions-missing ASSIGNING FIELD-SYMBOL(<action>).
+
+      " TODO: Package + Version
+      package_json-name = <action>-key.
+
+      /apmg/cl_apm_command_install=>run(
+        registry     = registry
+        package      = package
+        package_json = package_json
+        transport    = transport ).
+
+    ENDLOOP.
+
+    " Update invalid dependencies
+    LOOP AT actions-invalid ASSIGNING <action>.
+
+      " TODO: Package + Version
+      package_json-name = <action>-key.
+
+      /apmg/cl_apm_command_install=>run(
+        registry     = registry
+        package      = package
+        package_json = package_json
+        transport    = transport ).
+
+    ENDLOOP.
 
   ENDMETHOD.
 ENDCLASS.

@@ -188,8 +188,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
         package       = package
         name          = manifest-name
         version       = manifest-version
-        transport     = transport
-        is_production = is_production ).
+        transport     = transport ).
     ENDIF.
 
     " 9. Save package to apm
