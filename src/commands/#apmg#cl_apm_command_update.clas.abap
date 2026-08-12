@@ -183,12 +183,12 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     " 8. Update package
     IF is_newer = abap_true OR force = abap_true.
       /apmg/cl_apm_command_installer=>install_package(
-        registry      = registry
-        manifest      = manifest
-        package       = package
-        name          = manifest-name
-        version       = manifest-version
-        transport     = transport ).
+        registry  = registry
+        manifest  = manifest
+        package   = package
+        name      = manifest-name
+        version   = manifest-version
+        transport = transport ).
     ENDIF.
 
     " 9. Save package to apm

@@ -438,7 +438,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       " TODO: Package + Version
       package_json-name = <action>-key.
 
-      /apmg/cl_apm_command_install=>run(
+      run(
         registry     = registry
         package      = package
         package_json = package_json
@@ -452,7 +452,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       " TODO: Package + Version
       package_json-name = <action>-key.
 
-      /apmg/cl_apm_command_install=>run(
+      run(
         registry     = registry
         package      = package
         package_json = package_json
