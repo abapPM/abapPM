@@ -26,10 +26,6 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS constructor
-      RAISING
-        /apmg/cx_apm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -43,7 +39,6 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
       END OF c_action.
 
     CONSTANTS:
-      c_css_url      TYPE string VALUE 'css/page_db.css',
       c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
 
     TYPES:
@@ -66,10 +61,6 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
     DATA list TYPE ty_list.
 
     METHODS prepare_list.
-
-    METHODS register_stylesheet
-      RAISING
-        /apmg/cx_apm_error.
 
     METHODS render_stats
       IMPORTING
@@ -252,21 +243,12 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD constructor.
-
-    super->constructor( ).
-    register_stylesheet( ).
-
-  ENDMETHOD.
-
-
   METHOD create.
 
     DATA(component) = NEW /apmg/cl_apm_gui_page_db( ).
 
     result = /apmg/cl_apm_gui_page_hoc=>create(
       page_title         = 'Database Utility'
-      extra_css_url      = c_css_url
       page_menu_provider = component
       child_component    = component ).
 
@@ -514,20 +496,6 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
       list_entry-show_key = |{ indent }{ indent }{ list_entry-show_key }|.
       INSERT list_entry INTO TABLE list.
     ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD register_stylesheet.
-
-    DATA(buffer) = NEW zcl_abapgit_string_buffer( ).
-
-    " @@abapmerge include zabapgit_css_page_db.w3mi.data.css > buffer->add( '$$' ).
-    gui_services( )->register_page_asset(
-      iv_url       = c_css_url
-      iv_type      = 'text/css'
-      iv_mime_name = 'ZABAPGIT_CSS_PAGE_DB'
-      iv_inline    = buffer->join_w_newline_and_flush( ) ).
 
   ENDMETHOD.
 

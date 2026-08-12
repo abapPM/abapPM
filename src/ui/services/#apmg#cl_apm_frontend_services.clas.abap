@@ -18,6 +18,12 @@ CLASS /apmg/cl_apm_frontend_services DEFINITION
       RETURNING
         VALUE(rv_path) TYPE string.
 
+    METHODS normalize_gui_release
+      IMPORTING
+        iv_raw_gui_release               TYPE file_table-filename
+      RETURNING
+        VALUE(rv_normalized_gui_release) TYPE zif_abapgit_frontend_services=>ty_gui_release.
+
 ENDCLASS.
 
 
@@ -61,7 +67,7 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
             error_no_gui         = 2
             not_supported_by_gui = 3
             no_authority         = 4
-          OTHERS               = 5 ).
+            OTHERS               = 5 ).
         IF sy-subrc <> 0.
           RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
         ENDIF.
@@ -178,41 +184,43 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
     DATA lt_rawdata TYPE STANDARD TABLE OF ty_hex WITH DEFAULT KEY.
 
     zcl_abapgit_convert=>xstring_to_bintab(
-      EXPORTING iv_xstr   = iv_xstr
-      IMPORTING et_bintab = lt_rawdata ).
+      EXPORTING
+        iv_xstr   = iv_xstr
+      IMPORTING
+        et_bintab = lt_rawdata ).
 
     cl_gui_frontend_services=>gui_download(
       EXPORTING
-        bin_filesize              = xstrlen( iv_xstr )
-        filename                  = iv_path
-        filetype                  = 'BIN'
+        bin_filesize            = xstrlen( iv_xstr )
+        filename                = iv_path
+        filetype                = 'BIN'
       CHANGING
-        data_tab                  = lt_rawdata
+        data_tab                = lt_rawdata
       EXCEPTIONS
-        file_write_error          = 1
-        no_batch                  = 2
-        gui_refuse_filetransfer   = 3
-        invalid_type              = 4
-        no_authority              = 5
-        unknown_error             = 6
-        header_not_allowed        = 7
-        separator_not_allowed     = 8
-        filesize_not_allowed      = 9
-        header_too_long           = 10
-        dp_error_create           = 11
-        dp_error_send             = 12
-        dp_error_write            = 13
-        unknown_dp_error          = 14
-        access_denied             = 15
-        dp_out_of_memory          = 16
-        disk_full                 = 17
-        dp_timeout                = 18
-        file_not_found            = 19
-        dataprovider_exception    = 20
-        control_flush_error       = 21
-        not_supported_by_gui      = 22
-        error_no_gui              = 23
-        OTHERS                    = 24 ).
+        file_write_error        = 1
+        no_batch                = 2
+        gui_refuse_filetransfer = 3
+        invalid_type            = 4
+        no_authority            = 5
+        unknown_error           = 6
+        header_not_allowed      = 7
+        separator_not_allowed   = 8
+        filesize_not_allowed    = 9
+        header_too_long         = 10
+        dp_error_create         = 11
+        dp_error_send           = 12
+        dp_error_write          = 13
+        unknown_dp_error        = 14
+        access_denied           = 15
+        dp_out_of_memory        = 16
+        disk_full               = 17
+        dp_timeout              = 18
+        file_not_found          = 19
+        dataprovider_exception  = 20
+        control_flush_error     = 21
+        not_supported_by_gui    = 22
+        error_no_gui            = 23
+        OTHERS                  = 24 ).
     IF sy-subrc <> 0.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
     ENDIF.
@@ -282,37 +290,77 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD /apmg/if_apm_frontend_services~get_gui_type.
+
+    CASE abap_true.
+      WHEN /apmg/if_apm_frontend_services~is_webgui( ).
+        rv_gui_type = 'SAP GUI for HTML'.
+      WHEN /apmg/if_apm_frontend_services~is_sapgui_for_windows( ).
+        rv_gui_type = 'SAP GUI for Windows'.
+      WHEN /apmg/if_apm_frontend_services~is_sapgui_for_java( ).
+        rv_gui_type = 'SAP GUI for Java'.
+      WHEN OTHERS.
+* eg. open-abap?
+        rv_gui_type = 'Unknown'.
+    ENDCASE.
+
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_frontend_services~get_gui_version.
 
     DATA:
       lt_version_table TYPE filetable,
       lv_rc            TYPE i,
+      lv_ur_release    TYPE c LENGTH 255,
+      lv_its_release   TYPE c LENGTH 80,
+      lv_its_patch     TYPE i,
       ls_version       LIKE LINE OF lt_version_table.
 
-    cl_gui_frontend_services=>get_gui_version(
-      CHANGING
-        version_table            = lt_version_table
-        rc                       = lv_rc
-      EXCEPTIONS
-        get_gui_version_failed   = 1
-        cant_write_version_table = 2
-        gui_no_version           = 3
-        cntl_error               = 4
-        error_no_gui             = 5
-        not_supported_by_gui     = 6
-        OTHERS                   = 7 ).
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+    IF /apmg/if_apm_frontend_services~is_webgui( ) = abap_true.
+      cl_itsp_util=>get_value_by_name(
+        EXPORTING
+          name  = 'UR_RELVERS'
+        IMPORTING
+          value = lv_ur_release ).
+
+      cl_itsp_util=>get_version(
+        IMPORTING
+          release  = lv_its_release
+          patch_no = lv_its_patch ).
+
+      ev_gui_release = lv_its_release.
+      ev_gui_sp      = 0.
+      ev_gui_patch   = lv_its_patch.
+
+      ev_gui_version_string = |UR { lv_ur_release }, |
+        && |ITS { ev_gui_release }.{ condense( ev_gui_sp ) }.{ condense( ev_gui_patch ) }|.
+    ELSE.
+      cl_gui_frontend_services=>get_gui_version(
+        CHANGING
+          version_table            = lt_version_table
+          rc                       = lv_rc
+        EXCEPTIONS
+          get_gui_version_failed   = 1
+          cant_write_version_table = 2
+          gui_no_version           = 3
+          cntl_error               = 4 " <== raised by WebGUI
+          error_no_gui             = 5
+          not_supported_by_gui     = 6
+          OTHERS                   = 7 ).
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_t100.
+      ENDIF.
+
+      READ TABLE lt_version_table INTO ls_version INDEX 1. " gui release
+      ev_gui_release = normalize_gui_release( ls_version-filename ).
+      READ TABLE lt_version_table INTO ls_version INDEX 2. " gui sp
+      ev_gui_sp = ls_version-filename.
+      READ TABLE lt_version_table INTO ls_version INDEX 3. " gui patch
+      ev_gui_patch = ls_version-filename.
+
+      ev_gui_version_string = |{ ev_gui_release }.{ condense( ev_gui_sp ) }.{ condense( ev_gui_patch ) }|.
     ENDIF.
-
-    READ TABLE lt_version_table INTO ls_version INDEX 1. " gui release
-    ev_gui_release = ls_version-filename.
-    READ TABLE lt_version_table INTO ls_version INDEX 2. " gui sp
-    ev_gui_sp = ls_version-filename.
-    READ TABLE lt_version_table INTO ls_version INDEX 3. " gui patch
-    ev_gui_patch = ls_version-filename.
-
-    ev_gui_version_string = |{ ev_gui_release }.{ condense( ev_gui_sp ) }.{ condense( ev_gui_patch ) }|.
 
   ENDMETHOD.
 
@@ -508,6 +556,20 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
       IF sy-subrc = 0.
         rv_path = iv_fullname(lv_len).
       ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD normalize_gui_release.
+
+    IF /apmg/if_apm_frontend_services~is_sapgui_for_java( ) = abap_true
+    AND strlen( iv_raw_gui_release ) = 6.
+      " e.g. 081000
+      rv_normalized_gui_release = iv_raw_gui_release+1(4).
+    ELSE.
+      " e.g. 8100
+      rv_normalized_gui_release = iv_raw_gui_release.
     ENDIF.
 
   ENDMETHOD.

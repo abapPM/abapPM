@@ -48,8 +48,7 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
       END OF c_action.
 
     CONSTANTS:
-      c_edit_form_id TYPE string VALUE 'db_form',
-      c_css_url      TYPE string VALUE 'css/page_db_entry.css'.
+      c_edit_form_id TYPE string VALUE 'db_form'.
 
     CLASS-DATA db_persist TYPE REF TO /apmg/if_apm_persist_apm.
 
@@ -64,10 +63,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
         !key          TYPE /apmg/if_apm_persist_apm=>ty_key
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_persist_apm=>ty_zabappm
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS register_stylesheet
       RAISING
         /apmg/cx_apm_error.
 
@@ -245,8 +240,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
 
     super->constructor( ).
 
-    register_stylesheet( ).
-
     me->edit_mode    = edit_mode.
     me->back_on_save = back_on_save.
     content_type     = /apmg/cl_apm_persist_apm=>explain_key( key )-content_type.
@@ -263,7 +256,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
       back_on_save = back_on_save ).
 
     result = /apmg/cl_apm_gui_page_hoc=>create(
-      extra_css_url       = c_css_url
       page_title_provider = component
       child_component     = component ).
 
@@ -339,20 +331,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD register_stylesheet.
-
-    DATA(buffer) = NEW zcl_abapgit_string_buffer( ).
-
-    " @@abapmerge include zabapgit_css_page_db_entry.w3mi.data.css > buffer->add( '$$' ).
-    gui_services( )->register_page_asset(
-      iv_url       = c_css_url
-      iv_type      = 'text/css'
-      iv_mime_name = 'ZABAPGIT_CSS_PAGE_DB_ENTRY'
-      iv_inline    = buffer->join_w_newline_and_flush( ) ).
-
-  ENDMETHOD.
-
-
   METHOD render_edit.
 
     html->add( |<form id="{ c_edit_form_id }" method="post" action="sapevent:{ c_action-update }">| ).
@@ -388,8 +366,10 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
 
   METHOD render_view.
 
-    " Better not to use syntax highlighter so we see the actual, unmodified data
-    html->add( |<pre class="syntax-hl">{ db_entry-value }</pre>| ).
+    " Better NOT to use syntax highlighter so we see the actual, unmodified data
+    html->add( '<pre class="syntax-hl">' ).
+    html->add( escape( val = db_entry-value format = cl_abap_format=>e_html_text ) ).
+    html->add( '</pre>' ).
 
   ENDMETHOD.
 

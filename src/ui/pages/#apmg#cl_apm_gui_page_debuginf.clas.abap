@@ -163,6 +163,7 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
 
     TRY.
         frontend_service->get_gui_version( IMPORTING ev_gui_version_string = gui_version ).
+        DATA(gui_type) = frontend_service->get_gui_type( ).
       CATCH /apmg/cx_apm_error ##NO_HANDLER.
         " Continue rendering even if this fails
     ENDTRY.
@@ -186,13 +187,13 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
       html->add( |<div>apm is installed in package { package }</div>| ).
     ENDIF.
 
-    data(action) = |{ /apmg/if_apm_gui_router=>c_action-url }?url={
+    DATA(action) = |{ /apmg/if_apm_gui_router=>c_action-url }?url={
                       /apmg/if_apm_constants=>c_repository }/blob/main/CONTRIBUTING.md|.
 
     html->add( '<br><div>' ).
     html->add_a(
-      iv_txt = 'Contribution guidelines for apm'
-      iv_act = action
+      iv_txt   = 'Contribution guidelines for apm'
+      iv_act   = action
       iv_class = |url| ).
     html->add( '</div>' ).
 
@@ -202,6 +203,7 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
 
     html->add( |<table>| ).
     html->add( |<tr><td>apm version:    </td><td>{ /apmg/if_apm_version=>c_version }</td></tr>| ).
+    html->add( |<tr><td>GUI type:       </td><td>{ gui_type }</td></tr>| ).
     html->add( |<tr><td>GUI version:    </td><td>{ gui_version }</td></tr>| ).
     html->add( |<tr><td>SY time:        </td><td>{ sy-datum } { sy-uzeit } { sy-tzone }</td></tr>| ).
     html->add( |<tr><td>SY release:     </td><td>{ release-release } SP { release-sp }</td></tr>| ).

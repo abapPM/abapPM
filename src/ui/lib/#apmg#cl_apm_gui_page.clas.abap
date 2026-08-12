@@ -112,6 +112,12 @@ CLASS /apmg/cl_apm_gui_page DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS render_back_navigation
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS render_command_palettes
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_html
@@ -215,7 +221,20 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
 
     html->add( render_hotkey_overview( ) ).
     html->add( render_error_message_box( ) ).
+
+    " Extension point for pages that need their own hidden form. No page in
+    " abapGit uses it since the global sapevent form below replaced the
+    " per-action stub forms, but it stays available to subclasses.
     html->add( render_deferred_parts( c_html_parts-hidden_forms ) ).
+
+    " Reusable, server-rendered sapevent form. On WebGUI a sapevent only routes
+    " through a form/anchor that ITS wired up while rendering the page; a form
+    " built in JS at submit time is not wired, so the raw sapevent: scheme is
+    " rejected. submitSapeventForm submits through this form whenever the caller
+    " does not supply one of its own, so JS-triggered sapevents work on WebGUI.
+    " On the desktop browser control its action is simply overwritten, so it is
+    " harmless there.
+    html->add( |<form id="global_sapevent_form" method="post" action="sapevent:noop"></form>| ).
 
     html->add( footer( render_content_time ) ).
 
@@ -250,7 +269,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( '<div id="footer">' ).
     html->add( '<table class="w100"><tr>' ).
 
-    html->add( '<td class="w40 sponsor">' ).
+    html->add( '<td class="sponsor">' ).
     html->add_a( iv_act = /apmg/if_apm_gui_router=>c_action-sponsor
                  iv_txt = html->icon( iv_name = 'heart-regular/pink'
                                       iv_hint = 'Sponsor us' ) ).
@@ -267,7 +286,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( |<div id="footer-version" class="version">{ get_version_details( ) }</div>| ).
     html->add( '</td>' ).
 
-    html->add( '<td id="debug-output" class="w40"></td>' ).
+    html->add( '<td id="debug-output"></td>' ).
 
     html->add( '</tr></table>' ).
     html->add( '</div>' ).
@@ -289,17 +308,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
 
     DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
 
-    CASE abap_true.
-      WHEN frontend_services->is_webgui( ).
-        result = result && ` - Web`.
-      WHEN frontend_services->is_sapgui_for_windows( ).
-        result = result && ` - Win`.
-      WHEN frontend_services->is_sapgui_for_java( ).
-        result = result && ` - Java`.
-      WHEN OTHERS.
-        " eg. open-abap?
-        result = result && ` - Unknown`.
-    ENDCASE.
+    result = result && | - { frontend_services->get_gui_type( ) }|.
 
     " Will be filled by JS method displayBrowserControlFooter
     result = result && '<span id="browser-control-footer"></span>'.
@@ -376,29 +385,48 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
       gui_sp      TYPE /apmg/if_apm_frontend_services=>ty_gui_sp,
       gui_patch   TYPE /apmg/if_apm_frontend_services=>ty_gui_patch.
 
+    result = abap_true.
+
+    " only relevant with SAPGUI for Windows, always hide for javagui or WebGUI
+    IF zcl_abapgit_ui_factory=>get_frontend_services( )->is_sapgui_for_windows( ) = abap_false.
+      result = abap_false.
+      RETURN.
+    ENDIF.
+
     " With SAP GUI 8.00 PL3 and 7.70 PL13 Edge browser control is basically working.
     " For lower releases we render the browser control warning
     " and toggle it via JS function toggleBrowserControlWarning.
-
-    result = abap_true.
 
     TRY.
         DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
 
         frontend_services->get_gui_version(
           IMPORTING
-            ev_gui_release        = gui_release
-            ev_gui_sp             = gui_sp
-            ev_gui_patch          = gui_patch ).
+            ev_gui_release = gui_release
+            ev_gui_sp      = gui_sp
+            ev_gui_patch   = gui_patch ).
       CATCH /apmg/cx_apm_error.
         RETURN.
     ENDTRY.
 
     IF gui_release >= '7700' AND gui_sp >= '1' AND gui_patch >= '13'
-    OR gui_release >= '8000' AND gui_sp >= '1' AND gui_patch >= '3'.
+    OR gui_release >= '8000' AND gui_sp >= '1' AND gui_patch >= '3'
+    OR gui_release >= '8100' AND gui_sp >= '1' AND gui_patch >= '0'.
       result = abap_false.
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD render_back_navigation.
+    DATA(html) = /apmg/cl_apm_html=>create( ).
+
+    html->add( 'addHotkey({' ).
+    html->add( '  toggleKey: "F3",' ).
+    html->add( '  hotkeyDescription: "Go back"' ).
+    html->add( '});' ).
+
+    result = html.
   ENDMETHOD.
 
 
@@ -496,12 +524,14 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
   METHOD scripts.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
-    html->add( render_deferred_parts( c_html_parts-scripts ) ).
     html->add( render_link_hints( ) ).
     html->add( render_command_palettes( ) ).
+    html->add( render_deferred_parts( c_html_parts-scripts ) ).
 
     html->add( |toggleBrowserControlWarning();| ).
     html->add( |displayBrowserControlFooter();| ).
+    html->add( |redirectBrowserBackToSapEvent();| ).
+    html->add( render_back_navigation( ) ).
 
     result = html.
   ENDMETHOD.

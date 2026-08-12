@@ -91,6 +91,10 @@ INTERFACE /apmg/if_apm_frontend_services PUBLIC.
     RAISING
       /apmg/cx_apm_error.
 
+  METHODS get_gui_type
+    RETURNING
+      VALUE(rv_gui_type) TYPE string.
+
   METHODS directory_exist
     IMPORTING
       iv_directory     TYPE string

@@ -8,6 +8,7 @@ CLASS /apmg/cl_apm_gui_event DEFINITION
     INTERFACES /apmg/if_apm_gui_event.
 
     CLASS-METHODS class_constructor.
+
     CLASS-METHODS new
       IMPORTING
         !ii_gui_services   TYPE REF TO /apmg/if_apm_gui_services OPTIONAL
@@ -16,19 +17,21 @@ CLASS /apmg/cl_apm_gui_event DEFINITION
         !it_postdata       TYPE /apmg/if_apm_html_viewer=>ty_post_data OPTIONAL
       RETURNING
         VALUE(ro_instance) TYPE REF TO /apmg/cl_apm_gui_event.
+
     METHODS constructor
       IMPORTING
         !ii_gui_services TYPE REF TO /apmg/if_apm_gui_services OPTIONAL
         !iv_action       TYPE clike
         !iv_getdata      TYPE clike OPTIONAL
         !it_postdata     TYPE /apmg/if_apm_html_viewer=>ty_post_data OPTIONAL.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     DATA mo_query TYPE REF TO /apmg/cl_apm_string_map.
     DATA mo_form_data TYPE REF TO /apmg/cl_apm_string_map.
 
-    CLASS-DATA gv_non_breaking_space TYPE string .
+    CLASS-DATA gv_non_breaking_space TYPE string.
 
     TYPES: BEGIN OF ty_name_value,
              name  TYPE string,
@@ -49,36 +52,36 @@ CLASS /apmg/cl_apm_gui_event DEFINITION
         !it_post_data    TYPE /apmg/if_apm_html_viewer=>ty_post_data
         !iv_upper_cased  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(rt_fields) TYPE ty_name_value_tt .
+        VALUE(rt_fields) TYPE ty_name_value_tt.
 
     CLASS-METHODS parse_fields
       IMPORTING
         !iv_string       TYPE clike
         !iv_upper_cased  TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(rt_fields) TYPE ty_name_value_tt .
+        VALUE(rt_fields) TYPE ty_name_value_tt.
 
     CLASS-METHODS parse_fields_upper_case_name
       IMPORTING
         !iv_string       TYPE clike
       RETURNING
-        VALUE(rt_fields) TYPE ty_name_value_tt .
+        VALUE(rt_fields) TYPE ty_name_value_tt.
 
     CLASS-METHODS translate_postdata
       IMPORTING
         !it_postdata     TYPE /apmg/if_apm_html_viewer=>ty_post_data
       RETURNING
-        VALUE(rv_string) TYPE string .
+        VALUE(rv_string) TYPE string.
 
     CLASS-METHODS field_keys_to_upper
       CHANGING
-        !ct_fields TYPE ty_name_value_tt .
+        !ct_fields TYPE ty_name_value_tt.
 
     CLASS-METHODS unescape
       IMPORTING
         !iv_string       TYPE string
       RETURNING
-        VALUE(rv_string) TYPE string .
+        VALUE(rv_string) TYPE string.
 
 ENDCLASS.
 
@@ -143,6 +146,7 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
 
 
   METHOD fields_to_map.
+
     FIELD-SYMBOLS <ls_field> LIKE LINE OF it_fields.
 
     CREATE OBJECT ro_string_map EXPORTING iv_case_insensitive = abap_true.
@@ -151,6 +155,7 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
         iv_key = <ls_field>-name
         iv_val = <ls_field>-value ).
     ENDLOOP.
+
   ENDMETHOD.
 
 
@@ -166,12 +171,14 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
 
 
   METHOD new.
+
     CREATE OBJECT ro_instance
       EXPORTING
         ii_gui_services = ii_gui_services
         iv_action       = iv_action
         iv_getdata      = iv_getdata
         it_postdata     = it_postdata.
+
   ENDMETHOD.
 
 
@@ -274,6 +281,7 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '%3F' IN rv_string WITH '?' IGNORING CASE.
     REPLACE ALL OCCURRENCES OF '%3D' IN rv_string WITH '=' IGNORING CASE.
     REPLACE ALL OCCURRENCES OF '%2F' IN rv_string WITH '/' IGNORING CASE.
+    REPLACE ALL OCCURRENCES OF '%23' IN rv_string WITH '#' IGNORING CASE.
     REPLACE ALL OCCURRENCES OF '%25' IN rv_string WITH '%' IGNORING CASE.
     REPLACE ALL OCCURRENCES OF '%26' IN rv_string WITH '&' IGNORING CASE.
     REPLACE ALL OCCURRENCES OF gv_non_breaking_space IN rv_string WITH ` `.
