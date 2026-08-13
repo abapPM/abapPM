@@ -22,7 +22,7 @@ CLASS /apmg/cl_apm_frontend_services DEFINITION
       IMPORTING
         iv_raw_gui_release               TYPE file_table-filename
       RETURNING
-        VALUE(rv_normalized_gui_release) TYPE zif_abapgit_frontend_services=>ty_gui_release.
+        VALUE(rv_normalized_gui_release) TYPE /apmg/if_apm_frontend_services=>ty_gui_release.
 
 ENDCLASS.
 
@@ -413,9 +413,12 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
   METHOD /apmg/if_apm_frontend_services~is_sapgui_for_windows.
 
     TRY.
-        CALL FUNCTION 'GUI_HAS_ACTIVEX'
-          IMPORTING
-            return = rv_result.
+        " Sole ActiveX check is not sufficient as it is also TRUE for WebGUI
+        IF /apmg/if_apm_frontend_services~is_webgui( ) = abap_false.
+          CALL FUNCTION 'GUI_HAS_ACTIVEX'
+            IMPORTING
+              return = rv_result.
+        ENDIF.
       CATCH cx_sy_dyn_call_illegal_func.
 * when running on open-abap
         RETURN.
