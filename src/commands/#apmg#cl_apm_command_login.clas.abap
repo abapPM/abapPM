@@ -75,6 +75,12 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
       response = response
       text     = 'Login error' ).
 
+    IF message IS NOT INITIAL.
+      /apmg/cl_apm_http_login_manage=>clear( registry ).
+
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+    ENDIF.
+
     DATA(login_response) = VALUE ty_response( ).
 
     /apmg/cl_apm_json=>to_abap(
@@ -83,17 +89,13 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
       CHANGING
         result = login_response ).
 
-    " Set token for subsequent requests (overwrites basic authentication)
+    " Save token for subsequent requests (overwrites basic authentication)
     /apmg/cl_apm_http_login_manage=>set_token(
       host     = registry
       username = username
       token    = login_response-token ).
 
-    IF message IS INITIAL.
-      MESSAGE login_response-ok TYPE 'S'.
-    ELSE.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
-    ENDIF.
+    MESSAGE login_response-ok TYPE 'S'.
 
   ENDMETHOD.
 

@@ -52,6 +52,10 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
       response = response
       text     = 'Logout error' ).
 
+    IF message IS NOT INITIAL.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+    ENDIF.
+
     DATA(logout_response) = VALUE ty_response( ).
 
     /apmg/cl_apm_json=>to_abap(
@@ -60,14 +64,10 @@ CLASS /apmg/cl_apm_command_logout IMPLEMENTATION.
       CHANGING
         result = logout_response ).
 
-    " Clear token
+    " Remove token
     /apmg/cl_apm_http_login_manage=>clear( registry ).
 
-    IF message IS INITIAL.
-      MESSAGE logout_response-ok TYPE 'S'.
-    ELSE.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
-    ENDIF.
+    MESSAGE logout_response-ok TYPE 'S'.
 
   ENDMETHOD.
 

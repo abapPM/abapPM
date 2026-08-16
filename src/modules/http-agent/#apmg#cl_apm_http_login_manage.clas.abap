@@ -89,6 +89,9 @@ CLASS /apmg/cl_apm_http_login_manage IMPLEMENTATION.
       <auth>-host = hostname.
       <auth>-auth = auth.
       <auth>-user = user.
+    ELSE.
+      auths[ host = hostname ]-auth = auth.
+      auths[ host = hostname ]-user = user.
     ENDIF.
 
   ENDMETHOD.
