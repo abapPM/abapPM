@@ -14,7 +14,7 @@
 
 # apm
 
-apm is a *package manager* 📦 for ABAP applications and modules, a *website* 🌐, and a *registry* 📑.
+apm is a *package manager* and a *registry* for ABAP applications and modules.
 
 This repository contains the **source code** of the *package manager*, i.e., the developer version of apm. 
 
