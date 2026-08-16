@@ -172,7 +172,7 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
   METHOD check_response.
 
     IF response->is_ok( ) = abap_false.
-      result = |{ text } ({ response->code( ) }): { get_error( response->error( ) ) }|.
+      result = |{ text }: { get_error( response->error( ) ) } (HTTP{ response->code( ) })|.
     ENDIF.
 
   ENDMETHOD.
