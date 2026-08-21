@@ -9,7 +9,7 @@ CLASS /apmg/cl_apm_command_login DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* FUTURE: Enable web login (with optional 2fa)
+* FUTURE: Enable web login (/-/v1/login, with optional 2fa)
 ************************************************************************
   PUBLIC SECTION.
 
@@ -27,8 +27,12 @@ CLASS /apmg/cl_apm_command_login DEFINITION
 
     TYPES:
       BEGIN OF ty_request,
+        _id      TYPE string,
         name     TYPE string,
         password TYPE string,
+        type     TYPE string,
+        roles    TYPE string_table,
+        date     TYPE string,
       END OF ty_request,
       BEGIN OF ty_response,
         ok    TYPE string,
@@ -56,8 +60,10 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
     /apmg/cl_apm_registry=>check_logged_out( registry ).
 
     DATA(login_request) = VALUE ty_request(
+      _id      = |org.couchdb.user:{ username }|
       name     = username
-      password = password ).
+      password = password
+      type     = 'user' ).
 
     DATA(payload) = /apmg/cl_apm_json=>to_string( login_request ).
 
@@ -67,9 +73,7 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
       url       = |{ registry }/-/user/org.couchdb.user:{ username }|
       method    = /apmg/if_apm_http_agent=>c_method-put
       payload   = payload
-      auth_type = auth_type
-      username  = username
-      password  = password ).
+      auth_type = auth_type ).
 
     DATA(message) = /apmg/cl_apm_registry=>check_response(
       response = response
