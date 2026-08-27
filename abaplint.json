@@ -389,7 +389,7 @@
     "xml_consistency": true
   },
   "syntax": {
-    "errorNamespace": "^(/APMG/|LCL_|TY_|LIF_)",
+    "errorNamespace": "^(/APMG/|LCL_|TY_|LIF_|LTCL_)",
     "globalConstants": [],
     "globalMacros": [],
     "version": "v750"
