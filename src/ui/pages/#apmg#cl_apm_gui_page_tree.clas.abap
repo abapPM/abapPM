@@ -468,58 +468,58 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     result = '<div class="pad-1em">'.
 
-    result &&= '<strong>'.
+    result = result && '<strong>'.
 
     CASE view.
       WHEN 1.
-        result &&= 'Dependencies'.
+        result = result && 'Dependencies'.
       WHEN 2.
-        result &&= 'Dependents'.
+        result = result && 'Dependents'.
       WHEN 3.
-        result &&= 'Ranges'.
+        result = result && 'Ranges'.
       WHEN 4.
-        result &&= 'Messages'.
+        result = result && 'Messages'.
       WHEN 5.
-        result &&= 'Checks'.
+        result = result && 'Checks'.
     ENDCASE.
 
-    result &&= '</strong>'.
+    result = result && '</strong>'.
 
-    result &&= '<div>'.
+    result = result && '<div>'.
 
     LOOP AT edges ASSIGNING FIELD-SYMBOL(<edge>).
-      result &&= '<br>'.
+      result = result && '<br>'.
       CASE view.
         WHEN 1.
           IF <edge>->to IS INITIAL.
-            result &&= c_spacer.
+            result = result && c_spacer.
           ELSE.
-            result &&= <edge>->to->name.
+            result = result && <edge>->to->name.
           ENDIF.
         WHEN 2.
           IF <edge>->from IS INITIAL.
-            result &&= c_spacer.
+            result = result && c_spacer.
           ELSE.
-            result &&= <edge>->from->name.
+            result = result && <edge>->from->name.
           ENDIF.
         WHEN 3.
-          result &&= |{ <edge>->name }: { <edge>->spec }|.
+          result = result && |{ <edge>->name }: { <edge>->spec }|.
         WHEN 4.
           IF <edge>->error IS INITIAL.
-            result &&= c_spacer.
+            result = result && c_spacer.
           ELSE.
-            result &&= |<span class="red">{ <edge>->get_error_description( ) }</span>|.
+            result = result && |<span class="red">{ <edge>->get_error_description( ) }</span>|.
           ENDIF.
         WHEN 5.
           IF <edge>->error IS INITIAL.
-            result &&= |<span style="color:green">ok</span>|.
+            result = result && |<span style="color:green">ok</span>|.
           ELSE.
-            result &&= |<span style="color:red">{ <edge>->error }</span>|.
+            result = result && |<span style="color:red">{ <edge>->error }</span>|.
           ENDIF.
       ENDCASE.
     ENDLOOP.
 
-    result &&= '</div></div>'.
+    result = result && '</div></div>'.
 
   ENDMETHOD.
 
@@ -751,9 +751,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     DATA(out) = ``.
     LOOP AT node->errors ASSIGNING FIELD-SYMBOL(<error>).
       IF sy-tabix > 1.
-        out &&= '<br>'.
+        out = out && '<br>'.
       ENDIF.
-      out &&= <error>.
+      out = out && <error>.
     ENDLOOP.
 
     html->add( '<tr>' ).

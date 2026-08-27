@@ -4,7 +4,7 @@ INTERFACE /apmg/if_apm_gui_event PUBLIC.
   DATA mv_getdata TYPE string READ-ONLY.
   DATA mt_postdata TYPE /apmg/if_apm_html_viewer=>ty_post_data READ-ONLY.
   DATA mi_gui_services TYPE REF TO /apmg/if_apm_gui_services READ-ONLY.
-  DATA mv_current_page_name TYPE string.
+  DATA mv_current_page_name TYPE string READ-ONLY.
 
   METHODS query
     RETURNING

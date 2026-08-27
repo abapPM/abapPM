@@ -27,14 +27,13 @@ CLASS /apmg/cx_apm_cancel IMPLEMENTATION.
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 
-    CALL METHOD super->constructor
-      EXPORTING
-        previous = previous
-        msgv1    = msgv1
-        msgv2    = msgv2
-        msgv3    = msgv3
-        msgv4    = msgv4
-        longtext = longtext.
+    super->constructor(
+      previous = previous
+      msgv1    = msgv1
+      msgv2    = msgv2
+      msgv3    = msgv3
+      msgv4    = msgv4
+      longtext = longtext ).
 
     CLEAR me->textid.
     IF textid IS INITIAL.

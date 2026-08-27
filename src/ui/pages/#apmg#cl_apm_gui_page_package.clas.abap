@@ -475,7 +475,9 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
   METHOD copy_to_clipboard.
 
     " Note: export is buggy when using table of raw. Use table of char!
-    DATA clip_table TYPE STANDARD TABLE OF char1024 WITH EMPTY KEY.
+    TYPES ty_clip TYPE c LENGTH 1024.
+
+    DATA clip_table TYPE STANDARD TABLE OF ty_clip WITH EMPTY KEY.
 
     SPLIT data AT cl_abap_char_utilities=>newline INTO TABLE clip_table.
 
