@@ -207,6 +207,8 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
     html->add( |<tr><td>GUI version:    </td><td>{ gui_version }</td></tr>| ).
     html->add( |<tr><td>SY time:        </td><td>{ sy-datum } { sy-uzeit } { sy-tzone }</td></tr>| ).
     html->add( |<tr><td>SY release:     </td><td>{ release-release } SP { release-sp }</td></tr>| ).
+    html->add( |<tr><td>Charsize:       </td><td>{ cl_abap_char_utilities=>charsize }</td></tr>| ).
+    html->add( |<tr><td>Endian:         </td><td>{ cl_abap_char_utilities=>endian }</td></tr>| ).
     html->add( |</table>| ).
     html->add( |<br>| ).
 
