@@ -124,6 +124,12 @@ CLASS /apmg/cl_apm_gui_page DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS render_environment
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS render_hotkey_overview
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_html
@@ -149,6 +155,13 @@ CLASS /apmg/cl_apm_gui_page DEFINITION
     METHODS is_edge_control_warning_needed
       RETURNING
         VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS js_bool
+      IMPORTING
+        !value        TYPE abap_bool
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
@@ -310,8 +323,13 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
 
     result = result && | - { frontend_services->get_gui_type( ) }|.
 
+    " Only SAP GUI for Windows embeds a browser control whose type is worth
+    " reporting. The HTML GUI runs in the browser of the user, and guessing the
+    " control from its user agent produced nonsense there (e.g. "IE" on Chrome).
     " Will be filled by JS method displayBrowserControlFooter
-    result = result && '<span id="browser-control-footer"></span>'.
+    IF frontend_services->is_sapgui_for_windows( ) = abap_true.
+      result = result && '<span id="browser-control-footer"></span>'.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -418,6 +436,17 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD js_bool.
+
+    IF value = abap_true.
+      result = 'true'.
+    ELSE.
+      result = 'false'.
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD render_back_navigation.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
@@ -473,9 +502,24 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD render_environment.
+
+    result = /apmg/cl_apm_html=>create( ).
+
+    DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
+
+    " Tell the frontend which GUI it is rendered into
+    result->add( 'setEnvironment({' ).
+    result->add( |  isWebGui: { js_bool( frontend_services->is_webgui( ) ) },| ).
+    result->add( |  isSapGuiForWindows: { js_bool( frontend_services->is_sapgui_for_windows( ) ) }| ).
+    result->add( '});' ).
+
+  ENDMETHOD.
+
+
   METHOD render_error_message_box.
 
-    " You should remember that the we have to instantiate ro_html even
+    " You should remember that the we have to instantiate result even
     " it's overwritten further down. Because ADD checks whether it's
     " bound.
     result = /apmg/cl_apm_html=>create( ).
@@ -509,6 +553,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
 
   METHOD render_link_hints.
     DATA(html) = /apmg/cl_apm_html=>create( ).
+
     DATA(link_hint_key) = settings-keyboard_settings-link_hint_key.
 
     IF settings-keyboard_settings-link_hints_enabled = abap_true AND link_hint_key IS NOT INITIAL.
@@ -524,6 +569,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
   METHOD scripts.
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
+    html->add( render_environment( ) ).
     html->add( render_link_hints( ) ).
     html->add( render_command_palettes( ) ).
     html->add( render_deferred_parts( c_html_parts-scripts ) ).
