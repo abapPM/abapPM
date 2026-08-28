@@ -30,6 +30,7 @@ CLASS /apmg/cl_apm_gui_event DEFINITION
 
     DATA mo_query TYPE REF TO /apmg/cl_apm_string_map.
     DATA mo_form_data TYPE REF TO /apmg/cl_apm_string_map.
+    DATA mv_current_page_name TYPE string.
 
     CLASS-DATA gv_non_breaking_space TYPE string.
 
@@ -90,6 +91,11 @@ ENDCLASS.
 CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
 
 
+  METHOD /apmg/if_apm_gui_event~current_page_name.
+    rv_page_name = mv_current_page_name.
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_gui_event~form_data.
 
     IF mo_form_data IS NOT BOUND.
@@ -139,7 +145,7 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
     /apmg/if_apm_gui_event~mt_postdata     = it_postdata.
 
     IF ii_gui_services IS BOUND.
-      /apmg/if_apm_gui_event~mv_current_page_name = ii_gui_services->get_current_page_name( ).
+      mv_current_page_name = ii_gui_services->get_current_page_name( ).
     ENDIF.
 
   ENDMETHOD.
