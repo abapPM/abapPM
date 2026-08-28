@@ -91,25 +91,24 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
-    CASE ii_event->mv_action.
-      WHEN c_action-login.
+    IF ii_event->mv_action = c_action-login.
 
-        validation_log = validate_form( form_data ).
+      validation_log = validate_form( form_data ).
 
-        IF validation_log->is_empty( ) = abap_true.
-          DATA(params) = get_parameters( form_data ).
+      IF validation_log->is_empty( ) = abap_true.
+        DATA(params) = get_parameters( form_data ).
 
-          /apmg/cl_apm_command_login=>run(
-            registry = settings-registry
-            username = params-username
-            password = params-password ).
+        /apmg/cl_apm_command_login=>run(
+          registry = settings-registry
+          username = params-username
+          password = params-password ).
 
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
-        ENDIF.
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+      ELSE.
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+      ENDIF.
 
-    ENDCASE.
+    ENDIF.
 
   ENDMETHOD.
 
