@@ -358,7 +358,7 @@
       "maxStatements": 20
     },
     "reduce_string_templates": true,
-    "redundant_conversion": true,
+    "redundant_conversion": false,
     "release_idoc": true,
     "remove_descriptions": true,
     "rfc_error_handling": true,
