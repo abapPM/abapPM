@@ -275,7 +275,7 @@
     "no_chained_assignment": true,
     "no_comments_between_methods": true,
     "no_dynamic_stuff": true,
-    "no_exclamation_escape": true,
+    "no_exclamation_escape": false,
     "no_external_form_calls": {
       "exclude": [
         "#apmg#apm_forms"
