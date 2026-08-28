@@ -43,6 +43,7 @@
     "7bit_ascii": true,
     "abapdoc": false,
     "add_test_attributes": true,
+    "aff_and_xml": true,
     "align_parameters": true,
     "align_pseudo_comments": true,
     "align_type_expressions": true,
@@ -55,15 +56,21 @@
         "NSPC",
         "PROG",
         "TRAN",
-        "W3MI"]
+        "W3MI"
+      ]
     },
     "ambiguous_statement": true,
     "avoid_use": true,
     "begin_end_names": true,
     "begin_single_include": true,
     "call_transaction_authority_check": true,
+    "catch_and_raise": true,
+    "cds_association_name": true,
+    "cds_check_syntax": true,
     "cds_comment_style": true,
+    "cds_field_order": true,
     "cds_legacy_view": true,
+    "cds_naming": true,
     "cds_parser_error": true,
     "chain_mainly_declarations": true,
     "change_if_to_case": true,
@@ -79,6 +86,7 @@
     "check_transformation_exists": true,
     "class_attribute_names": false,
     "classic_exceptions_overlap": true,
+    "clear_exporting_parameters": true,
     "cloud_types": true,
     "colon_missing_space": true,
     "commented_code": true,
@@ -93,6 +101,11 @@
     },
     "cyclomatic_complexity": true,
     "dangerous_statement": {
+      "deleteDynpro": true,
+      "deleteReport": true,
+      "deleteTextpool": true,
+      "dynamicSQL": true,
+      "editorCallForReport": "X",
       "exclude": [
         "#apmg#cl_apm_env",
         "#apmg#cl_apm_persist_apm",
@@ -100,18 +113,15 @@
         "#apmg#cl_apm_tap"
       ],
       "execSQL": true,
-      "kernelCall": true,
-      "systemCall": true,
-      "insertReport": true,
+      "exportDynpro": true,
       "generateDynpro": true,
       "generateReport": true,
       "generateSubroutine": true,
-      "deleteReport": true,
-      "deleteTextpool": true,
+      "ignoreRAPQueryProvider": "X",
+      "insertReport": true,
       "insertTextpool": true,
-      "deleteDynpro": true,
-      "exportDynpro": true,
-      "dynamicSQL": true
+      "kernelCall": true,
+      "systemCall": true
     },
     "db_operation_in_loop": false,
     "definitions_top": true,
@@ -130,6 +140,7 @@
     },
     "expand_macros": true,
     "exporting": true,
+    "fm_global_parameters_obsolete": true,
     "forbidden_identifier": true,
     "forbidden_pseudo_and_pragma": true,
     "forbidden_void_type": {
@@ -181,26 +192,30 @@
     "fully_type_constants": true,
     "fully_type_itabs": true,
     "function_module_recommendations": {
-      "exclude": ["#apmg#cl_apm_progress_bar"]
-    },      
+      "exclude": [
+        "#apmg#cl_apm_progress_bar"
+      ]
+    },
     "functional_writing": true,
     "global_class": true,
     "identical_conditions": true,
     "identical_contents": true,
     "identical_descriptions": true,
     "identical_form_names": true,
+    "identical_move": true,
     "if_in_if": false,
     "implement_methods": true,
     "implicit_start_of_selection": true,
     "in_statement_indentation": false,
     "indentation": {
-      "ignoreExceptions": true,
       "alignTryCatch": false,
-      "selectionScreenBlockIndentation": true,
       "globalClassSkipFirst": false,
+      "ignoreExceptions": true,
       "ignoreGlobalClassDefinition": false,
-      "ignoreGlobalInterface": false
+      "ignoreGlobalInterface": false,
+      "selectionScreenBlockIndentation": true
     },
+    "index_completely_contained": true,
     "inline_data_old_versions": true,
     "intf_referencing_clas": {
       "allow": [
@@ -216,7 +231,9 @@
     },
     "line_break_style": true,
     "line_length": {
-      "exclude": ["#apmg#cl_apm_emoji.clas.macros"]
+      "exclude": [
+        "#apmg#cl_apm_emoji.clas.macros"
+      ]
     },
     "line_only_punc": true,
     "local_class_naming": true,
@@ -230,13 +247,15 @@
     "message_exists": true,
     "method_implemented_twice": true,
     "method_length": {
-      "statements": 100,
+      "checkForms": true,
       "errorWhenEmpty": true,
       "ignoreTestClasses": false,
-      "checkForms": true
+      "statements": 100
     },
     "method_overwrites_builtin": {
-      "exclude": ["#apmg#cl_apm_tap"]
+      "exclude": [
+        "#apmg#cl_apm_tap"
+      ]
     },
     "method_parameter_names": false,
     "mix_returning": true,
@@ -247,23 +266,32 @@
     "msag_consistency": true,
     "names_no_dash": true,
     "nesting": {
-      "exclude": ["#apmg#cl_apm_semver"]
+      "exclude": [
+        "#apmg#cl_apm_semver"
+      ]
     },
     "newline_between_methods": true,
     "no_aliases": true,
     "no_chained_assignment": true,
+    "no_comments_between_methods": true,
+    "no_dynamic_stuff": true,
+    "no_exclamation_escape": true,
     "no_external_form_calls": {
-      "exclude": ["#apmg#apm_forms"]
+      "exclude": [
+        "#apmg#apm_forms"
+      ]
     },
     "no_inline_in_optional_branches": false,
+    "no_macros": true,
+    "no_mandt_in_database_operations": true,
     "no_prefixes": {
-      "data": "^[LGM].?_",
-      "statics": "^S.?_",
-      "fieldSymbols": "^<[LGM].?_",
+      "allowIsPrefixBoolean": true,
       "constants": "^[LGM]C_",
-      "types": "^.*_TY_",
+      "data": "^[LGM].?_",
+      "fieldSymbols": "^<[LGM].?_",
       "methodParameters": "^[ICER].?_",
-      "allowIsPrefixBoolean": true
+      "statics": "^S.?_",
+      "types": "^.*_TY_"
     },
     "no_public_attributes": {
       "allowReadOnly": true,
@@ -313,6 +341,7 @@
     "omit_preceding_zeros": true,
     "omit_receiving": true,
     "parser_702_chaining": true,
+    "parser_bad_exceptions": true,
     "parser_error": true,
     "parser_missing_space": true,
     "pragma_style": true,
@@ -329,21 +358,23 @@
       "maxStatements": 20
     },
     "reduce_string_templates": true,
+    "redundant_conversion": true,
     "release_idoc": true,
     "remove_descriptions": true,
     "rfc_error_handling": true,
     "select_add_order_by": false,
     "select_performance": {
+      "endSelect": true,
       "exclude": [
         "#apmg#cl_apm_installer",
         "#apmg#cl_apm_persist_apm"
       ],
-      "endSelect": true,
       "selectStar": true,
       "starOkayIfFewColumns": 10
     },
     "select_single_full_key": true,
     "selection_screen_naming": true,
+    "selection_screen_texts_missing": true,
     "sequential_blank": true,
     "short_case": true,
     "sicf_consistency": true,
@@ -359,8 +390,11 @@
     "superclass_final": true,
     "superfluous_value": true,
     "sy_modification": {
-      "exclude": ["#apmg#cl_apm_tap"]
+      "exclude": [
+        "#apmg#cl_apm_tap"
+      ]
     },
+    "sy_read_restriction": true,
     "tabl_enhancement_category": true,
     "tables_declared_locally": true,
     "try_without_catch": true,
@@ -373,8 +407,10 @@
     "unnecessary_return": true,
     "unreachable_code": true,
     "unsecure_fae": {
-      "exclude": ["#apmg#cl_apm_installer"]
-    },      
+      "exclude": [
+        "#apmg#cl_apm_installer"
+      ]
+    },
     "unused_ddic": true,
     "unused_macros": true,
     "unused_methods": true,
@@ -386,6 +422,7 @@
     "use_new": true,
     "when_others_last": true,
     "whitespace_end": true,
+    "xml_bom": true,
     "xml_consistency": true
   },
   "syntax": {
