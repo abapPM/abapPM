@@ -703,6 +703,7 @@ CLASS /apmg/cl_apm_tar IMPLEMENTATION.
 
   METHOD _from_filename.
 
+    CLEAR prefix.
     DATA(temp_name) = filename.
     DO.
       IF strlen( temp_name ) <= 100.

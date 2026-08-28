@@ -63,6 +63,9 @@ CLASS /apmg/cl_apm_logo IMPLEMENTATION.
 
   METHOD replace_width_height.
 
+    " Without CONV it will use p(8,0) and loose the decimal places
+    " TODO: abaplint false positive
+    " https://github.com/abaplint/abaplint/issues/4254
     DATA(width) = CONV ty_ratio( height * ratio ).
 
     result = replace(
