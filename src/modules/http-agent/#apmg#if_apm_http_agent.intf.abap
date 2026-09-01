@@ -43,6 +43,7 @@ INTERFACE /apmg/if_apm_http_agent PUBLIC.
       !method       TYPE string DEFAULT c_method-get
       !headers      TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
       !payload      TYPE any OPTIONAL " can be char, string, xstring
+      !logon_popup  TYPE abap_bool DEFAULT abap_false
     RETURNING
       VALUE(result) TYPE REF TO /apmg/if_apm_http_response
     RAISING

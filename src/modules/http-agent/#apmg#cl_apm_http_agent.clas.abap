@@ -110,7 +110,8 @@ CLASS /apmg/cl_apm_http_agent IMPLEMENTATION.
     ENDIF.
 
     " If "Authorization" header is set, disable standard SAP login popup
-    IF http_client->request->get_header_field( /apmg/if_apm_http_agent=>c_header-authorization ) IS NOT INITIAL.
+    IF logon_popup = abap_false OR
+      http_client->request->get_header_field( /apmg/if_apm_http_agent=>c_header-authorization ) IS NOT INITIAL.
       http_client->propertytype_logon_popup = http_client->co_disabled.
     ENDIF.
 

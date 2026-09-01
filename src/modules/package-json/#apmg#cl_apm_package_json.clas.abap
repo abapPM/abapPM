@@ -50,6 +50,12 @@ CLASS /apmg/cl_apm_package_json DEFINITION
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_package_json=>ty_packages.
 
+    CLASS-METHODS is_package_key
+      IMPORTING
+        !value        TYPE csequence
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     CLASS-METHODS get_package_key
       IMPORTING
         !package      TYPE devclass
@@ -562,6 +568,14 @@ CLASS /apmg/cl_apm_package_json IMPLEMENTATION.
         instance = mock ).
       INSERT instance INTO TABLE instances.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD is_package_key.
+
+    result = xsdbool( value CP |{ /apmg/if_apm_persist_apm=>c_key_type-package }:*:|
+                            && |{ /apmg/if_apm_persist_apm=>c_key_extra-package_json }| ).
 
   ENDMETHOD.
 

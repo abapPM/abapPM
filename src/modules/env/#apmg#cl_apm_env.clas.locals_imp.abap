@@ -676,14 +676,14 @@ CLASS lcl_abap_environment IMPLEMENTATION.
   METHOD is_gui.
 
     DATA:
-      is_gui_running TYPE c LENGTH 1,
-      has_activex    TYPE c LENGTH 1,
-      has_javabeans  TYPE c LENGTH 1,
-      is_its         TYPE c LENGTH 1.
+      is_gui_available TYPE c LENGTH 1,
+      has_activex      TYPE c LENGTH 1,
+      has_javabeans    TYPE c LENGTH 1,
+      is_its           TYPE c LENGTH 1.
 
     CALL FUNCTION 'GUI_IS_AVAILABLE'
       IMPORTING
-        return = is_gui_running.
+        return = is_gui_available.
 
     CALL FUNCTION 'GUI_HAS_ACTIVEX'
       IMPORTING
@@ -700,8 +700,10 @@ CLASS lcl_abap_environment IMPLEMENTATION.
     ENDIF.
 
     CASE name.
+      WHEN /apmg/if_apm_env=>is_gui_available.
+        result = is_gui_available.
       WHEN /apmg/if_apm_env=>is_gui_windows.
-        result = xsdbool( is_gui_running = abap_true AND has_javabeans = abap_false AND is_its = abap_false ).
+        result = xsdbool( is_gui_available = abap_true AND has_javabeans = abap_false AND is_its = abap_false ).
       WHEN /apmg/if_apm_env=>is_gui_activex.
         result = has_activex.
       WHEN /apmg/if_apm_env=>is_gui_java.

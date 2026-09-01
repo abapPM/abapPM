@@ -15,7 +15,8 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
 
   TYPES:
     ty_dependency_type TYPE string,
-    ty_error_type      TYPE string.
+    ty_error_type      TYPE string,
+    ty_diff_action     TYPE string.
 
   CONSTANTS:
     BEGIN OF c_dependency_type,
@@ -33,9 +34,23 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
       invalid    TYPE ty_error_type VALUE 'INVALID',
     END OF c_error_type.
 
+  CONSTANTS:
+    BEGIN OF c_diff_action,
+      add    TYPE ty_diff_action VALUE 'ADD',
+      change TYPE ty_diff_action VALUE 'CHANGE',
+      remove TYPE ty_diff_action VALUE 'REMOVE',
+    END OF c_diff_action.
+
   TYPES:
     ty_node_ref  TYPE REF TO /apmg/cl_apm_arborist_node,
     ty_node_refs TYPE STANDARD TABLE OF ty_node_ref WITH KEY table_line.
+
+  TYPES:
+    BEGIN OF ty_add_package,
+      name    TYPE /apmg/if_apm_types=>ty_name,
+      version TYPE /apmg/if_apm_types=>ty_version,
+    END OF ty_add_package,
+    ty_add_packages TYPE STANDARD TABLE OF ty_add_package WITH KEY name.
 
   TYPES:
     "! Log entry for tree issues
@@ -69,8 +84,19 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
 
   " OPTIMIZING AND DESIGNING
 
-  "! Build an ideal tree from package.abap.json and various lockfiles
-  METHODS build_ideal_tree.
+  "! Build an ideal tree from the current tree with add/remove requests
+  METHODS build_ideal_tree
+    IMPORTING
+      add_packages    TYPE ty_add_packages OPTIONAL
+      remove_packages TYPE string_table OPTIONAL
+      is_production   TYPE abap_bool DEFAULT abap_true
+    RAISING
+      /apmg/cx_apm_error.
+
+  "! Get the diff between current and ideal trees
+  METHODS get_diff
+    RETURNING
+      VALUE(result) TYPE REF TO /apmg/cl_apm_arborist_diff.
 
   " WRITING
 
@@ -82,8 +108,13 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
     RETURNING
       VALUE(result) TYPE ty_log.
 
-  "! Get all nodes in the tree
-  METHODS get_tree
+  "! Get all nodes in the current (actual) tree
+  METHODS get_current_tree
+    RETURNING
+      VALUE(result) TYPE ty_node_refs.
+
+  "! Get all nodes in the ideal tree
+  METHODS get_ideal_tree
     RETURNING
       VALUE(result) TYPE ty_node_refs.
 

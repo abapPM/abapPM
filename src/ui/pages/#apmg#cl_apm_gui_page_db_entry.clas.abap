@@ -136,7 +136,7 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
         " Validate manifest
         " TODO: In case of errors, the editor reverts to the stored version and edits get lost
         " Ideally, it should retain the edits without saving them... but how?
-        IF key CP 'PACKAGE:*:PACKAGE_JSON'.
+        IF /apmg/cl_apm_package_json=>is_package_key( key ).
           validate_package_json( val ).
         ENDIF.
 

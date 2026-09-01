@@ -121,6 +121,7 @@ INTERFACE /apmg/if_apm_env PUBLIC.
     is_spool_proc              TYPE string VALUE 'IS_PROCESS_SPOOL',
     is_enqueue_proc            TYPE string VALUE 'IS_PROCESS_ENQUEUE',
     " GUI
+    is_gui_available           TYPE string VALUE 'IS_GUI_AVAILABLE',
     is_gui_windows             TYPE string VALUE 'IS_GUI_WINDOWS',
     is_gui_activex             TYPE string VALUE 'IS_GUI_ACTIVEX',
     is_gui_java                TYPE string VALUE 'IS_GUI_JAVA',

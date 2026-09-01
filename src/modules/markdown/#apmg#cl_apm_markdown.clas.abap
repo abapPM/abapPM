@@ -47,35 +47,34 @@ CLASS /apmg/cl_apm_markdown DEFINITION
 
     METHODS set_breaks_enabled
       IMPORTING
-        VALUE(breaks_enabled) TYPE clike
+        breaks_enabled TYPE clike
       RETURNING
-        VALUE(result)         TYPE REF TO /apmg/cl_apm_markdown.
+        VALUE(result)  TYPE REF TO /apmg/cl_apm_markdown.
 
     METHODS set_markup_escaped
       IMPORTING
-        VALUE(markup_escaped) TYPE clike
+        markup_escaped TYPE clike
       RETURNING
-        VALUE(result)         TYPE REF TO /apmg/cl_apm_markdown.
+        VALUE(result)  TYPE REF TO /apmg/cl_apm_markdown.
 
     METHODS set_urls_linked
       IMPORTING
-        VALUE(urls_linked) TYPE clike
+        urls_linked   TYPE clike
       RETURNING
-        VALUE(result)      TYPE REF TO /apmg/cl_apm_markdown.
+        VALUE(result) TYPE REF TO /apmg/cl_apm_markdown.
 
     METHODS set_safe_mode
       IMPORTING
-        !iv_safe_mode TYPE clike
+        safe_mode     TYPE clike
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_markdown.
 
     METHODS constructor
       IMPORTING
-        !root_href TYPE string OPTIONAL
-        !root_img  TYPE string OPTIONAL
-        !path      TYPE string OPTIONAL
-        !sapevent  TYPE abap_bool DEFAULT abap_false.
-
+        root_href TYPE string OPTIONAL
+        root_img  TYPE string OPTIONAL
+        path      TYPE string OPTIONAL
+        sapevent  TYPE abap_bool DEFAULT abap_false.
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -614,13 +613,12 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-element-text-name = 'code'.
       result-element-text-text = line-body+4.
     ENDIF.
-  ENDMETHOD.                    "block_code
+  ENDMETHOD.
 
 
   METHOD block_code_complete.
     result = block.
-    result-element-text-text = result-element-text-text.
-  ENDMETHOD.                    "block_code_complete
+  ENDMETHOD.
 
 
   METHOD block_code_continue.
@@ -639,7 +637,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       CONCATENATE result-element-text-text %_newline text
         INTO result-element-text-text RESPECTING BLANKS.
     ENDIF.
-  ENDMETHOD.                    "block_code_continue
+  ENDMETHOD.
 
 
   METHOD block_comment.
@@ -656,7 +654,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         result-closed = abap_true.
       ENDIF.
     ENDIF.
-  ENDMETHOD.                    "block_Comment
+  ENDMETHOD.
 
 
   METHOD block_comment_continue.
@@ -669,7 +667,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     IF sy-subrc = 0.
       result-closed = abap_true.
     ENDIF.
-  ENDMETHOD.                    "block_Comment_Continue
+  ENDMETHOD.
 
 
   METHOD block_fencedcode.
@@ -694,13 +692,12 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-element-text-name = 'code'.
       result-element-text-handler = 'syntax_highlighter'. " apm
     ENDIF.
-  ENDMETHOD.                    "block_Fenced_Code
+  ENDMETHOD.
 
 
   METHOD block_fencedcode_complete.
     result = block.
-    result-element-text-text = result-element-text-text.
-  ENDMETHOD.                    "block_Fenced_Code_Complete
+  ENDMETHOD.
 
 
   METHOD block_fencedcode_continue.
@@ -725,7 +722,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     CONCATENATE
       result-element-text-text %_newline line-body
     INTO result-element-text-text.
-  ENDMETHOD.                    "block_Fenced_Code_Continue
+  ENDMETHOD.
 
 
   METHOD block_header.
@@ -783,7 +780,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       <attribute>-value = id.
     ENDIF.
     "<<< apm
-  ENDMETHOD.                    "block_Header
+  ENDMETHOD.
 
 
   METHOD block_list.
@@ -838,7 +835,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-li-handler = 'li'.
       APPEND m2 TO result-li-lines.
     ENDIF.
-  ENDMETHOD.                    "block_List
+  ENDMETHOD.
 
 
   METHOD block_list_complete.
@@ -858,7 +855,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         ENDIF.
       ENDLOOP.
     ENDIF.
-  ENDMETHOD.                    "block_List_complete
+  ENDMETHOD.
 
 
   METHOD block_list_continue.
@@ -913,7 +910,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     ENDIF.
 
     CLEAR result.
-  ENDMETHOD.                    "block_List_Continue
+  ENDMETHOD.
 
 
   METHOD block_markup.
@@ -965,7 +962,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       ENDIF.
 
     ENDIF. "regex sy-subrc = 0
-  ENDMETHOD.                    "block_Markup
+  ENDMETHOD.
 
 
   METHOD block_markup_continue.
@@ -1002,7 +999,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     body = _adjust_markup( line-body ).
     CONCATENATE result-markup %_newline body INTO result-markup.
     "<<< apm
-  ENDMETHOD.                    "block_Markup_Continue
+  ENDMETHOD.
 
 
   METHOD block_quote.
@@ -1025,7 +1022,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       " <<< apm
       APPEND m1 TO result-element-lines.
     ENDIF.
-  ENDMETHOD.                    "block_Quote
+  ENDMETHOD.
 
 
   METHOD block_quote_complete.
@@ -1061,7 +1058,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result = block.
       APPEND line-text TO result-element-lines.
     ENDIF.
-  ENDMETHOD.                    "block_Quote_Continue
+  ENDMETHOD.
 
 
   METHOD block_reference.
@@ -1093,7 +1090,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
       result-hidden = abap_true.
     ENDIF.
-  ENDMETHOD.                    "block_Reference
+  ENDMETHOD.
 
 
   METHOD block_rule.
@@ -1104,7 +1101,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     IF sy-subrc = 0.
       result-element-name = 'hr'.
     ENDIF.
-  ENDMETHOD.                    "block_Rule
+  ENDMETHOD.
 
 
   METHOD block_setextheader.
@@ -1119,7 +1116,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         result-element-name = 'h2'.
       ENDIF.
     ENDIF.
-  ENDMETHOD.                    "block_SetextHeader
+  ENDMETHOD.
 
 
   METHOD block_table.
@@ -1245,7 +1242,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       <element_text1>-name = 'tbody'.
       <element_text1>-handler = 'elements'.
     ENDIF. "sy-subrc = 0 and line-text na ' -:|'.
-  ENDMETHOD.                    "block_Table
+  ENDMETHOD.
 
 
   METHOD block_table_continue.
@@ -1316,7 +1313,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         ENDIF.
       ENDLOOP. "lt_matches
     ENDIF. "line-text cs '|'
-  ENDMETHOD.                    "block_Table_Continue
+  ENDMETHOD.
 
 
   METHOD chop.
@@ -1327,7 +1324,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN regex WITH '\\$1' ##REGEX_POSIX.
     CONCATENATE '[' regex ']*\Z' INTO regex.
     REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH '' ##REGEX_POSIX.
-  ENDMETHOD.                    "trim
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -1575,7 +1572,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     LOOP AT objdescr->methods ASSIGNING <method>.
       APPEND <method>-name TO methods.
     ENDLOOP.
-  ENDMETHOD.                    "constructor
+  ENDMETHOD.
 
 
   METHOD element.
@@ -1665,7 +1662,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     ELSE.
       result = |{ result } />|.
     ENDIF.
-  ENDMETHOD.                    "element
+  ENDMETHOD.
 
 
   METHOD elements.
@@ -1682,7 +1679,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     CONCATENATE LINES OF markup INTO result SEPARATED BY %_newline.
     CONCATENATE %_newline result %_newline INTO result.
-  ENDMETHOD.                    "elements
+  ENDMETHOD.
 
 
   METHOD filter_unsafe_url_in_attribute.
@@ -1735,7 +1732,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         ENDIF.
       ENDIF.
     ENDIF.
-  ENDMETHOD.                    "htmlspecialchars
+  ENDMETHOD.
 
 
   METHOD inline_code.
@@ -1764,7 +1761,6 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       IF not_found IS INITIAL.
         text = m1.
         CONDENSE text.
-        text = text.
         REPLACE ALL OCCURRENCES OF REGEX '[ ]*\n' IN text WITH ' ' ##REGEX_POSIX.
 
         result-extent = strlen( m0 ).
@@ -1774,7 +1770,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       ENDIF.
       SHIFT marker_comb LEFT.
     ENDWHILE.
-  ENDMETHOD.                    "inline_code
+  ENDMETHOD.
 
 
   METHOD inline_emailtag.
@@ -1812,7 +1808,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       <attribute>-name = 'href'.
       <attribute>-value = url.
     ENDIF.
-  ENDMETHOD.                    "inline_EmailTag
+  ENDMETHOD.
 
 
   METHOD inline_emphasis.
@@ -1880,7 +1876,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     result-element-name = emphasis.
     result-element-handler = 'line'.
     result-element-text-text = m1.
-  ENDMETHOD.                    "inline_Emphasis
+  ENDMETHOD.
 
 
   METHOD inline_escapesequence.
@@ -1892,7 +1888,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-markup = excerpt-text+1(1).
       result-extent = 2.
     ENDIF.
-  ENDMETHOD.                    "inline_EscapeSequence
+  ENDMETHOD.
 
 
   METHOD inline_highlight.
@@ -1948,7 +1944,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     <attribute>-value = link-element-text-text.
 
     APPEND LINES OF link-element-attributes TO result-element-attributes.
-  ENDMETHOD.                    "inline_Image
+  ENDMETHOD.
 
 
   METHOD inline_link.
@@ -2048,7 +2044,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
         <attribute>-value = def_val->get_data( ).
       ENDIF.
     ENDIF.
-  ENDMETHOD.                    "inline_Link
+  ENDMETHOD.
 
 
   METHOD inline_markup.
@@ -2074,7 +2070,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-extent = strlen( m0 ).
       result-markup = _adjust_markup( m0 ). " apm
     ENDIF.
-  ENDMETHOD.                    "inline_Markup
+  ENDMETHOD.
 
 
   METHOD inline_specialcharacter.
@@ -2103,7 +2099,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       CONCATENATE '&' special ';' INTO result-markup.
       result-extent = 1.
     ENDIF.
-  ENDMETHOD.                    "inline_SpecialCharacter
+  ENDMETHOD.
 
 
   METHOD inline_strikethrough.
@@ -2122,7 +2118,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result-element-text-text = m1.
       result-element-handler = 'line'.
     ENDIF.
-  ENDMETHOD.                    "inline_Strikethrough
+  ENDMETHOD.
 
 
   METHOD inline_url.
@@ -2148,7 +2144,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       <attribute>-name = 'href'.
       <attribute>-value = m0.
     ENDIF.
-  ENDMETHOD.                    "inline_Url
+  ENDMETHOD.
 
 
   METHOD inline_urltag.
@@ -2172,7 +2168,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       <attribute>-name = 'href'.
       <attribute>-value = url.
     ENDIF.
-  ENDMETHOD.                    "inline_UrlTag
+  ENDMETHOD.
 
 
   METHOD li.
@@ -2199,7 +2195,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       result = |<input type="checkbox" disabled="disabled" checked="checked">{ result+3 }|.
     ENDIF.
     "<<< apm
-  ENDMETHOD.                    "li
+  ENDMETHOD.
 
 
   METHOD line.
@@ -2305,7 +2301,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     markup_part = unmarked_text( text ).
     CONCATENATE result markup_part INTO result.
-  ENDMETHOD.                    "line
+  ENDMETHOD.
 
 
   METHOD magic_move.
@@ -2418,7 +2414,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
             to   = to ).
       ENDIF.
     ENDIF.
-  ENDMETHOD.                    "magic_move
+  ENDMETHOD.
 
 
   METHOD match_marked_string.
@@ -2472,7 +2468,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     result-element-name = 'p'.
     result-element-text-text = line-text.
     result-element-handler = 'line'.
-  ENDMETHOD.                    "paragraph
+  ENDMETHOD.
 
 
   METHOD sanitise_element.
@@ -2512,27 +2508,27 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
 
   METHOD set_breaks_enabled.
-    breaks_enabled = breaks_enabled.
+    me->breaks_enabled = breaks_enabled.
     result = me.
-  ENDMETHOD.                    "set_breaks_enabled
+  ENDMETHOD.
 
 
   METHOD set_markup_escaped.
-    markup_escaped = markup_escaped.
+    me->markup_escaped = markup_escaped.
     result = me.
-  ENDMETHOD.                    "set_markup_escaped
+  ENDMETHOD.
 
 
   METHOD set_safe_mode.
-    safe_mode = iv_safe_mode.
+    me->safe_mode = safe_mode.
     result = me.
   ENDMETHOD.
 
 
   METHOD set_urls_linked.
-    urls_linked = urls_linked.
+    me->urls_linked = urls_linked.
     result = me.
-  ENDMETHOD.                    "set_urls_linked
+  ENDMETHOD.
 
 
   METHOD string_at_start.
@@ -2745,7 +2741,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     ENDDO.
     " <<< apm
 
-  ENDMETHOD.                    "text
+  ENDMETHOD.
 
 
   METHOD trim.
@@ -2756,7 +2752,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF REGEX '([\.\?\*\+\|])' IN regex WITH '\\$1' ##REGEX_POSIX.
     CONCATENATE '(\A[' regex ']*)|([' regex ']*\Z)' INTO regex.
     REPLACE ALL OCCURRENCES OF REGEX regex IN result WITH '' ##REGEX_POSIX.
-  ENDMETHOD.                    "trim
+  ENDMETHOD.
 
 
   METHOD unmarked_text.
@@ -2771,7 +2767,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       REPLACE ALL OCCURRENCES OF REGEX '(?:[ ][ ]+|[ ]*\\)\n' IN result WITH break ##REGEX_POSIX.
       REPLACE ALL OCCURRENCES OF REGEX ' \n' IN result WITH %_newline ##REGEX_POSIX.
     ENDIF.
-  ENDMETHOD.                    "unmarked_text
+  ENDMETHOD.
 
 
   METHOD _adjust_a_href.
@@ -3077,5 +3073,5 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     CONCATENATE result %_newline INTO result RESPECTING BLANKS.
 
-  ENDMETHOD.                    "lines
+  ENDMETHOD.
 ENDCLASS.

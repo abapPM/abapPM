@@ -54,8 +54,10 @@ CLASS /apmg/cl_apm_arborist DEFINITION
     DATA log TYPE /apmg/if_apm_arborist=>ty_log.
     DATA visited TYPE ty_visited_set.
     DATA processing_stack TYPE string_table.
+    DATA current_tree TYPE REF TO /apmg/cl_apm_arborist_tree.
+    DATA ideal_tree TYPE REF TO /apmg/cl_apm_arborist_tree.
+    DATA is_production TYPE abap_bool.
 
-    "! Add a log entry
     METHODS add_log
       IMPORTING
         !type    TYPE string
@@ -64,54 +66,100 @@ CLASS /apmg/cl_apm_arborist DEFINITION
         !version TYPE string OPTIONAL
         !spec    TYPE string OPTIONAL.
 
-    "! Process a single package and its dependencies
     METHODS process_package
       IMPORTING
+        !tree    TYPE REF TO /apmg/cl_apm_arborist_tree
         !package TYPE /apmg/if_apm_package_json=>ty_package
         !depth   TYPE i DEFAULT 0.
 
-    "! Process dependencies of a node
     METHODS process_dependencies
       IMPORTING
+        !tree  TYPE REF TO /apmg/cl_apm_arborist_tree
         !node  TYPE REF TO /apmg/cl_apm_arborist_node
         !depth TYPE i.
 
-    "! Process uninstalled dependencies
-    METHODS process_uninstalled.
+    METHODS process_uninstalled
+      IMPORTING
+        !tree TYPE REF TO /apmg/cl_apm_arborist_tree.
+
+    METHODS try_add_uninstalled
+      IMPORTING
+        !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
+        !edge         TYPE REF TO /apmg/cl_apm_arborist_edge
+      RETURNING
+        VALUE(result) TYPE REF TO /apmg/cl_apm_arborist_node.
 
     METHODS resolve
+      IMPORTING
+        !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
-    "! Create edges for a dependency list
     METHODS create_edges
       IMPORTING
-        !type                TYPE /apmg/if_apm_arborist=>ty_dependency_type
-        !node                TYPE REF TO /apmg/cl_apm_arborist_node
-        !dependencies        TYPE /apmg/if_apm_types=>ty_dependencies
-        !bundle_dependencies TYPE /apmg/if_apm_types=>ty_bundle_dependencies OPTIONAL.
+        !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
+        !type         TYPE /apmg/if_apm_arborist=>ty_dependency_type
+        !node         TYPE REF TO /apmg/cl_apm_arborist_node
+        !dependencies TYPE /apmg/if_apm_types=>ty_dependencies.
 
-    "! Check for circular dependency
     METHODS is_circular
       IMPORTING
         !name         TYPE /apmg/if_apm_types=>ty_name
       RETURNING
         VALUE(result) TYPE abap_bool.
 
-    "! Get manifest from pacote (cached locally if possible)
     METHODS get_manifest
       IMPORTING
+        !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
         !name         TYPE /apmg/if_apm_types=>ty_name
         !version      TYPE /apmg/if_apm_types=>ty_version OPTIONAL
+        !exact        TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(result) TYPE /apmg/if_apm_types=>ty_package_json.
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_package_json
+      RAISING
+        /apmg/cx_apm_error.
 
-    "! Get list of available versions from manifest
     METHODS get_versions
       IMPORTING
         !name         TYPE /apmg/if_apm_types=>ty_name
       RETURNING
         VALUE(result) TYPE /apmg/if_apm_types=>ty_versions.
+
+    METHODS validate_add_packages
+      IMPORTING
+        !add_packages TYPE /apmg/if_apm_arborist=>ty_add_packages
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS validate_remove_packages
+      IMPORTING
+        !remove_packages TYPE string_table
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS apply_removals
+      IMPORTING
+        !remove_packages TYPE string_table.
+
+    METHODS apply_additions
+      IMPORTING
+        !add_packages TYPE /apmg/if_apm_arborist=>ty_add_packages
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS prune_exclusive_deps
+      IMPORTING
+        !remove_packages TYPE string_table.
+
+    METHODS rebuild_tree
+      IMPORTING
+        !tree TYPE REF TO /apmg/cl_apm_arborist_tree.
+
+    METHODS raise_error
+      IMPORTING
+        !message TYPE string
+      RAISING
+        /apmg/cx_apm_error.
 
 ENDCLASS.
 
@@ -121,8 +169,56 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_arborist~build_ideal_tree.
-    " TODO: Future implementation
-    ASSERT 0 = 1.
+
+    me->is_production = is_production.
+
+    /apmg/if_apm_arborist~load_actual_tree( ).
+
+    ideal_tree = current_tree->clone( ).
+
+    validate_add_packages( add_packages ).
+    validate_remove_packages( remove_packages ).
+
+    apply_removals( remove_packages ).
+    apply_additions( add_packages ).
+
+    rebuild_tree( ideal_tree ).
+
+    add_log(
+      type    = /apmg/if_apm_arborist=>c_log_type-info
+      message = |Ideal tree built: { lines( ideal_tree->get_all( ) ) } nodes| ).
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_arborist~get_current_tree.
+
+    IF current_tree IS BOUND.
+      result = current_tree->get_all( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_arborist~get_diff.
+
+    IF current_tree IS NOT BOUND OR ideal_tree IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    result = /apmg/cl_apm_arborist_diff=>calculate(
+      actual = current_tree
+      ideal  = ideal_tree ).
+
+  ENDMETHOD.
+
+
+  METHOD /apmg/if_apm_arborist~get_ideal_tree.
+
+    IF ideal_tree IS BOUND.
+      result = ideal_tree->get_all( ).
+    ENDIF.
+
   ENDMETHOD.
 
 
@@ -133,17 +229,10 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD /apmg/if_apm_arborist~get_tree.
-
-    result = /apmg/cl_apm_arborist_node=>get_all( ).
-
-  ENDMETHOD.
-
-
   METHOD /apmg/if_apm_arborist~load_actual_tree.
 
-    " Clear previous tree and state
-    /apmg/cl_apm_arborist_node=>clear( ).
+    current_tree = NEW /apmg/cl_apm_arborist_tree( ).
+    current_tree->clear( ).
 
     CLEAR: log, visited, processing_stack.
 
@@ -151,7 +240,6 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       type    = /apmg/if_apm_arborist=>c_log_type-info
       message = 'Starting to load actual tree' ).
 
-    " Step 1: Get all installed packages with their metadata
     DATA(packages) = /apmg/cl_apm_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
@@ -160,13 +248,11 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       type    = /apmg/if_apm_arborist=>c_log_type-info
       message = |Found { lines( packages ) } installed packages| ).
 
-    " Step 2: Create nodes for all installed packages first
-    " This ensures all nodes exist before we create edges
     LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
       TRY.
           DATA(manifest) = <package>-instance->get( ).
 
-          /apmg/cl_apm_arborist_node=>create(
+          current_tree->add_node(
             package   = <package>-package
             manifest  = manifest
             installed = abap_true ).
@@ -182,22 +268,17 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    " Step 3: Process dependencies for each installed package
-    " Now that all nodes exist, create edges
     LOOP AT packages ASSIGNING <package>.
       process_package(
+        tree    = current_tree
         package = <package>
         depth   = 0 ).
     ENDLOOP.
 
-    " Step 4: Process uninstalled dependencies recursively
-    " This finds dependencies that are declared but not installed
-    process_uninstalled( ).
+    process_uninstalled( current_tree ).
 
-    " Step 5: Re-resolve all edges now that all nodes are created
-    DATA(final_nodes) = resolve( ).
+    DATA(final_nodes) = resolve( current_tree ).
 
-    " Log summary
     DATA(total_nodes)     = lines( final_nodes ).
     DATA(installed_count) = 0.
     DATA(missing_count)   = 0.
@@ -227,27 +308,57 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_arborist~load_virtual_tree.
-    " TODO: Future implementation - read from package-lock.abap.json
     ASSERT 0 = 1.
   ENDMETHOD.
 
 
   METHOD /apmg/if_apm_arborist~reify_tree.
-    " TODO: Future implementation
     ASSERT 0 = 1.
   ENDMETHOD.
 
 
   METHOD add_log.
 
-    DATA(entry) = VALUE /apmg/if_apm_arborist=>ty_log_entry(
+    INSERT VALUE #(
       type    = type
       message = message
       name    = name
       version = version
-      spec    = spec ).
+      spec    = spec ) INTO TABLE log.
 
-    INSERT entry INTO TABLE log.
+  ENDMETHOD.
+
+
+  METHOD apply_additions.
+
+    LOOP AT add_packages ASSIGNING FIELD-SYMBOL(<add>).
+      DATA(manifest) = get_manifest(
+        tree    = ideal_tree
+        name    = <add>-name
+        version = <add>-version
+        exact   = abap_true ).
+
+      ideal_tree->add_node(
+        manifest  = manifest
+        installed = abap_false ).
+
+      add_log(
+        type    = /apmg/if_apm_arborist=>c_log_type-info
+        message = |Added { <add>-name }@{ <add>-version } to ideal tree|
+        name    = <add>-name
+        version = <add>-version ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD apply_removals.
+
+    IF remove_packages IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    prune_exclusive_deps( remove_packages ).
 
   ENDMETHOD.
 
@@ -256,23 +367,21 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
     me->registry                 = registry.
     me->with_bundle_dependencies = with_bundle_dependencies.
+    current_tree                 = NEW /apmg/cl_apm_arborist_tree( ).
+    ideal_tree                   = NEW /apmg/cl_apm_arborist_tree( ).
 
   ENDMETHOD.
 
 
   METHOD create_edges.
 
-    IF node IS NOT BOUND OR dependencies IS INITIAL.
+    IF node IS NOT BOUND OR dependencies IS INITIAL OR tree IS NOT BOUND.
       RETURN.
     ENDIF.
 
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dep>).
-      IF with_bundle_dependencies = abap_false AND line_exists( bundle_dependencies[ table_line = <dep>-key ] ).
-        CONTINUE.
-      ENDIF.
-
-      " Create edge (constructor automatically resolves target)
       /apmg/cl_apm_arborist_edge=>create(
+        tree = tree
         from = node
         type = type
         name = <dep>-key
@@ -297,21 +406,14 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
   METHOD get_manifest.
 
-    " First try to get from already loaded node
-    DATA(existing_node) = /apmg/cl_apm_arborist_node=>get_by_name( name ).
-
-    IF existing_node IS BOUND.
-      result-name                  = existing_node->name.
-      result-version               = existing_node->version.
-      result-dependencies          = existing_node->dependencies.
-      result-dev_dependencies      = existing_node->dev_dependencies.
-      result-optional_dependencies = existing_node->optional_dependencies.
-      result-peer_dependencies     = existing_node->peer_dependencies.
-      result-bundle_dependencies   = existing_node->bundle_dependencies.
-      RETURN.
+    IF tree IS BOUND.
+      DATA(existing_node) = tree->get_by_name( name ).
+      IF existing_node IS BOUND AND exact = abap_false.
+        result = existing_node->get_manifest( ).
+        RETURN.
+      ENDIF.
     ENDIF.
 
-    " Try to get from pacote (registry cache)
     TRY.
         DATA(pacote) = /apmg/cl_apm_pacote=>factory(
           registry = registry
@@ -321,21 +423,36 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
           pacote->packument( ).
         ENDIF.
 
+        IF exact = abap_true.
+          IF version IS INITIAL.
+            raise_error( |Exact version required for { name }| ).
+          ENDIF.
+          DATA(exact_manifest) = pacote->get_version( version ).
+          IF exact_manifest IS INITIAL.
+            raise_error( |Version { version } not found for { name }| ).
+          ENDIF.
+          result = CORRESPONDING #( exact_manifest ).
+          RETURN.
+        ENDIF.
+
         DATA(packument) = pacote->get( ).
 
         IF version IS NOT INITIAL.
-          DATA(manifest) = pacote->get_version( version ).
-          result = CORRESPONDING #( manifest ).
+          DATA(version_manifest) = pacote->get_version( version ).
+          result = CORRESPONDING #( version_manifest ).
         ELSEIF packument-dist_tags IS NOT INITIAL.
-          " Get latest version
           READ TABLE packument-dist_tags ASSIGNING FIELD-SYMBOL(<tag>)
             WITH KEY key = 'latest'.
           IF sy-subrc = 0.
-            manifest = pacote->get_version( <tag>-value ).
-            result = CORRESPONDING #( manifest ).
+            version_manifest = pacote->get_version( <tag>-value ).
+            result = CORRESPONDING #( version_manifest ).
           ENDIF.
         ENDIF.
+
       CATCH /apmg/cx_apm_error INTO DATA(error).
+        IF exact = abap_true.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = error->get_text( ).
+        ENDIF.
         add_log(
           type    = /apmg/if_apm_arborist=>c_log_type-warning
           message = |Could not fetch manifest for { name }: { error->get_text( ) }|
@@ -352,9 +469,7 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
           registry = registry
           name     = name ).
 
-        " Get fresh from registry
         pacote->packument( ).
-
         result = pacote->get_versions( ).
 
       CATCH /apmg/cx_apm_error INTO DATA(error).
@@ -383,11 +498,10 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
   METHOD process_dependencies.
 
-    IF node IS NOT BOUND.
+    IF node IS NOT BOUND OR tree IS NOT BOUND.
       RETURN.
     ENDIF.
 
-    " Check for circular dependency
     IF is_circular( node->name ).
       add_log(
         type    = /apmg/if_apm_arborist=>c_log_type-circular
@@ -396,7 +510,6 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Check for maximum depth
     IF depth > c_max_depth.
       add_log(
         type    = /apmg/if_apm_arborist=>c_log_type-depth
@@ -405,36 +518,34 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Add to processing stack
     INSERT node->name INTO TABLE processing_stack.
 
-    " Create edges for production dependencies
     create_edges(
-      node                = node
-      dependencies        = node->dependencies
-      bundle_dependencies = node->bundle_dependencies
-      type                = /apmg/if_apm_arborist=>c_dependency_type-prod ).
+      tree         = tree
+      node         = node
+      dependencies = node->dependencies
+      type         = /apmg/if_apm_arborist=>c_dependency_type-prod ).
 
-    " Create edges for dev dependencies
-    create_edges(
-      node                = node
-      dependencies        = node->dev_dependencies
-      bundle_dependencies = node->bundle_dependencies
-      type                = /apmg/if_apm_arborist=>c_dependency_type-dev ).
+    IF is_production = abap_false.
+      create_edges(
+        tree         = tree
+        node         = node
+        dependencies = node->dev_dependencies
+        type         = /apmg/if_apm_arborist=>c_dependency_type-dev ).
+    ENDIF.
 
-    " Create edges for optional dependencies
     create_edges(
+      tree         = tree
       node         = node
       dependencies = node->optional_dependencies
       type         = /apmg/if_apm_arborist=>c_dependency_type-optional ).
 
-    " Create edges for peer dependencies
     create_edges(
+      tree         = tree
       node         = node
       dependencies = node->peer_dependencies
       type         = /apmg/if_apm_arborist=>c_dependency_type-peer ).
 
-    " Remove from processing stack
     DELETE processing_stack WHERE table_line = node->name.
 
   ENDMETHOD.
@@ -442,20 +553,18 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
   METHOD process_package.
 
-    " Skip if no instance or no name
-    IF package-instance IS NOT BOUND OR package-name IS INITIAL.
+    IF package-instance IS NOT BOUND OR package-name IS INITIAL OR tree IS NOT BOUND.
       RETURN.
     ENDIF.
 
-    " Get the node from the tree
-    DATA(node) = /apmg/cl_apm_arborist_node=>get_by_name( package-name ).
+    DATA(node) = tree->get_by_name( package-name ).
 
     IF node IS INITIAL.
       RETURN.
     ENDIF.
 
-    " Process dependencies
     process_dependencies(
+      tree  = tree
       node  = node
       depth = depth + 1 ).
 
@@ -464,8 +573,12 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
   METHOD process_uninstalled.
 
+    IF tree IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
     DATA(iteration) = 0.
-    DATA(nodes_to_process) = VALUE /apmg/if_apm_arborist~ty_node_refs( ).
+    DATA(nodes_to_process) = VALUE /apmg/if_apm_arborist=>ty_node_refs( ).
 
     DO.
       iteration = iteration + 1.
@@ -476,96 +589,244 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
         EXIT.
       ENDIF.
 
-      " Find nodes with unresolved dependencies
       CLEAR nodes_to_process.
-      DATA(all_nodes) = /apmg/cl_apm_arborist_node=>get_all( ).
 
-      LOOP AT all_nodes ASSIGNING FIELD-SYMBOL(<node>).
-        LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
-          " Check if we haven't visited this dependency yet
+      LOOP AT tree->get_all( ) INTO DATA(proc_node).
+        LOOP AT proc_node->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
           IF <edge>->is_missing( ) AND NOT line_exists( visited[ name = <edge>->name ] ).
-            " Try to get manifest from registry for uninstalled dependency
-            DATA(uninstalled_manifest) = get_manifest( <edge>->name ).
-
-            IF uninstalled_manifest IS NOT INITIAL.
-              " Create placeholder node for uninstalled package
-              DATA(new_node) = /apmg/cl_apm_arborist_node=>create(
-                manifest  = uninstalled_manifest
-                installed = abap_false ).
-
-              INSERT VALUE #( name = <edge>->name ) INTO TABLE visited.
+            DATA(new_node) = try_add_uninstalled(
+              tree = tree
+              edge = <edge> ).
+            IF new_node IS BOUND.
               INSERT new_node INTO TABLE nodes_to_process.
-
-              add_log(
-                type    = /apmg/if_apm_arborist=>c_log_type-warning
-                message = |Dependency { <edge>->name }@{ <edge>->spec } is not installed|
-                name    = <edge>->name
-                spec    = <edge>->spec ).
             ENDIF.
           ENDIF.
         ENDLOOP.
       ENDLOOP.
 
-      " Process dependencies of newly added nodes
       IF nodes_to_process IS INITIAL.
-        EXIT. " No more unresolved dependencies
+        EXIT.
       ENDIF.
 
-      LOOP AT nodes_to_process ASSIGNING FIELD-SYMBOL(<new_node>).
+      LOOP AT nodes_to_process INTO DATA(batch_node).
         process_dependencies(
-          node  = <new_node>
+          tree  = tree
+          node  = batch_node
           depth = iteration ).
       ENDLOOP.
     ENDDO.
 
+  ENDMETHOD.
+
+
+  METHOD prune_exclusive_deps.
+
+    TYPES:
+      BEGIN OF ty_remove_entry,
+        name TYPE /apmg/if_apm_types=>ty_name,
+      END OF ty_remove_entry,
+      ty_remove_set TYPE HASHED TABLE OF ty_remove_entry WITH UNIQUE KEY name.
+
+    DATA(remove_set) = VALUE ty_remove_set( ).
+
+    LOOP AT remove_packages ASSIGNING FIELD-SYMBOL(<remove>).
+      INSERT VALUE #( name = <remove> ) INTO TABLE remove_set.
+    ENDLOOP.
+
+    DATA(changed) = abap_true.
+    WHILE changed = abap_true.
+      changed = abap_false.
+
+      LOOP AT ideal_tree->get_all( ) INTO DATA(prune_node).
+        IF line_exists( remove_set[ name = prune_node->name ] ).
+          CONTINUE.
+        ENDIF.
+
+        IF prune_node->edges_in IS INITIAL.
+          CONTINUE.
+        ENDIF.
+
+        DATA(all_from_removed) = abap_true.
+        LOOP AT prune_node->edges_in INTO DATA(prune_edge).
+          IF prune_edge->from IS BOUND AND NOT line_exists( remove_set[ name = prune_edge->from->name ] ).
+            all_from_removed = abap_false.
+            EXIT.
+          ENDIF.
+        ENDLOOP.
+
+        IF all_from_removed = abap_true.
+          INSERT VALUE #( name = prune_node->name ) INTO TABLE remove_set.
+          changed = abap_true.
+        ENDIF.
+      ENDLOOP.
+    ENDWHILE.
+
+    LOOP AT remove_set ASSIGNING FIELD-SYMBOL(<entry>).
+      ideal_tree->remove_node( <entry>-name ).
+      add_log(
+        type    = /apmg/if_apm_arborist=>c_log_type-info
+        message = |Removed { <entry>-name } from ideal tree|
+        name    = <entry>-name ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD raise_error.
+
+    RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = message.
+
+  ENDMETHOD.
+
+
+  METHOD rebuild_tree.
+
+    IF tree IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    CLEAR: visited, processing_stack.
+
+    tree->clear_all_edges( ).
+
+    LOOP AT tree->get_all( ) INTO DATA(clear_node).
+      clear_node->clear_errors( ).
+    ENDLOOP.
+
+    LOOP AT tree->get_all( ) INTO DATA(rebuild_node).
+      process_dependencies(
+        tree  = tree
+        node  = rebuild_node
+        depth = 0 ).
+    ENDLOOP.
+
+    process_uninstalled( tree ).
+    resolve( tree ).
 
   ENDMETHOD.
 
 
   METHOD resolve.
 
-    result = /apmg/cl_apm_arborist_node=>get_all( ).
+    IF tree IS NOT BOUND.
+      RETURN.
+    ENDIF.
 
-    LOOP AT result ASSIGNING FIELD-SYMBOL(<node>).
-      LOOP AT <node>->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
-        <edge>->resolve( ).
+    result = tree->get_all( ).
 
-        " Check if dependency is valid
+    LOOP AT result INTO DATA(resolve_node).
+      LOOP AT resolve_node->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
+        <edge>->resolve( tree ).
+
         IF <edge>->is_invalid( ).
-          <node>->add_error( |Dependency "{ <edge>->name }" does not match specs| ).
+          resolve_node->add_error( |Dependency "{ <edge>->name }" does not match specs| ).
         ELSEIF <edge>->is_missing( ).
-          <node>->add_error( |Dependency "{ <edge>->name }" is not installed| ).
+          CASE <edge>->type.
+            WHEN /apmg/if_apm_arborist=>c_dependency_type-optional.
+              add_log(
+                type    = /apmg/if_apm_arborist=>c_log_type-warning
+                message = |Optional dependency "{ <edge>->name }" is not installed|
+                name    = <edge>->name
+                spec    = <edge>->spec ).
+            WHEN /apmg/if_apm_arborist=>c_dependency_type-peer.
+              resolve_node->add_error( |Peer dependency "{ <edge>->name }" is not installed| ).
+            WHEN OTHERS.
+              resolve_node->add_error( |Dependency "{ <edge>->name }" is not installed| ).
+          ENDCASE.
         ENDIF.
       ENDLOOP.
 
-      " Aggregate required versions from incoming edges and check satisfaction
       DATA(required_specs) = VALUE string_table( ).
       DATA(all_satisfied)  = abap_true.
-      DATA(max_satisfying) = <node>->version.
+      DATA(max_satisfying) = resolve_node->version.
 
-      LOOP AT <node>->edges_in ASSIGNING <edge>.
-        " Collect all specs from incoming edges
+      LOOP AT resolve_node->edges_in ASSIGNING <edge>.
         INSERT <edge>->spec INTO TABLE required_specs.
 
-        " Check if current node version satisfies this requirement
-        IF <node>->satisfies( <edge>->spec ) = abap_false.
+        IF resolve_node->satisfies( <edge>->spec ) = abap_false.
           all_satisfied = abap_false.
         ENDIF.
       ENDLOOP.
 
-      " Determine max_satisfying: if current version satisfies all requirements, use it
-      " Otherwise, max_satisfying needs to be calculated from available versions in registry
       IF all_satisfied = abap_false AND required_specs IS NOT INITIAL.
-        DATA(available_versions) = get_versions( <node>->name ).
+        DATA(available_versions) = get_versions( resolve_node->name ).
 
-        " Current version doesn't satisfy all requirements
-        " max_satisfying would ideally be the maximum version from registry that satisfies all specs
-        max_satisfying = <node>->max_satisfying(
+        max_satisfying = resolve_node->max_satisfying(
           versions = available_versions
           specs    = required_specs ).
       ENDIF.
 
-      <node>->set_max_satisfying( max_satisfying ).
+      resolve_node->set_max_satisfying( max_satisfying ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD try_add_uninstalled.
+
+    TRY.
+        DATA(uninstalled_manifest) = get_manifest(
+          tree = tree
+          name = edge->name ).
+
+        IF uninstalled_manifest IS INITIAL.
+          RETURN.
+        ENDIF.
+
+        result = tree->add_node(
+          manifest  = uninstalled_manifest
+          installed = abap_false ).
+
+        INSERT VALUE #( name = edge->name ) INTO TABLE visited.
+
+        IF edge->type = /apmg/if_apm_arborist=>c_dependency_type-optional.
+          add_log(
+            type    = /apmg/if_apm_arborist=>c_log_type-warning
+            message = |Optional dependency { edge->name }@{ edge->spec } is not installed|
+            name    = edge->name
+            spec    = edge->spec ).
+        ELSE.
+          add_log(
+            type    = /apmg/if_apm_arborist=>c_log_type-warning
+            message = |Dependency { edge->name }@{ edge->spec } is not installed|
+            name    = edge->name
+            spec    = edge->spec ).
+        ENDIF.
+
+      CATCH /apmg/cx_apm_error INTO DATA(manifest_error).
+        IF edge->type = /apmg/if_apm_arborist=>c_dependency_type-optional.
+          DATA(error_text) = manifest_error->get_text( ).
+          add_log(
+            type    = /apmg/if_apm_arborist=>c_log_type-warning
+            message = |Optional dependency { edge->name } could not be resolved: { error_text }|
+            name    = edge->name
+            spec    = edge->spec ).
+        ENDIF.
+    ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD validate_add_packages.
+
+    LOOP AT add_packages ASSIGNING FIELD-SYMBOL(<add>).
+      IF current_tree->exists( <add>-name ).
+        raise_error( |Package { <add>-name } is already installed| ).
+      ENDIF.
+      IF ideal_tree->exists( <add>-name ).
+        raise_error( |Package { <add>-name } is already in ideal tree| ).
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD validate_remove_packages.
+
+    LOOP AT remove_packages ASSIGNING FIELD-SYMBOL(<remove>).
+      IF NOT current_tree->exists( <remove> ).
+        raise_error( |Package { <remove> } is not installed| ).
+      ENDIF.
     ENDLOOP.
 
   ENDMETHOD.

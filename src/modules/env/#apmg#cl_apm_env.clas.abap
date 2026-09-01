@@ -212,6 +212,8 @@ CLASS /apmg/cl_apm_env IMPLEMENTATION.
         init_os( ).
       WHEN /apmg/if_apm_env=>c_env-profile.
         init_profile( ).
+      WHEN OTHERS.
+        MESSAGE 'Unknown environment type' TYPE 'X'.
     ENDCASE.
 
     SORT env.
@@ -282,6 +284,7 @@ CLASS /apmg/cl_apm_env IMPLEMENTATION.
                        ( /apmg/if_apm_env=>is_ecatt_recording )
                        ( /apmg/if_apm_env=>is_enqueue_proc )
                        ( /apmg/if_apm_env=>is_gui_activex )
+                       ( /apmg/if_apm_env=>is_gui_available )
                        ( /apmg/if_apm_env=>is_gui_java )
                        ( /apmg/if_apm_env=>is_gui_web )
                        ( /apmg/if_apm_env=>is_gui_windows )

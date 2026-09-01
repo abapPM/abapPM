@@ -11,7 +11,7 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
 * what kind of dependency it represents.
 *
 * edge.from is a reference to the node that has the dependency,
-* edge.to is a reference to the node that requires the dependency.
+* edge.to is a reference to the node that satisfies the dependency.
 *
 * Copyright 2025 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
@@ -36,6 +36,7 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
     "! Factory method to create an edge
     CLASS-METHODS create
       IMPORTING
+        !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
         !from         TYPE REF TO /apmg/cl_apm_arborist_node
         !type         TYPE /apmg/if_apm_arborist=>ty_dependency_type
         !name         TYPE /apmg/if_apm_types=>ty_name
@@ -46,13 +47,16 @@ CLASS /apmg/cl_apm_arborist_edge DEFINITION
     "! Constructor
     METHODS constructor
       IMPORTING
+        !tree TYPE REF TO /apmg/cl_apm_arborist_tree
         !from TYPE REF TO /apmg/cl_apm_arborist_node
         !type TYPE /apmg/if_apm_arborist=>ty_dependency_type
         !name TYPE /apmg/if_apm_types=>ty_name
         !spec TYPE /apmg/if_apm_types=>ty_spec.
 
     "! Resolve the target node and validate
-    METHODS resolve.
+    METHODS resolve
+      IMPORTING
+        !tree TYPE REF TO /apmg/cl_apm_arborist_tree.
 
     "! Check if the dependency is missing
     METHODS is_missing
@@ -86,8 +90,7 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
     me->name = name.
     me->spec = spec.
 
-    " Resolve target node immediately
-    resolve( ).
+    resolve( tree ).
 
   ENDMETHOD.
 
@@ -95,17 +98,16 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
   METHOD create.
 
     result = NEW #(
+      tree = tree
       from = from
       type = type
       name = name
       spec = spec ).
 
-    " Add edge to source node's outgoing edges
     IF from IS BOUND.
       from->add_edge_out( result ).
     ENDIF.
 
-    " Add edge to target node's incoming edges
     IF result->to IS BOUND.
       result->to->add_edge_in( result ).
     ENDIF.
@@ -120,12 +122,12 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
         result = |Dependency "{ name }@{ spec }" is not installed|.
       WHEN /apmg/if_apm_arborist=>c_error_type-invalid.
         IF to IS BOUND.
-          result = |Dependency "{ name }@{ spec }" not satisfied by installed { to->version }|.
+          result = |Dependency "{ name }@{ spec }" not satisfied by { to->version }|.
         ELSE.
           result = |Dependency "{ name }@{ spec }" is invalid|.
         ENDIF.
       WHEN /apmg/if_apm_arborist=>c_error_type-peer_local.
-        result = |Peer dependency "{ name }@{ spec }" should be installed at root level|.
+        result = |Peer dependency "{ name }@{ spec }" is not installed|.
       WHEN /apmg/if_apm_arborist=>c_error_type-detached.
         result = |Dependency "{ name }" is detached from the tree|.
       WHEN OTHERS.
@@ -151,15 +153,25 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
 
   METHOD resolve.
 
-    " Try to find the target node in the global tree
-    to = /apmg/cl_apm_arborist_node=>get_by_name( name ).
+    CLEAR: to, valid, error.
+
+    IF tree IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    to = tree->get_by_name( name ).
 
     IF to IS NOT BOUND.
-      " Dependency is missing
       valid = abap_false.
-      error = /apmg/if_apm_arborist=>c_error_type-missing.
+      CASE type.
+        WHEN /apmg/if_apm_arborist=>c_dependency_type-optional.
+          error = /apmg/if_apm_arborist=>c_error_type-missing.
+        WHEN /apmg/if_apm_arborist=>c_dependency_type-peer.
+          error = /apmg/if_apm_arborist=>c_error_type-peer_local.
+        WHEN OTHERS.
+          error = /apmg/if_apm_arborist=>c_error_type-missing.
+      ENDCASE.
     ELSE.
-      " Check if installed version satisfies the spec
       valid = to->satisfies( spec ).
       IF valid = abap_false.
         error = /apmg/if_apm_arborist=>c_error_type-invalid.
@@ -167,4 +179,6 @@ CLASS /apmg/cl_apm_arborist_edge IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+
 ENDCLASS.

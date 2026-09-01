@@ -38,6 +38,12 @@ CLASS /apmg/cl_apm_pacote DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS is_packument_key
+      IMPORTING
+        !value        TYPE string
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     CLASS-METHODS get_packument_key
       IMPORTING
         !name         TYPE string
@@ -588,6 +594,13 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
         instance = mock ).
       INSERT instance INTO TABLE instances.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD is_packument_key.
+
+    result = xsdbool( value CP |{ /apmg/if_apm_persist_apm=>c_key_type-packument }:*| ).
 
   ENDMETHOD.
 
