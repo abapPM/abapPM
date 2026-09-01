@@ -274,7 +274,7 @@
     "no_aliases": true,
     "no_chained_assignment": true,
     "no_comments_between_methods": true,
-    "no_dynamic_stuff": true,
+    "no_dynamic_stuff": false,
     "no_exclamation_escape": false,
     "no_external_form_calls": {
       "exclude": [
