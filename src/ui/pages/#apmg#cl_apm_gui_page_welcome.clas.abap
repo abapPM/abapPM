@@ -258,8 +258,8 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
     DATA(apm) = |<strong>apm</strong>|.
 
-    DATA(first_package) = html->a(
-      iv_txt   = 'first package'
+    DATA(tutorial) = html->a(
+      iv_txt   = 'Tutorial'
       iv_title = 'Tutorial'
       iv_act   = /apmg/if_apm_gui_router=>c_action-tutorial ).
 
@@ -271,21 +271,20 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( |You're looking at something that, until recently, didn't exist: a real package manager for ABAP.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |abapGit gave ABAP its git. For over 10 years we could share code we but were missing solid no| ).
+    html->add( |abapGit gave ABAP its git. For over 10 years we could share code but were missing solid| ).
     html->add( |versioning, dependencies, and automatic installs. We had git, but no npm.| ).
-    html->add( |Now, finally, ABAP has both.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |That's why I built { apm } and why a growing community of ABAP open-source developers| ).
-    html->add( |is building it with you. Whatever you do here, you're now part of that.| ).
+    html->add( |That's why I built { apm } and why a growing community of ABAP developers is building| ).
+    html->add( |ABAP open-source with you. Whatever you do here, you're now part of that.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |From here you can:| ).
+    html->add( |You can:| ).
     html->add( '</p>' ).
     html->add( '<ul>' ).
     html->add( '<li>' ).
     html->add( emoji->format( ':mag_right:' ) ).
-    html->add( |Browse the registry and find packages to solve problems you'd otherwise build from scratch| ).
+    html->add( |Browse the registry and find packages to solve problems you would otherwise build from scratch| ).
     html->add( '</li>' ).
     html->add( '<li>' ).
     html->add( emoji->format( ':package:' ) ).
@@ -305,7 +304,7 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( |keep the feedback coming. This ecosystem grows because of developers like you.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |Now go install your { first_package }. Welcome aboard.| ).
+    html->add( |Ready to install your first package? Try the { tutorial }! Welcome aboard.| ).
     html->add( emoji->format( ':tada:' ) ).
     html->add( '</p>' ).
     html->add( '<p>' ).
