@@ -45,13 +45,13 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
 
   METHOD get_certificate_ca.
 
-     " Subject       CN=WE1, O=Google Trust Services, C=US
+    " Subject       CN=WE1, O=Google Trust Services, C=US
     " Issuer        CN=GTS Root R4, O=Google Trust Services LLC, C=US
     " Serial Number 7FF31977972C224A76155D13B6D685E3
     " Validity      20231213090000Z - 20290220140000Z
 
     result = VALUE #(
-      ( '	BEGIN CERTIFICATE	' )
+      ( '-----BEGIN CERTIFICATE-----' )
       ( 'MIICnzCCAiWgAwIBAgIQf/MZd5csIkp2FV0TttaF4zAKBggqhkjOPQQDAzBHMQswCQYDVQQGEwJVUzEi' )
       ( 'MCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExMQzEUMBIGA1UEAxMLR1RTIFJvb3QgUjQwHhcN' )
       ( 'MjMxMjEzMDkwMDAwWhcNMjkwMjIwMTQwMDAwWjA7MQswCQYDVQQGEwJVUzEeMBwGA1UEChMVR29vZ2xl' )
@@ -64,7 +64,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
       ( 'VR0gBAwwCjAIBgZngQwBAgEwCgYIKoZIzj0EAwMDaAAwZQIxAOcCq1HW90OVznX+0RGU1cxAQXomvtgM' )
       ( '8zItPZCuFQ8jSBJSjz5keROv9aYsAm5VsQIwJonMaAFi54mrfhfoFNZEfuNMSQ6/bIBiNLiyoX46FohQ' )
       ( 'vKeIoJ99cx7sUkFN7uJW' )
-      ( '	END CERTIFICATE	' ) ).
+      ( '-----END CERTIFICATE-----' ) ).
 
   ENDMETHOD.
 
@@ -77,7 +77,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
     " Validity      20260830030715Z - 20261128040712Z
 
     result = VALUE #(
-      ( '	BEGIN CERTIFICATE	' )
+      ( '-----BEGIN CERTIFICATE-----' )
       ( 'MIIDgTCCAyagAwIBAgIQU8Ru6O1TANETgpd6GalsGTAKBggqhkjOPQQDAjA7MQswCQYDVQQGEwJVUzEe' )
       ( 'MBwGA1UEChMVR29vZ2xlIFRydXN0IFNlcnZpY2VzMQwwCgYDVQQDEwNXRTEwHhcNMjYwODMwMDMwNzE1' )
       ( 'WhcNMjYxMTI4MDQwNzEyWjAgMR4wHAYDVQQDExVwbGF5Z3JvdW5kLmFiYXBwbS5jb20wWTATBgcqhkjO' )
@@ -94,7 +94,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
       ( 'IQCrH7cBnDwt9sv3LpC0028zxhyklP0wn8toTGHOGDHCqDAKBggqhkjOPQQDAgNJADBGAiEA9NjUxcDH' )
       ( 'h1NOKDbmw+5FZV6WZ0SL2T9njE6CCv5XCE4CIQCRprLEioTS1HpWeih4gF2/F6d/MqCyJP645FZWSWUK' )
       ( 'Og==' )
-      ( '	END CERTIFICATE	' ) ).
+      ( '-----END CERTIFICATE-----' ) ).
 
   ENDMETHOD.
 
@@ -107,7 +107,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
     " Validity      20260816181140Z - 20261114191134Z
 
     result = VALUE #(
-      ( '	BEGIN CERTIFICATE	' )
+      ( '-----BEGIN CERTIFICATE-----' )
       ( 'MIIDfDCCAyOgAwIBAgIRAKuX8rThBV+IE5Ak5lCMCEkwCgYIKoZIzj0EAwIwOzELMAkGA1UEBhMCVVMx' )
       ( 'HjAcBgNVBAoTFUdvb2dsZSBUcnVzdCBTZXJ2aWNlczEMMAoGA1UEAxMDV0UxMB4XDTI2MDgxNjE4MTE0' )
       ( 'MFoXDTI2MTExNDE5MTEzNFowHjEcMBoGA1UEAxMTcmVnaXN0cnkuYWJhcHBtLmNvbTBZMBMGByqGSM49' )
@@ -123,7 +123,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
       ( 'fVU3LhnYAAABoAv8oJYAAAQDAEcwRQIhAPwOekbwBcKuvmbs+CTA50ykgESlAk8u6ZpBK8bwDOZnAiAU' )
       ( 'vt1WSmJzr8/e6mVj2QzcO6U9rWYLOUX62LRVgNLx4zAKBggqhkjOPQQDAgNHADBEAiB3yhWA7dm8I2pk' )
       ( '/xsn5jAKe7Zwk2LXrblEI+1Rhp273gIgZs4tb+Dz3BfG29SWD6oXmHCgcHnLP+EmZPBx38BQuYo=' )
-      ( '	END CERTIFICATE	' ) ).
+      ( '-----END CERTIFICATE-----' ) ).
 
   ENDMETHOD.
 
@@ -136,7 +136,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
     " Validity      20260729120328Z - 20261027130323Z
 
     result = VALUE #(
-      ( '	BEGIN CERTIFICATE	' )
+      ( '-----BEGIN CERTIFICATE-----' )
       ( 'MIIDdzCCAxygAwIBAgIQSjSfyfuVsOAOFNHUko0ygzAKBggqhkjOPQQDAjA7MQswCQYDVQQGEwJVUzEe' )
       ( 'MBwGA1UEChMVR29vZ2xlIFRydXN0IFNlcnZpY2VzMQwwCgYDVQQDEwNXRTEwHhcNMjYwNzI5MTIwMzI4' )
       ( 'WhcNMjYxMDI3MTMwMzIzWjAbMRkwFwYDVQQDExB0b29scy5hYmFwcG0uY29tMFkwEwYHKoZIzj0CAQYI' )
@@ -152,7 +152,7 @@ CLASS /apmg/cl_apm_certificates IMPLEMENTATION.
       ( 'AAGfrfkQbwAABAMARzBFAiA0G82kwNkxkjd9IQDAKgDmcTWVG1ZoDtxyqFOBsWh6hAIhAOFJNPf1BgnG' )
       ( 'eQ2nt6EvzlA0gK+yts5FXChufzxQHfMpMAoGCCqGSM49BAMCA0kAMEYCIQD3ZsuAslg90RJCAt/Bozq8' )
       ( 'p4LtVH9R17kuMTtSs+WwyAIhAKca+rFr8M/KWxfvbhgIo8nRg6qJ3LrfeO7pMfk8HU01' )
-      ( '	END CERTIFICATE	' ) ).
+      ( '-----END CERTIFICATE-----' ) ).
 
   ENDMETHOD.
 
