@@ -174,6 +174,10 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
     /apmg/if_apm_arborist~load_actual_tree( ).
 
+    add_log(
+      type    = /apmg/if_apm_arborist=>c_log_type-info
+      message = 'Starting to build ideal tree' ).
+
     ideal_tree = current_tree->clone( ).
 
     validate_add_packages( add_packages ).
@@ -299,7 +303,7 @@ CLASS /apmg/cl_apm_arborist IMPLEMENTATION.
 
     add_log(
       type    = /apmg/if_apm_arborist=>c_log_type-info
-      message = |Tree complete: { total_nodes } nodes, { installed_count } installed, |
+      message = |Actual tree complete: { total_nodes } nodes, { installed_count } installed, |
                 && |{ missing_count } missing deps, { invalid_count } invalid deps| ).
 
     result = final_nodes.
