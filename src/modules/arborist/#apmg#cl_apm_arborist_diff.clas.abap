@@ -35,9 +35,9 @@ CLASS /apmg/cl_apm_arborist_diff DEFINITION
     "! Leaf diff nodes under this branch
     DATA leaves TYPE ty_diff_refs READ-ONLY.
     "! Ideal nodes that do not change in this branch
-    DATA unchanged TYPE /apmg/cl_apm_arborist_node=>ty_node_refs READ-ONLY.
+    DATA unchanged TYPE /apmg/if_apm_arborist=>ty_node_refs READ-ONLY.
     "! Actual nodes removed in this branch
-    DATA removed TYPE /apmg/cl_apm_arborist_node=>ty_node_refs READ-ONLY.
+    DATA removed TYPE /apmg/if_apm_arborist=>ty_node_refs READ-ONLY.
 
     "! Calculate diff between actual and ideal trees
     CLASS-METHODS calculate
@@ -90,7 +90,7 @@ CLASS /apmg/cl_apm_arborist_diff DEFINITION
         !node         TYPE REF TO /apmg/cl_apm_arborist_node
         !tree         TYPE REF TO /apmg/cl_apm_arborist_tree
       RETURNING
-        VALUE(result) TYPE /apmg/cl_apm_arborist_node=>ty_node_refs.
+        VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
     METHODS build_children
       IMPORTING
@@ -126,13 +126,6 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
   METHOD /apmg/if_apm_arborist_diff~get_actual.
 
     result = actual.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_arborist_diff~get_children.
-
-    result = children.
 
   ENDMETHOD.
 
@@ -196,6 +189,13 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD /apmg/if_apm_arborist_diff~get_children.
+
+    result = children.
+
+  ENDMETHOD.
+
+
   METHOD /apmg/if_apm_arborist_diff~get_ideal.
 
     result = ideal.
@@ -250,8 +250,8 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
     DELETE ADJACENT DUPLICATES FROM child_names.
 
     DATA(children_result) = VALUE ty_diff_refs( ).
-    DATA(unchanged_result) = VALUE /apmg/cl_apm_arborist_node=>ty_node_refs( ).
-    DATA(removed_result) = VALUE /apmg/cl_apm_arborist_node=>ty_node_refs( ).
+    DATA(unchanged_result) = VALUE /apmg/if_apm_arborist=>ty_node_refs( ).
+    DATA(removed_result) = VALUE /apmg/if_apm_arborist=>ty_node_refs( ).
     DATA(leaves_result) = VALUE ty_diff_refs( ).
 
     LOOP AT child_names ASSIGNING FIELD-SYMBOL(<name>).
@@ -459,6 +459,4 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
     me->parent = parent.
 
   ENDMETHOD.
-
-
 ENDCLASS.

@@ -21,10 +21,6 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
       ty_edge  TYPE REF TO /apmg/cl_apm_arborist_edge,
       ty_edges TYPE STANDARD TABLE OF ty_edge WITH KEY table_line.
 
-    TYPES:
-      ty_node_ref  TYPE REF TO /apmg/cl_apm_arborist_node,
-      ty_node_refs TYPE STANDARD TABLE OF ty_node_ref WITH KEY table_line.
-
     "! Package (SAP devclass)
     DATA package TYPE /apmg/if_apm_types=>ty_devclass READ-ONLY.
     "! Package name in registry
@@ -137,6 +133,7 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     DATA manifest TYPE /apmg/if_apm_types=>ty_manifest.
 
 ENDCLASS.
+
 
 
 CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
@@ -302,6 +299,4 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
     me->max_satisfying_version = manifest-version.
 
   ENDMETHOD.
-
-
 ENDCLASS.

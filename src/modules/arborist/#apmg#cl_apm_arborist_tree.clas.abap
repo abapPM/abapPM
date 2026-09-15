@@ -15,10 +15,6 @@ CLASS /apmg/cl_apm_arborist_tree DEFINITION
   PUBLIC SECTION.
 
     TYPES:
-      ty_node_ref  TYPE REF TO /apmg/cl_apm_arborist_node,
-      ty_node_refs TYPE STANDARD TABLE OF ty_node_ref WITH KEY table_line.
-
-    TYPES:
       BEGIN OF ty_node_entry,
         name     TYPE /apmg/if_apm_types=>ty_name,
         package  TYPE /apmg/if_apm_types=>ty_devclass,
@@ -53,7 +49,7 @@ CLASS /apmg/cl_apm_arborist_tree DEFINITION
     "! Get all nodes
     METHODS get_all
       RETURNING
-        VALUE(result) TYPE ty_node_refs.
+        VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
     "! Add a node from manifest (returns existing if name already present)
     METHODS add_node
@@ -85,7 +81,7 @@ CLASS /apmg/cl_apm_arborist_tree DEFINITION
     "! Get root nodes (no incoming edges)
     METHODS get_roots
       RETURNING
-        VALUE(result) TYPE ty_node_refs.
+        VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -230,6 +226,4 @@ CLASS /apmg/cl_apm_arborist_tree IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-
 ENDCLASS.

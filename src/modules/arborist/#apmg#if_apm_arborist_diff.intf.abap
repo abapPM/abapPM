@@ -46,12 +46,12 @@ INTERFACE /apmg/if_apm_arborist_diff PUBLIC.
   "! Ideal nodes that do not change in this branch
   METHODS get_unchanged
     RETURNING
-      VALUE(result) TYPE /apmg/cl_apm_arborist_node=>ty_node_refs.
+      VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
   "! Actual nodes removed in this branch
   METHODS get_removed
     RETURNING
-      VALUE(result) TYPE /apmg/cl_apm_arborist_node=>ty_node_refs.
+      VALUE(result) TYPE /apmg/if_apm_arborist=>ty_node_refs.
 
   "! Get each reachable change once, deepest dependency first; equal depths by name
   METHODS get_changes
