@@ -525,7 +525,7 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
     DATA(link) = |{ iv_registry }/package/{ iv_name }|.
 
     IF iv_version IS NOT INITIAL.
-      link = link && |?v={ iv_version }|.
+      link = link && |/v/{ iv_version }|.
     ENDIF.
 
     ri_html->add( |<span class="registry-link">| ).
