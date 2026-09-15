@@ -56,7 +56,7 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     METHODS constructor
       IMPORTING
         !package   TYPE /apmg/if_apm_types=>ty_devclass OPTIONAL
-        !manifest  TYPE /apmg/if_apm_types=>ty_package_json
+        !manifest  TYPE /apmg/if_apm_types=>ty_manifest
         !installed TYPE abap_bool DEFAULT abap_true.
 
     "! Add an outgoing edge (dependency)
@@ -83,12 +83,12 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
     "! Get manifest data for this node
     METHODS get_manifest
       RETURNING
-        VALUE(result) TYPE /apmg/if_apm_types=>ty_package_json.
+        VALUE(result) TYPE /apmg/if_apm_types=>ty_manifest.
 
     "! Update manifest fields from registry data
     METHODS update_manifest
       IMPORTING
-        !manifest TYPE /apmg/if_apm_types=>ty_package_json.
+        !manifest TYPE /apmg/if_apm_types=>ty_manifest.
 
     "! Check if this node satisfies a version spec
     METHODS satisfies
@@ -134,9 +134,9 @@ CLASS /apmg/cl_apm_arborist_node DEFINITION
   PRIVATE SECTION.
 
     DATA max_satisfying_val TYPE /apmg/if_apm_types=>ty_version.
+    DATA manifest TYPE /apmg/if_apm_types=>ty_manifest.
 
 ENDCLASS.
-
 
 
 CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
@@ -179,6 +179,7 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
 
   METHOD constructor.
 
+    me->manifest              = manifest.
     me->package               = package.
     me->name                  = manifest-name.
     me->version               = manifest-version.
@@ -216,13 +217,7 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
 
   METHOD get_manifest.
 
-    result-name                  = name.
-    result-version               = version.
-    result-dependencies          = dependencies.
-    result-dev_dependencies      = dev_dependencies.
-    result-peer_dependencies     = peer_dependencies.
-    result-optional_dependencies = optional_dependencies.
-    result-bundle_dependencies   = bundle_dependencies.
+    result = manifest.
 
   ENDMETHOD.
 
@@ -295,11 +290,16 @@ CLASS /apmg/cl_apm_arborist_node IMPLEMENTATION.
 
   METHOD update_manifest.
 
+    me->manifest              = manifest.
+    me->name                  = manifest-name.
+    me->version               = manifest-version.
     me->dependencies          = manifest-dependencies.
     me->dev_dependencies      = manifest-dev_dependencies.
     me->peer_dependencies     = manifest-peer_dependencies.
     me->optional_dependencies = manifest-optional_dependencies.
     me->bundle_dependencies   = manifest-bundle_dependencies.
+    me->max_satisfying_val     = manifest-version.
+    me->max_satisfying_version = manifest-version.
 
   ENDMETHOD.
 

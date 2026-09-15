@@ -53,7 +53,7 @@ INTERFACE /apmg/if_apm_arborist_diff PUBLIC.
     RETURNING
       VALUE(result) TYPE /apmg/cl_apm_arborist_node=>ty_node_refs.
 
-  "! Get changes linked to a package, ordered deepest dependency first
+  "! Get each reachable change once, deepest dependency first; equal depths by name
   METHODS get_changes
     IMPORTING
       !name         TYPE /apmg/if_apm_types=>ty_name

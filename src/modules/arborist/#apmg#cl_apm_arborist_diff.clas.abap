@@ -57,13 +57,6 @@ CLASS /apmg/cl_apm_arborist_diff DEFINITION
   PRIVATE SECTION.
 
     TYPES:
-      BEGIN OF ty_change_entry,
-        name TYPE /apmg/if_apm_types=>ty_name,
-        diff TYPE REF TO /apmg/if_apm_arborist_diff,
-      END OF ty_change_entry,
-      ty_change_entries TYPE HASHED TABLE OF ty_change_entry WITH UNIQUE KEY name.
-
-    TYPES:
       BEGIN OF ty_depth_entry,
         name  TYPE /apmg/if_apm_types=>ty_name,
         depth TYPE i,
@@ -106,13 +99,7 @@ CLASS /apmg/cl_apm_arborist_diff DEFINITION
 
     METHODS merge_child_results
       IMPORTING
-        !child TYPE REF TO /apmg/cl_apm_arborist_diff.
-
-    METHODS collect_change_entries
-      IMPORTING
-        !diff    TYPE REF TO /apmg/if_apm_arborist_diff
-      CHANGING
-        !changes TYPE ty_change_entries.
+        !child TYPE REF TO /apmg/if_apm_arborist_diff.
 
     METHODS collect_dependency_depths
       IMPORTING
@@ -157,13 +144,6 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
       root = CAST /apmg/cl_apm_arborist_diff( root->parent ).
     ENDWHILE.
 
-    DATA(changes) = VALUE ty_change_entries( ).
-    root->collect_change_entries(
-      EXPORTING
-        diff    = root
-      CHANGING
-        changes = changes ).
-
     DATA(depths) = VALUE ty_depth_entries( ).
     DATA(path) = VALUE string_table( ).
 
@@ -190,13 +170,21 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
 
     DATA(ordered_changes) = VALUE ty_ordered_changes( ).
     LOOP AT depths ASSIGNING FIELD-SYMBOL(<depth>).
-      READ TABLE changes ASSIGNING FIELD-SYMBOL(<change>)
-        WITH TABLE KEY name = <depth>-name.
-      IF sy-subrc = 0.
+      DATA(actual_node) = root->actual_tree->get_by_name( <depth>-name ).
+      DATA(ideal_node) = root->ideal_tree->get_by_name( <depth>-name ).
+      DATA(change_action) = get_action(
+        actual = actual_node
+        ideal  = ideal_node ).
+      IF change_action IS NOT INITIAL.
+        DATA(change) = NEW /apmg/cl_apm_arborist_diff(
+          actual = actual_node
+          ideal  = ideal_node
+          action = change_action ).
+        change->set_parent( root ).
         APPEND VALUE #(
-          name  = <change>-name
+          name  = <depth>-name
           depth = <depth>-depth
-          diff  = <change>-diff ) TO ordered_changes.
+          diff  = change ) TO ordered_changes.
       ENDIF.
     ENDLOOP.
 
@@ -337,94 +325,38 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
     result->actual_tree = actual.
     result->ideal_tree = ideal.
 
-    DATA(actual_roots) = actual->get_roots( ).
-    DATA(ideal_roots)  = ideal->get_roots( ).
-
-    DATA(root_names) = VALUE string_table( ).
-    LOOP AT actual_roots INTO DATA(actual_root).
-      INSERT actual_root->name INTO TABLE root_names.
+    DATA(node_names) = VALUE string_table( ).
+    LOOP AT actual->get_all( ) INTO DATA(actual_entry).
+      INSERT actual_entry->name INTO TABLE node_names.
     ENDLOOP.
-    LOOP AT ideal_roots INTO DATA(ideal_root).
-      INSERT ideal_root->name INTO TABLE root_names.
+    LOOP AT ideal->get_all( ) INTO DATA(ideal_entry).
+      INSERT ideal_entry->name INTO TABLE node_names.
     ENDLOOP.
-    SORT root_names.
-    DELETE ADJACENT DUPLICATES FROM root_names.
+    SORT node_names.
+    DELETE ADJACENT DUPLICATES FROM node_names.
 
-    LOOP AT root_names ASSIGNING FIELD-SYMBOL(<name>).
+    LOOP AT node_names ASSIGNING FIELD-SYMBOL(<name>).
       DATA(actual_node) = actual->get_by_name( <name> ).
       DATA(ideal_node)  = ideal->get_by_name( <name> ).
-
-      IF actual_node IS NOT BOUND AND ideal_node IS NOT BOUND.
-        CONTINUE.
-      ENDIF.
-
-      DATA(root_action) = get_action(
+      DATA(node_action) = get_action(
         actual = actual_node
         ideal  = ideal_node ).
 
-      IF root_action IS NOT INITIAL.
-        IF root_action = /apmg/if_apm_arborist=>c_diff_action-remove.
+      IF node_action IS NOT INITIAL.
+        IF node_action = /apmg/if_apm_arborist=>c_diff_action-remove.
           APPEND actual_node TO result->removed.
         ENDIF.
 
-        DATA(root_diff) = NEW /apmg/cl_apm_arborist_diff(
+        DATA(node_diff) = NEW /apmg/cl_apm_arborist_diff(
           actual = actual_node
           ideal  = ideal_node
-          action = root_action ).
-
-        root_diff->build_children(
-          actual_tree = actual
-          ideal_tree  = ideal ).
-
-        root_diff->set_parent( result ).
-        APPEND root_diff TO result->children.
-        result->merge_child_results( root_diff ).
-
-      ELSE.
-        DATA(sub_diff) = NEW /apmg/cl_apm_arborist_diff(
-          actual = actual_node
-          ideal  = ideal_node ).
-
-        sub_diff->build_children(
-          actual_tree = actual
-          ideal_tree  = ideal ).
-
-        APPEND LINES OF sub_diff->children TO result->children.
-        APPEND LINES OF sub_diff->leaves TO result->leaves.
-        APPEND LINES OF sub_diff->unchanged TO result->unchanged.
-        APPEND LINES OF sub_diff->removed TO result->removed.
-        LOOP AT sub_diff->children INTO DATA(root_child).
-          CAST /apmg/cl_apm_arborist_diff( root_child )->set_parent( result ).
-        ENDLOOP.
+          action = node_action ).
+        node_diff->set_parent( result ).
+        APPEND node_diff TO result->children.
+        APPEND node_diff TO result->leaves.
+      ELSEIF ideal_node IS BOUND.
+        APPEND ideal_node TO result->unchanged.
       ENDIF.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD collect_change_entries.
-
-    DATA(ideal_node) = diff->get_ideal( ).
-    DATA(actual_node) = diff->get_actual( ).
-    DATA(name) = COND /apmg/if_apm_types=>ty_name(
-      WHEN ideal_node IS BOUND THEN ideal_node->name
-      WHEN actual_node IS BOUND THEN actual_node->name
-      ELSE '' ).
-
-    IF diff->get_action( ) IS NOT INITIAL
-        AND name IS NOT INITIAL
-        AND NOT line_exists( changes[ name = name ] ).
-      INSERT VALUE #(
-        name = name
-        diff = diff ) INTO TABLE changes.
-    ENDIF.
-
-    LOOP AT diff->get_children( ) INTO DATA(child).
-      collect_change_entries(
-        EXPORTING
-          diff    = child
-        CHANGING
-          changes = changes ).
     ENDLOOP.
 
   ENDMETHOD.
@@ -450,7 +382,7 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
 
     APPEND node->name TO path.
     LOOP AT node->edges_out ASSIGNING FIELD-SYMBOL(<edge>).
-      IF <edge>->type = /apmg/if_apm_arborist=>c_dependency_type-prod
+      IF <edge>->type <> /apmg/if_apm_arborist=>c_dependency_type-peer
           AND <edge>->to IS BOUND.
         collect_dependency_depths(
           EXPORTING
@@ -515,9 +447,9 @@ CLASS /apmg/cl_apm_arborist_diff IMPLEMENTATION.
 
   METHOD merge_child_results.
 
-    APPEND LINES OF child->leaves TO leaves.
-    APPEND LINES OF child->unchanged TO unchanged.
-    APPEND LINES OF child->removed TO removed.
+    APPEND LINES OF child->get_leaves( ) TO leaves.
+    APPEND LINES OF child->get_unchanged( ) TO unchanged.
+    APPEND LINES OF child->get_removed( ) TO removed.
 
   ENDMETHOD.
 

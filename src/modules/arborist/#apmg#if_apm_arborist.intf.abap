@@ -35,6 +35,16 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
     END OF c_error_type.
 
   CONSTANTS:
+    BEGIN OF c_diagnostic_category,
+      requested_version_not_found TYPE string VALUE 'REQUESTED_VERSION_NOT_FOUND',
+      no_satisfying_version       TYPE string VALUE 'NO_SATISFYING_VERSION',
+      peer_dependency             TYPE string VALUE 'PEER_DEPENDENCY',
+      manifest_unavailable        TYPE string VALUE 'MANIFEST_UNAVAILABLE',
+      circular_resolution         TYPE string VALUE 'CIRCULAR_RESOLUTION',
+      resolution_limit            TYPE string VALUE 'RESOLUTION_LIMIT',
+    END OF c_diagnostic_category.
+
+  CONSTANTS:
     BEGIN OF c_diff_action,
       add    TYPE ty_diff_action VALUE 'ADD',
       change TYPE ty_diff_action VALUE 'CHANGE',
@@ -55,11 +65,12 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
   TYPES:
     "! Log entry for tree issues
     BEGIN OF ty_log_entry,
-      type    TYPE string,
-      message TYPE string,
-      name    TYPE string,
-      version TYPE string,
-      spec    TYPE string,
+      type     TYPE string,
+      category TYPE string,
+      message  TYPE string,
+      name     TYPE string,
+      version  TYPE string,
+      spec     TYPE string,
     END OF ty_log_entry,
     ty_log TYPE STANDARD TABLE OF ty_log_entry WITH EMPTY KEY.
 
@@ -107,6 +118,11 @@ INTERFACE /apmg/if_apm_arborist PUBLIC.
   METHODS get_log
     RETURNING
       VALUE(result) TYPE ty_log.
+
+  "! True when the current ideal tree has no planning errors
+  METHODS is_executable
+    RETURNING
+      VALUE(result) TYPE abap_bool.
 
   "! Get all nodes in the current (actual) tree
   METHODS get_current_tree
