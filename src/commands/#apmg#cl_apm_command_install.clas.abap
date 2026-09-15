@@ -124,7 +124,6 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 
     METHODS install_changes
       IMPORTING
-        !registry  TYPE string
         !transport TYPE trkorr
         !changes   TYPE ty_changes
       RAISING
@@ -345,7 +344,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     ENDIF.
 
     install_changes(
-      registry  = registry
       transport = transport
       changes   = changes ).
 

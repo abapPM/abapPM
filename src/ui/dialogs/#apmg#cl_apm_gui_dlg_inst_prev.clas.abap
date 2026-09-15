@@ -22,6 +22,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
         !registry     TYPE string
         !root_name    TYPE /apmg/if_apm_types=>ty_name
         !version      TYPE /apmg/if_apm_types=>ty_version
+        !package      TYPE devclass
         !transport    TYPE trkorr
         !diff         TYPE REF TO /apmg/if_apm_arborist_diff
         !log          TYPE /apmg/if_apm_arborist=>ty_log
@@ -35,6 +36,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
         !registry  TYPE string
         !root_name TYPE /apmg/if_apm_types=>ty_name
         !version   TYPE /apmg/if_apm_types=>ty_version
+        !package   TYPE devclass
         !transport TYPE trkorr
         !diff      TYPE REF TO /apmg/if_apm_arborist_diff
         !log       TYPE /apmg/if_apm_arborist=>ty_log
@@ -49,7 +51,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
         added     TYPE string VALUE 'added',
         changed   TYPE string VALUE 'changed',
         removed   TYPE string VALUE 'removed',
-        transport TYPE string VALUE 'transport',
         warnings  TYPE string VALUE 'warnings',
       END OF c_id.
 
@@ -57,10 +58,10 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
       BEGIN OF c_action,
         confirm          TYPE string VALUE 'confirm-install',
         create_packages  TYPE string VALUE 'create-packages',
-        choose_transport TYPE string VALUE 'choose-transport',
       END OF c_action.
 
     DATA registry TYPE string.
+    data transport TYPE trkorr.
     DATA root_name TYPE /apmg/if_apm_types=>ty_name.
     DATA version TYPE /apmg/if_apm_types=>ty_version.
     DATA diff TYPE REF TO /apmg/if_apm_arborist_diff.
@@ -105,7 +106,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
     METHODS get_warning_text
       RETURNING
         VALUE(result) TYPE string.
-
 ENDCLASS.
 
 
@@ -118,18 +118,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
-      WHEN c_action-choose_transport.
-        DATA(selected_transport) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_select_transport( ).
-        IF selected_transport IS NOT INITIAL.
-          form_data->set(
-            iv_key = c_id-transport
-            iv_val = selected_transport ).
-          validation_log = validate_form( ).
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
-        ENDIF.
-
       WHEN c_action-create_packages.
         validation_log = validate_form( require_existing = abap_false ).
         IF validation_log->is_empty( ) = abap_true.
@@ -148,7 +136,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
             root_name   = root_name
             diff        = diff
             assignments = assignments
-            transport   = CONV #( form_data->get( c_id-transport ) ) ).
+            transport   = transport ).
 
           DATA(root_package) = assignments[ name = root_name ]-package.
           rs_handled-page  = /apmg/cl_apm_gui_page_package=>create( root_package ).
@@ -202,6 +190,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     super->constructor( ).
 
     me->registry  = registry.
+    me->transport = transport.
     me->root_name = root_name.
     me->version   = version.
     me->diff      = diff.
@@ -235,6 +224,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
       registry  = registry
       root_name = root_name
       version   = version
+      package   = package
       transport = transport
       diff      = diff
       log       = log ).
@@ -305,7 +295,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
       iv_width    = '10%'
       iv_readonly = abap_true
     )->column(
-      iv_label    = 'Registry Package'
+      iv_label    = 'Name'
       iv_width    = '35%'
       iv_readonly = abap_true
     )->column(
@@ -323,7 +313,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
       iv_label    = 'Action'
       iv_readonly = abap_true
     )->column(
-      iv_label    = 'Registry Package'
+      iv_label    = 'Name'
       iv_readonly = abap_true
     )->column(
       iv_label    = 'Installed Version'
@@ -342,7 +332,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
       iv_label    = 'Action'
       iv_readonly = abap_true
     )->column(
-      iv_label    = 'Registry Package'
+      iv_label    = 'Name'
       iv_readonly = abap_true
     )->column(
       iv_label    = 'Installed Version'
@@ -350,13 +340,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     )->column(
       iv_label    = 'SAP Package'
       iv_readonly = abap_true ).
-
-    result->text(
-      iv_name        = c_id-transport
-      iv_side_action = c_action-choose_transport
-      iv_label       = 'Transport'
-      iv_upper_case  = abap_true
-      iv_max         = 20 ).
 
     result->command(
       iv_label    = 'Install Changes'
@@ -429,7 +412,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     form_data->set( iv_key = |{ c_id-added }-rows| iv_val = |{ add_row }| ).
     form_data->set( iv_key = |{ c_id-changed }-rows| iv_val = |{ change_row }| ).
     form_data->set( iv_key = |{ c_id-removed }-rows| iv_val = |{ remove_row }| ).
-    form_data->set( iv_key = c_id-transport iv_val = transport ).
 
   ENDMETHOD.
 
@@ -487,12 +469,12 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
-      IF form_data->get( c_id-transport ) IS INITIAL.
+      IF transport IS INITIAL.
         message = /apmg/cl_apm_auth=>check_transport_required( <assignment>-package ).
         IF message IS NOT INITIAL.
           add_validation(
             target = result
-            key    = c_id-transport
+            key    = c_id-added
             text   = |{ message }: { <assignment>-package }| ).
         ENDIF.
       ENDIF.
@@ -511,7 +493,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
       ENDLOOP.
     ENDLOOP.
 
-    IF form_data->get( c_id-transport ) IS INITIAL.
+    IF transport IS INITIAL.
       LOOP AT changes INTO DATA(change).
         IF change->get_action( ) = /apmg/if_apm_arborist=>c_diff_action-add.
           CONTINUE.
@@ -522,7 +504,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
           IF message IS NOT INITIAL.
             add_validation(
               target = result
-              key    = c_id-transport
+              key    = c_id-added
               text   = |{ message }: { actual->package }| ).
           ENDIF.
         ENDIF.

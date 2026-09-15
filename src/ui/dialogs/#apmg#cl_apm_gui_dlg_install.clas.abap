@@ -32,6 +32,7 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
+        package   TYPE devclass,
         name      TYPE /apmg/if_apm_types=>ty_name,
         version   TYPE /apmg/if_apm_types=>ty_version,
         transport TYPE trkorr,
@@ -39,6 +40,7 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 
     CONSTANTS:
       BEGIN OF c_id,
+        package   TYPE string VALUE 'package',
         name      TYPE string VALUE 'name',
         version   TYPE string VALUE 'version',
         transport TYPE string VALUE 'transport',
@@ -46,6 +48,8 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
+        choose_package   TYPE string VALUE 'choose-package',
+        create_package   TYPE string VALUE 'create-package',
         install_package  TYPE string VALUE 'install-package',
         choose_transport TYPE string VALUE 'choose-transport',
       END OF c_action .
@@ -92,6 +96,32 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
+      WHEN c_action-create_package.
+
+        form_data->set(
+          iv_key = c_id-package
+          iv_val = /apmg/cl_apm_popup_utils=>create_package( form_data->get( c_id-package ) ) ).
+
+        IF form_data->get( c_id-package ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+        ENDIF.
+
+      WHEN c_action-choose_package.
+
+        form_data->set(
+          iv_key = c_id-package
+          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+
+        IF form_data->get( c_id-package ) IS NOT INITIAL.
+          validation_log = validate_form( form_data ).
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+        ELSE.
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+        ENDIF.
+
       WHEN c_action-choose_transport.
 
         form_data->set(
@@ -120,8 +150,8 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
 
           arborist->load_actual_tree( ).
           arborist->build_ideal_tree(
-            add_packages = VALUE #(
-              ( name = params-name version = params-version ) )
+            add_packages  = VALUE #(
+               ( name = params-name version = params-version ) )
             is_production = abap_true ).
 
           DATA(log) = arborist->get_log( ).
@@ -148,6 +178,7 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
             registry  = registry
             root_name = params-name
             version   = params-version
+            package   = params-package
             transport = params-transport
             diff      = diff
             log       = log ).
@@ -217,6 +248,16 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
+      iv_name        = c_id-package
+      iv_side_action = c_action-choose_package
+      iv_required    = abap_true
+      iv_upper_case  = abap_true
+      iv_label       = 'Package'
+      iv_hint        = 'SAP package (should be a dedicated one)'
+      iv_placeholder = '$..., Z..., /NSPC/...'
+      iv_min         = 2
+      iv_max         = 30
+    )->text(
       iv_name        = c_id-name
       iv_required    = abap_true
       iv_label       = 'Name'
@@ -239,6 +280,9 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_label       = 'Install Package'
       iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-install_package
+    )->command(
+      iv_label       = 'Create Package'
+      iv_action      = c_action-create_package
     )->command(
       iv_label       = 'Back'
       iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
@@ -290,6 +334,26 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       result->set(
         iv_key = c_id-version
         iv_val = 'Invalid version' ).
+    ENDIF.
+
+    DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
+
+    DATA(msg) = /apmg/cl_apm_auth=>check_package_allowed( package ).
+    IF msg IS NOT INITIAL.
+      result->set(
+        iv_key = c_id-package
+        iv_val = msg ).
+    ENDIF.
+
+    DATA(transport) = CONV trkorr( form_data->get( c_id-transport ) ).
+
+    IF transport IS INITIAL.
+      msg = /apmg/cl_apm_auth=>check_transport_required( package ).
+      IF msg IS NOT INITIAL.
+        result->set(
+          iv_key = c_id-transport
+          iv_val = msg ).
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.
