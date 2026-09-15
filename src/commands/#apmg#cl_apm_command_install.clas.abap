@@ -11,15 +11,23 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
+    TYPES:
+      BEGIN OF ty_package_assignment,
+        name    TYPE /apmg/if_apm_types=>ty_name,
+        package TYPE devclass,
+      END OF ty_package_assignment,
+      ty_package_assignments TYPE HASHED TABLE OF ty_package_assignment
+        WITH UNIQUE KEY name.
+
     CLASS-METHODS run
       IMPORTING
-        !registry      TYPE string
-        !package       TYPE devclass
-        !package_json  TYPE /apmg/if_apm_types=>ty_package_json
-        !transport     TYPE trkorr OPTIONAL
-        !is_production TYPE abap_bool DEFAULT abap_false
-        !is_force      TYPE abap_bool DEFAULT abap_false
-        !is_dry_run    TYPE abap_bool DEFAULT abap_false
+        !registry    TYPE string
+        !root_name   TYPE /apmg/if_apm_types=>ty_name
+        !diff        TYPE REF TO /apmg/if_apm_arborist_diff
+        !assignments TYPE ty_package_assignments
+        !transport   TYPE trkorr OPTIONAL
+        !is_force    TYPE abap_bool DEFAULT abap_false
+        !is_dry_run  TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
@@ -27,32 +35,61 @@ CLASS /apmg/cl_apm_command_install DEFINITION
   PRIVATE SECTION.
 
     TYPES:
-      BEGIN OF ty_action,
-        missing TYPE /apmg/if_apm_types=>ty_dependency,
-        invalid TYPE /apmg/if_apm_types=>ty_dependency,
-        error   TYPE string,
-        warning TYPE string,
-      END OF ty_action,
-      BEGIN OF ty_actions,
-        missing  TYPE /apmg/if_apm_types=>ty_dependencies,
-        invalid  TYPE /apmg/if_apm_types=>ty_dependencies,
-        errors   TYPE string_table,
-        warnings TYPE string_table,
-      END OF ty_actions.
+      BEGIN OF ty_change,
+        sequence     TYPE i,
+        action       TYPE /apmg/if_apm_arborist=>ty_diff_action,
+        name         TYPE /apmg/if_apm_types=>ty_name,
+        from_version TYPE /apmg/if_apm_types=>ty_version,
+        to_version   TYPE /apmg/if_apm_types=>ty_version,
+        package      TYPE devclass,
+        manifest     TYPE /apmg/if_apm_types=>ty_manifest,
+        tarball      TYPE xstring,
+        actual       TYPE REF TO /apmg/cl_apm_arborist_node,
+        ideal        TYPE REF TO /apmg/cl_apm_arborist_node,
+      END OF ty_change,
+      ty_changes TYPE STANDARD TABLE OF ty_change WITH EMPTY KEY.
 
     DATA packages TYPE /apmg/if_apm_package_json=>ty_packages.
 
     METHODS execute
       IMPORTING
-        !registry      TYPE string
-        !package       TYPE devclass
-        !package_json  TYPE /apmg/if_apm_types=>ty_package_json
-        !transport     TYPE trkorr
-        !is_production TYPE abap_bool
-        !is_force      TYPE abap_bool
-        !is_dry_run    TYPE abap_bool
+        !registry    TYPE string
+        !root_name   TYPE /apmg/if_apm_types=>ty_name
+        !diff        TYPE REF TO /apmg/if_apm_arborist_diff
+        !assignments TYPE ty_package_assignments
+        !transport   TYPE trkorr
+        !is_force    TYPE abap_bool
+        !is_dry_run  TYPE abap_bool
       RAISING
-        /apmg/cx_apm_error ##NEEDED.
+        /apmg/cx_apm_error.
+
+    METHODS normalize_changes
+      IMPORTING
+        !root_name    TYPE /apmg/if_apm_types=>ty_name
+        !diff         TYPE REF TO /apmg/if_apm_arborist_diff
+        !assignments  TYPE ty_package_assignments
+      RETURNING
+        VALUE(result) TYPE ty_changes
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS complete_change
+      IMPORTING
+        !assignments TYPE ty_package_assignments
+      CHANGING
+        !change      TYPE ty_change
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS preflight
+      IMPORTING
+        !registry  TYPE string
+        !transport TYPE trkorr
+        !is_force  TYPE abap_bool
+      CHANGING
+        !changes   TYPE ty_changes
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS check_package
       IMPORTING
@@ -68,58 +105,55 @@ CLASS /apmg/cl_apm_command_install DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS collect_actions
-      IMPORTING
-        !action TYPE ty_action
-      CHANGING
-        result  TYPE ty_actions.
-
-    METHODS check_actions
-      IMPORTING
-        !actions TYPE ty_actions
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS check_dependencies
-      IMPORTING
-        !manifest      TYPE /apmg/if_apm_types=>ty_manifest
-        !is_force      TYPE abap_bool DEFAULT abap_false
-        !is_production TYPE abap_bool DEFAULT abap_false
-      RETURNING
-        VALUE(result)  TYPE ty_actions
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS check_dependency
-      IMPORTING
-        !dependency   TYPE /apmg/if_apm_types=>ty_dependency
-        !category     TYPE string
-        !is_force     TYPE abap_bool DEFAULT abap_false
-        !is_optional  TYPE abap_bool DEFAULT abap_false
-      RETURNING
-        VALUE(result) TYPE ty_action
-      RAISING
-        /apmg/cx_apm_error.
-
     METHODS check_semver
       IMPORTING
-        !name        TYPE string
-        !version     TYPE string
-        !range       TYPE string
-        !category    TYPE string
-        !is_force    TYPE abap_bool DEFAULT abap_false
-        !is_optional TYPE abap_bool DEFAULT abap_false
+        !name     TYPE string
+        !version  TYPE string
+        !range    TYPE string
+        !category TYPE string
+        !is_force TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS take_actions
+    METHODS check_transport
       IMPORTING
-        !registry  TYPE string
+        !package   TYPE devclass
         !transport TYPE trkorr
-        !actions   TYPE ty_actions
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS install_changes
+      IMPORTING
+        !transport TYPE trkorr
+        !changes   TYPE ty_changes
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS remove_changes
+      IMPORTING
+        !transport TYPE trkorr
+        !changes   TYPE ty_changes
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS persist_manifest
+      IMPORTING
+        !package  TYPE devclass
+        !manifest TYPE /apmg/if_apm_types=>ty_manifest
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS delete_manifest
+      IMPORTING
+        !package TYPE devclass
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS raise_error
+      IMPORTING
+        !text TYPE string
+      RAISING
+        /apmg/cx_apm_error.
 ENDCLASS.
 
 
@@ -127,138 +161,30 @@ ENDCLASS.
 CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
 
-  METHOD check_actions.
-
-    " TODO: log all warnings and errors
-    IF actions-errors IS NOT INITIAL.
-      DATA(text) = concat_lines_of( table = actions-errors sep = |\n| ).
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = text.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD check_dependencies.
-
-    " Dependencies: Install, if not bundled
-    LOOP AT manifest-dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
-      IF NOT line_exists( manifest-bundle_dependencies[ table_line = <dependency>-key ] ).
-        DATA(action) = check_dependency(
-          dependency = <dependency>
-          category   = 'Dependency'
-          is_force   = is_force ).
-
-        collect_actions(
-          EXPORTING
-            action = action
-          CHANGING
-            result = result ).
-      ENDIF.
-    ENDLOOP.
-
-    " DevDependencies: Install, if not production
-    IF is_production = abap_false.
-      LOOP AT manifest-dev_dependencies ASSIGNING <dependency>.
-        action = check_dependency(
-          dependency = <dependency>
-          category   = 'devDependency'
-          is_force   = is_force ).
-
-        collect_actions(
-          EXPORTING
-            action = action
-          CHANGING
-            result = result ).
-      ENDLOOP.
-    ENDIF.
-
-    " OptionalDepedencies: Install, if possible and ignore failures
-    LOOP AT manifest-optional_dependencies ASSIGNING <dependency>.
-      action = check_dependency(
-        dependency  = <dependency>
-        category    = 'optionalDependency'
-        is_force    = is_force
-        is_optional = abap_true ).
-
-      collect_actions(
-        EXPORTING
-          action = action
-        CHANGING
-          result = result ).
-    ENDLOOP.
-
-    " PeerDepdencies: Expected to be installed already
-    LOOP AT manifest-peer_dependencies ASSIGNING <dependency>.
-      action = check_dependency(
-        dependency = <dependency>
-        category   = 'peerDependency'
-        is_force   = is_force ).
-
-      IF action-error IS NOT INITIAL.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = action-error.
-      ENDIF.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD check_dependency.
-
-    READ TABLE packages ASSIGNING FIELD-SYMBOL(<package>)
-      WITH KEY name COMPONENTS name = dependency-key.
-    IF sy-subrc = 0.
-      DATA(satisfies) = /apmg/cl_apm_semver_functions=>satisfies(
-        version = <package>-version
-        range   = dependency-range ).
-
-      IF satisfies = abap_false.
-        IF is_optional = abap_true OR is_force = abap_true.
-          result-warning = |{ category } "{ dependency-key }" is installed in version { <package>-version } | &&
-                           |and does not satisfy { dependency-range } but is optional|.
-        ELSE.
-          result-invalid = dependency.
-          result-error   = |{ category } "{ dependency-key }" is installed in version { <package>-version } | &&
-                           |but does not satisfy { dependency-range }|.
-        ENDIF.
-      ENDIF.
-    ELSE.
-      IF is_optional = abap_true OR is_force = abap_true.
-        result-warning = |{ category } "{ dependency-key }" is not installed but optional|.
-      ELSE.
-        result-missing = dependency.
-        result-error   = |{ category } "{ dependency-key }" is not installed|.
-      ENDIF.
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD check_package.
 
+    IF package IS INITIAL.
+      raise_error( |No SAP package was assigned to { name }| ).
+    ENDIF.
+
+    DATA(sap_package) = zcl_abapgit_factory=>get_sap_package( package ).
+    IF sap_package->exists( ) = abap_false.
+      raise_error( |SAP package { package } does not exist| ).
+    ENDIF.
+
     IF line_exists( packages[ name = name ] ) ##PRIMKEY[NAME].
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-        EXPORTING
-          text = |Package "{ name }" is already installed in { packages[ name = name ]-package }| ##PRIMKEY[NAME].
+      raise_error( |Package "{ name }" is already installed in { packages[ name = name ]-package }| ) ##PRIMKEY[NAME].
     ENDIF.
 
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( package ).
-
     IF package_json_service->exists( ) = abap_true.
       DATA(existing_name) = package_json_service->get( )-name.
-      IF existing_name = name.
-        " TODO: log warning
-      ELSE.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |{ package } already contains package "{ existing_name }"|.
-      ENDIF.
+      raise_error( |{ package } already contains package "{ existing_name }"| ).
     ENDIF.
 
     SELECT COUNT(*) FROM tadir INTO @DATA(count) WHERE devclass = @package. "#EC CI_SGLSELECT
     IF count > 1.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-        EXPORTING
-          text = |{ package } already contains { count } objects but must be empty|.
+      raise_error( |{ package } already contains { count } objects but must be empty| ).
     ENDIF.
 
   ENDMETHOD.
@@ -266,7 +192,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD check_prerequisites.
 
-    " apm version
     IF line_exists( manifest-engines[ key = 'apm' ] ).
       check_semver(
         name     = 'apm'
@@ -276,7 +201,6 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         is_force = is_force ).
     ENDIF.
 
-    " abap release
     IF line_exists( manifest-engines[ key = 'abap' ] ).
       check_semver(
         name     = 'ABAP'
@@ -286,16 +210,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
         is_force = is_force ).
     ENDIF.
 
-    " db platform
     DATA(db) = /apmg/cl_apm_utils=>get_database_platform( ).
-
-    IF manifest-db IS NOT INITIAL AND NOT line_exists( manifest-db[ db ] ).
-      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-        EXPORTING
-          text = |Database platform "{ db }" is not supported with this package|.
+    IF manifest-db IS NOT INITIAL AND NOT line_exists( manifest-db[ table_line = db ] ).
+      raise_error( |Database platform "{ db }" is not supported with package { manifest-name }| ).
     ENDIF.
-
-    " TODO: Check os & cpu (requires "env" package enhancement)
 
   ENDMETHOD.
 
@@ -306,33 +224,94 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       version = version
       range   = range ).
 
-    IF satisfies = abap_false.
-      IF is_optional = abap_true OR is_force = abap_true.
-        " TODO: Log warning
-      ELSE.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |{ category } "{ name }" is installed in version { version } | &&
-                   |but does not satisfy { range }|.
+    IF satisfies = abap_false AND is_force = abap_false.
+      raise_error( |{ category } "{ name }" is installed in version { version } but does not satisfy { range }| ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD check_transport.
+
+    IF transport IS INITIAL.
+      DATA(message) = /apmg/cl_apm_auth=>check_transport_required( package ).
+      IF message IS NOT INITIAL.
+        raise_error( |{ message }: { package }| ).
       ENDIF.
     ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD collect_actions.
+  METHOD complete_change.
 
-    IF action-missing IS NOT INITIAL.
-      INSERT action-missing INTO TABLE result-missing.
+    CASE change-action.
+      WHEN /apmg/if_apm_arborist=>c_diff_action-add.
+        IF change-actual IS BOUND OR change-ideal IS NOT BOUND.
+          raise_error( |Invalid ADD action for { change-name }| ).
+        ENDIF.
+        READ TABLE assignments ASSIGNING FIELD-SYMBOL(<assignment>)
+          WITH TABLE KEY name = change-name.
+        IF sy-subrc <> 0 OR <assignment>-package IS INITIAL.
+          raise_error( |No SAP package was assigned to { change-name }| ).
+        ENDIF.
+        change-package    = <assignment>-package.
+        change-to_version = change-ideal->version.
+        change-manifest   = change-ideal->get_manifest( ).
+        IF change-to_version IS INITIAL.
+          raise_error( |ADD action for { change-name } has no target version| ).
+        ENDIF.
+
+      WHEN /apmg/if_apm_arborist=>c_diff_action-change.
+        IF change-actual IS NOT BOUND
+            OR change-ideal IS NOT BOUND
+            OR change-actual->name <> change-ideal->name.
+          raise_error( |Invalid CHANGE action for { change-name }| ).
+        ENDIF.
+        change-package      = change-actual->package.
+        change-from_version = change-actual->version.
+        change-to_version   = change-ideal->version.
+        change-manifest     = change-ideal->get_manifest( ).
+        IF change-package IS INITIAL.
+          raise_error( |CHANGE action for { change-name } has no installed SAP package| ).
+        ENDIF.
+        IF change-from_version IS INITIAL OR change-to_version IS INITIAL.
+          raise_error( |CHANGE action for { change-name } has an incomplete version| ).
+        ENDIF.
+        IF change-from_version = change-to_version.
+          raise_error( |CHANGE action for { change-name } does not change the version| ).
+        ENDIF.
+
+      WHEN /apmg/if_apm_arborist=>c_diff_action-remove.
+        IF change-actual IS NOT BOUND OR change-ideal IS BOUND.
+          raise_error( |Invalid REMOVE action for { change-name }| ).
+        ENDIF.
+        change-package      = change-actual->package.
+        change-from_version = change-actual->version.
+        IF change-package IS INITIAL.
+          raise_error( |REMOVE action for { change-name } has no installed SAP package| ).
+        ENDIF.
+        IF change-from_version IS INITIAL.
+          raise_error( |REMOVE action for { change-name } has no installed version| ).
+        ENDIF.
+
+      WHEN OTHERS.
+        raise_error( |Unknown install action for { change-name }| ).
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD delete_manifest.
+
+    DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( package ).
+    IF package_json_service->exists( ) = abap_true.
+      package_json_service->delete( ).
     ENDIF.
-    IF action-invalid IS NOT INITIAL.
-      INSERT action-invalid INTO TABLE result-invalid.
-    ENDIF.
-    IF action-error IS NOT INITIAL.
-      INSERT action-error INTO TABLE result-errors.
-    ENDIF.
-    IF action-warning IS NOT INITIAL.
-      INSERT action-warning INTO TABLE result-warnings.
+
+    DATA(readme_service) = /apmg/cl_apm_readme=>factory( package ).
+    IF readme_service->exists( ) = abap_true.
+      readme_service->delete( ).
     ENDIF.
 
   ENDMETHOD.
@@ -340,73 +319,283 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
   METHOD execute.
 
-    DATA package_json_init TYPE /apmg/if_apm_types=>ty_package_json.
-
     /apmg/cl_apm_registry=>check_logged_in( registry ).
 
-    " Authorization check
-    /apmg/cl_apm_auth=>check_package_authorized(
-      package  = package
-      activity = /apmg/cl_apm_auth=>c_activity-create ).
-    /apmg/cl_apm_auth=>check_package_authorized(
-      package  = package
-      activity = /apmg/cl_apm_auth=>c_activity-change ).
-
-    " Get all installed packages
     packages = /apmg/cl_apm_package_json=>list(
       instanciate = abap_true
       is_bundle   = abap_false ).
 
-    " 1. Check if something else is already installed
-    check_package(
+    DATA(changes) = normalize_changes(
+      root_name   = root_name
+      diff        = diff
+      assignments = assignments ).
+
+    preflight(
+      EXPORTING
+        registry  = registry
+        transport = transport
+        is_force  = is_force
+      CHANGING
+        changes   = changes ).
+
+    IF is_dry_run = abap_true.
+      MESSAGE |Install dry run successful: { lines( changes ) } change(s)| TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    install_changes(
+      transport = transport
+      changes   = changes ).
+
+    remove_changes(
+      transport = transport
+      changes   = changes ).
+
+    MESSAGE |Package successfully installed: { root_name }| TYPE 'S'.
+
+  ENDMETHOD.
+
+
+  METHOD install_changes.
+
+    DATA(completed) = 0.
+
+    LOOP AT changes ASSIGNING FIELD-SYMBOL(<change>)
+        WHERE action = /apmg/if_apm_arborist=>c_diff_action-add
+           OR action = /apmg/if_apm_arborist=>c_diff_action-change.
+
+      TRY.
+          IF <change>-action = /apmg/if_apm_arborist=>c_diff_action-change.
+            /apmg/cl_apm_installer=>uninstall(
+              name      = <change>-name
+              version   = <change>-from_version
+              package   = <change>-package
+              transport = transport ).
+          ENDIF.
+
+          " FUTURE: Allow other folder logic than prefix
+          /apmg/cl_apm_installer=>install(
+            name              = <change>-name
+            version           = <change>-to_version
+            data              = <change>-tarball
+            package           = <change>-package
+            transport         = transport
+            enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
+            enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix ).
+
+          persist_manifest(
+            package  = <change>-package
+            manifest = <change>-manifest ).
+
+          completed = completed + 1.
+
+        CATCH /apmg/cx_apm_error INTO DATA(error).
+          /apmg/cx_apm_error=>raise(
+            text     = |{ <change>-action } failed for { <change>-name }@{ <change>-to_version } in | &&
+                       |{ <change>-package } after { completed } completed ADD/CHANGE action(s)|
+            previous = error ).
+      ENDTRY.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD normalize_changes.
+
+    IF diff IS NOT BOUND.
+      raise_error( 'The Arborist diff is not available' ).
+    ENDIF.
+
+    DATA(diff_changes) = diff->get_changes( root_name ).
+    IF diff_changes IS INITIAL.
+      raise_error( |No install changes were found for { root_name }| ).
+    ENDIF.
+
+    DATA(root_found) = abap_false.
+
+    LOOP AT diff_changes INTO DATA(diff_change).
+      DATA(actual) = diff_change->get_actual( ).
+      DATA(ideal)  = diff_change->get_ideal( ).
+      DATA(action) = diff_change->get_action( ).
+      DATA(name) = COND /apmg/if_apm_types=>ty_name(
+        WHEN ideal IS BOUND THEN ideal->name
+        WHEN actual IS BOUND THEN actual->name ).
+
+      IF name IS INITIAL.
+        raise_error( 'An install change has no registry package name' ).
+      ENDIF.
+      IF line_exists( result[ name = name ] ).
+        raise_error( |Duplicate install action for { name }| ).
+      ENDIF.
+
+      DATA(change) = VALUE ty_change(
+        sequence = sy-tabix
+        action   = action
+        name     = name
+        actual   = actual
+        ideal    = ideal ).
+
+      complete_change(
+        EXPORTING
+          assignments = assignments
+        CHANGING
+          change      = change ).
+
+      IF name = root_name AND action = /apmg/if_apm_arborist=>c_diff_action-add.
+        root_found = abap_true.
+      ENDIF.
+
+      APPEND change TO result.
+    ENDLOOP.
+
+    IF root_found = abap_false.
+      raise_error( |The requested installation of package { root_name } is not an ADD action| ).
+    ENDIF.
+
+    LOOP AT assignments ASSIGNING FIELD-SYMBOL(<assignment>).
+      IF NOT line_exists( result[
+        name   = <assignment>-name
+        action = /apmg/if_apm_arborist=>c_diff_action-add ] ).
+        raise_error( |Unexpected SAP package assignment for { <assignment>-name }| ).
+      ENDIF.
+    ENDLOOP.
+
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<left>) WHERE action = /apmg/if_apm_arborist=>c_diff_action-add.
+      LOOP AT result ASSIGNING FIELD-SYMBOL(<right>)
+          WHERE action = /apmg/if_apm_arborist=>c_diff_action-add AND sequence > <left>-sequence.
+        IF <left>-package = <right>-package.
+          raise_error( |SAP package { <left>-package } is assigned to both { <left>-name } and { <right>-name }| ).
+        ENDIF.
+      ENDLOOP.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD persist_manifest.
+
+    DATA(package_json) = CORRESPONDING /apmg/if_apm_types=>ty_package_json( manifest ).
+    DATA(markdown) = package_json-readme.
+    IF markdown IS INITIAL.
+      markdown = |# { package_json-name } - { package_json-description }|.
+    ELSE.
+      markdown = replace(
+        val  = markdown
+        sub  = '\n'
+        with = cl_abap_char_utilities=>newline
+        occ  = 0 ).
+    ENDIF.
+    CLEAR package_json-readme.
+
+    DATA(package_json_service) = /apmg/cl_apm_package_json=>factory(
       package = package
-      name    = package_json-name ).
+      name    = package_json-name
+      version = package_json-version
+      private = package_json-private ).
+    package_json_service->set( package_json )->save( ).
 
-    " 2. Get manifest
-    DATA(manifest) = /apmg/cl_apm_registry=>get_manifest(
-      registry = registry
-      name     = package_json-name
-      version  = package_json-version ).
+    DATA(readme_service) = /apmg/cl_apm_readme=>factory(
+      package  = package
+      markdown = markdown ).
+    readme_service->set( markdown )->save( ).
 
-    " 3. Check prerequisites (os, cpu, engines)
-    check_prerequisites(
-      manifest = manifest
-      is_force = is_force ).
+  ENDMETHOD.
 
-    " 4. Check dependencies (not recursive)
-    DATA(actions) = check_dependencies(
-      manifest = manifest
-      is_force = is_force ).
 
-    check_actions( actions ).
+  METHOD preflight.
 
-    " TODO!: Instead of just checking if dependencies are installed, it should install them.
-    " For that to happen, we need arborist to build the dependency tree and pass it here.
-    " This needs to include the target version and SAP package for each dependency :-)
+    LOOP AT changes ASSIGNING FIELD-SYMBOL(<change>).
+      check_transport(
+        package   = <change>-package
+        transport = transport ).
 
-    " 5. Install and update dependencies
-    take_actions(
-      registry  = registry
-      actions   = actions
-      transport = transport ).
+      CASE <change>-action.
+        WHEN /apmg/if_apm_arborist=>c_diff_action-add.
+          DATA(message) = /apmg/cl_apm_auth=>check_package_allowed( <change>-package ).
+          IF message IS NOT INITIAL.
+            raise_error( message ).
+          ENDIF.
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <change>-package
+            activity = /apmg/cl_apm_auth=>c_activity-create ).
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <change>-package
+            activity = /apmg/cl_apm_auth=>c_activity-change ).
+          check_package(
+            package = <change>-package
+            name    = <change>-name ).
 
-    " 6. Get tarball from registry and install it into package
-    /apmg/cl_apm_command_installer=>install_package(
-      registry  = registry
-      manifest  = manifest
-      package   = package
-      name      = package_json-name
-      version   = package_json-version
-      transport = transport ).
+        WHEN /apmg/if_apm_arborist=>c_diff_action-change.
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <change>-package
+            activity = /apmg/cl_apm_auth=>c_activity-change ).
 
-    " 7. Save package.abap.json and readme
-    package_json_init = CORRESPONDING #( manifest ).
+        WHEN /apmg/if_apm_arborist=>c_diff_action-remove.
+          /apmg/cl_apm_auth=>check_package_authorized(
+            package  = <change>-package
+            activity = /apmg/cl_apm_auth=>c_activity-delete ).
+      ENDCASE.
 
-    /apmg/cl_apm_command_init=>run(
-      package      = package
-      package_json = package_json_init ).
+      IF <change>-action = /apmg/if_apm_arborist=>c_diff_action-add
+          OR <change>-action = /apmg/if_apm_arborist=>c_diff_action-change.
+        IF <change>-manifest-name <> <change>-name
+            OR <change>-manifest-version <> <change>-to_version
+            OR <change>-manifest-dist-tarball IS INITIAL.
+          raise_error( |Incomplete target manifest for { <change>-name }@{ <change>-to_version }| ).
+        ENDIF.
 
-    MESSAGE 'Package successfully installed' TYPE 'S'.
+        check_prerequisites(
+          manifest = <change>-manifest
+          is_force = is_force ).
+
+        <change>-tarball = /apmg/cl_apm_registry=>get_tarball(
+          registry = registry
+          name     = <change>-name
+          tarball  = <change>-manifest-dist-tarball ).
+
+        /apmg/cl_apm_integrity=>check(
+          tarball = <change>-tarball
+          dist    = <change>-manifest-dist ).
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD raise_error.
+
+    RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = text.
+
+  ENDMETHOD.
+
+
+  METHOD remove_changes.
+
+    DATA(removals) = changes.
+    DELETE removals WHERE action <> /apmg/if_apm_arborist=>c_diff_action-remove.
+    SORT removals BY sequence DESCENDING.
+
+    DATA(completed) = 0.
+
+    LOOP AT changes ASSIGNING FIELD-SYMBOL(<change>).
+      TRY.
+          /apmg/cl_apm_installer=>uninstall(
+            name      = <change>-name
+            version   = <change>-from_version
+            package   = <change>-package
+            transport = transport ).
+
+          delete_manifest( <change>-package ).
+
+          completed = completed + 1.
+
+        CATCH /apmg/cx_apm_error INTO DATA(error).
+          /apmg/cx_apm_error=>raise(
+            text     = |REMOVE failed for { <change>-name }@{ <change>-from_version } in { <change>-package } | &&
+                       |after { completed } completed REMOVE action(s)|
+            previous = error ).
+      ENDTRY.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -416,49 +605,13 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     DATA(command) = NEW /apmg/cl_apm_command_install( ).
 
     command->execute(
-      registry      = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
-      package       = package
-      package_json  = package_json
-      transport     = transport
-      is_production = is_production
-      is_force      = is_force
-      is_dry_run    = is_dry_run ).
-
-  ENDMETHOD.
-
-
-  METHOD take_actions.
-
-    DATA package TYPE devclass.
-    DATA package_json TYPE /apmg/if_apm_types=>ty_package_json.
-
-    " Install missing dependencies
-    LOOP AT actions-missing ASSIGNING FIELD-SYMBOL(<action>).
-
-      " TODO: Package + Version
-      package_json-name = <action>-key.
-
-      run(
-        registry     = registry
-        package      = package
-        package_json = package_json
-        transport    = transport ).
-
-    ENDLOOP.
-
-    " Update invalid dependencies
-    LOOP AT actions-invalid ASSIGNING <action>.
-
-      " TODO: Package + Version
-      package_json-name = <action>-key.
-
-      run(
-        registry     = registry
-        package      = package
-        package_json = package_json
-        transport    = transport ).
-
-    ENDLOOP.
+      registry    = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
+      root_name   = root_name
+      diff        = diff
+      assignments = assignments
+      transport   = transport
+      is_force    = is_force
+      is_dry_run  = is_dry_run ).
 
   ENDMETHOD.
 ENDCLASS.

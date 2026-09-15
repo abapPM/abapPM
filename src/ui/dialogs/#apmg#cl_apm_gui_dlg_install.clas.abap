@@ -32,11 +32,10 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
-        package      TYPE devclass,
-        name         TYPE string,
-        version      TYPE string,
-        transport    TYPE trkorr,
-        package_json TYPE /apmg/if_apm_types=>ty_package_json,
+        package   TYPE devclass,
+        name      TYPE /apmg/if_apm_types=>ty_name,
+        version   TYPE /apmg/if_apm_types=>ty_version,
+        transport TYPE trkorr,
       END OF ty_params.
 
     CONSTANTS:
@@ -80,6 +79,11 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS get_planning_error
+      IMPORTING
+        !log          TYPE /apmg/if_apm_arborist=>ty_log
+      RETURNING
+        VALUE(result) TYPE string.
 ENDCLASS.
 
 
@@ -138,16 +142,47 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
-          /apmg/cl_apm_command_install=>run(
-            registry     = registry
-            package      = params-package
-            package_json = params-package_json
-            transport    = params-transport ).
+          /apmg/cl_apm_registry=>check_logged_in( registry ).
 
-          " TODO: Set package to write-protected (see settings-package_settings)
+          DATA(arborist) = /apmg/cl_apm_arborist=>factory(
+            registry                 = registry
+            with_bundle_dependencies = abap_false ).
 
-          rs_handled-page  = /apmg/cl_apm_gui_page_package=>create( params-package ).
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page_replacing.
+          arborist->load_actual_tree( ).
+          arborist->build_ideal_tree(
+            add_packages  = VALUE #(
+               ( name = params-name version = params-version ) )
+            is_production = abap_true ).
+
+          DATA(log) = arborist->get_log( ).
+          IF arborist->is_executable( ) = abap_false.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+              EXPORTING
+                text = get_planning_error( log ).
+          ENDIF.
+
+          DATA(diff) = arborist->get_diff( ).
+          IF diff IS NOT BOUND.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+              EXPORTING
+                text = |No install changes were found for { params-name }|.
+          ENDIF.
+
+          IF diff->get_changes( params-name ) IS INITIAL.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+              EXPORTING
+                text = |No install changes were found for { params-name }|.
+          ENDIF.
+
+          rs_handled-page = /apmg/cl_apm_gui_dlg_inst_prev=>create(
+            registry  = registry
+            root_name = params-name
+            version   = params-version
+            package   = params-package
+            transport = params-transport
+            diff      = diff
+            log       = log ).
+          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
         ELSE.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
@@ -259,7 +294,28 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
 
     form_data->to_struc( CHANGING cs_container = result ).
 
-    result-package_json = CORRESPONDING #( result ).
+  ENDMETHOD.
+
+
+  METHOD get_planning_error.
+
+    LOOP AT log ASSIGNING FIELD-SYMBOL(<entry>)
+        WHERE type = /apmg/if_apm_arborist=>c_log_type-error.
+      IF result IS NOT INITIAL.
+        result = result && |\n|.
+      ENDIF.
+      result = result && |[{ <entry>-category }] { <entry>-name }|.
+      IF <entry>-version IS NOT INITIAL.
+        result = result && |@{ <entry>-version }|.
+      ELSEIF <entry>-spec IS NOT INITIAL.
+        result = result && | ({ <entry>-spec })|.
+      ENDIF.
+      result = result && |: { <entry>-message }|.
+    ENDLOOP.
+
+    IF result IS INITIAL.
+      result = 'Arborist could not build an executable install plan'.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -267,6 +323,18 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
   METHOD validate_form.
 
     result = form_util->validate( form_data ).
+
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ).
+      result->set(
+        iv_key = c_id-name
+        iv_val = 'Invalid name' ).
+    ENDIF.
+
+    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
+      result->set(
+        iv_key = c_id-version
+        iv_val = 'Invalid version' ).
+    ENDIF.
 
     DATA(package) = CONV devclass( form_data->get( c_id-package ) ).
 
@@ -286,18 +354,6 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
           iv_key = c_id-transport
           iv_val = msg ).
       ENDIF.
-    ENDIF.
-
-    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_name( form_data->get( c_id-name ) ).
-      result->set(
-        iv_key = c_id-name
-        iv_val = 'Invalid name' ).
-    ENDIF.
-
-    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-version ) ).
-      result->set(
-        iv_key = c_id-version
-        iv_val = 'Invalid version' ).
     ENDIF.
 
   ENDMETHOD.

@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>/APMG/CL_APM_COMMAND_INSTALLER</CLSNAME>
+    <CLSNAME>/APMG/CL_APM_GUI_DLG_INST_PREV</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>apm - Command Installer</DESCRIPT>
+    <DESCRIPT>apm - GUI Install Preview Dialog</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

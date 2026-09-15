@@ -210,10 +210,10 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
         " TODO: Support data config
         " _deserialize_data( ... )
 
-      CATCH cx_root INTO DATA(error).
+      CATCH cx_root INTO DATA(failure).
         _transport_reset( ).
 
-        log->add_exception( error ).
+        log->add_exception( failure ).
     ENDTRY.
 
     TRY.
@@ -221,9 +221,18 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
         _restore_messages( ).
 
-      CATCH cx_root INTO error.
-        log->add_exception( error ).
+      CATCH cx_root INTO DATA(cleanup_error).
+        IF failure IS NOT BOUND.
+          failure = cleanup_error.
+        ENDIF.
+        log->add_exception( cleanup_error ).
     ENDTRY.
+
+    IF failure IS BOUND.
+      /apmg/cx_apm_error=>raise(
+        text     = |Install failed for { name }@{ version } in SAP package { package }|
+        previous = failure ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -268,10 +277,10 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
           ENDIF.
         ENDDO.
 
-      CATCH cx_root INTO DATA(error).
+      CATCH cx_root INTO DATA(failure).
         _transport_reset( ).
 
-        log->add_exception( error ).
+        log->add_exception( failure ).
     ENDTRY.
 
     TRY.
@@ -283,9 +292,18 @@ CLASS /apmg/cl_apm_installer IMPLEMENTATION.
 
         _restore_messages( ).
 
-      CATCH cx_root INTO error.
-        log->add_exception( error ).
+      CATCH cx_root INTO DATA(cleanup_error).
+        IF failure IS NOT BOUND.
+          failure = cleanup_error.
+        ENDIF.
+        log->add_exception( cleanup_error ).
     ENDTRY.
+
+    IF failure IS BOUND.
+      /apmg/cx_apm_error=>raise(
+        text     = |Uninstall failed for { name }@{ version } in SAP package { package }|
+        previous = failure ).
+    ENDIF.
 
   ENDMETHOD.
 
