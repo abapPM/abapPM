@@ -277,7 +277,7 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_max         = 20 ).
 
     result->command(
-      iv_label       = 'Install Package'
+      iv_label       = 'Install Preview'
       iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action      = c_action-install_package
     )->command(
