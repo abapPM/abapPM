@@ -32,8 +32,8 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
-        name      TYPE string,
-        version   TYPE string,
+        name      TYPE /apmg/if_apm_types=>ty_name,
+        version   TYPE /apmg/if_apm_types=>ty_version,
         transport TYPE trkorr,
       END OF ty_params.
 
@@ -80,7 +80,6 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
         !log          TYPE /apmg/if_apm_arborist=>ty_log
       RETURNING
         VALUE(result) TYPE string.
-
 ENDCLASS.
 
 
@@ -147,8 +146,8 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
 
           rs_handled-page = /apmg/cl_apm_gui_dlg_inst_prev=>create(
             registry  = registry
-            root_name = CONV #( params-name )
-            version   = CONV #( params-version )
+            root_name = params-name
+            version   = params-version
             transport = params-transport
             diff      = diff
             log       = log ).
