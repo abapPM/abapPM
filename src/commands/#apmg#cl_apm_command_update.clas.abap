@@ -182,13 +182,24 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
 
     " 8. Update package
     IF is_newer = abap_true OR force = abap_true.
-      /apmg/cl_apm_command_installer=>install_package(
-        registry  = registry
-        manifest  = manifest
-        package   = package
-        name      = manifest-name
-        version   = manifest-version
-        transport = transport ).
+      DATA(tarball) = /apmg/cl_apm_registry=>get_tarball(
+        registry = registry
+        name     = package_json-name
+        tarball  = manifest-dist-tarball ).
+
+      /apmg/cl_apm_integrity=>check(
+        tarball = tarball
+        dist    = manifest-dist ).
+
+      " FUTURE: Allow other folder logic than prefix
+      /apmg/cl_apm_installer=>install(
+        name              = manifest-name
+        version           = manifest-version
+        data              = tarball
+        package           = package
+        transport         = transport
+        enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
+        enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix ).
     ENDIF.
 
     " 9. Save package to apm
@@ -355,7 +366,7 @@ CLASS /apmg/cl_apm_command_update IMPLEMENTATION.
     LOOP AT dependencies INTO DATA(dependency) WHERE action = /apmg/if_apm_importer=>c_action-remove.
 
       IF is_dry_run = abap_false.
-        /apmg/cl_apm_command_installer=>uninstall_package(
+        /apmg/cl_apm_installer=>uninstall(
           name      = dependency-name
           version   = dependency-version
           package   = dependency-package

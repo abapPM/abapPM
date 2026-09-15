@@ -43,7 +43,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         to_version   TYPE /apmg/if_apm_types=>ty_version,
         package      TYPE devclass,
         manifest     TYPE /apmg/if_apm_types=>ty_manifest,
-        data         TYPE xstring,
+        tarball      TYPE xstring,
         actual       TYPE REF TO /apmg/cl_apm_arborist_node,
         ideal        TYPE REF TO /apmg/cl_apm_arborist_node,
       END OF ty_change,
@@ -155,74 +155,11 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !text TYPE string
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
 
 CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
-
-
-  METHOD complete_change.
-
-    CASE change-action.
-      WHEN /apmg/if_apm_arborist=>c_diff_action-add.
-        IF change-actual IS BOUND OR change-ideal IS NOT BOUND.
-          raise_error( |Invalid ADD action for { change-name }| ).
-        ENDIF.
-        READ TABLE assignments ASSIGNING FIELD-SYMBOL(<assignment>)
-          WITH TABLE KEY name = change-name.
-        IF sy-subrc <> 0.
-          raise_error( |No SAP package was assigned to { change-name }| ).
-        ENDIF.
-        IF <assignment>-package IS INITIAL.
-          raise_error( |No SAP package was assigned to { change-name }| ).
-        ENDIF.
-        change-package    = <assignment>-package.
-        change-to_version = change-ideal->version.
-        change-manifest   = change-ideal->get_manifest( ).
-        IF change-to_version IS INITIAL.
-          raise_error( |ADD action for { change-name } has no target version| ).
-        ENDIF.
-
-      WHEN /apmg/if_apm_arborist=>c_diff_action-change.
-        IF change-actual IS NOT BOUND
-            OR change-ideal IS NOT BOUND
-            OR change-actual->name <> change-ideal->name.
-          raise_error( |Invalid CHANGE action for { change-name }| ).
-        ENDIF.
-        change-package      = change-actual->package.
-        change-from_version = change-actual->version.
-        change-to_version   = change-ideal->version.
-        change-manifest     = change-ideal->get_manifest( ).
-        IF change-package IS INITIAL.
-          raise_error( |CHANGE action for { change-name } has no installed SAP package| ).
-        ENDIF.
-        IF change-from_version IS INITIAL OR change-to_version IS INITIAL.
-          raise_error( |CHANGE action for { change-name } has an incomplete version| ).
-        ENDIF.
-        IF change-from_version = change-to_version.
-          raise_error( |CHANGE action for { change-name } does not change the version| ).
-        ENDIF.
-
-      WHEN /apmg/if_apm_arborist=>c_diff_action-remove.
-        IF change-actual IS NOT BOUND OR change-ideal IS BOUND.
-          raise_error( |Invalid REMOVE action for { change-name }| ).
-        ENDIF.
-        change-package      = change-actual->package.
-        change-from_version = change-actual->version.
-        IF change-package IS INITIAL.
-          raise_error( |REMOVE action for { change-name } has no installed SAP package| ).
-        ENDIF.
-        IF change-from_version IS INITIAL.
-          raise_error( |REMOVE action for { change-name } has no installed version| ).
-        ENDIF.
-
-      WHEN OTHERS.
-        raise_error( |Unknown install action for { change-name }| ).
-    ENDCASE.
-
-  ENDMETHOD.
 
 
   METHOD check_package.
@@ -307,6 +244,65 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD complete_change.
+
+    CASE change-action.
+      WHEN /apmg/if_apm_arborist=>c_diff_action-add.
+        IF change-actual IS BOUND OR change-ideal IS NOT BOUND.
+          raise_error( |Invalid ADD action for { change-name }| ).
+        ENDIF.
+        READ TABLE assignments ASSIGNING FIELD-SYMBOL(<assignment>)
+          WITH TABLE KEY name = change-name.
+        IF sy-subrc <> 0 OR <assignment>-package IS INITIAL.
+          raise_error( |No SAP package was assigned to { change-name }| ).
+        ENDIF.
+        change-package    = <assignment>-package.
+        change-to_version = change-ideal->version.
+        change-manifest   = change-ideal->get_manifest( ).
+        IF change-to_version IS INITIAL.
+          raise_error( |ADD action for { change-name } has no target version| ).
+        ENDIF.
+
+      WHEN /apmg/if_apm_arborist=>c_diff_action-change.
+        IF change-actual IS NOT BOUND
+            OR change-ideal IS NOT BOUND
+            OR change-actual->name <> change-ideal->name.
+          raise_error( |Invalid CHANGE action for { change-name }| ).
+        ENDIF.
+        change-package      = change-actual->package.
+        change-from_version = change-actual->version.
+        change-to_version   = change-ideal->version.
+        change-manifest     = change-ideal->get_manifest( ).
+        IF change-package IS INITIAL.
+          raise_error( |CHANGE action for { change-name } has no installed SAP package| ).
+        ENDIF.
+        IF change-from_version IS INITIAL OR change-to_version IS INITIAL.
+          raise_error( |CHANGE action for { change-name } has an incomplete version| ).
+        ENDIF.
+        IF change-from_version = change-to_version.
+          raise_error( |CHANGE action for { change-name } does not change the version| ).
+        ENDIF.
+
+      WHEN /apmg/if_apm_arborist=>c_diff_action-remove.
+        IF change-actual IS NOT BOUND OR change-ideal IS BOUND.
+          raise_error( |Invalid REMOVE action for { change-name }| ).
+        ENDIF.
+        change-package      = change-actual->package.
+        change-from_version = change-actual->version.
+        IF change-package IS INITIAL.
+          raise_error( |REMOVE action for { change-name } has no installed SAP package| ).
+        ENDIF.
+        IF change-from_version IS INITIAL.
+          raise_error( |REMOVE action for { change-name } has no installed version| ).
+        ENDIF.
+
+      WHEN OTHERS.
+        raise_error( |Unknown install action for { change-name }| ).
+    ENDCASE.
+
+  ENDMETHOD.
+
+
   METHOD delete_manifest.
 
     DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( package ).
@@ -371,32 +367,28 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
            OR action = /apmg/if_apm_arborist=>c_diff_action-change.
 
       TRY.
-          CASE <change>-action.
-            WHEN /apmg/if_apm_arborist=>c_diff_action-add.
-              /apmg/cl_apm_command_installer=>install_package(
-                registry  = registry
-                manifest  = <change>-manifest
-                package   = <change>-package
-                name      = <change>-name
-                version   = <change>-to_version
-                transport = transport
-                data      = <change>-data ).
+          IF <change>-action = /apmg/if_apm_arborist=>c_diff_action-change.
+            /apmg/cl_apm_installer=>uninstall(
+              name      = <change>-name
+              version   = <change>-from_version
+              package   = <change>-package
+              transport = transport ).
+          ENDIF.
 
-            WHEN /apmg/if_apm_arborist=>c_diff_action-change.
-              /apmg/cl_apm_command_installer=>replace_package(
-                registry     = registry
-                manifest     = <change>-manifest
-                package      = <change>-package
-                name         = <change>-name
-                from_version = <change>-from_version
-                to_version   = <change>-to_version
-                transport    = transport
-                data         = <change>-data ).
-          ENDCASE.
+          " FUTURE: Allow other folder logic than prefix
+          /apmg/cl_apm_installer=>install(
+            name              = <change>-name
+            version           = <change>-to_version
+            data              = <change>-tarball
+            package           = <change>-package
+            transport         = transport
+            enum_source       = /apmg/cl_apm_installer=>c_enum_source-registry
+            enum_folder_logic = /apmg/cl_apm_installer=>c_enum_folder_logic-prefix ).
 
           persist_manifest(
             package  = <change>-package
             manifest = <change>-manifest ).
+
           completed = completed + 1.
 
         CATCH /apmg/cx_apm_error INTO DATA(error).
@@ -459,7 +451,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     ENDLOOP.
 
     IF root_found = abap_false.
-      raise_error( |The requested root { root_name } is not an ADD action| ).
+      raise_error( |The requested installation of package { root_name } is not an ADD action| ).
     ENDIF.
 
     LOOP AT assignments ASSIGNING FIELD-SYMBOL(<assignment>).
@@ -470,11 +462,9 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    LOOP AT result ASSIGNING FIELD-SYMBOL(<left>)
-        WHERE action = /apmg/if_apm_arborist=>c_diff_action-add.
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<left>) WHERE action = /apmg/if_apm_arborist=>c_diff_action-add.
       LOOP AT result ASSIGNING FIELD-SYMBOL(<right>)
-          WHERE action = /apmg/if_apm_arborist=>c_diff_action-add
-            AND sequence > <left>-sequence.
+          WHERE action = /apmg/if_apm_arborist=>c_diff_action-add AND sequence > <left>-sequence.
         IF <left>-package = <right>-package.
           raise_error( |SAP package { <left>-package } is assigned to both { <left>-name } and { <right>-name }| ).
         ENDIF.
@@ -560,10 +550,14 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
           manifest = <change>-manifest
           is_force = is_force ).
 
-        <change>-data = /apmg/cl_apm_command_installer=>get_package_data(
+        <change>-tarball = /apmg/cl_apm_registry=>get_tarball(
           registry = registry
-          manifest = <change>-manifest
-          name     = <change>-name ).
+          name     = <change>-name
+          tarball  = <change>-manifest-dist-tarball ).
+
+        /apmg/cl_apm_integrity=>check(
+          tarball = <change>-tarball
+          dist    = <change>-manifest-dist ).
       ENDIF.
     ENDLOOP.
 
@@ -582,17 +576,19 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
     DATA(removals) = changes.
     DELETE removals WHERE action <> /apmg/if_apm_arborist=>c_diff_action-remove.
     SORT removals BY sequence DESCENDING.
+
     DATA(completed) = 0.
 
-    LOOP AT removals ASSIGNING FIELD-SYMBOL(<change>).
+    LOOP AT changes ASSIGNING FIELD-SYMBOL(<change>).
       TRY.
-          /apmg/cl_apm_command_installer=>uninstall_package(
+          /apmg/cl_apm_installer=>uninstall(
             name      = <change>-name
             version   = <change>-from_version
             package   = <change>-package
             transport = transport ).
 
           delete_manifest( <change>-package ).
+
           completed = completed + 1.
 
         CATCH /apmg/cx_apm_error INTO DATA(error).

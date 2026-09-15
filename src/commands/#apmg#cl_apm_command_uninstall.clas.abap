@@ -64,7 +64,7 @@ CLASS /apmg/cl_apm_command_uninstall IMPLEMENTATION.
       package  = package
       activity = /apmg/cl_apm_auth=>c_activity-delete ).
 
-    /apmg/cl_apm_command_installer=>uninstall_package(
+    /apmg/cl_apm_installer=>uninstall(
       name      = package_json-name
       version   = package_json-version
       package   = package
