@@ -216,9 +216,16 @@ CLASS /apmg/cl_apm_registry IMPLEMENTATION.
 
   METHOD get_agent.
 
+    " TODO:
     " Based on host, get registry settings from user (rfcdest, username, password, proxy, ...)
     " and pass these to the agent here
     result = /apmg/cl_apm_http_agent=>create( ).
+*      rfc_destination = rfc_destination
+*      ssl_id          = ssl_id
+*      proxy_host      = proxy_host
+*      proxy_service   = proxy_service
+*      proxy_user      = proxy_user
+*      proxy_password  = proxy_password ).
 
     result->global_headers( )->set(
       iv_key = /apmg/if_apm_http_agent=>c_header-accept

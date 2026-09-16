@@ -11,6 +11,10 @@ CLASS /apmg/cl_apm_trace DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
+    CONSTANTS:
+      c_trace_on  TYPE c LENGTH 20 VALUE 'ZAPM_TRACE_ON',
+      c_trace_dir TYPE c LENGTH 20 VALUE 'ZAPM_TRACE_DIR'.
+
     CLASS-METHODS cdata
       IMPORTING
         !cdata TYPE csequence.
@@ -31,8 +35,8 @@ CLASS /apmg/cl_apm_trace IMPLEMENTATION.
 
   METHOD cdata.
 
-    GET PARAMETER ID 'ZAPM_TRACE' FIELD DATA(trace) ##EXISTS.
-    GET PARAMETER ID 'ZAPM_TRACE_DIR' FIELD DATA(dir) ##EXISTS.
+    GET PARAMETER ID c_trace_on FIELD DATA(trace) ##EXISTS.
+    GET PARAMETER ID c_trace_dir FIELD DATA(dir) ##EXISTS.
 
     CHECK trace = abap_true.
 
@@ -51,8 +55,8 @@ CLASS /apmg/cl_apm_trace IMPLEMENTATION.
 
   METHOD xdata.
 
-    GET PARAMETER ID 'ZAPM_TRACE' FIELD DATA(trace) ##EXISTS.
-    GET PARAMETER ID 'ZAPM_TRACE_DIR' FIELD DATA(dir) ##EXISTS.
+    GET PARAMETER ID c_trace_on FIELD DATA(trace) ##EXISTS.
+    GET PARAMETER ID c_trace_dir FIELD DATA(dir) ##EXISTS.
 
     CHECK trace = abap_true.
 
