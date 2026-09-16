@@ -99,6 +99,9 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
       iv_txt = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
       iv_act = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
+      iv_txt = /apmg/cl_apm_html=>icon( 'bars' ) && ' Package List'
+      iv_act = /apmg/if_apm_gui_router=>c_action-go_home
+    )->add(
       iv_txt = /apmg/cl_apm_gui_buttons=>settings( )
       io_sub = /apmg/cl_apm_gui_menus=>settings( )
     )->add(
