@@ -10,7 +10,7 @@ INTERFACE /apmg/if_apm_env PUBLIC.
 * require adjusting the select in cl_env->constructor
 ************************************************************************
 
-  CONSTANTS c_version TYPE string VALUE '1.0.0'.
+  CONSTANTS c_version TYPE string VALUE '1.0.1'.
 
   CONSTANTS:
     BEGIN OF c_env,
