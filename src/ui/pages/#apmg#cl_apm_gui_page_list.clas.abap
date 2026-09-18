@@ -662,7 +662,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
   METHOD load_settings.
 
     TRY.
-        settings = /apmg/cl_apm_settings=>factory( )->get( ).
+        settings = /apmg/cl_apm_settings=>factory( )->load( )->get( ).
       CATCH /apmg/cx_apm_error.
         " Settings didn't exist, so save the defaults
         /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
