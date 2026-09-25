@@ -99,7 +99,7 @@ CLASS /apmg/cl_apm_command_login IMPLEMENTATION.
       username = username
       token    = login_response-token ).
 
-    MESSAGE login_response-ok TYPE 'S'.
+    MESSAGE |You're in, { username }. May the force be with you!| TYPE 'S'.
 
   ENDMETHOD.
 
