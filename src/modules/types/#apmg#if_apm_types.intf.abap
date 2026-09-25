@@ -338,7 +338,7 @@ INTERFACE /apmg/if_apm_types PUBLIC.
   CONSTANTS:
     "! Hardware Platforms
     BEGIN OF c_cpu,
-      x86_64   TYPE string VALUE 'x86-64',
+      x64      TYPE string VALUE 'x64',
       power_pc TYPE string VALUE 'power-pc',
       sparc    TYPE string VALUE 'sparc',
     END OF c_cpu.
