@@ -42,7 +42,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
         !log       TYPE /apmg/if_apm_arborist=>ty_log
       RAISING
         /apmg/cx_apm_error.
-
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -64,6 +63,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
     DATA transport TYPE trkorr.
     DATA root_name TYPE /apmg/if_apm_types=>ty_name.
     DATA version TYPE /apmg/if_apm_types=>ty_version.
+    DATA package TYPE devclass.
     DATA diff TYPE REF TO /apmg/if_apm_arborist_diff.
     DATA log TYPE /apmg/if_apm_arborist=>ty_log.
     DATA changes TYPE /apmg/if_apm_arborist_diff=>ty_diff_refs.
@@ -77,9 +77,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_html_form.
 
-    METHODS initialize_form_data
-      IMPORTING
-        !transport TYPE trkorr.
+    METHODS initialize_form_data.
 
     METHODS get_assignments
       RETURNING
@@ -120,7 +118,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     CASE ii_event->mv_action.
       WHEN c_action-create_packages.
 
-        validation_log = validate_form( require_existing = abap_false ).
+        validation_log = validate_form( abap_false ).
 
         IF validation_log->is_empty( ).
           create_missing_packages( ).
@@ -196,6 +194,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     super->constructor( ).
 
     me->registry  = registry.
+    me->package   = package.
     me->transport = transport.
     me->root_name = root_name.
     me->version   = version.
@@ -208,6 +207,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
           text = 'The Arborist diff is not available'.
     ENDIF.
 
+    " TODO: set sap package for root_name
     changes = diff->get_changes( root_name ).
 
     IF changes IS INITIAL.
@@ -220,7 +220,8 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     form_data      = NEW #( ).
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
-    initialize_form_data( transport ).
+
+    initialize_form_data( ).
 
   ENDMETHOD.
 

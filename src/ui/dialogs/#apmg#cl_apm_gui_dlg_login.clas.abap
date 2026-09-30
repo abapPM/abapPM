@@ -174,25 +174,25 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
-      iv_name        = c_id-username
-      iv_required    = abap_true
-      iv_label       = 'User'
-      iv_hint        = 'Username for registry'
-      iv_max         = 30
+      iv_name     = c_id-username
+      iv_required = abap_true
+      iv_label    = 'User'
+      iv_hint     = 'Username for registry'
+      iv_max      = 30
     )->text(
-      iv_name        = c_id-password
-      iv_required    = abap_true
-      iv_password    = abap_true
-      iv_label       = 'Password'
-      iv_min         = /apmg/if_apm_types=>c_package_name-min_length
-      iv_max         = /apmg/if_apm_types=>c_package_name-max_length
+      iv_name     = c_id-password
+      iv_required = abap_true
+      iv_password = abap_true
+      iv_label    = 'Password'
+      iv_min      = /apmg/if_apm_types=>c_package_name-min_length
+      iv_max      = /apmg/if_apm_types=>c_package_name-max_length
     )->command(
-      iv_label       = 'Login'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-login
+      iv_label    = 'Login'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-login
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

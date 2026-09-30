@@ -249,28 +249,28 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_placeholder = 'Z... / $...'
       iv_max         = 30
     )->text(
-      iv_name        = c_id-name
-      iv_label       = 'Name'
-      iv_readonly    = abap_true
+      iv_name     = c_id-name
+      iv_label    = 'Name'
+      iv_readonly = abap_true
     )->text(
-      iv_name        = c_id-version
-      iv_label       = 'Version'
-      iv_readonly    = abap_true
+      iv_name     = c_id-version
+      iv_label    = 'Version'
+      iv_readonly = abap_true
     )->text(
-      iv_name        = c_id-tag
-      iv_label       = 'Tag'
-      iv_hint        = 'Distribution Tag' ).
+      iv_name  = c_id-tag
+      iv_label = 'Tag'
+      iv_hint  = 'Distribution Tag' ).
 
     result->command(
-      iv_label       = 'Publish Package'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-publish_package
+      iv_label    = 'Publish Package'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-publish_package
     )->command(
-      iv_label       = 'Refresh'
-      iv_action      = c_action-refresh
+      iv_label  = 'Refresh'
+      iv_action = c_action-refresh
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

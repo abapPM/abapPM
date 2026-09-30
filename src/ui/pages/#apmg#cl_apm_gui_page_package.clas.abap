@@ -351,8 +351,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     CONSTANTS:
       c_key          TYPE string VALUE `?key=`,
-      c_release_type TYPE string VALUE `&release_type=`,
-      c_action_class TYPE string VALUE `action_link`.
+      c_release_type TYPE string VALUE `&release_type=`.
 
     DATA(commands) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-view-commands' ).
 

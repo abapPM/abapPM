@@ -250,17 +250,17 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_min         = 2
       iv_max         = 30
     )->text(
-      iv_name        = c_id-name
-      iv_required    = abap_true
-      iv_label       = 'Name'
-      iv_hint        = 'Name of the package'
-      iv_min         = /apmg/if_apm_types=>c_package_name-min_length
-      iv_max         = /apmg/if_apm_types=>c_package_name-max_length
+      iv_name     = c_id-name
+      iv_required = abap_true
+      iv_label    = 'Name'
+      iv_hint     = 'Name of the package'
+      iv_min      = /apmg/if_apm_types=>c_package_name-min_length
+      iv_max      = /apmg/if_apm_types=>c_package_name-max_length
     )->text(
-      iv_name        = c_id-version
-      iv_required    = abap_true
-      iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)'
+      iv_name     = c_id-version
+      iv_required = abap_true
+      iv_label    = 'Version'
+      iv_hint     = 'Semantic version (x.y.z)'
     )->text(
       iv_name        = c_id-transport
       iv_side_action = c_action-choose_transport
@@ -269,15 +269,15 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
       iv_max         = 20 ).
 
     result->command(
-      iv_label       = 'Install Preview'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-install_package
+      iv_label    = 'Install Preview'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-install_package
     )->command(
-      iv_label       = 'Create Package'
-      iv_action      = c_action-create_package
+      iv_label  = 'Create Package'
+      iv_action = c_action-create_package
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

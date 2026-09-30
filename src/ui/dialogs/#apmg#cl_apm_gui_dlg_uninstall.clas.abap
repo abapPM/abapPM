@@ -254,13 +254,13 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
       iv_placeholder = 'Z... / $...'
       iv_max         = 30
     )->text(
-      iv_name        = c_id-name
-      iv_label       = 'Name'
-      iv_readonly    = abap_true
+      iv_name     = c_id-name
+      iv_label    = 'Name'
+      iv_readonly = abap_true
     )->text(
-      iv_name        = c_id-version
-      iv_label       = 'Version'
-      iv_readonly    = abap_true
+      iv_name     = c_id-version
+      iv_label    = 'Version'
+      iv_readonly = abap_true
     )->text(
       iv_name        = c_id-transport
       iv_side_action = c_action-choose_transport
@@ -269,15 +269,15 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
       iv_max         = 20 ).
 
     result->command(
-      iv_label       = 'Uninstall Package'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-uninstall_package
+      iv_label    = 'Uninstall Package'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-uninstall_package
     )->command(
-      iv_label       = 'Refresh'
-      iv_action      = c_action-refresh
+      iv_label  = 'Refresh'
+      iv_action = c_action-refresh
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

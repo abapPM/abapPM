@@ -240,11 +240,11 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
-      iv_name     = c_id-name
-      iv_label    = 'Name'
+      iv_name  = c_id-name
+      iv_label = 'Name'
     )->text(
-      iv_name     = c_id-version
-      iv_label    = 'Version or Range of Versions'
+      iv_name  = c_id-version
+      iv_label = 'Version or Range of Versions'
     )->textarea(
       iv_name     = c_id-message
       iv_label    = 'Message'
@@ -256,8 +256,8 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
       iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
       iv_action   = c_action-deprecate
     )->command(
-      iv_label    = 'Back'
-      iv_action   = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

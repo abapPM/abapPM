@@ -172,13 +172,13 @@ CLASS /apmg/cl_apm_gui_dlg_init IMPLEMENTATION.
 
     ASSERT 0 = 0.
     " FUTURE
-*    DATA(old_labels) = form_data->get( c_id-labels ).
+*    DATA(old_labels) = form_data->get( c_id-labels )
 *
-*    DATA(new_labels) = /apmg/cl_apm_ui_factory=>get_popups( )->popup_to_select_labels( old_labels ).
+*    DATA(new_labels) = /apmg/cl_apm_ui_factory=>get_popups( )->popup_to_select_labels( old_labels )
 *
 *    form_data->set(
 *      iv_key = c_id-labels
-*      iv_val = new_labels ).
+*      iv_val = new_labels )
 
   ENDMETHOD.
 
@@ -222,20 +222,20 @@ CLASS /apmg/cl_apm_gui_dlg_init IMPLEMENTATION.
       iv_placeholder = 'Z... / $...'
       iv_max         = 30
     )->text(
-      iv_name        = c_id-name
-      iv_required    = abap_true
-      iv_label       = 'Name'
-      iv_hint        = 'Unique name for package'
-      iv_min         = /apmg/if_apm_types=>c_package_name-min_length
-      iv_max         = /apmg/if_apm_types=>c_package_name-max_length
+      iv_name     = c_id-name
+      iv_required = abap_true
+      iv_label    = 'Name'
+      iv_hint     = 'Unique name for package'
+      iv_min      = /apmg/if_apm_types=>c_package_name-min_length
+      iv_max      = /apmg/if_apm_types=>c_package_name-max_length
     )->text(
-      iv_name        = c_id-version
-      iv_required    = abap_true
-      iv_label       = 'Version'
-      iv_hint        = 'Semantic version (x.y.z)'
+      iv_name     = c_id-version
+      iv_required = abap_true
+      iv_label    = 'Version'
+      iv_hint     = 'Semantic version (x.y.z)'
     )->text(
-      iv_name        = c_id-description
-      iv_label       = 'Description'
+      iv_name  = c_id-description
+      iv_label = 'Description'
 * FUTURE
 *    )->text(
 *      iv_name        = c_id-labels
@@ -243,8 +243,8 @@ CLASS /apmg/cl_apm_gui_dlg_init IMPLEMENTATION.
 *      iv_label       = |Labels (comma-separated, allowed chars: "{ /apmg/cl_apm_repo_labels=>c_allowed_chars }")|
 *      iv_hint        = 'Comma-separated labels for grouping and repo organization (optional)'
     )->checkbox(
-      iv_name        = c_id-private
-      iv_label       = 'Private Package (will not become public)' ).
+      iv_name  = c_id-private
+      iv_label = 'Private Package (will not become public)' ).
 
 * FUTURE
 *    IF /apmg/cl_apm_feature=>is_enabled( /apmg/cl_apm_abap_language_vers=>c_feature_flag ) = abap_true.
@@ -271,15 +271,15 @@ CLASS /apmg/cl_apm_gui_dlg_init IMPLEMENTATION.
 *    ENDIF
 
     result->command(
-      iv_label       = 'Init Package'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-init_package
+      iv_label    = 'Init Package'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-init_package
     )->command(
-      iv_label       = 'Create Package'
-      iv_action      = c_action-create_package
+      iv_label  = 'Create Package'
+      iv_action = c_action-create_package
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

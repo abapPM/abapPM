@@ -185,11 +185,11 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 
     METHODS apply_filter
       CHANGING
-        !packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED.
+        !packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED ##CALLED.
 
     METHODS apply_order_by
       CHANGING
-        packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED.
+        packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED ##CALLED.
 
     " INIT
 

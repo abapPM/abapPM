@@ -171,7 +171,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_html_table~get_row_attrs.
-    RETURN.
+    ASSERT 1 = 1.
   ENDMETHOD.
 
 
