@@ -9,12 +9,9 @@ CLASS /apmg/cl_apm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
-* TODO: Add support for International Domain Names for Application
-* (punycode)
-************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '1.0.1' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '1.1.0' ##NEEDED.
 
     TYPES:
       "! scheme://username:password@host:port/path?query#fragment
@@ -60,6 +57,47 @@ CLASS /apmg/cl_apm_url DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    TYPES ty_codepoints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+
+    CLASS-METHODS domain_to_ascii
+      IMPORTING
+        domain        TYPE string
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS unicode_codepoints
+      IMPORTING
+        input         TYPE string
+      RETURNING
+        VALUE(result) TYPE ty_codepoints
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS punycode_encode
+      IMPORTING
+        label         TYPE string
+      RETURNING
+        VALUE(result) TYPE string
+      RAISING
+        /apmg/cx_apm_error.
+
+    CLASS-METHODS punycode_delta
+      IMPORTING
+        delta         TYPE i
+        bias          TYPE i
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS punycode_adapt
+      IMPORTING
+        delta         TYPE i
+        count         TYPE i
+        first         TYPE abap_bool
+      RETURNING
+        VALUE(result) TYPE i.
 
     CLASS-METHODS is_special_scheme
       IMPORTING
@@ -147,6 +185,36 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD domain_to_ascii.
+
+    CHECK domain IS NOT INITIAL.
+
+    " Punycode encoding, not full UTS #46 normalization or IDNA validation.
+    DATA(domain_name) = to_lower( domain ).
+    REPLACE ALL OCCURRENCES OF '。' IN domain_name WITH '.'.
+    REPLACE ALL OCCURRENCES OF '．' IN domain_name WITH '.'.
+    REPLACE ALL OCCURRENCES OF '｡' IN domain_name WITH '.'.
+
+    IF domain_name CA | #%/:<>?@[\\]^\||.
+      RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Host contains invalid code point'.
+    ENDIF.
+
+    " Assemble by index so empty labels and a trailing root dot are preserved.
+    SPLIT domain_name AT '.' INTO TABLE DATA(labels).
+    DATA(last) = strlen( domain_name ) - 1.
+    IF domain_name+last(1) = '.'.
+      APPEND `` TO labels.
+    ENDIF.
+    LOOP AT labels INTO DATA(label).
+      IF sy-tabix > 1.
+        result = |{ result }.|.
+      ENDIF.
+      result = |{ result }{ punycode_encode( label ) }|.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD is_special_scheme.
 
     CASE to_lower( scheme ).
@@ -224,20 +292,17 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
       remaining = remaining+2.
 
       " Find end of authority
-      delimiter = find( val = remaining sub = '/' ).
+      IF components-is_special = abap_true.
+        delimiter = find( val = remaining regex = '[/?#\\]' ) ##REGEX_POSIX.
+      ELSE.
+        delimiter = find( val = remaining regex = '[/?#]' ) ##REGEX_POSIX.
+      ENDIF.
       IF delimiter < 0.
         authority = remaining.
         CLEAR remaining.
       ELSE.
         authority = remaining(delimiter).
         remaining = remaining+delimiter.
-      ENDIF.
-
-      " Split off fragment
-      delimiter = find( val = authority sub = '#' ).
-      IF delimiter >= 0.
-        authority = authority(delimiter).
-        remaining = authority+delimiter.
       ENDIF.
 
       " Parse authority section
@@ -302,6 +367,9 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
         ENDIF.
     ENDCASE.
 
+    IF components-is_special = abap_true.
+      REPLACE ALL OCCURRENCES OF '\' IN components-path WITH '/'.
+    ENDIF.
     components-path     = percent_decode( normalize_path( components-path ) ).
     components-query    = percent_decode( components-query ).
     components-fragment = percent_decode( components-fragment ).
@@ -363,7 +431,12 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
         host = temp.
       ENDIF.
 
-      " TODO: punycode
+      IF is_special_scheme( scheme ).
+        " Decode UTF-8 escapes before converting domain labels. Keep literal '+'.
+        REPLACE ALL OCCURRENCES OF '+' IN host WITH '%2B'.
+        host = cl_http_utility=>unescape_url( host ).
+        host = domain_to_ascii( host ).
+      ENDIF.
     ENDIF.
 
     " Validate port if present
@@ -447,6 +520,95 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD punycode_adapt.
+
+    " RFC 3492 section 6.1: base=36, tmin=1, tmax=26, skew=38, damp=700.
+    DATA(adjusted) = delta.
+    IF first = abap_true.
+      adjusted = adjusted DIV 700.
+    ELSE.
+      adjusted = adjusted DIV 2.
+    ENDIF.
+    adjusted = adjusted + adjusted DIV count.
+    WHILE adjusted > 455.
+      adjusted = adjusted DIV 35.
+      result = result + 36.
+    ENDWHILE.
+    result = result + ( 36 * adjusted ) DIV ( adjusted + 38 ).
+
+  ENDMETHOD.
+
+
+  METHOD punycode_delta.
+
+    CONSTANTS digits TYPE string VALUE 'abcdefghijklmnopqrstuvwxyz0123456789'.
+    DATA(remainder) = delta.
+    DATA(weight) = 36.
+    DATA(threshold) = nmin( val1 = 26 val2 = nmax( val1 = 1 val2 = weight - bias ) ).
+    WHILE remainder >= threshold.
+      DATA(digit) = threshold + ( remainder - threshold ) MOD ( 36 - threshold ).
+      result = |{ result }{ digits+digit(1) }|.
+      remainder = ( remainder - threshold ) DIV ( 36 - threshold ).
+      weight = weight + 36.
+      threshold = nmin( val1 = 26 val2 = nmax( val1 = 1 val2 = weight - bias ) ).
+    ENDWHILE.
+    result = |{ result }{ digits+remainder(1) }|.
+
+  ENDMETHOD.
+
+
+  METHOD punycode_encode.
+
+    " RFC 3492 section 6.3, with explicit signed 32-bit overflow checks.
+    CONSTANTS max_integer TYPE i VALUE 2147483647.
+    DATA(points) = unicode_codepoints( label ).
+    DATA(count) = lines( points ).
+    LOOP AT points INTO DATA(point) WHERE table_line < 128.
+      result = |{ result }{ cl_abap_conv_in_ce=>uccpi( point ) }|.
+    ENDLOOP.
+    DATA(basic) = strlen( result ).
+    DATA(handled) = basic.
+    IF handled = count.
+      RETURN.
+    ENDIF.
+    IF basic > 0.
+      result = |{ result }-|.
+    ENDIF.
+
+    DATA(next_point) = 128.
+    DATA(delta) = 0.
+    DATA(bias) = 72.
+    WHILE handled < count.
+      DATA(minimum) = 1114112.
+      LOOP AT points INTO point WHERE table_line >= next_point.
+        minimum = nmin( val1 = minimum val2 = point ).
+      ENDLOOP.
+      IF minimum - next_point > ( max_integer - delta ) DIV ( handled + 1 ).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Punycode overflow'.
+      ENDIF.
+      delta = delta + ( minimum - next_point ) * ( handled + 1 ).
+      next_point = minimum.
+      LOOP AT points INTO point.
+        IF point < next_point.
+          IF delta = max_integer.
+            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Punycode overflow'.
+          ENDIF.
+          delta = delta + 1.
+        ELSEIF point = next_point.
+          result = |{ result }{ punycode_delta( delta = delta bias = bias ) }|.
+          bias = punycode_adapt( delta = delta count = handled + 1 first = xsdbool( handled = basic ) ).
+          delta = 0.
+          handled = handled + 1.
+        ENDIF.
+      ENDLOOP.
+      delta = delta + 1.
+      next_point = next_point + 1.
+    ENDWHILE.
+    result = |xn--{ result }|.
+
+  ENDMETHOD.
+
+
   METHOD serialize.
 
     DATA(url) = |{ components-scheme }:|.
@@ -467,7 +629,11 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
       ENDIF.
 
       " Add host and port
-      url = |{ url }{ components-host }|.
+      DATA(host) = components-host.
+      IF is_special_scheme( components-scheme ) AND host NS ':'.
+        host = domain_to_ascii( host ).
+      ENDIF.
+      url = |{ url }{ host }|.
       IF components-port IS NOT INITIAL.
         url = |{ url }:{ components-port }|.
       ENDIF.
@@ -492,6 +658,39 @@ CLASS /apmg/cl_apm_url IMPLEMENTATION.
     ENDIF.
 
     result = url.
+
+  ENDMETHOD.
+
+
+  METHOD unicode_codepoints.
+
+    DATA(character) = space.
+    DATA(length) = strlen( input ).
+    DATA(offset) = 0.
+    WHILE offset < length.
+      character = input+offset(1).
+      DATA(point) = cl_abap_conv_out_ce=>uccpi( character ).
+      offset = offset + 1.
+      " ABAP strings use UTF-16; combine surrogate pairs before Bootstring.
+      IF point BETWEEN 55296 AND 56319.
+        IF offset >= length.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid Unicode in host'.
+        ENDIF.
+        character = input+offset(1).
+        DATA(low) = cl_abap_conv_out_ce=>uccpi( character ).
+        IF low NOT BETWEEN 56320 AND 57343.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid Unicode in host'.
+        ENDIF.
+        point = 65536 + ( point - 55296 ) * 1024 + low - 56320.
+        offset = offset + 1.
+      ELSEIF point BETWEEN 56320 AND 57343.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Invalid Unicode in host'.
+      ENDIF.
+      IF point <= 32 OR point = 127.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Host contains invalid code point'.
+      ENDIF.
+      APPEND point TO result.
+    ENDWHILE.
 
   ENDMETHOD.
 
