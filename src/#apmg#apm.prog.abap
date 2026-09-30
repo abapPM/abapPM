@@ -96,6 +96,10 @@ SELECTION-SCREEN BEGIN OF SCREEN 1001.
 * dummy for triggering screen on Java SAP GUI
 SELECTION-SCREEN END OF SCREEN 1001.
 
+SELECTION-SCREEN BEGIN OF BLOCK b1.
+  PARAMETERS p_pack TYPE devclass NO-DISPLAY.
+SELECTION-SCREEN END OF BLOCK b1.
+
 INCLUDE /apmg/apm_forms.
 
 **********************************************************************

@@ -26,7 +26,7 @@ FORM open_gui RAISING /apmg/cx_apm_error.
 
   DATA:
     action TYPE string,
-    mode   TYPE tabname.
+    mode   TYPE devclass.
 
   IF sy-batch = abap_true.
     " FUTURE: One day we will add this
@@ -34,7 +34,11 @@ FORM open_gui RAISING /apmg/cx_apm_error.
     MESSAGE s000(oo) WITH 'apm does not support background processing'.
   ELSE.
 
-    GET PARAMETER ID 'DBT' FIELD mode.
+    IF p_pack IS INITIAL.
+      GET PARAMETER ID 'DBT' FIELD mode.
+    ELSE.
+      SET PARAMETER ID 'DBT' FIELD p_pack.
+    ENDIF.
 
     CASE mode.
       WHEN 'INIT'.

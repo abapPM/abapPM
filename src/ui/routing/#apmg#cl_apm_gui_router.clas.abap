@@ -426,7 +426,20 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
   METHOD main_page ##CALLED.
 
-    " Prio 1: Show last viewed package (if it exists)
+    DATA devclass TYPE devclass.
+
+    " Prio 1: Package parameter
+    GET PARAMETER ID 'DBT' FIELD devclass.
+
+    TRY.
+        /apmg/cl_apm_package_json=>factory( devclass )->load( ).
+
+        result = /apmg/cl_apm_gui_page_package=>create( devclass ).
+        RETURN.
+      CATCH /apmg/cx_apm_error ##NO_HANDLER.
+    ENDTRY.
+
+    " Prio 2: Show last viewed package (if it exists)
     DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
 
     IF settings-show_last_package = abap_true AND settings-last_package IS NOT INITIAL.
@@ -442,15 +455,16 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
       ENDTRY.
     ENDIF.
 
-    " Prio 2: Package list
+    " Prio 3: Package list
     DATA(package_list) = /apmg/cl_apm_package_json=>list( ).
 
     IF package_list IS NOT INITIAL.
       result = /apmg/cl_apm_gui_page_list=>create( ).
-    ELSE.
-      " Prio 3: Welcome page
-      result = /apmg/cl_apm_gui_page_welcome=>create( ).
+      RETURN.
     ENDIF.
+
+    " Prio 4: Welcome page
+    result = /apmg/cl_apm_gui_page_welcome=>create( ).
 
   ENDMETHOD.
 
