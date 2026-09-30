@@ -144,31 +144,23 @@ CLASS /apmg/cl_apm_gui_dlg_install IMPLEMENTATION.
 
           /apmg/cl_apm_registry=>check_logged_in( registry ).
 
-          DATA(arborist) = /apmg/cl_apm_arborist=>factory(
-            registry                 = registry
-            with_bundle_dependencies = abap_false ).
+          DATA(arborist) = /apmg/cl_apm_arborist=>factory( registry ).
 
-          arborist->load_actual_tree( ).
           arborist->build_ideal_tree(
-            add_packages  = VALUE #(
-               ( name = params-name version = params-version ) )
+            add_packages  = VALUE #( ( name = params-name version = params-version ) )
             is_production = abap_true ).
 
           DATA(log) = arborist->get_log( ).
-          IF arborist->is_executable( ) = abap_false.
+
+          IF NOT arborist->is_executable( ).
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
               EXPORTING
                 text = get_planning_error( log ).
           ENDIF.
 
           DATA(diff) = arborist->get_diff( ).
-          IF diff IS NOT BOUND.
-            RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-              EXPORTING
-                text = |No install changes were found for { params-name }|.
-          ENDIF.
 
-          IF diff->get_changes( params-name ) IS INITIAL.
+          IF diff IS NOT BOUND OR diff->get_changes( params-name ) IS INITIAL.
             RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
               EXPORTING
                 text = |No install changes were found for { params-name }|.

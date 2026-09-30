@@ -48,20 +48,20 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
 
     CONSTANTS:
       BEGIN OF c_id,
-        added     TYPE string VALUE 'added',
-        changed   TYPE string VALUE 'changed',
-        removed   TYPE string VALUE 'removed',
-        warnings  TYPE string VALUE 'warnings',
+        added    TYPE string VALUE 'added',
+        changed  TYPE string VALUE 'changed',
+        removed  TYPE string VALUE 'removed',
+        warnings TYPE string VALUE 'warnings',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
-        confirm          TYPE string VALUE 'confirm-install',
-        create_packages  TYPE string VALUE 'create-packages',
+        confirm         TYPE string VALUE 'confirm-install',
+        create_packages TYPE string VALUE 'create-packages',
       END OF c_action.
 
     DATA registry TYPE string.
-    data transport TYPE trkorr.
+    DATA transport TYPE trkorr.
     DATA root_name TYPE /apmg/if_apm_types=>ty_name.
     DATA version TYPE /apmg/if_apm_types=>ty_version.
     DATA diff TYPE REF TO /apmg/if_apm_arborist_diff.
@@ -119,16 +119,21 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-create_packages.
+
         validation_log = validate_form( require_existing = abap_false ).
-        IF validation_log->is_empty( ) = abap_true.
+
+        IF validation_log->is_empty( ).
           create_missing_packages( ).
           validation_log = validate_form( ).
         ENDIF.
+
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-confirm.
+
         validation_log = validate_form( ).
-        IF validation_log->is_empty( ) = abap_true.
+
+        IF validation_log->is_empty( ).
           DATA(assignments) = get_assignments( ).
 
           /apmg/cl_apm_command_install=>run(
@@ -144,6 +149,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
         ELSE.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
         ENDIF.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -203,6 +209,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
     ENDIF.
 
     changes = diff->get_changes( root_name ).
+
     IF changes IS INITIAL.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
         EXPORTING
@@ -308,7 +315,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
 
     result->table(
       iv_name  = c_id-changed
-      iv_label = 'Packages to Change'
+      iv_label = 'Packages to Update'
     )->column(
       iv_label    = 'Action'
       iv_readonly = abap_true
@@ -394,7 +401,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
 
         WHEN /apmg/if_apm_arborist=>c_diff_action-change.
           change_row = change_row + 1.
-          form_data->set( iv_key = |{ c_id-changed }-{ change_row }-1| iv_val = 'CHANGE' ).
+          form_data->set( iv_key = |{ c_id-changed }-{ change_row }-1| iv_val = 'UPDATE' ).
           form_data->set( iv_key = |{ c_id-changed }-{ change_row }-2| iv_val = ideal->name ).
           form_data->set( iv_key = |{ c_id-changed }-{ change_row }-3| iv_val = actual->version ).
           form_data->set( iv_key = |{ c_id-changed }-{ change_row }-4| iv_val = ideal->version ).
@@ -431,7 +438,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-      IF /apmg/cl_apm_package_json_vali=>is_valid_sap_package( <assignment>-package ) = abap_false.
+      IF NOT /apmg/cl_apm_package_json_vali=>is_valid_sap_package( <assignment>-package ).
         add_validation(
           target = result
           key    = c_id-added
