@@ -120,10 +120,21 @@ CLASS /apmg/cl_apm_auth IMPLEMENTATION.
   METHOD is_package_allowed.
 
     " Check if package owned by SAP is allowed (new packages are ok, since they are created automatically)
-    DATA(username) = zcl_abapgit_factory=>get_sap_package( package )->read_responsible( ).
 
     " TODO: This uses abapGit exit. Replace with apm logic
-    result = xsdbool( username <> 'SAP' OR zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_true ).
+    IF zcl_abapgit_factory=>get_environment( )->is_sap_object_allowed( ) = abap_true.
+      result = abap_true.
+    ELSE.
+      DATA(sap_package) = zcl_abapgit_factory=>get_sap_package( package ).
+
+      IF sap_package IS BOUND AND sap_package->read_responsible( ) = 'SAP'.
+        result = abap_false.
+      ELSEIF sap_package IS BOUND AND sap_package->read_namespace( ) CP '/0SAP*/'.
+        result = abap_false.
+      ELSE.
+        result = abap_true.
+      ENDIF.
+    ENDIF.
 
   ENDMETHOD.
 
