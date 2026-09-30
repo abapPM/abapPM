@@ -118,7 +118,7 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 
     METHODS render_table_footer
       IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
+        !html TYPE REF TO /apmg/if_apm_html ##NEEDED.
 
     " EDGES
 
@@ -185,11 +185,11 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 
     METHODS apply_filter
       CHANGING
-        !packages TYPE /apmg/if_apm_package_json=>ty_packages.
+        !packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED.
 
     METHODS apply_order_by
       CHANGING
-        packages TYPE /apmg/if_apm_package_json=>ty_packages.
+        packages TYPE /apmg/if_apm_package_json=>ty_packages ##NEEDED.
 
     " INIT
 
@@ -204,7 +204,6 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
     METHODS save_settings
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -797,7 +796,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         html->a(
           iv_txt = node->name
           iv_act = |{ c_action-select }?key={ node->package }| )
-      iv_class = 'top' ).
+      iv_class   = 'top' ).
 
     " Version
     html->td(
@@ -805,7 +804,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
         html->a(
           iv_txt = node->version
           iv_act = |{ c_action-select }?key={ node->package }| )
-      iv_class = 'top' ).
+      iv_class   = 'top' ).
 
     " Package
     " FIX: node->installed flag should be evaluated but it's not correct in arborist

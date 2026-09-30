@@ -204,20 +204,20 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
-      iv_name        = c_id-package
-      iv_readonly    = abap_true
-      iv_label       = 'Package'
+      iv_name     = c_id-package
+      iv_readonly = abap_true
+      iv_label    = 'Package'
     )->text(
-      iv_name        = c_id-name
-      iv_readonly    = abap_true
-      iv_label       = 'Name'
+      iv_name     = c_id-name
+      iv_readonly = abap_true
+      iv_label    = 'Name'
     )->text(
-      iv_name        = c_id-version
-      iv_readonly    = abap_true
-      iv_label       = 'Current Version'
+      iv_name     = c_id-version
+      iv_readonly = abap_true
+      iv_label    = 'Current Version'
     )->text(
-      iv_name        = c_id-to_version
-      iv_label       = 'Target Version'
+      iv_name  = c_id-to_version
+      iv_label = 'Target Version'
     )->text(
       iv_name        = c_id-transport
       iv_side_action = c_action-choose_transport
@@ -225,17 +225,17 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
       iv_upper_case  = abap_true
       iv_max         = 20
     )->checkbox(
-      iv_name        = c_id-force
-      iv_label       = 'Force'
-      iv_hint        = 'Overwrite already installed dependencies' ).
+      iv_name  = c_id-force
+      iv_label = 'Force'
+      iv_hint  = 'Overwrite already installed dependencies' ).
 
     result->command(
-      iv_label       = 'Update Package'
-      iv_cmd_type    = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action      = c_action-update_package
+      iv_label    = 'Update Package'
+      iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
+      iv_action   = c_action-update_package
     )->command(
-      iv_label       = 'Back'
-      iv_action      = /apmg/if_apm_gui_router=>c_action-go_back ).
+      iv_label  = 'Back'
+      iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
 
   ENDMETHOD.
 

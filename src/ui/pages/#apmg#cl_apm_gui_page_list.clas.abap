@@ -356,8 +356,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_class    = c_action_class
       iv_li_class = c_action_class
     )->add(
-      iv_txt      = 'Registry'
-      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+      iv_txt = 'Registry'
+      iv_typ = /apmg/if_apm_html=>c_action_type-separator
     )->add(
       iv_txt      = 'Deprecate'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_deprecate }{ c_dummy_key }|
@@ -369,8 +369,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_class    = c_action_class
       iv_li_class = c_action_class
     )->add(
-      iv_txt      = 'Danger'
-      iv_typ      = /apmg/if_apm_html=>c_action_type-separator
+      iv_txt = 'Danger'
+      iv_typ = /apmg/if_apm_html=>c_action_type-separator
     )->add(
       iv_txt      = 'Unpublish'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_unpublish }{ c_dummy_key }|
@@ -385,11 +385,11 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-list' ).
 
     toolbar->add(
-      iv_txt      = /apmg/cl_apm_html=>icon( 'file' ) && ' Init'
-      iv_act      = /apmg/if_apm_gui_router=>c_action-apm_init
+      iv_txt = /apmg/cl_apm_html=>icon( 'file' ) && ' Init'
+      iv_act = /apmg/if_apm_gui_router=>c_action-apm_init
     )->add(
-      iv_txt      = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
-      iv_act      = /apmg/if_apm_gui_router=>c_action-apm_install
+      iv_txt = /apmg/cl_apm_html=>icon( 'download-solid' ) && ' Install'
+      iv_act = /apmg/if_apm_gui_router=>c_action-apm_install
     )->add(
       iv_txt      = /apmg/cl_apm_html=>icon( 'upload-solid' ) && ' Publish'
       iv_act      = |{ /apmg/if_apm_gui_router=>c_action-apm_publish }{ c_dummy_key }|
@@ -401,17 +401,17 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_class    = c_action_class
       iv_li_class = c_action_class
     )->add(
-      iv_txt      = /apmg/cl_apm_gui_buttons=>settings( )
-      io_sub      = /apmg/cl_apm_gui_menus=>settings( )
+      iv_txt = /apmg/cl_apm_gui_buttons=>settings( )
+      io_sub = /apmg/cl_apm_gui_menus=>settings( )
     )->add(
-      iv_txt      = /apmg/cl_apm_gui_buttons=>refresh( )
-      iv_act      = c_action-refresh
+      iv_txt = /apmg/cl_apm_gui_buttons=>refresh( )
+      iv_act = c_action-refresh
     )->add(
-      iv_txt      = /apmg/cl_apm_gui_buttons=>advanced( )
-      io_sub      = /apmg/cl_apm_gui_menus=>advanced( )
+      iv_txt = /apmg/cl_apm_gui_buttons=>advanced( )
+      io_sub = /apmg/cl_apm_gui_menus=>advanced( )
     )->add(
-      iv_txt      = /apmg/cl_apm_gui_buttons=>help( )
-      io_sub      = /apmg/cl_apm_gui_menus=>help( ) ).
+      iv_txt = /apmg/cl_apm_gui_buttons=>help( )
+      io_sub = /apmg/cl_apm_gui_menus=>help( ) ).
 
     ro_toolbar = toolbar.
 
@@ -715,9 +715,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_text_input(
-      iv_name      = 'filter'
-      iv_label     = |Filter: { render_filter_help_hint( ) }|
-      iv_value     = settings-list_settings-filter ) ).
+      iv_name  = 'filter'
+      iv_label = |Filter: { render_filter_help_hint( ) }|
+      iv_value = settings-list_settings-filter ) ).
     html->add( '<input type="submit" class="hidden-submit">' ).
     html->add( '</form>' ).
 
@@ -855,8 +855,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       html->add( `<tr><td colspan="100%">` ).
       html->add( |(Only favorites are shown. {
         html->a(
-          iv_txt   = |Show All|
-          iv_act   = |{ c_action-toggle_favorites }?force_state={ abap_false }| )
+          iv_txt = |Show All|
+          iv_act = |{ c_action-toggle_favorites }?force_state={ abap_false }| )
         })| ).
       html->add( `</td></tr>` ).
       html->add( `</tfoot>` ).

@@ -180,7 +180,7 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
           DATA(package) = zcl_abapgit_factory=>get_tadir( )->get_object_package(
             iv_object   = 'PROG'
             iv_obj_name = '/APMG/APM' ).
-        CATCH cx_root ##NO_HANDLER.
+        CATCH cx_root.
           package = 'UNKNOWN'.
       ENDTRY.
       html->add( '<h2>apm - Developer Version</h2>' ).

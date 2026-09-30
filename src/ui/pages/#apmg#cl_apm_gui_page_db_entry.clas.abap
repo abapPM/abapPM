@@ -47,8 +47,7 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
         switch_mode TYPE string VALUE 'switch_mode',
       END OF c_action.
 
-    CONSTANTS:
-      c_edit_form_id TYPE string VALUE 'db_form'.
+    CONSTANTS c_edit_form_id TYPE string VALUE 'db_form'.
 
     CLASS-DATA db_persist TYPE REF TO /apmg/if_apm_persist_apm.
 
@@ -112,7 +111,6 @@ CLASS /apmg/cl_apm_gui_page_db_entry DEFINITION
         !json TYPE string
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -315,9 +313,9 @@ CLASS /apmg/cl_apm_gui_page_db_entry IMPLEMENTATION.
     html->set_title( cl_abap_typedescr=>describe_by_object_ref( me )->get_relative_name( ) ).
 
     " TODO: Replace with full-featured JSON editor; needs testing
-    " IF content_type = /apmg/if_apm_persist_apm=>c_content_type-json.
-      " html->add( lcl_json_editor=>get_javascript( ) )
-    " ENDIF.
+    " IF content_type = /apmg/if_apm_persist_apm=>c_content_type-json
+    "   html->add( lcl_json_editor=>get_javascript( ) )
+    " ENDIF
 
     result = html.
 

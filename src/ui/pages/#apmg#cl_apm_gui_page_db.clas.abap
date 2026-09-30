@@ -38,8 +38,7 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
         db_edit    TYPE string VALUE 'db_edit',
       END OF c_action.
 
-    CONSTANTS:
-      c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
+    CONSTANTS c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
 
     TYPES:
       BEGIN OF ty_list_item,
@@ -93,7 +92,6 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
         !key          TYPE /apmg/if_apm_persist_apm=>ty_key
       RETURNING
         VALUE(result) TYPE string.
-
 ENDCLASS.
 
 
@@ -108,13 +106,13 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     CASE ii_event->mv_action.
       WHEN c_action-db_display.
         rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
-          key          = key
-          edit_mode    = abap_false ).
+          key       = key
+          edit_mode = abap_false ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
       WHEN c_action-db_edit.
         rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
-          key          = key
-          edit_mode    = abap_true ).
+          key       = key
+          edit_mode = abap_true ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
       WHEN c_action-delete.
         do_delete_entry( key ).
@@ -173,6 +171,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_html_table~get_row_attrs.
+    RETURN.
   ENDMETHOD.
 
 
@@ -218,7 +217,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         ENDIF.
       WHEN 'cmd'.
         IF <key_extra> IS NOT INITIAL.
-          DATA(action)  = |key={ escape( val = |{ <key> }| format =  cl_abap_format=>e_url ) }|.
+          DATA(action)  = |key={ escape( val = |{ <key> }| format = cl_abap_format=>e_url ) }|.
           DATA(toolbar) = /apmg/cl_apm_html_toolbar=>create(
             )->add(
               iv_txt = 'Display'
@@ -383,7 +382,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
       CLEAR db_entry.
 
       " Remove extension
-      SPLIT <file>-name AT '.' INTO db_entry-keys DATA(rest).
+      SPLIT <file>-name AT '.' INTO db_entry-keys DATA(rest) ##NEEDED.
 
       TRANSLATE db_entry-keys USING '#/'.
 
