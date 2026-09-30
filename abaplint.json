@@ -15,20 +15,15 @@
     "exclude": [],
     "files": "/src/**/*.*",
     "noIssues": [
+      "/src/abapgit/*.*",
       "/src/modules/ajson/*.*",
       "/src/modules/markdown/*.*",
       "/src/modules/semver-sap/*.*",
       "/src/modules/string-map/*.*",
-      "#apmg#cl_apm_abapgit_*",
-      "#apmg#cl_apm_exception_viewer*",
-      "#apmg#cl_apm_frontend_services*",
-      "#apmg#if_apm_frontend_services*",
-      "#apmg#cl_apm_gui*",
-      "#apmg#if_apm_gui*",
-      "#apmg#cl_apm_html_*",
-      "#apmg#if_apm_html_*",
-      "#apmg#cl_apm_popups*",
-      "#apmg#if_apm_popups*"
+      "/src/ui/core/*.*",
+      "/src/ui/lib/*.*",
+      "/src/ui/popups/*.*",
+      "/src/ui/services/*.*"
     ],
     "skipGeneratedBOPFInterfaces": true,
     "skipGeneratedFunctionGroups": true,
@@ -40,7 +35,11 @@
     "useApackDependencies": false
   },
   "rules": {
-    "7bit_ascii": true,
+    "7bit_ascii": {
+      "exclude": [
+        "#apmg#cl_apm_url"
+      ]
+    },
     "abapdoc": false,
     "add_test_attributes": true,
     "aff_and_xml": true,
@@ -147,6 +146,7 @@
       "check": [
         "^/APMG/CL_ARBORIST",
         "^/APMG/IF_ARBORIST",
+        "^/APMG/CL_CONVERT",
         "^/APMG/CL_PACKAGE_JSON",
         "^/APMG/IF_PACKAGE_JSON",
         "^/APMG/CL_PACOTE",
