@@ -355,7 +355,7 @@
     "preferred_compare_operator": true,
     "prefix_is_current_class": true,
     "reduce_procedural_code": {
-      "maxStatements": 20
+      "maxStatements": 25
     },
     "reduce_string_templates": true,
     "redundant_conversion": false,
