@@ -658,9 +658,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   METHOD render_table_edges_fill.
 
     html->td(
-      iv_class     = 'ro-detail top'
-      iv_colspan   = 5
-      iv_content   = '' ).
+      iv_class   = 'ro-detail top'
+      iv_colspan = 5
+      iv_content = '' ).
 
     html->td(
       iv_class   = 'ro-detail nodisplay top'
@@ -756,9 +756,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     html->add( '<tr>' ).
 
     html->td(
-      iv_content   = out
-      iv_colspan   = 4
-      iv_class     = 'top red' ).
+      iv_content = out
+      iv_colspan = 4
+      iv_class   = 'top red' ).
 
     " Remaining columns
     render_table_edges_fill( html ).

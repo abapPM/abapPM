@@ -23,22 +23,25 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS constructor.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
     CONSTANTS:
       BEGIN OF c_action,
-        setup   TYPE string VALUE 'setup',
-        refresh TYPE string VALUE 'refresh',
+        setup_persistence  TYPE string VALUE 'setup_persistence',
+        setup_certificates TYPE string VALUE 'setup_certificates',
+        refresh            TYPE string VALUE 'refresh',
       END OF c_action.
 
     CONSTANTS c_ping_pong TYPE string VALUE 'PONG'.
 
-    METHODS render_styles
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
+    DATA emoji TYPE REF TO /apmg/cl_apm_emoji.
+
+    METHODS get_styles
+      RETURNING
+        VALUE(result) TYPE string.
 
     METHODS render_welcome
       IMPORTING
@@ -47,6 +50,12 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
         /apmg/cx_apm_error.
 
     METHODS render_connections
+      IMPORTING
+        !html TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS render_persistence
       IMPORTING
         !html TYPE REF TO /apmg/if_apm_html
       RAISING
@@ -73,7 +82,15 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
         " Re-runs connection check
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
-      WHEN c_action-setup.
+      WHEN c_action-setup_persistence.
+
+        IF confirm_popup( ) = abap_true.
+          /apmg/cl_apm_persist_apm_setup=>install( ).
+        ENDIF.
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-setup_certificates.
 
         IF confirm_popup( ) = abap_true.
           /apmg/cl_apm_certificates=>setup( ).
@@ -122,10 +139,11 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
-    render_styles( html ).
+    register_styles( /apmg/cl_apm_gui_styles=>emoji( get_styles( ) ) ).
 
     render_welcome( html ).
     render_connections( html ).
+    render_persistence( html ).
 
     ri_html = html.
 
@@ -158,6 +176,15 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD constructor.
+
+    super->constructor( ).
+
+    emoji = /apmg/cl_apm_emoji=>create( ).
+
+  ENDMETHOD.
+
+
   METHOD create.
 
     DATA(component) = NEW /apmg/cl_apm_gui_page_welcome( ).
@@ -170,9 +197,17 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_connections.
+  METHOD get_styles.
 
-    DATA(emoji) = /apmg/cl_apm_emoji=>create( ).
+    result = |table.repo_tab tbody td \{ padding: 10px \}\n|
+      && |table.repo_tab .col-name \{ width: 25% \}\n|
+      && |table.repo_tab .col-action \{ width: 70% \}|
+      && |table.repo_tab .col-status \{ width: 5% \}|.
+
+  ENDMETHOD.
+
+
+  METHOD render_connections.
 
     html->add( '<div style="padding:10px 150px 30px;font-size:large;">' ).
     html->add( '<h3>' ).
@@ -186,11 +221,11 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
     DO 2 TIMES.
       IF sy-index = 2.
-        DATA(name)     = 'Playground'.
+        DATA(name)     = `Playground`.
         DATA(registry) = /apmg/if_apm_constants=>c_playground.
         DATA(action)   = /apmg/if_apm_gui_router=>c_action-playground.
       ELSE.
-        name     = 'Registry'.
+        name     = `Registry`.
         registry = /apmg/if_apm_constants=>c_registry.
         action   = /apmg/if_apm_gui_router=>c_action-registry.
       ENDIF.
@@ -204,33 +239,40 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
           ENDIF.
       ENDTRY.
 
-
       html->add( '<tr>' ).
-      html->td( name ).
-      html->td( html->a( iv_txt = registry iv_act = action ) ).
+      html->td(
+        iv_content = name
+        iv_class   = 'col-name' ).
+      html->td(
+        iv_content = html->a( iv_txt = registry iv_act = action )
+        iv_class   = 'col-action' ).
 
       IF ping = c_ping_pong.
-        html->td( emoji->format( ':heavy_check_mark:' ) ).
+        html->td(
+          iv_content = emoji->format( ':heavy_check_mark:' )
+          iv_class   = 'col-status' ).
       ELSE.
-        html->td( emoji->format( ':x:' ) ).
+        html->td(
+          iv_content = emoji->format( ':x:' )
+          iv_class   = 'col-status' ).
+        html->add( '</tr>' ).
         html->add( '<tr>' ).
         html->td( '' ).
         html->td(
-          iv_content   = ping
-          is_data_attr = VALUE #( name = 'colspan' value = 2 ) ).
-        html->add( '</tr>' ).
-        html->add( '</tr>' ).
+          iv_content = ping
+          iv_colspan = 2 ).
       ENDIF.
+      html->add( '</tr>' ).
     ENDDO.
 
     IF missing_certificates = abap_true.
       html->add( '<tr>' ).
       html->td( '' ).
       html->td(
-        iv_content   = html->a(
+        iv_content = html->a(
           iv_txt = 'Install missing certificates...'
-          iv_act = c_action-setup )
-        is_data_attr = VALUE #( name = 'colspan' value = 2 ) ).
+          iv_act = c_action-setup_certificates )
+        iv_colspan = 2 ).
       html->add( '</tr>' ).
     ENDIF.
 
@@ -241,23 +283,80 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_styles.
+  METHOD render_persistence.
 
-    " Emoji Styles
-    DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_css( )
-      sep   = cl_abap_char_utilities=>newline ).
+    html->add( '<div style="padding:10px 150px 30px;font-size:large;">' ).
+    html->add( '<h3>' ).
+    html->add( 'Persistence Check' ).
+    html->add( '</h3>' ).
 
-    html->add( '<style>' ).
-    html->add( emoji_styles ).
-    html->add( '</style>' ).
+    html->add( '<table class="repo_tab w100 paddings">' ).
+    html->add( '<tbody>' ).
+
+    DATA(missing_persistence) = abap_false.
+
+    DO 3 TIMES.
+      CASE sy-index.
+        WHEN 1.
+          DATA(name)   = `Database Table`.
+          DATA(object) = /apmg/if_apm_persist_apm=>c_tabname.
+          DATA(action) = |type=TABL&name={ /apmg/if_apm_persist_apm=>c_tabname }|.
+          DATA(exists) = /apmg/cl_apm_persist_apm_setup=>table_exists( ).
+        WHEN 2.
+          name   = `Lock Object`.
+          object = /apmg/if_apm_persist_apm=>c_lock.
+          action = |type=ENQU&name={ /apmg/if_apm_persist_apm=>c_lock }|.
+          exists = /apmg/cl_apm_persist_apm_setup=>lock_exists( ).
+        WHEN 3.
+          name   = `Transport Object`.
+          object = /apmg/if_apm_persist_apm=>c_zapm.
+          action = |type=SOBJ&nameE={ /apmg/if_apm_persist_apm=>c_zapm }|.
+          exists = /apmg/cl_apm_persist_apm_setup=>logo_exists( ).
+      ENDCASE.
+
+      html->add( '<tr>' ).
+      html->td(
+        iv_content = name
+        iv_class   = 'col-name' ).
+      html->td(
+        iv_content = html->a(
+          iv_txt   = object
+          iv_act   = |{ /apmg/if_apm_gui_router=>c_action-jump }?{ action }| )
+        iv_class   = 'col-action' ).
+
+      IF exists = abap_true.
+        html->td(
+          iv_content = emoji->format( ':heavy_check_mark:' )
+          iv_class   = 'col-status' ).
+      ELSE.
+        missing_persistence = abap_true.
+        html->td(
+          iv_content = emoji->format( ':x:' )
+          iv_class   = 'col-status' ).
+      ENDIF.
+
+      html->add( '</tr>' ).
+    ENDDO.
+
+    IF missing_persistence = abap_true.
+      html->add( '<tr>' ).
+      html->td( '' ).
+      html->td(
+        iv_content = html->a(
+          iv_txt = 'Install missing persistence...'
+          iv_act = c_action-setup_persistence )
+        iv_colspan = 2 ).
+      html->add( '</tr>' ).
+    ENDIF.
+
+    html->add( '</tbody>' ).
+    html->add( '</table>' ).
+    html->add( '</div>' ).
 
   ENDMETHOD.
 
 
   METHOD render_welcome.
-
-    DATA(emoji) = /apmg/cl_apm_emoji=>create( ).
 
     DATA(apm) = |<strong>apm</strong>|.
 
@@ -313,6 +412,9 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( '<p>' ).
     html->add( |Marc & the ABAP open-source community<br>| ).
     html->add( emoji->format( 'Made with :heart: in Canada' ) ).
+    html->add( '</p>' ).
+    html->add( '<p class="center">' ).
+    html->add( emoji->format( ':arrow_down:' ) ).
     html->add( '</p>' ).
     html->add( '</div>' ).
 
