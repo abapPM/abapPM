@@ -98,7 +98,7 @@ CLASS /apmg/cl_apm_gui_router DEFINITION
 
     METHODS call_transaction
       IMPORTING
-        !iv_tcode TYPE csequence
+        !tcode TYPE csequence
       RAISING
         /apmg/cx_apm_error.
 
@@ -209,24 +209,24 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
   METHOD call_transaction.
 
-    DATA lv_msg TYPE c LENGTH 200.
+    DATA msg TYPE c LENGTH 200.
 
     CALL FUNCTION 'ABAP4_CALL_TRANSACTION'
       DESTINATION 'NONE'
       STARTING NEW TASK 'ZAPM'
       EXPORTING
-        tcode                 = iv_tcode
+        tcode                 = tcode
       EXCEPTIONS
-        communication_failure = 1 MESSAGE lv_msg
-        system_failure        = 2 MESSAGE lv_msg
+        communication_failure = 1 MESSAGE msg
+        system_failure        = 2 MESSAGE msg
         resource_failure      = 3
         OTHERS                = 4.
     IF sy-subrc <> 0.
-      lv_msg = |Error starting transaction { iv_tcode }: { lv_msg }|.
-      MESSAGE lv_msg TYPE 'I'.
+      msg = |Error starting transaction { tcode }: { msg }|.
+      MESSAGE msg TYPE 'I'.
     ELSE.
-      lv_msg = |Transaction { iv_tcode } opened in a new window|.
-      MESSAGE lv_msg TYPE 'S'.
+      msg = |Transaction { tcode } opened in a new window|.
+      MESSAGE msg TYPE 'S'.
     ENDIF.
 
   ENDMETHOD.

@@ -373,15 +373,15 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     html->add( emoji->format( 'Welcome to apm :wave:' ) ).
     html->add( '</h1>' ).
     html->add( '<p>' ).
-    html->add( 'You’re looking at the first package manager built for ABAP and written in ABAP.' ).
+    html->add( 'You''re looking at the first package manager built for ABAP and written in ABAP.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( 'abapGit gave ABAP its Git. For more than a decade, we’ve been able to share code, but' ).
+    html->add( 'abapGit gave ABAP its Git. For more than a decade, we''ve been able to share code, but' ).
     html->add( 'package releases, dependency management, and automated installations were still missing.' ).
     html->add( 'We had Git, but no npm.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |That’s why I built { apm }.| ).
+    html->add( |That's why I built { apm }.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
     html->add( |With { apm }, you can:| ).

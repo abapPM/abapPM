@@ -1132,22 +1132,31 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     html->add( '<table class="w100"><tr>' ).
     html->add( '<td>' ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_package_name( package ) ).
+
     html->add( '<span class="indent5em">' ).
     html->add( get_package_boxed(
       name  = package_json-name
       value = package_json-version ) ).
     html->add( '</span>' ).
+
     html->add( '<span class="indent5em">' ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_registry_link(
       iv_registry = settings-registry
       iv_name     = package_json-name
       iv_version  = package_json-version ) ).
     html->add( '</span>' ).
+
+    " TODO: Add link to abapGit (if the package has an associated repository)
+    " html->add( '<span class="indent5em">' )
+    " html->add( '</span>' ).
+
     html->add( '</td>' ).
     html->add( '<td class="right">' ).
     html->add( get_toolbar( )->render( iv_right = abap_true ) ).
     html->add( '</td>' ).
-    html->add( '</tr></table>' ).
+
+    html->add( '</tr>' ).
+    html->add( '</table>' ).
 
     html->add( '</div>' ).
 
