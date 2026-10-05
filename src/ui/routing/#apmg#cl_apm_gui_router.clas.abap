@@ -96,6 +96,12 @@ CLASS /apmg/cl_apm_gui_router DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS call_transaction
+      IMPORTING
+        !iv_tcode TYPE csequence
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS main_page
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_gui_renderable
@@ -197,6 +203,31 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
   METHOD call_browser.
 
     /apmg/cl_apm_gui_factory=>get_frontend_services( )->execute( iv_document = |{ url }| ).
+
+  ENDMETHOD.
+
+
+  METHOD call_transaction.
+
+    DATA lv_msg TYPE c LENGTH 200.
+
+    CALL FUNCTION 'ABAP4_CALL_TRANSACTION'
+      DESTINATION 'NONE'
+      STARTING NEW TASK 'ZAPM'
+      EXPORTING
+        tcode                 = iv_tcode
+      EXCEPTIONS
+        communication_failure = 1 MESSAGE lv_msg
+        system_failure        = 2 MESSAGE lv_msg
+        resource_failure      = 3
+        OTHERS                = 4.
+    IF sy-subrc <> 0.
+      lv_msg = |Error starting transaction { iv_tcode }: { lv_msg }|.
+      MESSAGE lv_msg TYPE 'I'.
+    ELSE.
+      lv_msg = |Transaction { iv_tcode } opened in a new window|.
+      MESSAGE lv_msg TYPE 'S'.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -512,6 +543,11 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
           line       = event->query( )->get( 'LINE' )
           new_window = event->query( )->get( 'NEW_WINDOW' ) ).
 
+        result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
+
+      WHEN zif_abapgit_definitions=>c_action-jump_transaction.
+
+        call_transaction( |{ event->query( )->get( 'TRANSACTION' ) }| ).
         result-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
       WHEN /apmg/if_apm_gui_router=>c_action-jump_transport.

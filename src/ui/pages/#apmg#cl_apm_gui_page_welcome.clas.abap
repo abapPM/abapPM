@@ -300,17 +300,19 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
         WHEN 1.
           DATA(name)   = `Database Table`.
           DATA(object) = /apmg/if_apm_persist_apm=>c_tabname.
-          DATA(action) = |type=TABL&name={ /apmg/if_apm_persist_apm=>c_tabname }|.
+          DATA(action) = /apmg/if_apm_gui_router=>c_action-jump
+                      && |?type=TABL&name={ /apmg/if_apm_persist_apm=>c_tabname }|.
           DATA(exists) = /apmg/cl_apm_persist_apm_setup=>table_exists( ).
         WHEN 2.
           name   = `Lock Object`.
           object = /apmg/if_apm_persist_apm=>c_lock.
-          action = |type=ENQU&name={ /apmg/if_apm_persist_apm=>c_lock }|.
+          action = /apmg/if_apm_gui_router=>c_action-jump
+                && |?type=ENQU&name={ /apmg/if_apm_persist_apm=>c_lock }|.
           exists = /apmg/cl_apm_persist_apm_setup=>lock_exists( ).
         WHEN 3.
           name   = `Transport Object`.
           object = /apmg/if_apm_persist_apm=>c_zapm.
-          action = |type=SOBJ&nameE={ /apmg/if_apm_persist_apm=>c_zapm }|.
+          action = /apmg/if_apm_gui_router=>c_action-jump_transaction && |?transaction=SOBJ|.
           exists = /apmg/cl_apm_persist_apm_setup=>logo_exists( ).
       ENDCASE.
 
@@ -320,8 +322,8 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
         iv_class   = 'col-name' ).
       html->td(
         iv_content = html->a(
-          iv_txt   = object
-          iv_act   = |{ /apmg/if_apm_gui_router=>c_action-jump }?{ action }| )
+          iv_txt = object
+          iv_act = action )
         iv_class   = 'col-action' ).
 
       IF exists = abap_true.
@@ -358,59 +360,61 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
   METHOD render_welcome.
 
-    DATA(apm) = |<strong>apm</strong>|.
+    DATA(apm) = '<strong>apm</strong>'.
 
-    DATA(tutorial) = html->a(
-      iv_txt   = 'Tutorial'
-      iv_title = 'Tutorial'
-      iv_act   = /apmg/if_apm_gui_router=>c_action-tutorial ).
+    DATA(tutorial) = |{ emoji->format( ':point_right:' ) } |
+      && html->a(
+        iv_txt   = 'Tutorial'
+        iv_title = 'Tutorial'
+        iv_act   = /apmg/if_apm_gui_router=>c_action-tutorial ).
 
     html->add( '<div style="padding:20px 150px 0;font-size:large;">' ).
     html->add( '<h1>' ).
     html->add( emoji->format( 'Welcome to apm :wave:' ) ).
     html->add( '</h1>' ).
     html->add( '<p>' ).
-    html->add( |You're looking at something that, until recently, didn't exist: a real package manager for ABAP.| ).
+    html->add( 'You’re looking at the first package manager built for ABAP and written in ABAP.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |abapGit gave ABAP its git. For over 10 years we could share code but were missing solid| ).
-    html->add( |versioning, dependencies, and automatic installs. We had git, but no npm.| ).
+    html->add( 'abapGit gave ABAP its Git. For more than a decade, we’ve been able to share code, but' ).
+    html->add( 'package releases, dependency management, and automated installations were still missing.' ).
+    html->add( 'We had Git, but no npm.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |That's why I built { apm } and why a growing community of ABAP developers is building| ).
-    html->add( |ABAP open-source with you. Whatever you do here, you're now part of that.| ).
+    html->add( |That’s why I built { apm }.| ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |You can:| ).
+    html->add( |With { apm }, you can:| ).
     html->add( '</p>' ).
     html->add( '<ul>' ).
     html->add( '<li>' ).
     html->add( emoji->format( ':mag_right:' ) ).
-    html->add( |Browse the registry and find packages to solve problems you would otherwise build from scratch| ).
+    html->add( '<strong>Find packages</strong> in the registry to solve problems you would otherwise' ).
+    html->add( 'build from scratch' ).
     html->add( '</li>' ).
     html->add( '<li>' ).
     html->add( emoji->format( ':package:' ) ).
-    html->add( |Install packages with a few clicks, dependencies resolve automatically| ).
+    html->add( '<strong>Install packages</strong> with a few clicks, with dependencies resolved automatically' ).
     html->add( '</li>' ).
     html->add( '<li>' ).
     html->add( emoji->format( ':rocket:' ) ).
-    html->add( |Publish & share your own ABAP code with a manifest and a version number, for the whole| ).
-    html->add( |ecosystem to use| ).
+    html->add( '<strong>Publish your code</strong> with a package manifest and version number so other' ).
+    html->add( 'ABAP developers can use it' ).
     html->add( '</li>' ).
     html->add( '</ul>' ).
     html->add( '<p>' ).
-    html->add( |No complex setup. One ABAP report. You're already up and running.| ).
+    html->add( 'Getting started takes just one ABAP report.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |Thanks for being here early. { apm } is new, so expect a few hiccups along the way, and please| ).
-    html->add( |keep the feedback coming. This ecosystem grows because of developers like you.| ).
+    html->add( |{ apm } is new, and your feedback helps shape it. Thanks for being here early and helping grow| ).
+    html->add( 'the ABAP open-source ecosystem.' ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |Ready to install your first package? Try the { tutorial }! Welcome aboard.| ).
+    html->add( |Follow the { tutorial } to install your first package! Welcome aboard.| ).
     html->add( emoji->format( ':tada:' ) ).
     html->add( '</p>' ).
     html->add( '<p>' ).
-    html->add( |Marc & the ABAP open-source community<br>| ).
+    html->add( 'Marc & the ABAP open-source community<br>' ).
     html->add( emoji->format( 'Made with :heart: in Canada' ) ).
     html->add( '</p>' ).
     html->add( '<p class="center">' ).
