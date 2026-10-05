@@ -28,19 +28,20 @@ CLASS /apmg/cl_apm_highlighter_xml DEFINITION
         " For XML tags, we will use a submatch
         " main pattern includes quoted strings so we can ignore < and > in attr values
         xml_tag  TYPE string VALUE '(?:"[^"]*")|(?:''[^'']*'')|(?:`[^`]*`)|([<>])',
-        attr     TYPE string VALUE '(?:^|\s)[-a-z:_0-9]+\s*(?==\s*["|''|`])',
+        attr     TYPE string VALUE '(?:^|\s)[-a-z:_.0-9]+\s*(?==\s*["''`])',
         attr_val TYPE string VALUE '("[^"]*")|(''[^'']*'')|(`[^`]*`)',
         " comments <!-- ... -->
-        comment  TYPE string VALUE '[\<]!--.*--[\>]|[\<]!--|--[\>]',
+        comment  TYPE string VALUE '<!--(?:(?!-->).)*-->|<!--|-->',
       END OF c_regex.
 
     METHODS constructor.
 
   PROTECTED SECTION.
 
-    CLASS-DATA comment TYPE abap_bool.
+    DATA comment TYPE abap_bool.
 
     METHODS order_matches REDEFINITION.
+    METHODS parse_line REDEFINITION.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -82,16 +83,15 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
 
     FIELD-SYMBOLS <prev_match> TYPE ty_match.
 
-    " Longest matches
-    SORT matches BY offset length DESCENDING.
-
     DATA(line_len)   = strlen( line ).
     DATA(prev_token) = ''.
+    DATA(prev_end) = 0.
     DATA(state) = 'O'. " O - for open tag; C - for closed tag;
 
-    " Check if this is part of multi-line comment and mark it accordingly
+    " A continued comment ends at the first delimiter, regardless of its content.
     IF comment = abap_true.
-      IF NOT line_exists( matches[ token = c_token-comment ] ).
+      FIND FIRST OCCURRENCE OF '-->' IN line MATCH OFFSET DATA(comment_end).
+      IF sy-subrc <> 0.
         CLEAR matches.
         APPEND INITIAL LINE TO matches ASSIGNING FIELD-SYMBOL(<match>).
         <match>-token = c_token-comment.
@@ -99,10 +99,23 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
         <match>-length = line_len.
         RETURN.
       ENDIF.
+      comment_end = comment_end + 3.
+      DELETE matches WHERE offset < comment_end.
+      APPEND VALUE #( token = c_token-comment offset = 0 length = comment_end ) TO matches.
+      comment = abap_false.
     ENDIF.
+
+    " Longest matches, including any continued comment prefix.
+    SORT matches BY offset length DESCENDING.
 
     LOOP AT matches ASSIGNING <match>.
       DATA(index) = sy-tabix.
+
+      " Ignore comment delimiters and nested quotes inside an accepted match.
+      IF <match>-offset < prev_end.
+        DELETE matches INDEX index.
+        CONTINUE.
+      ENDIF.
 
       DATA(match) = substring( val = line
                                off = <match>-offset
@@ -131,6 +144,7 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
           ENDIF.
 
         WHEN c_token-comment.
+          state = 'C'.
           CASE match.
             WHEN '<!--'.
               DELETE matches WHERE offset > <match>-offset.
@@ -144,7 +158,7 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
               comment = abap_false.
             WHEN OTHERS.
               DATA(cmmt_end) = <match>-offset + <match>-length.
-              DELETE matches WHERE offset > <match>-offset AND offset <= cmmt_end.
+              DELETE matches WHERE offset > <match>-offset AND offset < cmmt_end.
               DELETE matches WHERE offset = <match>-offset AND token = c_token-xml_tag.
           ENDCASE.
 
@@ -160,6 +174,7 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
 
       ENDCASE.
 
+      prev_end = <match>-offset + <match>-length.
       prev_token = <match>-token.
       ASSIGN <match> TO <prev_match>.
     ENDLOOP.
@@ -176,6 +191,67 @@ CLASS /apmg/cl_apm_highlighter_xml IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD parse_line.
+
+    DATA(line_len) = strlen( line ).
+    DATA(segment_start) = 0.
+    DATA(scan_offset) = 0.
+    DATA(pattern) = c_regex-attr_val && '|<!--'.
+
+    " Comments are parsed separately so their quotes cannot hide subsequent tags.
+    IF comment = abap_true.
+      FIND FIRST OCCURRENCE OF '-->' IN line MATCH OFFSET DATA(comment_end).
+      IF sy-subrc <> 0.
+        APPEND VALUE #( token = c_token-comment offset = 0 length = line_len ) TO result.
+        RETURN.
+      ENDIF.
+      segment_start = comment_end + 3.
+      scan_offset = segment_start.
+      APPEND VALUE #( token = c_token-comment offset = 0 length = segment_start ) TO result.
+    ENDIF.
+
+    WHILE scan_offset < line_len.
+      FIND FIRST OCCURRENCE OF REGEX pattern IN line+scan_offset
+        MATCH OFFSET DATA(found_offset) MATCH LENGTH DATA(found_length) ##REGEX_POSIX.
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      found_offset = found_offset + scan_offset.
+      scan_offset = found_offset + found_length.
+      IF substring( val = line off = found_offset len = found_length ) <> '<!--'.
+        CONTINUE.
+      ENDIF.
+
+      DATA(segment) = substring( val = line off = segment_start len = found_offset - segment_start ).
+      DATA(segment_matches) = super->parse_line( segment ).
+      LOOP AT segment_matches ASSIGNING FIELD-SYMBOL(<segment_match>).
+        <segment_match>-offset = <segment_match>-offset + segment_start.
+      ENDLOOP.
+      APPEND LINES OF segment_matches TO result.
+
+      DATA(comment_length) = 4.
+      FIND FIRST OCCURRENCE OF '-->' IN line+scan_offset MATCH OFFSET comment_end.
+      IF sy-subrc = 0.
+        scan_offset = scan_offset + comment_end + 3.
+        comment_length = scan_offset - found_offset.
+      ELSE.
+        scan_offset = line_len.
+      ENDIF.
+      APPEND VALUE #( token  = c_token-comment offset = found_offset
+                      length = comment_length ) TO result.
+      segment_start = scan_offset.
+    ENDWHILE.
+
+    segment = substring( val = line off = segment_start ).
+    segment_matches = super->parse_line( segment ).
+    LOOP AT segment_matches ASSIGNING <segment_match>.
+      <segment_match>-offset = <segment_match>-offset + segment_start.
+    ENDLOOP.
+    APPEND LINES OF segment_matches TO result.
 
   ENDMETHOD.
 ENDCLASS.

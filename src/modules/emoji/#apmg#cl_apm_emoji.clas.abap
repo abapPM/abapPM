@@ -34,11 +34,11 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 
     METHODS constructor.
 
-    METHODS get_css
+    CLASS-METHODS styles
       IMPORTING
         size_in_px    TYPE i DEFAULT 20
       RETURNING
-        VALUE(result) TYPE ty_code.
+        VALUE(result) TYPE string.
 
     METHODS get_list
       RETURNING
@@ -110,7 +110,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
     DATA(has_hex) = xsdbool( result CS '&#x' ).
 
     LOOP AT emojis ASSIGNING FIELD-SYMBOL(<emoji>).
-      DATA(html)  = |<img src="{ base }{ <emoji>-img }" class="emoji">|.
+      DATA(html)  = |<img src="{ base }{ <emoji>-img }" class="emoji" alt="{ <emoji>-name }">|.
 
       IF has_names = abap_true.
         DATA(emoji) = |:{ <emoji>-name }:|.
@@ -127,22 +127,6 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-  ENDMETHOD.
-
-
-  METHOD get_css.
-    INSERT `.emoji {` INTO TABLE result.
-    INSERT `  display: inline-block;` INTO TABLE result.
-    INSERT `  min-width: 1ch;` INTO TABLE result.
-    INSERT `  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";` INTO TABLE result.
-    INSERT `  font-size: 1em;` INTO TABLE result.
-    INSERT `  font-style: normal !important;` INTO TABLE result.
-    INSERT `  font-weight: 400;` INTO TABLE result.
-    INSERT |  height: { size_in_px }px;| INTO TABLE result.
-    INSERT |  width: { size_in_px }px;| INTO TABLE result.
-    INSERT `  line-height: 1;` INTO TABLE result.
-    INSERT `  vertical-align: -3px;` INTO TABLE result.
-    INSERT `}` INTO TABLE result.
   ENDMETHOD.
 
 
@@ -172,6 +156,24 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
         INSERT <emoji>-name INTO TABLE result.
       ENDIF.
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD styles.
+
+    result = |.emoji \{\n|
+      && |  display: inline-block;\n|
+      && |  min-width: 1ch;\n|
+      && |  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";\n|
+      && |  font-size: 1em;\n|
+      && |  font-style: normal !important;\n|
+      && |  font-weight: 400;\n|
+      && |  height: { size_in_px }px;|
+      && |  width: { size_in_px }px;|
+      && |  line-height: 1;\n|
+      && |  vertical-align: -3px;\n|
+      && |\}|.
 
   ENDMETHOD.
 ENDCLASS.

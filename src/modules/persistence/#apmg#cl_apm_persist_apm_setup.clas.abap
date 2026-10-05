@@ -15,6 +15,18 @@ CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    CLASS-METHODS table_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS lock_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS logo_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
     CLASS-METHODS uninstall
       RAISING
         /apmg/cx_apm_error.
@@ -30,10 +42,6 @@ CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS logo_exists
-      RETURNING
-        VALUE(result) TYPE abap_bool.
-
     CLASS-METHODS table_create
       RAISING
         /apmg/cx_apm_error.
@@ -42,10 +50,6 @@ CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    CLASS-METHODS table_exists
-      RETURNING
-        VALUE(result) TYPE abap_bool.
-
     CLASS-METHODS lock_create
       RAISING
         /apmg/cx_apm_error.
@@ -53,10 +57,6 @@ CLASS /apmg/cl_apm_persist_apm_setup DEFINITION
     CLASS-METHODS lock_delete
       RAISING
         /apmg/cx_apm_error.
-
-    CLASS-METHODS lock_exists
-      RETURNING
-        VALUE(result) TYPE abap_bool.
 
     CLASS-METHODS delete_ddic
       IMPORTING

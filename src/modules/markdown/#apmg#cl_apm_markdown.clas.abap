@@ -1605,11 +1605,9 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
 
     result = |<{ current_element-name }|.
 
-    IF current_element-attributes IS NOT INITIAL.
-      LOOP AT current_element-attributes ASSIGNING <attribute>.
-        result = |{ result } { <attribute>-name }="{ _escape( <attribute>-value ) }"|.
-      ENDLOOP.
-    ENDIF.
+    LOOP AT current_element-attributes ASSIGNING <attribute>.
+      result = |{ result } { <attribute>-name }="{ _escape( <attribute>-value ) }"|.
+    ENDLOOP.
 
     IF <text> IS NOT INITIAL OR current_element-texts IS NOT INITIAL OR current_element-lines IS NOT INITIAL.
       result = |{ result }>|.
@@ -2590,7 +2588,7 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       && |\{ line-height: 1.5; \}\n|
       && |.markdown table\n|
       && |\{ border: 1px solid #ddd; border-radius: 3px; \}\n|
-      && |.markdown th,\n|
+      && |.markdown th\n|
       && |\{ color: #4078c0; background-color: #edf2f9; border-bottom-color: #ddd; \}\n|
       && |.markdown th,\n|
       && |.markdown td\n|
@@ -2621,6 +2619,8 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       && |  margin-bottom: 16px; margin-top: 0; overflow: auto; overflow-wrap: normal;\n|
       && |  padding: 16px; word-break: normal; box-sizing: border-box;\n|
       && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|
+      && |.markdown li code,\n|
+      && |.markdown td code,\n|
       && |.markdown p code\n|
       && |\{ background-color: #eee; border-radius: 6px; margin: 0; padding: .2em .4em;\n|
       && |  font-family: Consolas, Courier, monospace; font-size: 14px; \}\n|
@@ -2645,7 +2645,8 @@ CLASS /apmg/cl_apm_markdown IMPLEMENTATION.
       && |  font-weight: 400;\n|
       && |  line-height: 10px;\n|
       && |  padding: 4px;\n|
-      && |  vertical-align: middle;\}\n|.
+      && |  vertical-align: middle;\n|
+      && |\}|.
 
   ENDMETHOD.
 
