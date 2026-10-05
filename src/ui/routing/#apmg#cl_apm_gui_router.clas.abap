@@ -426,28 +426,30 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
 
   METHOD main_page ##CALLED.
 
-    DATA devclass TYPE devclass.
+    DATA package TYPE devclass.
 
-    " Prio 1: Package parameter
-    GET PARAMETER ID 'DBT' FIELD devclass.
+    " Prio 1: Package parameter (if it exists)
+    GET PARAMETER ID 'DBT' FIELD package.
 
-    TRY.
-        /apmg/cl_apm_package_json=>factory( devclass )->load( ).
-
-        result = /apmg/cl_apm_gui_page_package=>create( devclass ).
-        RETURN.
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-    ENDTRY.
+    IF package IS NOT INITIAL.
+      TRY.
+          IF /apmg/cl_apm_package_json=>factory( package )->exists( ).
+            result = /apmg/cl_apm_gui_page_package=>create( package ).
+            RETURN.
+          ENDIF.
+        CATCH /apmg/cx_apm_error ##NO_HANDLER.
+      ENDTRY.
+    ENDIF.
 
     " Prio 2: Show last viewed package (if it exists)
     DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
 
     IF settings-show_last_package = abap_true AND settings-last_package IS NOT INITIAL.
       TRY.
-          /apmg/cl_apm_package_json=>factory( settings-last_package )->load( ).
-
-          result = /apmg/cl_apm_gui_page_package=>create( settings-last_package ).
-          RETURN.
+          IF /apmg/cl_apm_package_json=>factory( settings-last_package )->exists( ).
+            result = /apmg/cl_apm_gui_page_package=>create( settings-last_package ).
+            RETURN.
+          ENDIF.
         CATCH /apmg/cx_apm_error.
           " Remove inconsistent value from settings
           CLEAR settings-last_package.
