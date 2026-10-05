@@ -183,7 +183,7 @@ CLASS /apmg/cl_apm_frontend_services IMPLEMENTATION.
     TYPES ty_hex TYPE x LENGTH 200.
     DATA lt_rawdata TYPE STANDARD TABLE OF ty_hex WITH DEFAULT KEY.
 
-    zcl_abapgit_convert=>xstring_to_bintab(
+    /apmg/cl_apm_abapgit_convert=>xstring_to_bintab(
       EXPORTING
         iv_xstr   = iv_xstr
       IMPORTING

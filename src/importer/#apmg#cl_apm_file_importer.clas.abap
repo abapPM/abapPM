@@ -98,13 +98,7 @@ CLASS /apmg/cl_apm_file_importer IMPLEMENTATION.
 
     READ TABLE files ASSIGNING FIELD-SYMBOL(<file>) WITH KEY file COMPONENTS filename = filename.
     IF sy-subrc = 0.
-      TRY.
-          " TODO: Replace with ZCL_CONVERT
-          result = zcl_abapgit_convert=>xstring_to_string_utf8( <file>-data ).
-
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-      ENDTRY.
+      result = /apmg/cl_apm_abapgit_convert=>xstring_to_string_utf8( <file>-data ).
     ELSE.
       RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |File { filename } not found|.
     ENDIF.

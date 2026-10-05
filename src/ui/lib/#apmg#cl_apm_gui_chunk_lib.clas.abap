@@ -3,6 +3,12 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
   FINAL
   CREATE PUBLIC.
 
+************************************************************************
+* apm GUI Chunk Lib
+*
+* Copyright 2014 abapGit Contributors
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     TYPES:
@@ -156,20 +162,20 @@ CLASS /apmg/cl_apm_gui_chunk_lib DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
 
-    CLASS-DATA gv_time_zone TYPE timezone .
+    CLASS-DATA gv_time_zone TYPE timezone.
 
     CLASS-METHODS get_t100_text
       IMPORTING
         !iv_msgid      TYPE scx_t100key-msgid
         !iv_msgno      TYPE scx_t100key-msgno
       RETURNING
-        VALUE(rv_text) TYPE string .
+        VALUE(rv_text) TYPE string.
 
     CLASS-METHODS normalize_program_name
       IMPORTING
         !iv_program_name                  TYPE sy-repid
       RETURNING
-        VALUE(rv_normalized_program_name) TYPE string .
+        VALUE(rv_normalized_program_name) TYPE string.
 
 ENDCLASS.
 
@@ -252,14 +258,14 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
         system_response TYPE string VALUE `System response`,
         what_to_do      TYPE string VALUE `Procedure`,
         sys_admin       TYPE string VALUE `System administration`,
-      END OF c_section_text .
+      END OF c_section_text.
     CONSTANTS:
       BEGIN OF c_section_token,
         cause           TYPE string VALUE `&CAUSE&`,
         system_response TYPE string VALUE `&SYSTEM_RESPONSE&`,
         what_to_do      TYPE string VALUE `&WHAT_TO_DO&`,
         sys_admin       TYPE string VALUE `&SYS_ADMIN&`,
-      END OF c_section_token .
+      END OF c_section_token.
 
     DATA:
       lv_error_text          TYPE string,

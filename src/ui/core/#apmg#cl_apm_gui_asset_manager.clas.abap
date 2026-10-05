@@ -89,11 +89,7 @@ CLASS /apmg/cl_apm_gui_asset_manager IMPLEMENTATION.
           text = |Wrong subtype ({ iv_assert_subtype }): { iv_url }|.
     ENDIF.
 
-    TRY.
-        rv_asset = zcl_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
+    rv_asset = /apmg/cl_apm_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
 
   ENDMETHOD.
 
@@ -107,15 +103,11 @@ CLASS /apmg/cl_apm_gui_asset_manager IMPLEMENTATION.
     ls_asset-mime_name    = iv_mime_name.
     ls_asset-is_cacheable = iv_cacheable.
 
-    TRY.
-        IF iv_base64 IS NOT INITIAL.
-          ls_asset-content = zcl_abapgit_convert=>base64_to_xstring( iv_base64 ).
-        ELSEIF iv_inline IS NOT INITIAL.
-          ls_asset-content = zcl_abapgit_convert=>string_to_xstring( iv_inline ).
-        ENDIF.
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
+    IF iv_base64 IS NOT INITIAL.
+      ls_asset-content = cl_http_utility=>decode_x_base64( iv_base64 ).
+    ELSEIF iv_inline IS NOT INITIAL.
+      ls_asset-content = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( iv_inline ).
+    ENDIF.
 
     DELETE mt_asset_register WHERE url = iv_url.
     " TODO: Maybe forbid overwriting cacheable assets as they were probably already cached ... arguable

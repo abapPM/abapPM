@@ -279,11 +279,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         filename = filename && '.txt'.
       ENDIF.
 
-      TRY.
-          DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( db_entry-value ).
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-      ENDTRY.
+      DATA(content) = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( db_entry-value ).
 
       zip->add(
         name    = filename
@@ -292,11 +288,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
       INSERT explain_key( db_entry-keys ) INTO TABLE table_of_contents.
     ENDLOOP.
 
-    TRY.
-        content = zcl_abapgit_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ).
-      CATCH zcx_abapgit_exception INTO error.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
+    content = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( concat_lines_of( table_of_contents ) ).
 
     zip->add(
       name    = c_toc_filename
@@ -406,11 +398,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = |Error getting file { <file>-name } from ZIP|.
       ENDIF.
 
-      TRY.
-          db_entry-value = zcl_abapgit_convert=>xstring_to_string_utf8( file_data ).
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-      ENDTRY.
+      db_entry-value = /apmg/cl_apm_abapgit_convert=>xstring_to_string_utf8( file_data ).
 
       INSERT db_entry INTO TABLE db_entries.
     ENDLOOP.

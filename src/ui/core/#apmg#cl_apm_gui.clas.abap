@@ -145,7 +145,7 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
     ASSERT iv_text IS SUPPLIED OR iv_xdata IS SUPPLIED.
 
     IF iv_text IS SUPPLIED. " String input
-      zcl_abapgit_convert=>string_to_tab(
+      /apmg/cl_apm_abapgit_convert=>string_to_tab(
          EXPORTING
            iv_str  = iv_text
          IMPORTING
@@ -163,7 +163,7 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
         CHANGING
           ct_data_table   = lt_html ).
     ELSE. " Raw input
-      zcl_abapgit_convert=>xstring_to_bintab(
+      /apmg/cl_apm_abapgit_convert=>xstring_to_bintab(
         EXPORTING
           iv_xstr   = iv_xdata
         IMPORTING
@@ -318,10 +318,19 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
 
   METHOD cache_html.
 
-    rv_url = /apmg/if_apm_gui_services~cache_asset(
-      iv_text    = iv_text
-      iv_type    = 'text'
-      iv_subtype = 'html' ).
+    IF /apmg/cl_apm_gui_factory=>get_frontend_services( )->is_sapgui_for_java( ) = abap_true.
+      "Java GUI needs the UTF-8 payload length in bytes for non-ASCII HTML.
+      rv_url = /apmg/if_apm_gui_services~cache_asset(
+        iv_xdata   = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( iv_text )
+        iv_type    = 'text'
+        iv_subtype = 'html' ).
+    ELSE.
+      "Keep the character-based HTML processing for WebGUI and Windows.
+      rv_url = /apmg/if_apm_gui_services~cache_asset(
+        iv_text    = iv_text
+        iv_type    = 'text'
+        iv_subtype = 'html' ).
+    ENDIF.
 
   ENDMETHOD.
 

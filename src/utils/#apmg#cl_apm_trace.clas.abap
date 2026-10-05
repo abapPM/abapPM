@@ -43,10 +43,10 @@ CLASS /apmg/cl_apm_trace IMPLEMENTATION.
     GET TIME STAMP FIELD DATA(timestamp).
 
     TRY.
-        zcl_abapgit_ui_factory=>get_frontend_services( )->file_download(
+        /apmg/cl_apm_gui_factory=>get_frontend_services( )->file_download(
           iv_path = |{ dir }/apm-trace-{ timestamp }.log|
-          iv_xstr = zcl_abapgit_convert=>string_to_xstring_utf8( cdata ) ).
-      CATCH zcx_abapgit_exception /apmg/cx_apm_error.
+          iv_xstr = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( cdata ) ).
+      CATCH /apmg/cx_apm_error.
         ASSERT 0 = 0.
     ENDTRY.
 

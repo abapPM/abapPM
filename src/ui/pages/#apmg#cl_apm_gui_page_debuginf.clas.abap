@@ -66,11 +66,7 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
           iv_extension        = 'html'
           iv_default_filename = filename ).
 
-        TRY.
-            DATA(content) = zcl_abapgit_convert=>string_to_xstring_utf8( html_for_download ).
-          CATCH zcx_abapgit_exception INTO DATA(error).
-            RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-        ENDTRY.
+        DATA(content) = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( html_for_download ).
 
         frontend_services->file_download(
           iv_path = path

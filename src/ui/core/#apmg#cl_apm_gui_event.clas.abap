@@ -123,8 +123,8 @@ CLASS /apmg/cl_apm_gui_event IMPLEMENTATION.
     CONSTANTS lc_nbsp TYPE xstring VALUE 'C2A0'. " &nbsp;
 
     TRY.
-        gv_non_breaking_space = zcl_abapgit_convert=>xstring_to_string_utf8( lc_nbsp ).
-      CATCH zcx_abapgit_exception.
+        gv_non_breaking_space = /apmg/cl_apm_abapgit_convert=>xstring_to_string_utf8( lc_nbsp ).
+      CATCH /apmg/cx_apm_error.
         " Fallback for non-Unicode systems
         IF cl_abap_char_utilities=>charsize < 2.
           gv_non_breaking_space = |X'A0'|.

@@ -298,17 +298,13 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       manifest        = manifest
       is_package_json = abap_true ).
 
-    TRY.
-        tar->append(
-          name    = CONV string( /apmg/if_apm_types=>c_package_json_file )
-          content = zcl_abapgit_convert=>string_to_xstring_utf8( json ) ).
+    tar->append(
+      name    = CONV string( /apmg/if_apm_types=>c_package_json_file )
+      content = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( json ) ).
 
-        tar->append(
-          name    = /apmg/if_apm_types=>c_readme_file
-          content = zcl_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
-    ENDTRY.
+    tar->append(
+      name    = /apmg/if_apm_types=>c_readme_file
+      content = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( package_json-readme ) ).
 
     result = tar.
 

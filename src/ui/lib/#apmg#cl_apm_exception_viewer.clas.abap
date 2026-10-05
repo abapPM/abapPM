@@ -2,6 +2,12 @@ CLASS /apmg/cl_apm_exception_viewer DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
+************************************************************************
+* apm Exception Viewer
+*
+* Copyright 2014 abapGit Contributors
+* SPDX-License-Identifier: MIT
+************************************************************************
   PUBLIC SECTION.
 
     METHODS constructor

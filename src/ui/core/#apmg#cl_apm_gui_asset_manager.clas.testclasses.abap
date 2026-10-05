@@ -35,7 +35,7 @@ CLASS ltcl_gui_asset_manager IMPLEMENTATION.
                                         exp = 'css' ).
 
     TRY.
-        DATA(act) = zcl_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
+        DATA(act) = /apmg/cl_apm_abapgit_convert=>xstring_to_string_utf8( ls_asset-content ).
       CATCH zcx_abapgit_exception.
         cl_abap_unit_assert=>fail( ).
     ENDTRY.
