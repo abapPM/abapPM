@@ -101,13 +101,13 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
 
   METHOD /apmg/if_apm_html~a.
 
-    DATA: lv_class TYPE string,
-          lv_href  TYPE string,
-          lv_click TYPE string,
-          lv_id    TYPE string,
-          lv_act   TYPE string,
-          lv_style TYPE string,
-          lv_title TYPE string,
+    DATA: lv_class         TYPE string,
+          lv_href          TYPE string,
+          lv_click         TYPE string,
+          lv_id            TYPE string,
+          lv_act           TYPE string,
+          lv_style         TYPE string,
+          lv_title         TYPE string,
           lv_data_sapevent TYPE string.
 
     lv_class = iv_class.
@@ -331,6 +331,7 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
       iv_class              = iv_class
       is_data_attr          = is_data_attr
       it_data_attrs         = it_data_attrs
+      iv_colspan            = iv_colspan
       iv_hint               = iv_hint ).
     ri_self = me.
   ENDMETHOD.
@@ -346,6 +347,7 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
       iv_class              = iv_class
       is_data_attr          = is_data_attr
       it_data_attrs         = it_data_attrs
+      iv_colspan            = iv_colspan
       iv_hint               = iv_hint ).
     ri_self = me.
   ENDMETHOD.
@@ -360,6 +362,7 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
     DATA: lv_class     TYPE string,
           lv_id        TYPE string,
           lv_data_attr TYPE string,
+          lv_colspan   TYPE string,
           lv_title     TYPE string.
 
     IF iv_id IS NOT INITIAL.
@@ -382,7 +385,11 @@ CLASS /apmg/cl_apm_html IMPLEMENTATION.
       lv_data_attr = lv_data_attr && | data-{ ls_data_attr-name }="{ ls_data_attr-value }"|.
     ENDLOOP.
 
-    lv_open_tag = |<{ iv_tag }{ lv_id }{ lv_class }{ lv_data_attr }{ lv_title }>|.
+    IF iv_colspan IS NOT INITIAL. " apm
+      lv_colspan = | colspan="{ iv_colspan }"|.
+    ENDIF.
+
+    lv_open_tag = |<{ iv_tag }{ lv_id }{ lv_class }{ lv_data_attr }{ lv_colspan }{ lv_title }>|.
     lv_close_tag = |</{ iv_tag }>|.
 
     IF ii_content IS NOT BOUND AND iv_content IS INITIAL.

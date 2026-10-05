@@ -165,7 +165,7 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
     ENDTRY.
 
     IF zcl_abapgit_factory=>get_environment( )->is_merged( ) = abap_true.
-      html->add( '<h2>apm - Standalone Version</h2>' ).
+      html->add( '<h1>apm - Standalone Version</h1>' ).
       html->add( '<div>To keep apm up-to-date (or also to contribute) you need to' ).
       html->add( |install it as a repository ({ html->a(
         iv_txt = 'Developer Version'
@@ -179,25 +179,26 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
         CATCH cx_root.
           package = 'UNKNOWN'.
       ENDTRY.
-      html->add( '<h2>apm - Developer Version</h2>' ).
-      html->add( |<div>apm is installed in package { package }</div>| ).
+      html->add( '<h1>apm - Developer Version</h1>' ).
+      html->add( |<p>apm is installed in package { package }</p>| ).
     ENDIF.
 
     DATA(action) = |{ /apmg/if_apm_gui_router=>c_action-url }?url={
                       /apmg/if_apm_constants=>c_repository }/blob/main/CONTRIBUTING.md|.
 
-    html->add( '<br><div>' ).
+    html->add( '<br>' ).
+    html->add( '<p>' ).
     html->add_a(
       iv_txt   = 'Contribution guidelines for apm'
       iv_act   = action
-      iv_class = |url| ).
-    html->add( '</div>' ).
+      iv_class = 'url' ).
+    html->add( '</p>' ).
 
     DATA(release) = zcl_abapgit_factory=>get_environment( )->get_basis_release( ).
 
     html->add( '<h2>Environment</h2>' ).
 
-    html->add( |<table>| ).
+    html->add( '<table>' ).
     html->add( |<tr><td>apm version:    </td><td>{ /apmg/if_apm_version=>c_version }</td></tr>| ).
     html->add( |<tr><td>GUI type:       </td><td>{ gui_type }</td></tr>| ).
     html->add( |<tr><td>GUI version:    </td><td>{ gui_version }</td></tr>| ).
@@ -205,8 +206,8 @@ CLASS /apmg/cl_apm_gui_page_debuginf IMPLEMENTATION.
     html->add( |<tr><td>SY release:     </td><td>{ release-release } SP { release-sp }</td></tr>| ).
     html->add( |<tr><td>Charsize:       </td><td>{ cl_abap_char_utilities=>charsize }</td></tr>| ).
     html->add( |<tr><td>Endian:         </td><td>{ cl_abap_char_utilities=>endian }</td></tr>| ).
-    html->add( |</table>| ).
-    html->add( |<br>| ).
+    html->add( '</table>' ).
+    html->add( '<br>' ).
 
     " TODO: List support objects for bundling and IMPORT (see package /APMG/APM_OBJECTS)
 

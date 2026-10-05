@@ -214,6 +214,9 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
   METHOD /apmg/if_apm_gui_renderable~render.
     register_handlers( ).
 
+    " Get page content first because it might register styles and scripts
+    DATA(content) = render_content( ). " TODO -> render child
+
     " Real page
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
@@ -222,13 +225,22 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( html_head( ) ).
     html->add( |<body class="{ page_control-page_layout }">| ).
 
+    html->add( render_deferred_parts( c_html_parts-styles ) ). " apm
+
     html->add( title( ) ).
 
     html->add( '<div class="not_sticky">' ).
 
     DATA(timer) = zcl_abapgit_timer=>create( )->start( ).
 
-    html->add( render_content( ) ). " TODO -> render child
+    " Visible until the page scripts confirm they initialized, and shown again
+    " by common.js for a later script error - on every page, so a broken
+    " common.js does not go unnoticed where most users start
+    html->add( /apmg/cl_apm_gui_chunk_lib=>render_js_error_banner( ) ).
+
+    html->add( '<div id="main">' ).
+    html->add( content ).
+    html->add( '</div>' ).
 
     DATA(render_content_time) = timer->end( ).
 
@@ -374,7 +386,7 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( '<head>' ).
 
     html->add( '<meta http-equiv="content-type" content="text/html; charset=utf-8">' ).
-    html->add( '<meta http-equiv="X-UA-Compatible" content="IE=11,10,9,8" />' ).
+    html->add( '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' ).
 
     html->add( '<title>apm</title>' ).
 
@@ -574,9 +586,9 @@ CLASS /apmg/cl_apm_gui_page IMPLEMENTATION.
     html->add( render_command_palettes( ) ).
     html->add( render_deferred_parts( c_html_parts-scripts ) ).
 
-    html->add( |toggleBrowserControlWarning();| ).
-    html->add( |displayBrowserControlFooter();| ).
-    html->add( |redirectBrowserBackToSapEvent();| ).
+    html->add( 'toggleBrowserControlWarning();' ).
+    html->add( 'displayBrowserControlFooter();' ).
+    html->add( 'redirectBrowserBackToSapEvent();' ).
     html->add( render_back_navigation( ) ).
 
     result = html.

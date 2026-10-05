@@ -130,10 +130,6 @@ CLASS /apmg/cl_apm_gui_page_list DEFINITION
 
     " CSS + JS
 
-    METHODS render_styles
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
-
     METHODS get_scripts
       RETURNING
         VALUE(result) TYPE REF TO /apmg/if_apm_html
@@ -430,7 +426,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
-    render_styles( html ).
+    register_styles( /apmg/cl_apm_gui_styles=>emoji( ) ).
 
     html->add( '<div class="repo-overview">' ).
 
@@ -716,8 +712,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_text_input(
       iv_name  = 'filter'
-      iv_label = |Filter: { render_filter_help_hint( ) }|
+      iv_label = |Filter: |
       iv_value = settings-list_settings-filter ) ).
+    html->add( render_filter_help_hint( ) ).
     html->add( '<input type="submit" class="hidden-submit">' ).
     html->add( '</form>' ).
 
@@ -727,7 +724,7 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       icon_class = `grey`.
     ENDIF.
 
-    html->add( '<span class="toolbar-light pad-sides">' ).
+    html->add( '<div class="toolbar-light pad-sides" style="display: inline;">' ).
 
     IF settings-list_settings-filter IS NOT INITIAL.
       html->add( html->a(
@@ -745,7 +742,8 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
       iv_act   = 'gHelper.toggleRepoListDetail()'
       iv_class = 'command'
       iv_typ   = /apmg/if_apm_html=>c_action_type-onclick ) ).
-    html->add( '</span>' ).
+
+    html->add( '</div>' ).
 
   ENDMETHOD.
 
@@ -810,23 +808,9 @@ CLASS /apmg/cl_apm_gui_page_list IMPLEMENTATION.
 
   METHOD render_registry_bar.
 
-    html->add( '<span style="float:right">' ).
+    html->add( '<div style="float:right;display:inline;">' ).
     html->add( /apmg/cl_apm_gui_menus=>registry( settings-registry )->render( ) ).
-    html->add( '</span>' ).
-
-  ENDMETHOD.
-
-
-  METHOD render_styles.
-
-    " Emoji Styles
-    DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_css( )
-      sep   = cl_abap_char_utilities=>newline ).
-
-    html->add( '<style>' ).
-    html->add( emoji_styles ).
-    html->add( '</style>' ).
+    html->add( '</div>' ).
 
   ENDMETHOD.
 

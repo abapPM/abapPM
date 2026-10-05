@@ -16,9 +16,16 @@ CLASS /apmg/cl_apm_gui_component DEFINITION
       BEGIN OF c_html_parts,
         scripts      TYPE string VALUE 'scripts',
         hidden_forms TYPE string VALUE 'hidden_forms',
+        styles       TYPE string VALUE 'styles',
       END OF c_html_parts.
 
   PROTECTED SECTION.
+
+    METHODS register_styles
+      IMPORTING
+        part TYPE REF TO /apmg/if_apm_html
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS register_deferred_script
       IMPORTING
@@ -116,6 +123,15 @@ CLASS /apmg/cl_apm_gui_component IMPLEMENTATION.
     ENDIF.
 
     gui_services( )->get_hotkeys_ctl( )->register_hotkeys( provider->get_hotkey_actions( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD register_styles.
+
+    gui_services( )->get_html_parts( )->add_part(
+      iv_collection = c_html_parts-styles
+      ii_part       = part ).
 
   ENDMETHOD.
 ENDCLASS.

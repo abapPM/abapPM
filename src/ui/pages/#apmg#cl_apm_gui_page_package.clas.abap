@@ -79,6 +79,10 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
       settings     TYPE /apmg/if_apm_settings=>ty_settings,
       package_json TYPE /apmg/if_apm_types=>ty_package_json.
 
+    METHODS get_styles
+      RETURNING
+        VALUE(result) TYPE string.
+
     METHODS load_settings
       RAISING
         /apmg/cx_apm_error.
@@ -137,12 +141,6 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
         !value        TYPE string OPTIONAL
       RETURNING
         VALUE(result) TYPE string.
-
-    METHODS render_styles
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html
-      RAISING
-        /apmg/cx_apm_error.
 
     METHODS render_top
       IMPORTING
@@ -229,6 +227,7 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
         !data      TYPE string
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -427,7 +426,8 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     markdown-data = get_markdown( ).
     package_json  = get_package_json( ).
 
-    render_styles( html ).
+    register_styles( /apmg/cl_apm_gui_styles=>markdown( get_styles( ) ) ).
+
     render_top( html ).
 
     html->add( '<div class="markdown">' ).
@@ -501,11 +501,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD download_to_file.
 
-    TRY.
-        DATA(bin_data) = zcl_abapgit_convert=>string_to_xstring_utf8( data ).
-      CATCH zcx_abapgit_exception INTO DATA(error).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = error->get_text( ).
-    ENDTRY.
+    DATA(bin_data) = /apmg/cl_apm_abapgit_convert=>string_to_xstring_utf8( data ).
 
     DATA(frontend_services) = /apmg/cl_apm_gui_factory=>get_frontend_services( ).
 
@@ -535,6 +531,13 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     " Always load data since it can be edited in another page
     result = /apmg/cl_apm_readme=>factory( package )->load( )->get( ).
+
+    " Replace deprecated HTML sometimes found in readmes
+    result = replace(
+      val  = result
+      sub  = '<div align="center">'
+      with = '<div class="center">'
+      occ  = 0 ).
 
   ENDMETHOD.
 
@@ -651,6 +654,21 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       " Add other git hosts here...
       result = |{ url }/raw/{ branch }|.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_styles.
+
+    result = |table.dependencies \{\n|
+      && |width: 100%;\n|
+      && |table-layout: fixed;\n|
+      && |\}\n|
+      && |table.dependencies .col-range   \{ width: 30%; \}\n|
+      && |table.dependencies .col-type    \{ width: 10%; \}\n|
+      && |table.dependencies .col-package \{ width: 40%; \}\n|
+      && |table.dependencies .col-version \{ width: 10%; \}\n|
+      && |table.dependencies .col-status  \{ width: 10%; \}|.
 
   ENDMETHOD.
 
@@ -823,7 +841,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     ENDIF.
 
     IF none = abap_true.
-      html->add( '<h3>This package has no dependencies</h3>' ).
+      html->add( '<h2>This package has no dependencies</h2>' ).
     ENDIF.
 
     html->add( '</div>' ).
@@ -837,13 +855,13 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     DATA(list) = /apmg/cl_apm_package_json=>list( instanciate = abap_true ).
 
-    html->add( '<table width="100%">' ).
+    html->add( '<table class="dependencies">' ).
     html->add( '<tr>' ).
-    html->add( '<th width="30%">Range</th>' ).
-    html->add( '<th width="10%">Type</th>' ).
-    html->add( '<th width="40%">Package</th>' ).
-    html->add( '<th width="10%">Version</th>' ).
-    html->add( '<th width="10%">Status</th>' ).
+    html->add( '<th class="col-range">Range</th>' ).
+    html->add( '<th class="col-type">Type</th>' ).
+    html->add( '<th class="col-package">Package</th>' ).
+    html->add( '<th class="col-version">Version</th>' ).
+    html->add( '<th class="col-status">Status</th>' ).
     html->add( '</tr>' ).
 
     LOOP AT dependencies ASSIGNING FIELD-SYMBOL(<dependency>).
@@ -893,13 +911,13 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD render_engines_table.
 
-    html->add( '<table width="100%">' ).
+    html->add( '<table class="dependencies">' ).
     html->add( '<tr>' ).
-    html->add( '<th width="30%">Range</th>' ).
-    html->add( '<th width="10%">&nbsp;</th>' ).
-    html->add( '<th width="40%">&nbsp;</th>' ).
-    html->add( '<th width="10%">Version</th>' ).
-    html->add( '<th width="10%">Status</th>' ).
+    html->add( '<th class="col-range">Range</th>' ).
+    html->add( '<th class="col-type">&nbsp;</th>' ).
+    html->add( '<th class="col-package">&nbsp;</th>' ).
+    html->add( '<th class="col-version">Version</th>' ).
+    html->add( '<th class="col-status">Status</th>' ).
     html->add( '</tr>' ).
 
     LOOP AT engines ASSIGNING FIELD-SYMBOL(<engine>)
@@ -992,12 +1010,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
   METHOD render_header_content.
 
-    html->add( '<div class="header">' ).
+    html->add( '<h1 class="header">' ).
     html->add( image ).
     html->add( '<span class="indent5em">' ).
     html->add( text ).
     html->add( '</span>' ).
-    html->add( '</div>' ).
+    html->add( '</h1>' ).
 
   ENDMETHOD.
 
@@ -1100,25 +1118,6 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
     html->add( '</table>' ).
     html->add( '</div>' ).
-
-  ENDMETHOD.
-
-
-  METHOD render_styles.
-
-    " Emoji Styles
-    DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_css( )
-      sep   = cl_abap_char_utilities=>newline ).
-
-    html->add( '<style>' ).
-    html->add( emoji_styles ).
-    html->add( '</style>' ).
-
-    " Markdown Styles
-    html->add( '<style>' ).
-    html->add( /apmg/cl_apm_markdown=>styles( ) ).
-    html->add( '</style>' ).
 
   ENDMETHOD.
 

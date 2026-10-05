@@ -84,11 +84,11 @@ CLASS /apmg/cl_apm_logo IMPLEMENTATION.
 
     result = |<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 232 252" width="$" height="$">\n|
       && |<g>|
-      && |<path id="1b" d="M 0 62 L 116 120 L 116 254 L 0 196 L 0 62 Z" stroke="#000000" |
+      && |<path d="M 0 62 L 116 120 L 116 254 L 0 196 L 0 62 Z" stroke="#000000" | "1b
       && |stroke-width="0" fill="#000000" stroke-miterlimit="1"/>|
-      && |<path id="1w" d="M 116 120 L 116 254 L 232 196 L 232 62 L 116 120 Z" stroke="#808080" |
+      && |<path d="M 116 120 L 116 254 L 232 196 L 232 62 L 116 120 Z" stroke="#808080" | "1w
       && |stroke-width="0.5" fill="#FFFFFF" stroke-miterlimit="1"/>|
-      && |<path id="1g" d="M 0 62 L 116 2 L 232 62 L 116 120 L 0 62 Z" stroke="#808080" |
+      && |<path d="M 0 62 L 116 2 L 232 62 L 116 120 L 0 62 Z" stroke="#808080" | "1g
       && |stroke-width="0" fill="#808080" stroke-miterlimit="1"/>|
       && |</g>|
       && |</svg>|.
@@ -105,23 +105,23 @@ CLASS /apmg/cl_apm_logo IMPLEMENTATION.
 
     result = |<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512" width="$" height="$">\n|
       && |<g>\n|
-      && |<path id="1b" d="M 116 62 L 232 120 L 232 254 L 116 196 L 116 62 Z" stroke="#000000" |
+      && |<path d="M 116 62 L 232 120 L 232 254 L 116 196 L 116 62 Z" stroke="#000000" | "1b
       && |stroke-width="0" fill="#000000" stroke-miterlimit="1" />\n|
-      && |<path id="1w" d="M 232 120 L 232 254 L 350 196 L 350 62 L 232 120 Z" stroke="#808080" |
+      && |<path d="M 232 120 L 232 254 L 350 196 L 350 62 L 232 120 Z" stroke="#808080" | "1w
       && |stroke-width="0.5" fill="#FFFFFF" stroke-miterlimit="1" />\n|
-      && |<path id="1g" d="M 116 62 L 232 2 L 350 62 L 232 120 L 116 62 Z" stroke="#808080" |
+      && |<path d="M 116 62 L 232 2 L 350 62 L 232 120 L 116 62 Z" stroke="#808080" | "1g
       && |stroke-width="0" fill="#808080" stroke-miterlimit="1" />\n|
-      && |<path id="2b" d="M 2 254 L 116 312 L 116 446 L 2 388 L 2 254 Z" stroke="#000000" |
+      && |<path d="M 2 254 L 116 312 L 116 446 L 2 388 L 2 254 Z" stroke="#000000" | "2b
       && |stroke-width="0" fill="#000000" stroke-miterlimit="1" />\n|
-      && |<path id="2w" d="M 116 312 L 116 446 L 232 388 L 232 254 L 116 312 Z" stroke="#808080" |
+      && |<path d="M 116 312 L 116 446 L 232 388 L 232 254 L 116 312 Z" stroke="#808080" | "2w
       && |stroke-width="0.5" fill="#FFFFFF" stroke-miterlimit="1" />\n|
-      && |<path id="2g" d="M 2 254 L 116 196 L 232 254 L 116 312 L 2 254 Z" stroke="#808080" |
+      && |<path d="M 2 254 L 116 196 L 232 254 L 116 312 L 2 254 Z" stroke="#808080" | "2g
       && |stroke-width="0" fill="#808080" stroke-miterlimit="1" />\n|
-      && |<path id="3b" d="M 232 254 L 350 312 L 350 446 L 232 388 L 232 254 Z" stroke="#000000" |
+      && |<path d="M 232 254 L 350 312 L 350 446 L 232 388 L 232 254 Z" stroke="#000000" | "3b
       && |stroke-width="0" fill="#000000" stroke-miterlimit="1" />\n|
-      && |<path id="3w" d="M 350 312 L 350 446 L 468 388 L 468 254 L 350 312 Z" stroke="#808080" |
+      && |<path d="M 350 312 L 350 446 L 468 388 L 468 254 L 350 312 Z" stroke="#808080" | "3w
       && |stroke-width="0.5" fill="#FFFFFF" stroke-miterlimit="1" />\n|
-      && |<path id="3g" d="M 232 254 L 350 196 L 468 254 L 350 312 L 232 254 Z" stroke="#808080" |
+      && |<path d="M 232 254 L 350 196 L 468 254 L 350 312 L 232 254 Z" stroke="#808080" | "3g
       && |stroke-width="0" fill="#808080" stroke-miterlimit="1" />\n|
       && |</g>\n|
       && |</svg>|.
@@ -142,7 +142,7 @@ CLASS /apmg/cl_apm_logo IMPLEMENTATION.
 
   METHOD svg_text.
 
-    result = |<svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 804 331" |
+    result = |<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 804 331" |
       && |width="$" height="$">\n|
       && |<g transform="translate(0,331) scale(0.1,-0.1)" fill=" " stroke="none">\n|
       && |<path d="M1090 3083 c-121 -19 -259 -65 -360 -120 -387 -211 -593 -624 -551 |

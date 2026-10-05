@@ -153,9 +153,9 @@ CLASS /apmg/cl_apm_gui_page_tree DEFINITION
 
     " CSS + JS
 
-    METHODS render_styles
-      IMPORTING
-        !html TYPE REF TO /apmg/if_apm_html.
+    METHODS get_styles
+      RETURNING
+        VALUE(result) TYPE string.
 
     METHODS get_scripts
       RETURNING
@@ -272,7 +272,8 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     DATA(html) = /apmg/cl_apm_html=>create( ).
 
-    render_styles( html ).
+    register_styles( /apmg/cl_apm_gui_styles=>emoji( get_styles( ) ) ).
+
     render_log( html ).
 
     html->add( |<div class="repo-overview">| ).
@@ -336,20 +337,17 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     table_schema->add_column(
       tech_name      = 'NAME'
       display_name   = 'Name'
-      css_class      = 'name'
-      width          = '25%'
+      css_class      = 'col-name'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'VERSION'
       display_name   = 'Version'
-      css_class      = 'version'
-      width          = '25%'
+      css_class      = 'col-version'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'PACKAGE'
       display_name   = 'Package'
-      css_class      = 'package'
-      width          = '40%'
+      css_class      = 'col-package'
       allow_order_by = abap_true
     )->add_column(
       tech_name      = 'STATUS'
@@ -425,6 +423,20 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     html->add( |var gHelper = new RepoOverViewHelper(\{ focusFilterKey: "f", pageId: "{ c_page_id }" \});| ).
 
     result = html.
+
+  ENDMETHOD.
+
+
+  METHOD get_styles.
+
+    result = |table.dependencies \{\n|
+      && |width: 100%;\n|
+      && |table-layout: fixed;\n|
+      && |\}\n|
+      && |table.dependencies .col-name    \{ width: 25%; \}\n|
+      && |table.dependencies .col-version \{ width: 25%; \}\n|
+      && |table.dependencies .col-package \{ width: 40%; \}\n|
+      && |tr.border-top td \{ border-top: 1px solid darkgray; \}|.
 
   ENDMETHOD.
 
@@ -528,8 +540,9 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
     html->add( |<form class="inline" method="post" action="sapevent:{ c_action-apply_filter }">| ).
     html->add( /apmg/cl_apm_gui_chunk_lib=>render_text_input(
       iv_name  = |filter|
-      iv_label = |Filter: { render_filter_help_hint( ) }|
+      iv_label = |Filter: |
       iv_value = settings-tree_settings-filter ) ).
+    html->add( render_filter_help_hint( ) ).
     html->add( |<input type="submit" class="hidden-submit">| ).
     html->add( |</form>| ).
 
@@ -571,7 +584,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
   METHOD render_log.
 
-    html->add( '<div>' ).
+    html->add( '<div class="log">' ).
 
     " TODO: Improve formatting/color by type
     LOOP AT log ASSIGNING FIELD-SYMBOL(<log>).
@@ -616,21 +629,6 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD render_styles.
-
-    " Emoji Styles
-    DATA(emoji_styles) = concat_lines_of(
-      table = /apmg/cl_apm_emoji=>create( )->get_css( )
-      sep   = cl_abap_char_utilities=>newline ).
-
-    html->add( '<style>' ).
-    html->add( emoji_styles ).
-    html->add( 'tr.border-top td { border-top: 1px solid darkgray; }' ).
-    html->add( '</style>' ).
-
-  ENDMETHOD.
-
-
   METHOD render_table_body.
 
     html->add( '<tbody>' ).
@@ -661,7 +659,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     html->td(
       iv_class     = 'ro-detail top'
-      is_data_attr = VALUE #( name = 'colspan' value = 5 )
+      iv_colspan   = 5
       iv_content   = '' ).
 
     html->td(
@@ -759,7 +757,7 @@ CLASS /apmg/cl_apm_gui_page_tree IMPLEMENTATION.
 
     html->td(
       iv_content   = out
-      is_data_attr = VALUE #( name = 'colspan' value = 4 )
+      iv_colspan   = 4
       iv_class     = 'top red' ).
 
     " Remaining columns

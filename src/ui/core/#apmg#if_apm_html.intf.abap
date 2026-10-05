@@ -113,6 +113,7 @@ INTERFACE /apmg/if_apm_html PUBLIC.
       !iv_format_single_line TYPE abap_bool DEFAULT abap_false
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
+      !iv_colspan            TYPE i OPTIONAL
     RETURNING
       VALUE(ri_self)         TYPE REF TO /apmg/if_apm_html.
 
@@ -126,6 +127,7 @@ INTERFACE /apmg/if_apm_html PUBLIC.
       !iv_format_single_line TYPE abap_bool DEFAULT abap_true
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
+      !iv_colspan            TYPE i OPTIONAL
         PREFERRED PARAMETER iv_content
     RETURNING
       VALUE(ri_self)         TYPE REF TO /apmg/if_apm_html.
@@ -140,6 +142,7 @@ INTERFACE /apmg/if_apm_html PUBLIC.
       !iv_format_single_line TYPE abap_bool DEFAULT abap_true
       !is_data_attr          TYPE ty_data_attr OPTIONAL
       !it_data_attrs         TYPE ty_data_attrs OPTIONAL
+      !iv_colspan            TYPE i OPTIONAL
         PREFERRED PARAMETER iv_content
     RETURNING
       VALUE(ri_self)         TYPE REF TO /apmg/if_apm_html.
