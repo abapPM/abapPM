@@ -1146,9 +1146,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       iv_version  = package_json-version ) ).
     html->add( '</span>' ).
 
-    " TODO: Add link to abapGit (if the package has an associated repository)
-    " html->add( '<span class="indent5em">' )
-    " html->add( '</span>' ).
+    " TODO: if the package has an associated repository, add link to abapGit
 
     html->add( '</td>' ).
     html->add( '<td class="right">' ).
