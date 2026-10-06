@@ -1,21 +1,20 @@
-CLASS /apmg/cl_apm_gui_dlg_update DEFINITION
+CLASS /apmg/cl_apm_gui_dlg_upd_deps DEFINITION
   PUBLIC
   INHERITING FROM /apmg/cl_apm_gui_component
   FINAL
   CREATE PRIVATE.
 
 ************************************************************************
-* apm GUI Dialog for Update Command
+* apm GUI Dialog for Update Dependencies Command
 *
-* Copyright 2024 apm.to Inc. <https://apm.to>
+* Copyright 2026 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
   PUBLIC SECTION.
 
-    INTERFACES:
-      /apmg/if_apm_gui_event_handler,
-      /apmg/if_apm_gui_menu_provider,
-      /apmg/if_apm_gui_renderable.
+    INTERFACES /apmg/if_apm_gui_event_handler.
+    INTERFACES /apmg/if_apm_gui_menu_provider.
+    INTERFACES /apmg/if_apm_gui_renderable.
 
     CLASS-METHODS create
       IMPORTING
@@ -36,28 +35,34 @@ CLASS /apmg/cl_apm_gui_dlg_update DEFINITION
 
     TYPES:
       BEGIN OF ty_params,
-        package    TYPE devclass,
-        name       TYPE string,
-        version    TYPE string,
-        to_version TYPE string,
-        transport  TYPE trkorr,
-        force      TYPE abap_bool,
+        package     TYPE devclass,
+        name        TYPE string,
+        version     TYPE string,
+        deps        TYPE abap_bool,
+        dev_deps    TYPE abap_bool,
+        opt_deps    TYPE abap_bool,
+        bundle_deps TYPE abap_bool,
+        transport   TYPE trkorr,
+        force       TYPE abap_bool,
       END OF ty_params.
 
     CONSTANTS:
       BEGIN OF c_id,
-        package    TYPE string VALUE 'package',
-        name       TYPE string VALUE 'name',
-        version    TYPE string VALUE 'version',
-        to_version TYPE string VALUE 'to-version',
-        transport  TYPE string VALUE 'transport',
-        force      TYPE string VALUE 'force',
+        package     TYPE string VALUE 'package',
+        name        TYPE string VALUE 'name',
+        version     TYPE string VALUE 'version',
+        deps        TYPE string VALUE 'deps',
+        dev_deps    TYPE string VALUE 'dev_deps',
+        opt_deps    TYPE string VALUE 'opt_deps',
+        bundle_deps TYPE string VALUE 'bundle_deps',
+        transport   TYPE string VALUE 'transport',
+        force       TYPE string VALUE 'force',
       END OF c_id.
 
     CONSTANTS:
       BEGIN OF c_action,
-        update_package   TYPE string VALUE 'update-package',
-        choose_transport TYPE string VALUE 'choose-transport',
+        update_dependencies TYPE string VALUE 'update-dependencies',
+        choose_transport    TYPE string VALUE 'choose-transport',
       END OF c_action .
 
     DATA:
@@ -98,7 +103,7 @@ ENDCLASS.
 
 
 
-CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
+CLASS /apmg/cl_apm_gui_dlg_upd_deps IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
@@ -119,17 +124,19 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
         ENDIF.
 
-      WHEN c_action-update_package.
+      WHEN c_action-update_dependencies.
 
         validation_log = validate_form( form_data ).
 
         IF validation_log->is_empty( ) = abap_true.
           DATA(params) = get_parameters( form_data ).
 
+          /apmg/cl_apm_registry=>check_logged_in( registry ).
+
           /apmg/cl_apm_command_update=>run(
             registry   = registry
             package    = params-package
-            to_version = params-to_version
+            to_version = params-version
             transport  = params-transport
             force      = params-force ).
 
@@ -188,10 +195,10 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
 
   METHOD create.
 
-    DATA(component) = NEW /apmg/cl_apm_gui_dlg_update( package ).
+    DATA(component) = NEW /apmg/cl_apm_gui_dlg_upd_deps( package ).
 
     result = /apmg/cl_apm_gui_page_hoc=>create(
-      page_title      = 'Update Package'
+      page_title      = 'Update Dependencies'
       child_component = component ).
 
   ENDMETHOD.
@@ -200,7 +207,7 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
   METHOD get_form_schema.
 
     result = /apmg/cl_apm_html_form=>create(
-      iv_form_id   = 'update-package-form'
+      iv_form_id   = 'update-dependencies-form'
       iv_help_page = 'https://docs.abappm.com/' ). " TODO
 
     result->text(
@@ -214,10 +221,7 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
     )->text(
       iv_name     = c_id-version
       iv_readonly = abap_true
-      iv_label    = 'Current Version'
-    )->text(
-      iv_name  = c_id-to_version
-      iv_label = 'Target Version'
+      iv_label    = 'Version'
     )->text(
       iv_name        = c_id-transport
       iv_side_action = c_action-choose_transport
@@ -225,14 +229,26 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
       iv_upper_case  = abap_true
       iv_max         = 20
     )->checkbox(
+      iv_name  = c_id-deps
+      iv_label = 'Dependencies'
+    )->checkbox(
+      iv_name  = c_id-dev_deps
+      iv_label = 'Dev Dependencies'
+    )->checkbox(
+      iv_name  = c_id-bundle_deps
+      iv_label = 'Bundle Dependencies'
+    )->checkbox(
+      iv_name  = c_id-opt_deps
+      iv_label = 'Optional Dependencies'
+    )->checkbox(
       iv_name  = c_id-force
       iv_label = 'Force'
       iv_hint  = 'Overwrite already installed dependencies' ).
 
     result->command(
-      iv_label    = 'Update Package'
+      iv_label    = 'Update Dependencies'
       iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action   = c_action-update_package
+      iv_action   = c_action-update_dependencies
     )->command(
       iv_label  = 'Back'
       iv_action = /apmg/if_apm_gui_router=>c_action-go_back ).
@@ -251,10 +267,6 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
 
     DATA(package_json) = /apmg/cl_apm_package_json=>factory( package )->get( ).
 
-    DATA(latest) = /apmg/cl_apm_registry=>get_latest_version(
-      registry = registry
-      name     = package_json-name ).
-
     result = NEW #( ).
 
     result->set(
@@ -267,8 +279,14 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
       iv_key = c_id-version
       iv_val = package_json-version
     )->set(
-      iv_key = c_id-to_version
-      iv_val = latest ).
+      iv_key = c_id-deps
+      iv_val = abap_true
+    )->set(
+      iv_key = c_id-dev_deps
+      iv_val = abap_true
+    )->set(
+      iv_key = c_id-bundle_deps
+      iv_val = abap_true ).
 
   ENDMETHOD.
 
@@ -295,12 +313,6 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
           iv_key = c_id-transport
           iv_val = msg ).
       ENDIF.
-    ENDIF.
-
-    IF NOT /apmg/cl_apm_package_json_vali=>is_valid_version( form_data->get( c_id-to_version ) ).
-      result->set(
-        iv_key = c_id-to_version
-        iv_val = 'Invalid version' ).
     ENDIF.
 
   ENDMETHOD.

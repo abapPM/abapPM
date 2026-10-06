@@ -44,19 +44,20 @@ CLASS /apmg/cl_apm_gui_page_package DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        view_readme       TYPE string VALUE 'view_readme',
-        view_readme_code  TYPE string VALUE 'view_readme_code',
-        view_readme_raw   TYPE string VALUE 'view_readme_raw',
-        edit_readme       TYPE string VALUE 'edit_readme',
-        copy_readme       TYPE string VALUE 'copy_readme',
-        download_readme   TYPE string VALUE 'download_readme',
-        view_json         TYPE string VALUE 'view_json',
-        edit_json         TYPE string VALUE 'edit_json',
-        copy_json         TYPE string VALUE 'copy_json',
-        download_json     TYPE string VALUE 'download_json',
-        view_dependencies TYPE string VALUE 'view_dependencies',
-        add_dependency    TYPE string VALUE 'add_dependency',
-        remove_dependency TYPE string VALUE 'remove_dependency',
+        view_readme         TYPE string VALUE 'view_readme',
+        view_readme_code    TYPE string VALUE 'view_readme_code',
+        view_readme_raw     TYPE string VALUE 'view_readme_raw',
+        edit_readme         TYPE string VALUE 'edit_readme',
+        copy_readme         TYPE string VALUE 'copy_readme',
+        download_readme     TYPE string VALUE 'download_readme',
+        view_json           TYPE string VALUE 'view_json',
+        edit_json           TYPE string VALUE 'edit_json',
+        copy_json           TYPE string VALUE 'copy_json',
+        download_json       TYPE string VALUE 'download_json',
+        view_dependencies   TYPE string VALUE 'view_dependencies',
+        add_dependency      TYPE string VALUE 'add_dependency',
+        remove_dependency   TYPE string VALUE 'remove_dependency',
+        update_dependencies TYPE string VALUE 'update_dependencies',
       END OF c_action.
 
     CONSTANTS:
@@ -301,6 +302,13 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
 
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-no_more_act.
 
+      WHEN c_action-update_dependencies.
+
+        /apmg/cl_apm_registry=>check_logged_in( settings-registry ).
+
+        rs_handled-page = /apmg/cl_apm_gui_dlg_upd_deps=>create( package ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -328,6 +336,11 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
     " Commands
+    hotkey_action-description = |Update|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_update.
+    hotkey_action-hotkey      = |t|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
     hotkey_action-description = |Publish|.
     hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_publish.
     hotkey_action-hotkey      = |p|.
@@ -369,7 +382,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       iv_txt = '+ Patch'
       iv_act = |{ /apmg/if_apm_gui_router=>c_action-apm_version }{ c_key }{ id }{ c_release_type }patch|
     )->add(
-      iv_txt = 'Update to Latest'
+      iv_txt = 'Update'
       iv_act = |{ /apmg/if_apm_gui_router=>c_action-apm_update }{ c_key }{ id }|
     )->add(
       iv_txt = 'Registry'
@@ -399,7 +412,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       iv_txt = /apmg/cl_apm_html=>icon( 'markdown' ) && ' Readme'
       iv_act = c_action-view_readme
     )->add(
-      " TODO: Replace with dependencies icon
+      " TODO: Replace with better icon for dependencies
       iv_txt = /apmg/cl_apm_html=>icon( 'code-fork-solid' ) && ' Dependencies'
       iv_act = c_action-view_dependencies
     )->add(
@@ -678,7 +691,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     CASE view.
       WHEN c_action-view_readme OR c_action-view_readme_code OR c_action-view_readme_raw.
 
-        DATA(readme_menu) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-readme' )->add(
+        DATA(readme_menu) = /apmg/cl_apm_html_toolbar=>create( 'apm-package-readme-view' )->add(
           iv_txt = 'Rendered'
           iv_chk = boolc( view = c_action-view_readme OR view IS INITIAL )
           iv_act = c_action-view_readme
@@ -702,16 +715,19 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           iv_act = c_action-download_readme
         )->add(
           iv_txt = 'Edit'
-          iv_act = |{ c_action-edit_readme }?key={ package }| ).
+          iv_act = c_action-edit_readme ).
 
       WHEN c_action-view_dependencies.
 
         result = /apmg/cl_apm_html_toolbar=>create( 'apm-package-dependencies-actions' )->add(
           iv_txt = 'Add'
-          iv_act = |{ c_action-add_dependency }?key={ package }|
+          iv_act = c_action-add_dependency
         )->add(
           iv_txt = 'Remove'
-          iv_act = |{ c_action-remove_dependency }?key={ package }| ).
+          iv_act = c_action-remove_dependency
+        )->add(
+          iv_txt = 'Update'
+          iv_act = c_action-update_dependencies ).
 
       WHEN c_action-view_json.
 
@@ -723,7 +739,7 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
           iv_act = c_action-download_json
         )->add(
           iv_txt = 'Edit'
-          iv_act = |{ c_action-edit_json }?key={ package }| ).
+          iv_act = c_action-edit_json ).
 
       WHEN OTHERS.
         ASSERT 0 = 1.

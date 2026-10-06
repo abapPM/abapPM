@@ -84,6 +84,7 @@ CLASS /apmg/cl_apm_gui_dlg_install DEFINITION
         !log          TYPE /apmg/if_apm_arborist=>ty_log
       RETURNING
         VALUE(result) TYPE string.
+
 ENDCLASS.
 
 

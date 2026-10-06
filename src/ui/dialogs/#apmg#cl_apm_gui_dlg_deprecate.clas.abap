@@ -212,12 +212,12 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
     form           = get_form_schema( ).
     form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     deprecate_package = package.
     IF deprecate_package IS NOT INITIAL.
       form_data = read_package( deprecate_package ).
     ENDIF.
-
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
   ENDMETHOD.
 
