@@ -28,7 +28,7 @@ REPORT /apmg/apm LINE-SIZE 100.
 ********************************************************************************
 
 * @@require devc /apmg/apm_abapgit
-* @@require devc /apmg/apm_commands*
+* @@require devc /apmg/apm_commands
 * @@require devc /apmg/apm_importer
 * @@require devc /apmg/apm_installer
 * @@require devc /apmg/apm_main
