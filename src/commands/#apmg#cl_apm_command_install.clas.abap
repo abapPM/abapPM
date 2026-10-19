@@ -143,6 +143,13 @@ CLASS /apmg/cl_apm_command_install DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS persist_bundle_dependencies
+      IMPORTING
+        !package  TYPE devclass
+        !manifest TYPE /apmg/if_apm_types=>ty_manifest
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS delete_manifest
       IMPORTING
         !package TYPE devclass
@@ -387,6 +394,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
             package  = <change>-package
             manifest = <change>-manifest ).
 
+          persist_bundle_dependencies(
+            package  = <change>-package
+            manifest = <change>-manifest ).
+
           completed = completed + 1.
 
         CATCH /apmg/cx_apm_error INTO DATA(error).
@@ -467,6 +478,63 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
           raise_error( |SAP package { <left>-package } is assigned to both { <left>-name } and { <right>-name }| ).
         ENDIF.
       ENDLOOP.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD persist_bundle_dependencies.
+
+    " FUTURE: Avoid saving bundled deps individually but store it with the parent package
+
+    LOOP AT manifest-bundle_dependencies ASSIGNING FIELD-SYMBOL(<bundle_dependency>).
+
+      " Bundle dependency must be listed with exact version under dependencies
+      IF NOT line_exists( manifest-dependencies[ <bundle_dependency> ] ).
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Package inconsistency: Expected { <bundle_dependency> } to be listed in dependencies|.
+      ENDIF.
+
+      DATA(version) = manifest-dependencies[ <bundle_dependency> ]-range.
+
+      DATA(semver_range) = /apmg/cl_apm_semver_range=>create( version ).
+
+      IF lines( semver_range->set ) <> 1 OR
+         lines( semver_range->set[ 1 ] ) <> 1 OR
+         semver_range->set[ 1 ][ 1 ]->operator IS NOT INITIAL OR
+         semver_range->set[ 1 ][ 1 ]->semver = /apmg/cl_apm_semver_comparator=>any_semver.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Package inconsistency: Expected exact version for { <bundle_dependency> } in dependencies|.
+      ENDIF.
+
+      " Note: This assumes prefix folder mode
+      " FUTURE: support full and mixed folder modes
+      DATA(module_package) = CONV devclass( to_upper( <bundle_dependency> ) ).
+      IF module_package(1) = '@' AND module_package CS '/'.
+        SPLIT module_package AT '/' INTO DATA(rest) module_package ##NEEDED.
+      ENDIF.
+      module_package = |{ package }_MODULE_{ module_package }|.
+
+      DATA(package_json_service) = /apmg/cl_apm_package_json=>factory( module_package ).
+
+      IF package_json_service->exists( ).
+        DATA(package_json) = package_json_service->load( )->get( ).
+        IF package_json-name <> <bundle_dependency>.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+            EXPORTING
+              text = |Package inconsistency: Expected { <bundle_dependency> }, found { package_json-name }|.
+        ENDIF.
+        package_json-version = version.
+      ELSE.
+        package_json = VALUE /apmg/if_apm_types=>ty_package_json(
+          name    = <bundle_dependency>
+          version = version ).
+      ENDIF.
+
+      package_json_service->set( package_json )->save( ).
+
     ENDLOOP.
 
   ENDMETHOD.
