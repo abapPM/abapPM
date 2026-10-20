@@ -9,6 +9,10 @@ CLASS /apmg/cl_apm_command_install DEFINITION
 * Copyright 2024 apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: MIT
 ************************************************************************
+* TODO: This interface is too complex. It needs to be simplified so it
+* does not use object parameters (i.e. resolve diff and combine with
+* with assignments).
+************************************************************************
   PUBLIC SECTION.
 
     TYPES:
@@ -161,6 +165,7 @@ CLASS /apmg/cl_apm_command_install DEFINITION
         !text TYPE string
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -491,9 +496,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
 
       " Bundle dependency must be listed with exact version under dependencies
       IF NOT line_exists( manifest-dependencies[ <bundle_dependency> ] ).
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |Package inconsistency: Expected { <bundle_dependency> } to be listed in dependencies|.
+        raise_error( |Package inconsistency: Expected { <bundle_dependency> } to be listed in dependencies| ).
       ENDIF.
 
       DATA(version) = manifest-dependencies[ <bundle_dependency> ]-range.
@@ -504,12 +507,10 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
          lines( semver_range->set[ 1 ] ) <> 1 OR
          semver_range->set[ 1 ][ 1 ]->operator IS NOT INITIAL OR
          semver_range->set[ 1 ][ 1 ]->semver = /apmg/cl_apm_semver_comparator=>any_semver.
-        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-          EXPORTING
-            text = |Package inconsistency: Expected exact version for { <bundle_dependency> } in dependencies|.
+        raise_error( |Package inconsistency: Expected exact version for { <bundle_dependency> } in dependencies| ).
       ENDIF.
 
-      " Note: This assumes prefix folder mode
+      " Note: This assumes prefix folder mode and MODULE sub-package
       " FUTURE: support full and mixed folder modes
       DATA(module_package) = CONV devclass( to_upper( <bundle_dependency> ) ).
       IF module_package(1) = '@' AND module_package CS '/'.
@@ -522,9 +523,7 @@ CLASS /apmg/cl_apm_command_install IMPLEMENTATION.
       IF package_json_service->exists( ).
         DATA(package_json) = package_json_service->load( )->get( ).
         IF package_json-name <> <bundle_dependency>.
-          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
-            EXPORTING
-              text = |Package inconsistency: Expected { <bundle_dependency> }, found { package_json-name }|.
+          raise_error( |Package inconsistency: Expected { <bundle_dependency> }, found { package_json-name }| ).
         ENDIF.
         package_json-version = version.
       ELSE.
