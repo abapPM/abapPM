@@ -40,6 +40,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         name    TYPE string,
         version TYPE string,
         tag     TYPE string,
+        access  TYPE string,
       END OF ty_params.
 
     CONSTANTS:
@@ -48,6 +49,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         name    TYPE string VALUE 'name',
         version TYPE string VALUE 'version',
         tag     TYPE string VALUE 'tag',
+        access  TYPE string VALUE 'access',
       END OF c_id.
 
     CONSTANTS:
@@ -60,6 +62,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
     DATA:
       registry       TYPE string,
       pubish_package TYPE devclass,
+      is_scoped      TYPE abap_bool,
       form           TYPE REF TO /apmg/cl_apm_html_form,
       form_data      TYPE REF TO /apmg/cl_apm_string_map,
       form_util      TYPE REF TO /apmg/cl_apm_html_form_utils,
@@ -98,6 +101,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
         VALUE(result) TYPE abap_bool
       RAISING
         /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -141,7 +145,8 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
             /apmg/cl_apm_command_publish=>run(
               registry = registry
               package  = params-package
-              tag      = params-tag ).
+              tag      = params-tag
+              access   = params-access ).
           ENDIF.
 
           rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
@@ -211,17 +216,18 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
     super->constructor( ).
 
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     validation_log = NEW #( ).
     form_data      = NEW #( ).
-    form           = get_form_schema( ).
-    form_util      = /apmg/cl_apm_html_form_utils=>create( form ).
 
     pubish_package = package.
     IF pubish_package IS NOT INITIAL.
       form_data = read_package( pubish_package ).
     ENDIF.
 
-    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+    form      = get_form_schema( ).
+    form_util = /apmg/cl_apm_html_form_utils=>create( form ).
 
   ENDMETHOD.
 
@@ -263,7 +269,12 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     )->text(
       iv_name  = c_id-tag
       iv_label = 'Tag'
-      iv_hint  = 'Distribution Tag' ).
+      iv_hint  = 'Distribution Tag'
+    )->checkbox(
+      iv_name     = c_id-access
+      iv_label    = 'Public package'
+      iv_readonly = boolc( is_scoped = abap_false )
+      iv_hint     = 'The package will be viewable (and installable) publicly' ).
 
     result->command(
       iv_label    = 'Publish Package'
@@ -282,6 +293,12 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   METHOD get_parameters.
 
     form_data->to_struc( CHANGING cs_container = result ).
+
+    IF result-access = abap_true.
+      result-access = /apmg/if_apm_command=>c_access-public.
+    ELSE.
+      result-access = /apmg/if_apm_command=>c_access-restricted.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -314,6 +331,22 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       result->set(
         iv_key = c_id-tag
         iv_val = 'latest' ).
+    ENDIF.
+
+    is_scoped = boolc( package_json-name CP '@*' ).
+
+    " Set access based on existing package
+    TRY.
+        DATA(access) = /apmg/cl_apm_registry=>get_packument(
+          registry = registry
+          name     = package_json-name )-access.
+      CATCH /apmg/cx_apm_error ##NO_HANDLER.
+    ENDTRY.
+
+    IF access = /apmg/if_apm_command=>c_access-public OR is_scoped = abap_false.
+      result->set(
+        iv_key = c_id-access
+        iv_val = abap_true ).
     ENDIF.
 
   ENDMETHOD.
