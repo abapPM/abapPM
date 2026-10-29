@@ -14,7 +14,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
 
     INTERFACES:
       /apmg/if_apm_gui_event_handler,
-      /apmg/if_apm_gui_menu_provider,
       /apmg/if_apm_gui_renderable.
 
     CLASS-METHODS create
@@ -113,8 +112,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    CHECK ii_event->mv_action <> /apmg/if_apm_gui_router=>c_action-switch_registry.
-
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
@@ -151,13 +148,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
         ENDIF.
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_gui_menu_provider~get_menu.
-
-    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( registry ).
 
   ENDMETHOD.
 

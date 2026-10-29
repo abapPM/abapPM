@@ -111,8 +111,6 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    CHECK ii_event->mv_action <> /apmg/if_apm_gui_router=>c_action-switch_registry.
-
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
@@ -273,7 +271,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     )->checkbox(
       iv_name     = c_id-access
       iv_label    = 'Public package'
-      iv_readonly = boolc( is_scoped = abap_false )
+      iv_readonly = xsdbool( is_scoped = abap_false )
       iv_hint     = 'The package will be viewable (and installable) publicly' ).
 
     result->command(
@@ -333,7 +331,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
         iv_val = 'latest' ).
     ENDIF.
 
-    is_scoped = boolc( package_json-name CP '@*' ).
+    is_scoped = xsdbool( package_json-name CP '@*' ).
 
     " Set access based on existing package
     TRY.

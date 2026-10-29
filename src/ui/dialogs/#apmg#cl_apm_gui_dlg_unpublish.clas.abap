@@ -116,8 +116,6 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    CHECK ii_event->mv_action <> /apmg/if_apm_gui_router=>c_action-switch_registry.
-
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.

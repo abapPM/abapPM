@@ -103,8 +103,6 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    CHECK ii_event->mv_action <> /apmg/if_apm_gui_router=>c_action-switch_registry.
-
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
@@ -155,15 +153,10 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
   METHOD /apmg/if_apm_gui_renderable~render.
 
     DATA(current_registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     IF registry <> current_registry.
-      registry = current_registry.
-      IF form_data->get( c_id-name ) IS NOT INITIAL.
-        form_data->set(
-          iv_key = c_id-to_version
-          iv_val = /apmg/cl_apm_registry=>get_latest_version(
-            registry = registry
-            name     = form_data->get( c_id-name ) ) ).
-      ENDIF.
+      registry  = current_registry.
+      form_data = read_package( update_package ).
     ENDIF.
 
     register_handlers( ).
