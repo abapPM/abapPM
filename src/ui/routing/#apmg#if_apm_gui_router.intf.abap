@@ -50,6 +50,7 @@ INTERFACE /apmg/if_apm_gui_router PUBLIC.
       show_callstack       TYPE string VALUE 'show_callstack',
       show_hotkeys         TYPE string VALUE 'show_hotkeys',
       sponsor              TYPE string VALUE 'sponsor',
+      switch_registry      TYPE string VALUE 'switch_registry',
       tutorial             TYPE string VALUE 'tutorial',
       url                  TYPE string VALUE 'url',
     END OF c_action.

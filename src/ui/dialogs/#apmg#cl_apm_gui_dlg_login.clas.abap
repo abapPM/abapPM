@@ -89,6 +89,8 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
+    CHECK ii_event->mv_action <> /apmg/if_apm_gui_router=>c_action-switch_registry.
+
     form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
     IF ii_event->mv_action = c_action-login.
@@ -121,6 +123,14 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_gui_renderable~render.
+
+    DATA(current_settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+    IF settings-registry <> current_settings-registry.
+      settings = current_settings.
+      CLEAR defaults.
+      validation_log = NEW #( ).
+      form_data = get_login_default( ).
+    ENDIF.
 
     register_handlers( ).
 
@@ -199,6 +209,9 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD get_login_default.
 
+    result = NEW #( ).
+    focus_field = c_id-username.
+
     CHECK line_exists( settings-registry_settings[ url = settings-registry ] ).
 
     defaults = settings-registry_settings[ url = settings-registry ].
@@ -208,8 +221,6 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
     ELSE.
       focus_field = c_id-password.
     ENDIF.
-
-    result = NEW #( ).
 
     result->set(
       iv_key = c_id-username

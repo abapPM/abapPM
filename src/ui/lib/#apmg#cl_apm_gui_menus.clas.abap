@@ -144,6 +144,18 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
 
   METHOD registry.
 
+    DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+    DATA(registries) = /apmg/cl_apm_html_toolbar=>create( ).
+
+    LOOP AT settings-registry_settings INTO DATA(registry_setting).
+      DATA(name) = escape( val = registry_setting-name format = cl_abap_format=>e_url ).
+      registries->add(
+        iv_txt = escape( val = |{ registry_setting-url } ({ registry_setting-name })|
+                         format = cl_abap_format=>e_html_text )
+        iv_act = |{ /apmg/if_apm_gui_router=>c_action-switch_registry }?name={ name }|
+        iv_cur = xsdbool( registry_setting-url = registry ) ).
+    ENDLOOP.
+
     IF registry = /apmg/if_apm_constants=>c_registry.
       DATA(fav_class) = `transport-box`. " green
     ELSE.
@@ -152,9 +164,9 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
 
     result = /apmg/cl_apm_html_toolbar=>create( 'apm-toolbar-registry' )->add(
       iv_title = 'Registry'
-      iv_txt   = registry
+      iv_txt   = escape( val = registry format = cl_abap_format=>e_html_text )
       iv_class = fav_class
-      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ registry }| ).
+      io_sub   = registries ).
 
     " Playground is anonymous i.e. no login required
     IF registry = /apmg/if_apm_constants=>c_playground.

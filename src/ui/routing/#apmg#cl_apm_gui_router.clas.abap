@@ -597,6 +597,26 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
   METHOD utility_actions.
 
     CASE event->mv_action.
+      WHEN /apmg/if_apm_gui_router=>c_action-switch_registry.
+
+        DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+        DATA(name) = event->query( )->get( 'NAME' ).
+        READ TABLE settings-registry_settings INTO DATA(registry_setting) WITH TABLE KEY name = name.
+        IF sy-subrc <> 0 OR registry_setting-url IS INITIAL.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Unknown registry'.
+        ENDIF.
+
+        result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+        IF settings-registry <> registry_setting-url.
+          settings-registry = registry_setting-url.
+          /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
+
+          " An install preview belongs to the registry used to build its plan
+          IF event->current_page_name( ) = '/APMG/CL_APM_GUI_DLG_INST_PREV'.
+            result-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+          ENDIF.
+        ENDIF.
+
       WHEN /apmg/if_apm_gui_router=>c_action-go_db.
 
         result-page  = /apmg/cl_apm_gui_page_db=>create( ).
