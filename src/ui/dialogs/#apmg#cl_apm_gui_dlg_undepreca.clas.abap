@@ -155,6 +155,8 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_renderable~render.
 
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     register_handlers( ).
 
     DATA(html) = /apmg/cl_apm_html=>create( ).

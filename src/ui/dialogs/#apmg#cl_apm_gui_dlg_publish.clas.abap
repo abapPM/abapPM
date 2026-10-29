@@ -166,6 +166,8 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_renderable~render.
 
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
     register_handlers( ).
 
     DATA(html) = /apmg/cl_apm_html=>create( ).
@@ -269,7 +271,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     )->checkbox(
       iv_name     = c_id-access
       iv_label    = 'Public package'
-      iv_readonly = boolc( is_scoped = abap_false )
+      iv_readonly = xsdbool( is_scoped = abap_false )
       iv_hint     = 'The package will be viewable (and installable) publicly' ).
 
     result->command(
@@ -329,7 +331,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
         iv_val = 'latest' ).
     ENDIF.
 
-    is_scoped = boolc( package_json-name CP '@*' ).
+    is_scoped = xsdbool( package_json-name CP '@*' ).
 
     " Set access based on existing package
     TRY.

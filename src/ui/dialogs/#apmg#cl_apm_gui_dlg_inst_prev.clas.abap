@@ -14,7 +14,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev DEFINITION
 
     INTERFACES:
       /apmg/if_apm_gui_event_handler,
-      /apmg/if_apm_gui_menu_provider,
       /apmg/if_apm_gui_renderable.
 
     CLASS-METHODS create
@@ -149,13 +148,6 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
         ENDIF.
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD /apmg/if_apm_gui_menu_provider~get_menu.
-
-    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( registry ).
 
   ENDMETHOD.
 

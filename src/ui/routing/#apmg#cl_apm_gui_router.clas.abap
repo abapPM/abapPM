@@ -597,6 +597,24 @@ CLASS /apmg/cl_apm_gui_router IMPLEMENTATION.
   METHOD utility_actions.
 
     CASE event->mv_action.
+      WHEN /apmg/if_apm_gui_router=>c_action-switch_registry.
+
+        DATA(name) = event->query( )->get( 'NAME' ).
+
+        DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+
+        READ TABLE settings-registry_settings INTO DATA(registry_setting) WITH TABLE KEY name = name.
+        IF sy-subrc <> 0 OR registry_setting-url IS INITIAL.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text EXPORTING text = 'Missing registry URL in settings'.
+        ENDIF.
+
+        IF settings-registry <> registry_setting-url.
+          settings-registry = registry_setting-url.
+          /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
+        ENDIF.
+
+        result-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
       WHEN /apmg/if_apm_gui_router=>c_action-go_db.
 
         result-page  = /apmg/cl_apm_gui_page_db=>create( ).

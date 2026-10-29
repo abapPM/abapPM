@@ -32,6 +32,7 @@ CLASS /apmg/cl_apm_gui_menus DEFINITION
     CLASS-METHODS registry
       IMPORTING
         registry      TYPE string
+        no_login      TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(result) TYPE REF TO /apmg/cl_apm_html_toolbar.
 
@@ -144,6 +145,17 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
 
   METHOD registry.
 
+    DATA(registries) = /apmg/cl_apm_html_toolbar=>create( ).
+
+    DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+
+    LOOP AT settings-registry_settings INTO DATA(registry_setting).
+      registries->add(
+        iv_txt = registry_setting-url
+        iv_act = |{ /apmg/if_apm_gui_router=>c_action-switch_registry }?name={ registry_setting-name }|
+        iv_chk = xsdbool( registry_setting-url = registry ) ).
+    ENDLOOP.
+
     IF registry = /apmg/if_apm_constants=>c_registry.
       DATA(fav_class) = `transport-box`. " green
     ELSE.
@@ -154,10 +166,10 @@ CLASS /apmg/cl_apm_gui_menus IMPLEMENTATION.
       iv_title = 'Registry'
       iv_txt   = registry
       iv_class = fav_class
-      iv_act   = |{ /apmg/if_apm_gui_router=>c_action-url }?url={ registry }| ).
+      io_sub   = registries ).
 
     " Playground is anonymous i.e. no login required
-    IF registry = /apmg/if_apm_constants=>c_playground.
+    IF registry = /apmg/if_apm_constants=>c_playground OR no_login = abap_true.
       RETURN.
     ENDIF.
 

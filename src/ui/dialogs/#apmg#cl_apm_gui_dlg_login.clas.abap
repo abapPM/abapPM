@@ -115,12 +115,22 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_menu_provider~get_menu.
 
-    ro_toolbar = /apmg/cl_apm_gui_menus=>registry( settings-registry ).
+    ro_toolbar = /apmg/cl_apm_gui_menus=>registry(
+      registry = settings-registry
+      no_login = abap_true ).
 
   ENDMETHOD.
 
 
   METHOD /apmg/if_apm_gui_renderable~render.
+
+    DATA(current_settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+
+    IF settings-registry <> current_settings-registry.
+      validation_log = NEW #( ).
+      settings       = current_settings.
+      form_data      = get_login_default( ).
+    ENDIF.
 
     register_handlers( ).
 
@@ -199,6 +209,9 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD get_login_default.
 
+    result = NEW #( ).
+    focus_field = c_id-username.
+
     CHECK line_exists( settings-registry_settings[ url = settings-registry ] ).
 
     defaults = settings-registry_settings[ url = settings-registry ].
@@ -208,8 +221,6 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
     ELSE.
       focus_field = c_id-password.
     ENDIF.
-
-    result = NEW #( ).
 
     result->set(
       iv_key = c_id-username
@@ -233,17 +244,6 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
   METHOD validate_form.
 
     result = form_util->validate( form_data ).
-
-    DATA(username) = CONV devclass( form_data->get( c_id-username ) ).
-    IF username IS NOT INITIAL.
-      TRY.
-          "...
-        CATCH zcx_abapgit_exception INTO DATA(error).
-          result->set(
-            iv_key = c_id-username
-            iv_val = error->get_text( ) ).
-      ENDTRY.
-    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
