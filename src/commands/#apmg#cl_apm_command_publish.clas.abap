@@ -17,6 +17,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         !registry   TYPE string
         !package    TYPE devclass
         !tag        TYPE string OPTIONAL
+        !access     TYPE string DEFAULT 'public'
         !is_dry_run TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
@@ -29,6 +30,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         !registry   TYPE string
         !package    TYPE devclass
         !tag        TYPE string
+        !access     TYPE string
         !is_dry_run TYPE abap_bool
       RAISING
         /apmg/cx_apm_error ##NEEDED.
@@ -107,6 +109,15 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         VALUE(result) TYPE string
       RAISING
         /apmg/cx_apm_error.
+
+    METHODS set_access
+      IMPORTING
+        access     TYPE string
+      CHANGING
+        !packument TYPE /apmg/if_apm_types=>ty_packument
+      RAISING
+        /apmg/cx_apm_error.
+
 ENDCLASS.
 
 
@@ -218,6 +229,12 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       packument    = packument
       package_json = package_json
       tag          = tag ).
+
+    set_access(
+      EXPORTING
+        access    = access
+      CHANGING
+        packument = packument_publish ).
 
     " 6. Serialize all objects of package
     DATA(files) = serialize_package( package ).
@@ -382,6 +399,7 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       registry   = /apmg/cl_apm_utils=>remove_trailing_slash( registry )
       package    = package
       tag        = tag
+      access     = access
       is_dry_run = is_dry_run ).
 
   ENDMETHOD.
@@ -412,6 +430,40 @@ CLASS /apmg/cl_apm_command_publish IMPLEMENTATION.
       CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD set_access.
+
+    CASE access.
+      WHEN /apmg/if_apm_command=>c_access-public.
+
+        packument-access = /apmg/if_apm_command=>c_access-public.
+
+      WHEN /apmg/if_apm_command=>c_access-restricted
+        OR /apmg/if_apm_command=>c_access-private.
+
+        IF packument-name NP '@*'.
+          RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+            EXPORTING
+              text = 'Can not restrict access to unscoped packages'.
+        ENDIF.
+        packument-access = /apmg/if_apm_command=>c_access-restricted.
+
+      WHEN ''.
+
+        IF packument-name CP '@*'.
+          packument-access = /apmg/if_apm_command=>c_access-restricted.
+        ELSE.
+          packument-access = /apmg/if_apm_command=>c_access-public.
+        ENDIF.
+
+      WHEN OTHERS.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = 'Invalid value for "access"'.
+    ENDCASE.
 
   ENDMETHOD.
 ENDCLASS.

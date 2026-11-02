@@ -322,6 +322,13 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
       lv_longtext = |{ lv_longtext }<br>|.
     ENDIF.
 
+    lv_longtext = |{ lv_longtext }<p>| &&
+      |Stuck? Check the { ri_html->a(
+        iv_txt = 'documentation'
+        iv_act = /apmg/if_apm_gui_router=>c_action-documentation ) } or open an { ri_html->a(
+        iv_txt = 'issue'
+        iv_act = /apmg/if_apm_gui_router=>c_action-feedback ) }.</p>|.
+
     ri_html->add( |<div id="message" class="message-panel">| ).
     ri_html->add( |{ ri_html->icon( 'exclamation-circle/red' ) } { lv_error_text }| ).
     ri_html->add( |<div class="message-panel-bar">| ).
@@ -752,7 +759,8 @@ CLASS /apmg/cl_apm_gui_chunk_lib IMPLEMENTATION.
                         iv_title = lv_title
                         iv_txt   = |{ iv_username }| ).
       ELSE.
-        ri_html->add( iv_username ).
+        " own tag, so the stage filter can mark the name without dropping the icon
+        ri_html->add( |<span>{ iv_username }</span>| ).
       ENDIF.
 
       ri_html->add( '</span>' ).

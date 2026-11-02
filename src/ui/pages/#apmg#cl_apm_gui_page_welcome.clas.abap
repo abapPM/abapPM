@@ -83,12 +83,12 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
       WHEN c_action-setup_persistence.
 
         confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
-          title                 = 'Setup Persistence'
-          question              = 'This will install the apm persistence objects into the system'
-          button_1_text         = 'Install Persistence'
-          button_1_action       = c_action-confirm_setup_persistence
-          button_2_text         = 'Cancel'
-          button_2_action       = c_action-cancel_confirm
+          titlebar              = 'Setup Persistence'
+          text_question         = 'This will install the apm persistence objects into the system'
+          text_button_1         = 'Install Persistence'
+          action_button_1       = c_action-confirm_setup_persistence
+          text_button_2         = 'Cancel'
+          action_button_2       = c_action-cancel_confirm
           default_button        = '2'
           display_cancel_button = abap_false
           popup_type            = 'ICON_MESSAGE_WARNING' ).
@@ -97,13 +97,13 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
       WHEN c_action-setup_certificates.
 
         confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
-          title                 = 'Setup Certificates'
-          question              =
+          titlebar              = 'Setup Certificates'
+          text_question         =
             `This will install certificates for the apm Registry and Playground into Trust Management (STRUST)`
-          button_1_text         = 'Install Certificates'
-          button_1_action       = c_action-confirm_setup_certificates
-          button_2_text         = 'Cancel'
-          button_2_action       = c_action-cancel_confirm
+          text_button_1         = 'Install Certificates'
+          action_button_1       = c_action-confirm_setup_certificates
+          text_button_2         = 'Cancel'
+          action_button_2       = c_action-cancel_confirm
           default_button        = '2'
           display_cancel_button = abap_false
           popup_type            = 'ICON_MESSAGE_WARNING' ).

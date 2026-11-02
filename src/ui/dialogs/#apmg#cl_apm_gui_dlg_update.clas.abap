@@ -152,6 +152,13 @@ CLASS /apmg/cl_apm_gui_dlg_update IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_renderable~render.
 
+    DATA(current_registry) = /apmg/cl_apm_settings=>factory( )->get( )-registry.
+
+    IF registry <> current_registry.
+      registry  = current_registry.
+      form_data = read_package( update_package ).
+    ENDIF.
+
     register_handlers( ).
 
     DATA(html) = /apmg/cl_apm_html=>create( ).

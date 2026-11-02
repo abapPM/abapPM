@@ -35,6 +35,7 @@ CLASS /apmg/cl_apm_popups IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_popups~popup_folder_logic.
+    " might be needed in future
   ENDMETHOD.
 
 

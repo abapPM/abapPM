@@ -172,13 +172,13 @@ CLASS /apmg/cl_apm_gui_dlg_uninstall IMPLEMENTATION.
 
               pending_params = params.
               confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
-                title                 = 'Uninstall'
-                question              = |This will DELETE all objects in { params-package } | &&
+                titlebar              = 'Uninstall'
+                text_question         = |This will DELETE all objects in { params-package } | &&
                                         |including subpackages from the system|
-                button_1_text         = 'Delete'
-                button_1_action       = c_action-confirm_uninstall
-                button_2_text         = 'Cancel'
-                button_2_action       = c_action-cancel_confirm
+                text_button_1         = 'Delete'
+                action_button_1       = c_action-confirm_uninstall
+                text_button_2         = 'Cancel'
+                action_button_2       = c_action-cancel_confirm
                 default_button        = '2'
                 display_cancel_button = abap_false
                 popup_type            = 'ICON_MESSAGE_WARNING' ).

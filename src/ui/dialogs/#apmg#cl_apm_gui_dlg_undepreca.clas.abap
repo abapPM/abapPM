@@ -153,12 +153,12 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
 
               pending_params = params.
               confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
-                title                 = 'Undeprecate Version'
-                question              = |This will UNDEPRECATE package "{ params-name }" { params-version }|
-                button_1_text         = 'Undeprecate'
-                button_1_action       = c_action-confirm_undeprecate
-                button_2_text         = 'Cancel'
-                button_2_action       = c_action-cancel_confirm
+                titlebar              = 'Undeprecate Version'
+                text_question         = |This will UNDEPRECATE package "{ params-name }" { params-version }|
+                text_button_1         = 'Undeprecate'
+                action_button_1       = c_action-confirm_undeprecate
+                text_button_2         = 'Cancel'
+                action_button_2       = c_action-cancel_confirm
                 default_button        = '2'
                 display_cancel_button = abap_false
                 popup_type            = 'ICON_MESSAGE_WARNING' ).
@@ -181,6 +181,8 @@ CLASS /apmg/cl_apm_gui_dlg_undepreca IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_gui_renderable~render.
+
+    registry = /apmg/cl_apm_settings=>factory( )->get( )-registry.
 
     register_handlers( ).
 
