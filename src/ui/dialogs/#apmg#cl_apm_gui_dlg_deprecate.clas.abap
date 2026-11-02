@@ -97,9 +97,7 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate DEFINITION
 
     METHODS popup_to_confirm
       IMPORTING
-        !params       TYPE ty_params
-      RETURNING
-        VALUE(result) TYPE abap_bool
+        !params TYPE ty_params
       RAISING
         /apmg/cx_apm_error.
 
