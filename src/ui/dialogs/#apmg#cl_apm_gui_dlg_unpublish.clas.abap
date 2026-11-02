@@ -50,10 +50,13 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        choose_package    TYPE string VALUE 'choose-package',
-        unpublish_package TYPE string VALUE 'unpublish-package',
-        unpublish_version TYPE string VALUE 'unpublish-version',
-        refresh           TYPE string VALUE 'refresh',
+        choose_package           TYPE string VALUE 'choose-package',
+        confirm_unpublish_package TYPE string VALUE 'confirm-unpublish-package',
+        confirm_unpublish_version TYPE string VALUE 'confirm-unpublish-version',
+        cancel_confirm           TYPE string VALUE 'cancel-confirm',
+        unpublish_package        TYPE string VALUE 'unpublish-package',
+        unpublish_version        TYPE string VALUE 'unpublish-version',
+        refresh                  TYPE string VALUE 'refresh',
       END OF c_action.
 
     DATA:
@@ -62,7 +65,9 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       form              TYPE REF TO /apmg/cl_apm_html_form,
       form_data         TYPE REF TO /apmg/cl_apm_string_map,
       form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
-      validation_log    TYPE REF TO /apmg/cl_apm_string_map.
+      validation_log    TYPE REF TO /apmg/cl_apm_string_map,
+      confirm_popup     TYPE REF TO /apmg/cl_apm_popup_to_confirm,
+      pending_params    TYPE ty_params.
 
     METHODS get_form_schema
       RETURNING
@@ -91,22 +96,6 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup_version
-      IMPORTING
-        !params       TYPE ty_params
-      RETURNING
-        VALUE(result) TYPE abap_bool
-      RAISING
-        /apmg/cx_apm_error.
-
-    METHODS confirm_popup_package
-      IMPORTING
-        !params       TYPE ty_params
-      RETURNING
-        VALUE(result) TYPE abap_bool
-      RAISING
-        /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -116,65 +105,109 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
-
     CASE ii_event->mv_action.
-      WHEN c_action-choose_package.
+      WHEN c_action-confirm_unpublish_package.
 
-        form_data->set(
-          iv_key = c_id-package
-          iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
+        confirm_popup->close( ).
+        /apmg/cl_apm_command_unpublish=>run(
+          registry = registry
+          name     = pending_params-name ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
 
-        IF form_data->get( c_id-package ) IS NOT INITIAL.
-          validation_log = validate_form( form_data ).
-        ELSE.
-          form_data = read_package( |{ form_data->get( c_id-package ) }| ).
-        ENDIF.
+      WHEN c_action-confirm_unpublish_version.
+
+        confirm_popup->close( ).
+        /apmg/cl_apm_command_unpublish=>run(
+          registry = registry
+          name     = pending_params-name
+          version  = pending_params-version ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+
+      WHEN c_action-cancel_confirm.
+
+        confirm_popup->close( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
-      WHEN c_action-refresh.
+      WHEN /apmg/if_apm_gui_router=>c_action-go_back.
 
-        form_data = read_package( |{ form_data->get( c_id-package ) }| ).
-        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
-
-      WHEN c_action-unpublish_package.
-
-        validation_log = validate_form( form_data ).
-
-        IF validation_log->is_empty( ) = abap_true.
-          DATA(params) = get_parameters( form_data ).
-
-          IF confirm_popup_package( params ) = abap_true.
-            /apmg/cl_apm_command_unpublish=>run(
-              registry = registry
-              name     = params-name ).
+        IF confirm_popup IS BOUND.
+          IF confirm_popup->was_closed( ) = abap_false.
+            confirm_popup->close( ).
+            rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
           ENDIF.
-
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
         ENDIF.
 
-      WHEN c_action-unpublish_version.
+      WHEN OTHERS.
 
-        validation_log = validate_form(
-          form_data  = form_data
-          check_vers = abap_true ).
+        form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
 
-        IF validation_log->is_empty( ) = abap_true.
-          params = get_parameters( form_data ).
+        CASE ii_event->mv_action.
+          WHEN c_action-choose_package.
 
-          IF confirm_popup_version( params ) = abap_true.
-            /apmg/cl_apm_command_unpublish=>run(
-              registry = registry
-              name     = params-name
-              version  = params-version ).
-          ENDIF.
+            form_data->set(
+              iv_key = c_id-package
+              iv_val = /apmg/cl_apm_gui_factory=>get_popups( )->popup_search_help( 'TDEVC-DEVCLASS' ) ).
 
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
-        ENDIF.
+            IF form_data->get( c_id-package ) IS NOT INITIAL.
+              validation_log = validate_form( form_data ).
+            ELSE.
+              form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+            ENDIF.
+            rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+          WHEN c_action-refresh.
+
+            form_data = read_package( |{ form_data->get( c_id-package ) }| ).
+            rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+          WHEN c_action-unpublish_package.
+
+            validation_log = validate_form( form_data ).
+
+            IF validation_log->is_empty( ) = abap_true.
+              DATA(params) = get_parameters( form_data ).
+
+              pending_params = params.
+              confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
+                title                 = 'Unpublish Package'
+                question              = |This will UNPUBLISH the COMPLETE "{ params-name }" package | &&
+                                        |from the registry (Note: Terms will apply)|
+                button_1_text         = 'Unpublish'
+                button_1_action       = c_action-confirm_unpublish_package
+                button_2_text         = 'Cancel'
+                button_2_action       = c_action-cancel_confirm
+                default_button        = '2'
+                display_cancel_button = abap_false
+                popup_type            = 'ICON_MESSAGE_WARNING' ).
+            ENDIF.
+
+            rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+          WHEN c_action-unpublish_version.
+
+            validation_log = validate_form(
+              form_data  = form_data
+              check_vers = abap_true ).
+
+            IF validation_log->is_empty( ) = abap_true.
+              pending_params = get_parameters( form_data ).
+
+              confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
+                title                 = 'Unpublish Version'
+                question              = |This will UNPUBLISH "{ pending_params-name }" { pending_params-version } | &&
+                                        |from the registry (Note: Terms will apply)|
+                button_1_text         = 'Unpublish'
+                button_1_action       = c_action-confirm_unpublish_version
+                button_2_text         = 'Cancel'
+                button_2_action       = c_action-cancel_confirm
+                default_button        = '2'
+                display_cancel_button = abap_false
+                popup_type            = 'ICON_MESSAGE_WARNING' ).
+            ENDIF.
+
+            rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+        ENDCASE.
 
     ENDCASE.
 
@@ -200,62 +233,13 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
       io_validation_log = validation_log ) ).
     html->add( '</div>' ).
 
+    IF confirm_popup IS BOUND AND confirm_popup->was_closed( ) = abap_false.
+      html->add( /apmg/cl_apm_gui_in_page_modal=>create( confirm_popup ) ).
+    ENDIF.
+
     ri_html = html.
 
   ENDMETHOD.
-
-
-  METHOD confirm_popup_package.
-
-    DATA(question) = |This will UNPUBLISH the COMPLETE "{ params-name }" package | &&
-                     |from the registry (Note: Terms will apply)|.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish Package'
-      iv_text_question         = question
-      iv_text_button_1         = 'Unpublish'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Unpublish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
-
-  ENDMETHOD.
-
-
-  METHOD confirm_popup_version.
-
-    DATA(question) = |This will UNPUBLISH "{ params-name }" { params-version } | &&
-                     |from the registry (Note: Terms will apply)|.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish Version'
-      iv_text_question         = question
-      iv_text_button_1         = 'Unpublish'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Unpublish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
-
-  ENDMETHOD.
-
 
   METHOD constructor.
 

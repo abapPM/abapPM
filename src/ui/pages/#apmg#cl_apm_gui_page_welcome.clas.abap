@@ -30,14 +30,18 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        setup_persistence  TYPE string VALUE 'setup_persistence',
-        setup_certificates TYPE string VALUE 'setup_certificates',
-        refresh            TYPE string VALUE 'refresh',
+        setup_persistence          TYPE string VALUE 'setup_persistence',
+        setup_certificates         TYPE string VALUE 'setup_certificates',
+        confirm_setup_persistence  TYPE string VALUE 'confirm-setup-persistence',
+        confirm_setup_certificates TYPE string VALUE 'confirm-setup-certificates',
+        cancel_confirm             TYPE string VALUE 'cancel-confirm',
+        refresh                    TYPE string VALUE 'refresh',
       END OF c_action.
 
     CONSTANTS c_ping_pong TYPE string VALUE 'PONG'.
 
     DATA emoji TYPE REF TO /apmg/cl_apm_emoji.
+    DATA confirm_popup TYPE REF TO /apmg/cl_apm_popup_to_confirm.
 
     METHODS get_styles
       RETURNING
@@ -61,12 +65,6 @@ CLASS /apmg/cl_apm_gui_page_welcome DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup
-      RETURNING
-        VALUE(result) TYPE abap_bool
-      RAISING
-        /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -84,18 +82,48 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
 
       WHEN c_action-setup_persistence.
 
-        IF confirm_popup( ) = abap_true.
-          /apmg/cl_apm_persist_apm_setup=>install( ).
-        ENDIF.
-
+        confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
+          title                 = 'Setup Persistence'
+          question              = 'This will install the apm persistence objects into the system'
+          button_1_text         = 'Install Persistence'
+          button_1_action       = c_action-confirm_setup_persistence
+          button_2_text         = 'Cancel'
+          button_2_action       = c_action-cancel_confirm
+          default_button        = '2'
+          display_cancel_button = abap_false
+          popup_type            = 'ICON_MESSAGE_WARNING' ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-setup_certificates.
 
-        IF confirm_popup( ) = abap_true.
-          /apmg/cl_apm_certificates=>setup( ).
-        ENDIF.
+        confirm_popup = /apmg/cl_apm_popup_to_confirm=>create(
+          title                 = 'Setup Certificates'
+          question              =
+            `This will install certificates for the apm Registry and Playground into Trust Management (STRUST)`
+          button_1_text         = 'Install Certificates'
+          button_1_action       = c_action-confirm_setup_certificates
+          button_2_text         = 'Cancel'
+          button_2_action       = c_action-cancel_confirm
+          default_button        = '2'
+          display_cancel_button = abap_false
+          popup_type            = 'ICON_MESSAGE_WARNING' ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
+      WHEN c_action-confirm_setup_persistence.
+
+        confirm_popup->close( ).
+        /apmg/cl_apm_persist_apm_setup=>install( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-confirm_setup_certificates.
+
+        confirm_popup->close( ).
+        /apmg/cl_apm_certificates=>setup( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-cancel_confirm.
+
+        confirm_popup->close( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN OTHERS.
@@ -145,36 +173,13 @@ CLASS /apmg/cl_apm_gui_page_welcome IMPLEMENTATION.
     render_connections( html ).
     render_persistence( html ).
 
+    IF confirm_popup IS BOUND AND confirm_popup->was_closed( ) = abap_false.
+      html->add( /apmg/cl_apm_gui_in_page_modal=>create( confirm_popup ) ).
+    ENDIF.
+
     ri_html = html.
 
   ENDMETHOD.
-
-
-  METHOD confirm_popup.
-
-    DATA(question) =
-      `This will install certificates for the apm Registry and Playground into Trust Management (STRUST)`.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Setup'
-      iv_text_question         = question
-      iv_text_button_1         = 'Install Certificates'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Setup cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
-
-  ENDMETHOD.
-
 
   METHOD constructor.
 
