@@ -31,11 +31,16 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        delete     TYPE string VALUE 'delete',
-        backup     TYPE string VALUE 'backup',
-        restore    TYPE string VALUE 'restore',
-        db_display TYPE string VALUE 'db_display',
-        db_edit    TYPE string VALUE 'db_edit',
+        delete                   TYPE string VALUE 'delete',
+        delete_popup_to_confirm  TYPE string VALUE 'delete_popup',
+        delete_confirmed         TYPE string VALUE 'delete_confirmed',
+        backup                   TYPE string VALUE 'backup',
+        restore                  TYPE string VALUE 'restore',
+        restore_popup_to_confirm TYPE string VALUE 'restore_popup',
+        restore_confirmed        TYPE string VALUE 'restore_confirmed',
+        cancel                   TYPE string VALUE 'cancel',
+        db_display               TYPE string VALUE 'db_display',
+        db_edit                  TYPE string VALUE 'db_edit',
       END OF c_action.
 
     CONSTANTS c_toc_filename TYPE string VALUE '#_Table_of_Content_#.txt'.
@@ -53,10 +58,11 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
       END OF ty_list_item,
       ty_list TYPE SORTED TABLE OF ty_list_item WITH UNIQUE KEY key_type key_name key_extra.
 
+
     CLASS-DATA db_persist TYPE REF TO /apmg/if_apm_persist_apm.
 
     DATA db_entries TYPE /apmg/if_apm_persist_apm=>ty_list.
-
+    DATA popup TYPE REF TO /apmg/cl_apm_popup_to_confirm.
     DATA list TYPE ty_list.
 
     METHODS prepare_list.
@@ -92,6 +98,22 @@ CLASS /apmg/cl_apm_gui_page_db DEFINITION
         !key          TYPE /apmg/if_apm_persist_apm=>ty_key
       RETURNING
         VALUE(result) TYPE string.
+
+    METHODS popup_to_confirm
+      IMPORTING
+        !question TYPE clike
+        !action   TYPE clike
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS popup_render
+      RETURNING
+        VALUE(result) TYPE REF TO object
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS popup_close.
+
 ENDCLASS.
 
 
@@ -105,24 +127,58 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     CASE ii_event->mv_action.
       WHEN c_action-db_display.
-        rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
+
+        rs_handled-page = /apmg/cl_apm_gui_page_db_entry=>create(
           key       = key
           edit_mode = abap_false ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
       WHEN c_action-db_edit.
-        rs_handled-page  = /apmg/cl_apm_gui_page_db_entry=>create(
+
+        rs_handled-page = /apmg/cl_apm_gui_page_db_entry=>create(
           key       = key
           edit_mode = abap_true ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-new_page.
+
       WHEN c_action-delete.
+
+        popup_to_confirm(
+          question = |Are you sure you want to delete the entry "{ key }"?|
+          action   = |{ c_action-delete_confirmed }?key={ key }| ).
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-delete_confirmed.
+
+        popup_close( ).
         do_delete_entry( key ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
       WHEN c_action-backup.
+
         do_backup_db( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
       WHEN c_action-restore.
+
+        popup_to_confirm(
+          question = |All existing packages and settings will be deleted and overwritten!\n|
+                     && |Are you sure you want to continue?|
+          action   = c_action-restore_confirmed ).
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-restore_confirmed.
+
+        popup_close( ).
         do_restore_db( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-cancel.
+
+        popup_close( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
     ENDCASE.
 
   ENDMETHOD.
@@ -164,6 +220,8 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     html->add( '<div class="db-list">' ).
     render_table( html ).
     html->add( '</div>' ).
+
+    html->add( popup_render( ) ).
 
     ri_html = html.
 
@@ -318,20 +376,6 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
 
     ASSERT key IS NOT INITIAL.
 
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Warning'
-      iv_text_question         = |Are you sure you want to delete entry { key }?|
-      iv_text_button_1         = 'Yes'
-      iv_icon_button_1         = 'ICON_DELETE'
-      iv_text_button_2         = 'No'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false ).
-
-    IF answer = '2'.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_cancel.
-    ENDIF.
-
     db_persist->delete( key ).
 
     COMMIT WORK.
@@ -403,20 +447,6 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
       INSERT db_entry INTO TABLE db_entries.
     ENDLOOP.
 
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Warning'
-      iv_text_question         = 'All existing packages and settings will be deleted and overwritten! Continue?'
-      iv_text_button_1         = 'Restore'
-      iv_icon_button_1         = 'ICON_IMPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false ).
-
-    IF answer <> '1'.
-      RAISE EXCEPTION TYPE /apmg/cx_apm_cancel.
-    ENDIF.
-
     db_persist->lock( db_entry-keys ).
 
     db_entries_old = db_persist->list( ).
@@ -443,6 +473,41 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     DATA(explained) = /apmg/cl_apm_persist_apm=>explain_key( key ).
 
     result = |{ key } - { explained-key_type }: { explained-description } ({ explained-extra })\n|.
+
+  ENDMETHOD.
+
+
+  METHOD popup_close.
+
+    IF popup IS BOUND.
+      popup->close( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_render.
+
+    IF popup IS INITIAL OR popup->was_closed( ) = abap_true.
+      result = /apmg/cl_apm_html=>create( ).
+    ELSE.
+      result = /apmg/cl_apm_gui_in_page_modal=>create( popup ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_to_confirm.
+
+    popup = /apmg/cl_apm_popup_to_confirm=>create(
+      titlebar        = 'Warning'
+      text_question   = question
+      text_button_1   = 'Yes'
+      action_button_1 = action
+      text_button_2   = 'No'
+      action_button_2 = 'cancel'
+      default_button  = '2'
+      popup_type      = 'ICON_MESSAGE_WARNING' ).
 
   ENDMETHOD.
 

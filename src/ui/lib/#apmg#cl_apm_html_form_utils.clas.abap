@@ -108,7 +108,7 @@ CLASS /apmg/cl_apm_html_form_utils IMPLEMENTATION.
       io_compare_with = io_compare_with ) = abap_true.
       lv_answer = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
         iv_display_cancel_button = abap_false
-        iv_titlebar       = 'abapGit - Unsaved Changes'
+        iv_titlebar       = 'Unsaved Changes'
         iv_text_question  = 'There are unsaved changes. Do you want to exit the form?'
         iv_default_button = '2' ).
 
@@ -260,83 +260,8 @@ CLASS /apmg/cl_apm_html_form_utils IMPLEMENTATION.
 
   METHOD normalize_abapgit.
 
-    " TODO: replace with normalize
-    DATA:
-      lt_fields TYPE /apmg/if_apm_html_form=>ty_fields,
-      lv_value  TYPE string,
-      lv_rows   TYPE i,
-      lv_row    TYPE i,
-      lv_len    TYPE i.
-
-    FIELD-SYMBOLS <ls_field> LIKE LINE OF lt_fields.
-
-    CREATE OBJECT ro_form_data.
-
-    IF io_form_data->is_empty( ) = abap_true.
-      RETURN.
-    ENDIF.
-
-    lt_fields = mo_form->get_fields( ).
-    LOOP AT lt_fields ASSIGNING <ls_field> WHERE type <> /apmg/if_apm_html_form=>c_field_type-field_group
-      AND type <> /apmg/if_apm_html_form=>c_field_type-hidden.
-
-      CLEAR lv_value.
-      lv_value = io_form_data->get( <ls_field>-name ).
-      IF <ls_field>-condense = abap_true.
-        lv_value = condense( val = lv_value
-                             del = ` ` ).
-      ENDIF.
-
-      IF <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-checkbox.
-        ro_form_data->set(
-          iv_key = <ls_field>-name
-          iv_val = boolc( lv_value = 'on' ) ) ##TYPE.
-      ELSEIF ( <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-text
-          OR <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-textarea )
-          AND <ls_field>-upper_case = abap_true.
-        ro_form_data->set(
-          iv_key = <ls_field>-name
-          iv_val = to_upper( lv_value ) ).
-      ELSEIF <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-number.
-        " Numeric value is checked in validation
-        ro_form_data->set(
-          iv_key = <ls_field>-name
-          iv_val = condense( val = lv_value del = ` ` ) ).
-      ELSEIF <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-table.
-        lv_rows = io_form_data->get( |{ <ls_field>-name }-{ /apmg/if_apm_html_form=>c_rows }| ).
-        DO lv_rows TIMES.
-          lv_row = sy-index.
-          DO lines( <ls_field>-subitems ) TIMES.
-            lv_value = io_form_data->get( |{ <ls_field>-name }-{ lv_row }-{ sy-index }| ).
-            ro_form_data->set(
-              iv_key = |{ <ls_field>-name }-{ lv_row }-{ sy-index }|
-              iv_val = lv_value ).
-          ENDDO.
-        ENDDO.
-        ro_form_data->set(
-          iv_key = |{ <ls_field>-name }-{ /apmg/if_apm_html_form=>c_rows }|
-          iv_val = |{ lv_rows }| ).
-      ELSEIF <ls_field>-type = /apmg/if_apm_html_form=>c_field_type-textarea.
-        REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf IN lv_value
-          WITH cl_abap_char_utilities=>newline.
-
-        " Remove last line if empty (ie 2x newline)
-        lv_len = strlen( lv_value ) - 2.
-        IF lv_len >= 0 AND lv_value+lv_len(1) = cl_abap_char_utilities=>newline.
-          lv_len = lv_len + 1.
-          lv_value = lv_value(lv_len).
-        ENDIF.
-
-        ro_form_data->set(
-          iv_key = <ls_field>-name
-          iv_val = lv_value ).
-      ELSE.
-        ro_form_data->set(
-          iv_key = <ls_field>-name
-          iv_val = lv_value ).
-      ENDIF.
-
-    ENDLOOP.
+    " TODO: call normalize directly everywhere
+    ro_form_data = normalize( io_form_data ).
 
   ENDMETHOD.
 
