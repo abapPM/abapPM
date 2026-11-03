@@ -89,7 +89,7 @@ CLASS /apmg/cl_apm_gui_dlg_login IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
+    form_data = form_util->normalize( ii_event->form_data( ) ).
 
     IF ii_event->mv_action = c_action-login.
 

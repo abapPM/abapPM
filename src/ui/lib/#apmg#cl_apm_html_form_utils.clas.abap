@@ -37,14 +37,6 @@ CLASS /apmg/cl_apm_html_form_utils DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS normalize_abapgit
-      IMPORTING
-        !io_form_data       TYPE REF TO /apmg/cl_apm_string_map OPTIONAL
-      RETURNING
-        VALUE(ro_form_data) TYPE REF TO /apmg/cl_apm_string_map
-      RAISING
-        /apmg/cx_apm_error.
-
     METHODS validate
       IMPORTING
         !io_form_data            TYPE REF TO /apmg/cl_apm_string_map
@@ -254,14 +246,6 @@ CLASS /apmg/cl_apm_html_form_utils IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD normalize_abapgit.
-
-    " TODO: call normalize directly everywhere
-    ro_form_data = normalize( io_form_data ).
 
   ENDMETHOD.
 

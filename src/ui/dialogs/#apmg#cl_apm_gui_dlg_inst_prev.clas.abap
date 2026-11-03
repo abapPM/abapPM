@@ -112,7 +112,7 @@ CLASS /apmg/cl_apm_gui_dlg_inst_prev IMPLEMENTATION.
 
   METHOD /apmg/if_apm_gui_event_handler~on_event.
 
-    form_data = form_util->normalize_abapgit( ii_event->form_data( ) ).
+    form_data = form_util->normalize( ii_event->form_data( ) ).
 
     CASE ii_event->mv_action.
       WHEN c_action-create_packages.
