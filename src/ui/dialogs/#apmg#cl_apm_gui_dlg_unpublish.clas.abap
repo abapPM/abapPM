@@ -54,11 +54,15 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
         unpublish_package TYPE string VALUE 'unpublish-package',
         unpublish_version TYPE string VALUE 'unpublish-version',
         refresh           TYPE string VALUE 'refresh',
+        confirmed         TYPE string VALUE 'confirmed',
+        cancel            TYPE string VALUE 'cancel',
       END OF c_action.
 
     DATA:
       registry          TYPE string,
       unpublish_package TYPE devclass,
+      params            TYPE ty_params,
+      popup             TYPE REF TO /apmg/cl_apm_popup_to_confirm,
       form              TYPE REF TO /apmg/cl_apm_html_form,
       form_data         TYPE REF TO /apmg/cl_apm_string_map,
       form_util         TYPE REF TO /apmg/cl_apm_html_form_utils,
@@ -91,21 +95,19 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup_version
+    METHODS popup_to_confirm
       IMPORTING
-        !params       TYPE ty_params
-      RETURNING
-        VALUE(result) TYPE abap_bool
+        !params TYPE ty_params
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup_package
-      IMPORTING
-        !params       TYPE ty_params
+    METHODS popup_render
       RETURNING
-        VALUE(result) TYPE abap_bool
+        VALUE(result) TYPE REF TO object
       RAISING
         /apmg/cx_apm_error.
+
+    METHODS popup_close.
 
 ENDCLASS.
 
@@ -142,18 +144,12 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
         validation_log = validate_form( form_data ).
 
         IF validation_log->is_empty( ) = abap_true.
-          DATA(params) = get_parameters( form_data ).
-
-          IF confirm_popup_package( params ) = abap_true.
-            /apmg/cl_apm_command_unpublish=>run(
-              registry = registry
-              name     = params-name ).
-          ENDIF.
-
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+          params = get_parameters( form_data ).
+          CLEAR params-version.
+          popup_to_confirm( params ).
         ENDIF.
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-unpublish_version.
 
@@ -163,18 +159,26 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
 
         IF validation_log->is_empty( ) = abap_true.
           params = get_parameters( form_data ).
-
-          IF confirm_popup_version( params ) = abap_true.
-            /apmg/cl_apm_command_unpublish=>run(
-              registry = registry
-              name     = params-name
-              version  = params-version ).
-          ENDIF.
-
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+          popup_to_confirm( params ).
         ENDIF.
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-confirmed.
+
+        popup_close( ).
+
+        /apmg/cl_apm_command_unpublish=>run(
+          registry = registry
+          name     = params-name
+          version  = params-version ).
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+
+      WHEN c_action-cancel.
+
+        popup_close( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
     ENDCASE.
 
@@ -202,59 +206,9 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
       io_validation_log = validation_log ) ).
     html->add( '</div>' ).
 
+    html->add( popup_render( ) ).
+
     ri_html = html.
-
-  ENDMETHOD.
-
-
-  METHOD confirm_popup_package.
-
-    DATA(question) = |This will UNPUBLISH the COMPLETE "{ params-name }" package | &&
-                     |from the registry (Note: Terms will apply)|.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish Package'
-      iv_text_question         = question
-      iv_text_button_1         = 'Unpublish'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Unpublish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
-
-  ENDMETHOD.
-
-
-  METHOD confirm_popup_version.
-
-    DATA(question) = |This will UNPUBLISH "{ params-name }" { params-version } | &&
-                     |from the registry (Note: Terms will apply)|.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Unpublish Version'
-      iv_text_question         = question
-      iv_text_button_1         = 'Unpublish'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Unpublish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
 
   ENDMETHOD.
 
@@ -319,6 +273,59 @@ CLASS /apmg/cl_apm_gui_dlg_unpublish IMPLEMENTATION.
   METHOD get_parameters.
 
     form_data->to_struc( CHANGING cs_container = result ).
+
+  ENDMETHOD.
+
+
+  METHOD popup_close.
+
+    IF popup IS BOUND.
+      popup->close( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_render.
+
+    IF popup IS INITIAL OR popup->was_closed( ) = abap_true.
+      result = /apmg/cl_apm_html=>create( ).
+    ELSE.
+      result = /apmg/cl_apm_gui_in_page_modal=>create( popup ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_to_confirm.
+
+    DATA(terms) = |{ /apmg/if_apm_constants=>c_documentation }/policies/unpublish-policy.html|.
+
+    IF params-version IS INITIAL.
+
+      DATA(titlebar) = `Unpublish Package`.
+      DATA(question) = |This will <b>unpublish</b> the <b>complete</b> "{ params-name }" package | &&
+                       |from the registry|.
+
+    ELSE.
+
+      titlebar = `Unpubish Version`.
+      question = |This will <b>unpublish</b> "{ params-name }" version { params-version } from the registry|.
+
+    ENDIF.
+
+    question = question && | (<a href="{ terms }" target="_blank">Terms</a> will apply)|.
+
+    popup = /apmg/cl_apm_popup_to_confirm=>create(
+      titlebar              = titlebar
+      text_question         = question
+      text_button_1         = 'Unpublish'
+      action_button_1       = c_action-confirmed
+      text_button_2         = 'Cancel'
+      action_button_2       = c_action-cancel
+      default_button        = '2'
+      display_cancel_button = abap_false
+      popup_type            = 'ICON_MESSAGE_WARNING' ).
 
   ENDMETHOD.
 

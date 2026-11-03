@@ -288,9 +288,11 @@ CLASS /apmg/cl_apm_gui_dlg_deprecate IMPLEMENTATION.
 
   METHOD popup_to_confirm.
 
+    DATA(question) = |This will <b>deprecate</b> package "{ params-name }" version { params-version }|.
+
     popup = /apmg/cl_apm_popup_to_confirm=>create(
       titlebar              = 'Deprecate Version'
-      text_question         = |This will DEPRECATE package "{ params-name }" version { params-version }|
+      text_question         = question
       text_button_1         = 'Deprecate'
       action_button_1       = c_action-confirmed
       text_button_2         = 'Cancel'

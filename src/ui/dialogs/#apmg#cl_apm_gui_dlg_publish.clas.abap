@@ -54,15 +54,19 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
 
     CONSTANTS:
       BEGIN OF c_action,
-        choose_package  TYPE string VALUE 'choose-package',
-        publish_package TYPE string VALUE 'publish-package',
-        refresh         TYPE string VALUE 'refresh',
+        choose_package TYPE string VALUE 'choose-package',
+        publish        TYPE string VALUE 'publish',
+        refresh        TYPE string VALUE 'refresh',
+        confirmed      TYPE string VALUE 'confirmed',
+        cancel         TYPE string VALUE 'cancel',
       END OF c_action.
 
     DATA:
       registry       TYPE string,
       pubish_package TYPE devclass,
       is_scoped      TYPE abap_bool,
+      params         TYPE ty_params,
+      popup          TYPE REF TO /apmg/cl_apm_popup_to_confirm,
       form           TYPE REF TO /apmg/cl_apm_html_form,
       form_data      TYPE REF TO /apmg/cl_apm_string_map,
       form_util      TYPE REF TO /apmg/cl_apm_html_form_utils,
@@ -94,13 +98,19 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
-    METHODS confirm_popup
+    METHODS popup_to_confirm
       IMPORTING
-        !params       TYPE ty_params
-      RETURNING
-        VALUE(result) TYPE abap_bool
+        !params TYPE ty_params
       RAISING
         /apmg/cx_apm_error.
+
+    METHODS popup_render
+      RETURNING
+        VALUE(result) TYPE REF TO object
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS popup_close.
 
 ENDCLASS.
 
@@ -132,25 +142,33 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
         form_data = read_package( |{ form_data->get( c_id-package ) }| ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
-      WHEN c_action-publish_package.
+      WHEN c_action-publish.
 
         validation_log = validate_form( form_data ).
 
         IF validation_log->is_empty( ) = abap_true.
-          DATA(params) = get_parameters( form_data ).
-
-          IF confirm_popup( params ) = abap_true.
-            /apmg/cl_apm_command_publish=>run(
-              registry = registry
-              package  = params-package
-              tag      = params-tag
-              access   = params-access ).
-          ENDIF.
-
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
-        ELSE.
-          rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render. " Display errors
+          params = get_parameters( form_data ).
+          popup_to_confirm( params ).
         ENDIF.
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
+
+      WHEN c_action-confirmed.
+
+        popup_close( ).
+
+        /apmg/cl_apm_command_publish=>run(
+          registry = registry
+          package  = params-package
+          tag      = params-tag
+          access   = params-access ).
+
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-go_back.
+
+      WHEN c_action-cancel.
+
+        popup_close( ).
+        rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
     ENDCASE.
 
@@ -178,34 +196,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       io_validation_log = validation_log ) ).
     html->add( '</div>' ).
 
+    html->add( popup_render( ) ).
+
     ri_html = html.
-
-  ENDMETHOD.
-
-
-  METHOD confirm_popup.
-
-    DATA(question) = |This will PUBLISH all objects in { params-package } | &&
-                     |including subpackages as "{ params-name }" { params-version } | &&
-                     |to the registry|.
-
-    DATA(answer) = /apmg/cl_apm_gui_factory=>get_popups( )->popup_to_confirm(
-      iv_titlebar              = 'Publish'
-      iv_text_question         = question
-      iv_text_button_1         = 'Publish'
-      iv_icon_button_1         = 'ICON_EXPORT'
-      iv_text_button_2         = 'Cancel'
-      iv_icon_button_2         = 'ICON_CANCEL'
-      iv_default_button        = '2'
-      iv_display_cancel_button = abap_false
-      iv_popup_type            = 'ICON_MESSAGE_WARNING' ).
-
-    IF answer = '2'.
-      MESSAGE 'Publish cancelled' TYPE 'S'.
-      RETURN.
-    ENDIF.
-
-    result = abap_true.
 
   ENDMETHOD.
 
@@ -275,9 +268,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_hint     = 'The package will be viewable (and installable) publicly' ).
 
     result->command(
-      iv_label    = 'Publish Package'
+      iv_label    = 'Publish'
       iv_cmd_type = /apmg/if_apm_html_form=>c_cmd_type-input_main
-      iv_action   = c_action-publish_package
+      iv_action   = c_action-publish
     )->command(
       iv_label  = 'Refresh'
       iv_action = c_action-refresh
@@ -297,6 +290,46 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     ELSE.
       result-access = /apmg/if_apm_command=>c_access-restricted.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_close.
+
+    IF popup IS BOUND.
+      popup->close( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_render.
+
+    IF popup IS INITIAL OR popup->was_closed( ) = abap_true.
+      result = /apmg/cl_apm_html=>create( ).
+    ELSE.
+      result = /apmg/cl_apm_gui_in_page_modal=>create( popup ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD popup_to_confirm.
+
+    DATA(question) = |This will <b>publish</b> all objects in { params-package } | &&
+                     |including subpackages as "{ params-name }" version { params-version } | &&
+                     |to the registry|.
+
+    popup = /apmg/cl_apm_popup_to_confirm=>create(
+      titlebar              = 'Publish Package'
+      text_question         = question
+      text_button_1         = 'Publish'
+      action_button_1       = c_action-confirmed
+      text_button_2         = 'Cancel'
+      action_button_2       = c_action-cancel
+      default_button        = '2'
+      display_cancel_button = abap_false
+      popup_type            = 'ICON_MESSAGE_WARNING' ).
 
   ENDMETHOD.
 
