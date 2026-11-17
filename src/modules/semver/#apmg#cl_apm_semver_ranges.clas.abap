@@ -135,6 +135,17 @@ CLASS /apmg/cl_apm_semver_ranges DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    " apm addition
+    CLASS-METHODS is_version
+      IMPORTING
+        !range        TYPE any
+        !loose        TYPE abap_bool DEFAULT abap_false
+        !incpre       TYPE abap_bool DEFAULT abap_false
+      RETURNING
+        VALUE(result) TYPE abap_bool
+      RAISING
+        /apmg/cx_apm_error.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -161,6 +172,24 @@ CLASS /apmg/cl_apm_semver_ranges IMPLEMENTATION.
     DATA(semrange2) = /apmg/cl_apm_semver_range=>create( range = r2 loose = loose incpre = incpre ).
 
     result = semrange1->intersects( range = semrange2 loose = loose incpre = incpre ).
+
+  ENDMETHOD.
+
+
+  METHOD is_version.
+
+    " true, if range represents exactly one version
+    TRY.
+        DATA(semrange) = /apmg/cl_apm_semver_range=>create( range = range loose = loose incpre = incpre ).
+
+        result = xsdbool( semrange IS BOUND
+          AND lines( semrange->set ) = 1
+          AND lines( semrange->set[ 1 ] ) = 1
+          AND semrange->set[ 1 ][ 1 ]->operator IS INITIAL
+          AND semrange->set[ 1 ][ 1 ]->semver <> /apmg/cl_apm_semver_comparator=>any_semver ).
+      CATCH /apmg/cx_apm_error.
+        result = abap_false.
+    ENDTRY.
 
   ENDMETHOD.
 

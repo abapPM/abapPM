@@ -268,6 +268,10 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
     " First, split on ||
     IF raw IS NOT INITIAL.
       SPLIT raw AT '||' INTO TABLE DATA(ranges).
+      " ABAP SPLIT omits the final empty field; JavaScript split retains it.
+      IF raw CP '*||'.
+        INSERT INITIAL LINE INTO TABLE ranges.
+      ENDIF.
     ELSE.
       INSERT INITIAL LINE INTO TABLE ranges.
     ENDIF.
@@ -463,6 +467,17 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
       comp_values TYPE string_table,
       comparators TYPE ty_comparators.
 
+    " Reject detached build identifiers that can otherwise turn into a hyphen range.
+    IF options-loose = abap_false.
+      FIND REGEX `^\s*[^<>=~^|]+\s+\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\s+\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\s+\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)*\s+=`
+        IN range_string ##REGEX_POSIX.
+      IF sy-subrc = 0.
+        RAISE EXCEPTION TYPE /apmg/cx_apm_error_text
+          EXPORTING
+            text = |Invalid SemVer Range: { range_string }|.
+      ENDIF.
+    ENDIF.
+
     DATA(range) = replace(
       val   = range_string
       regex = /apmg/cl_apm_semver_re=>token-build-src
@@ -482,11 +497,7 @@ CLASS /apmg/cl_apm_semver_range IMPLEMENTATION.
     range = replace_hyphen( range = range loose = options-loose incpre = options-incpre ).
 
     " `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-    range = replace(
-      val   = range
-      regex = /apmg/cl_apm_semver_re=>token-comparatortrim-safe_src
-      with  = /apmg/cl_apm_semver_re=>comparator_trim_replace
-      occ   = /apmg/cl_apm_semver_re=>token-comparatortrim-occ ) ##REGEX_POSIX.
+    range = /apmg/cl_apm_semver_trim_white=>trim_comparator_whitespace( range ).
 
     " `~ 1.2.3` => `~1.2.3`
     range = replace(

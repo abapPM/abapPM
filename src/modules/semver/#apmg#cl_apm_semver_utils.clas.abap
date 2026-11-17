@@ -52,13 +52,9 @@ CLASS /apmg/cl_apm_semver_utils IMPLEMENTATION.
 
 
   METHOD trim.
-    " Remove leading and trailing tab, cr, lf and spaces Like JavaScript trim
-    result = condense(
-      replace(
-        val   = data
-        regex = `[\t\n\r]`
-        with  = ` `
-        occ   = 0 ) ) ##REGEX_POSIX.
+    " Normalize JavaScript whitespace before splitting ranges on ASCII spaces.
+    result = /apmg/cl_apm_semver_trim_white=>normalize_whitespace( CONV string( data ) ).
+    result = condense( result ).
   ENDMETHOD.
 
 

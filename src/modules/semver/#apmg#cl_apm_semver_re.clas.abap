@@ -9,8 +9,8 @@ CLASS /apmg/cl_apm_semver_re DEFINITION
 * Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
-* TODO: Migrate POSIX to PCRE
-* https://help.sap.com/doc/abapdocu_latest_index_htm/latest/en-US/index.htm?file=abenregex_posix_pcre_incompat.htm
+* TODO: Migrate POSIX to PCRE (but required 7.55 or higher)
+* https://help.sap.com/docs/abap-cloud/abap-keywords-standard-abap/abenregex_posix_pcre_incompat.html
 ************************************************************************
   PUBLIC SECTION.
 
@@ -27,7 +27,7 @@ CLASS /apmg/cl_apm_semver_re DEFINITION
       letter_dash_number      TYPE string VALUE '[a-zA-Z0-9-]',
       caret_trim_replace      TYPE string VALUE '$1^',
       tilde_trim_replace      TYPE string VALUE '$1~',
-      comparator_trim_replace TYPE string VALUE '$1$2$3',
+      comparator_trim_replace TYPE string VALUE '$1$2$3' ##NEEDED,
       version_trim_replace    TYPE string VALUE '$1$2'. " added for POSIX
 
     CLASS-DATA:

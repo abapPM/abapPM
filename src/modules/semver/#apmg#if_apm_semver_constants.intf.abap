@@ -7,14 +7,14 @@ INTERFACE /apmg/if_apm_semver_constants PUBLIC.
 * Ported to ABAP by apm.to Inc. <https://apm.to>
 * SPDX-License-Identifier: ISC
 ************************************************************************
-* Based on node semver package v7.8.5 (June 2026)
-* https://github.com/npm/node-semver/releases/tag/v7.8.5
+* Based on node semver package v7.8.6 (October 2026)
+* https://github.com/npm/node-semver/releases/tag/v7.8.6
 * not included yet:
-* https://github.com/npm/node-semver/compare/v7.8.5...main
+* https://github.com/npm/node-semver/compare/v7.8.6...main
 ************************************************************************
 
   " Package version
-  CONSTANTS version TYPE string VALUE '7.8.5' ##NEEDED.
+  CONSTANTS version TYPE string VALUE '7.8.6' ##NEEDED.
 
   " Note: this is the semver.org version of the spec that it implements
   " Not necessarily the package version of this code.
@@ -41,5 +41,9 @@ INTERFACE /apmg/if_apm_semver_constants PUBLIC.
       prerelease TYPE string VALUE 'prerelease',
       release    TYPE string VALUE 'release',
     END OF release_types.
+
+  " ECMAScript whitespace and line terminators matched by \s.
+  " Note: Value is too long for ABAP and defined in CL_SEMVER_TRIM_WHITESPC
+  " CONSTANTS whitespace_characters TYPE string VALUE ``
 
 ENDINTERFACE.

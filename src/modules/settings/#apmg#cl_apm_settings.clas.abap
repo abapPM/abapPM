@@ -116,7 +116,7 @@ CLASS /apmg/cl_apm_settings IMPLEMENTATION.
           )->set(
             iv_path = '/'
             iv_val  = /apmg/if_apm_settings~get( )
-          )->map( /apmg/cl_apm_ajson_mapping=>create_to_camel_case( ) ).
+          )->map( /apmg/cl_apm_ajson_mapper_lib=>create_to_camel_case( ) ).
 
         IF is_complete = abap_false.
           ajson = ajson->filter( /apmg/cl_apm_ajson_extensions=>filter_empty_zero_null( ) ).
