@@ -6,76 +6,13 @@ CLASS /apmg/cl_apm_ajson DEFINITION
 
     INTERFACES /apmg/if_apm_ajson.
 
-    ALIASES:
-      is_empty FOR /apmg/if_apm_ajson~is_empty,
-      exists FOR /apmg/if_apm_ajson~exists,
-      members FOR /apmg/if_apm_ajson~members,
-      get FOR /apmg/if_apm_ajson~get,
-      get_boolean FOR /apmg/if_apm_ajson~get_boolean,
-      get_integer FOR /apmg/if_apm_ajson~get_integer,
-      get_number FOR /apmg/if_apm_ajson~get_number,
-      get_date FOR /apmg/if_apm_ajson~get_date,
-      get_timestamp FOR /apmg/if_apm_ajson~get_timestamp,
-      get_string FOR /apmg/if_apm_ajson~get_string,
-      slice FOR /apmg/if_apm_ajson~slice,
-      to_abap FOR /apmg/if_apm_ajson~to_abap,
-      array_to_string_table FOR /apmg/if_apm_ajson~array_to_string_table.
-
-    ALIASES:
-      clear FOR /apmg/if_apm_ajson~clear,
-      set FOR /apmg/if_apm_ajson~set,
-      setx FOR /apmg/if_apm_ajson~setx,
-      set_boolean FOR /apmg/if_apm_ajson~set_boolean,
-      set_string FOR /apmg/if_apm_ajson~set_string,
-      set_integer FOR /apmg/if_apm_ajson~set_integer,
-      set_date FOR /apmg/if_apm_ajson~set_date,
-      set_timestamp FOR /apmg/if_apm_ajson~set_timestamp,
-      set_null FOR /apmg/if_apm_ajson~set_null,
-      delete FOR /apmg/if_apm_ajson~delete,
-      touch_array FOR /apmg/if_apm_ajson~touch_array,
-      push FOR /apmg/if_apm_ajson~push,
-      stringify FOR /apmg/if_apm_ajson~stringify.
-
-    ALIASES:
-      clone FOR /apmg/if_apm_ajson~clone,
-      filter FOR /apmg/if_apm_ajson~filter,
-      map FOR /apmg/if_apm_ajson~map.
-
-    ALIASES:
-      mt_json_tree FOR /apmg/if_apm_ajson~mt_json_tree,
-      keep_item_order FOR /apmg/if_apm_ajson~keep_item_order,
-      format_datetime FOR /apmg/if_apm_ajson~format_datetime,
-      to_abap_corresponding_only FOR /apmg/if_apm_ajson~to_abap_corresponding_only,
-      freeze FOR /apmg/if_apm_ajson~freeze.
-
     CLASS-METHODS parse
       IMPORTING
         !iv_json            TYPE any
         !iv_freeze          TYPE abap_bool DEFAULT abap_false
-        !ii_custom_mapping  TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
         !iv_keep_item_order TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(ro_instance)  TYPE REF TO /apmg/cl_apm_ajson
-      RAISING
-        /apmg/cx_apm_ajson_error.
-
-    CLASS-METHODS create_empty " Might be deprecated, prefer using new( ) or create object
-      IMPORTING
-        !ii_custom_mapping            TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
-        iv_keep_item_order            TYPE abap_bool DEFAULT abap_false
-        iv_format_datetime            TYPE abap_bool DEFAULT abap_true
-        iv_to_abap_corresponding_only TYPE abap_bool DEFAULT abap_false
-      RETURNING
-        VALUE(ro_instance)            TYPE REF TO /apmg/cl_apm_ajson.
-
-    " Experimental ! May change
-    CLASS-METHODS create_from " TODO, rename to 'from' ?
-      IMPORTING
-        !ii_source_json    TYPE REF TO /apmg/if_apm_ajson
-        !ii_filter         TYPE REF TO /apmg/if_apm_ajson_filter OPTIONAL " Might be deprecated, use filter() instead
-        !ii_mapper         TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL " Might be deprecated, use map() instead
-      RETURNING
-        VALUE(ro_instance) TYPE REF TO /apmg/cl_apm_ajson
+        VALUE(ri_instance)  TYPE REF TO /apmg/if_apm_ajson
       RAISING
         /apmg/cx_apm_ajson_error.
 
@@ -91,7 +28,7 @@ CLASS /apmg/cl_apm_ajson DEFINITION
         iv_format_datetime            TYPE abap_bool DEFAULT abap_true
         iv_to_abap_corresponding_only TYPE abap_bool DEFAULT abap_false
       RETURNING
-        VALUE(ro_instance)            TYPE REF TO /apmg/cl_apm_ajson.
+        VALUE(ri_instance)            TYPE REF TO /apmg/if_apm_ajson.
 
     CLASS-METHODS normalize_path
       IMPORTING
@@ -103,10 +40,12 @@ CLASS /apmg/cl_apm_ajson DEFINITION
 
   PRIVATE SECTION.
 
+    ALIASES:
+      mt_json_tree FOR /apmg/if_apm_ajson~mt_json_tree.
+
     CLASS-DATA go_float_regex TYPE REF TO cl_abap_regex.
 
     DATA ms_opts TYPE /apmg/if_apm_ajson=>ty_opts.
-    DATA mi_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping. " DEPRECATED, will be removed
 
     METHODS get_item
       IMPORTING
@@ -140,52 +79,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
   METHOD constructor.
     ms_opts-keep_item_order = iv_keep_item_order.
     ms_opts-to_abap_corresponding_only = iv_to_abap_corresponding_only.
-    format_datetime( iv_format_datetime ).
-  ENDMETHOD.
-
-
-  METHOD create_empty.
-    CREATE OBJECT ro_instance
-      EXPORTING
-        iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
-        iv_format_datetime            = iv_format_datetime
-        iv_keep_item_order            = iv_keep_item_order.
-    ro_instance->mi_custom_mapping = ii_custom_mapping.
-  ENDMETHOD.
-
-
-  METHOD create_from.
-
-    DATA lo_mutator_queue TYPE REF TO lcl_mutator_queue.
-
-    IF ii_source_json IS NOT BOUND.
-      /apmg/cx_apm_ajson_error=>raise( 'Source not bound' ).
-    ENDIF.
-
-    CREATE OBJECT ro_instance
-      EXPORTING
-        iv_to_abap_corresponding_only = ii_source_json->opts( )-to_abap_corresponding_only
-        iv_format_datetime            = ii_source_json->opts( )-format_datetime
-        iv_keep_item_order            = ii_source_json->opts( )-keep_item_order.
-
-    IF ii_filter IS NOT BOUND AND ii_mapper IS NOT BOUND.
-      ro_instance->mt_json_tree = ii_source_json->mt_json_tree.
-    ELSE.
-      CREATE OBJECT lo_mutator_queue.
-      IF ii_mapper IS BOUND.
-        " Mapping goes first. But maybe it should be a freely definable queue of processors ?
-        lo_mutator_queue->add( lcl_mapper_runner=>new( ii_mapper ) ).
-      ENDIF.
-      IF ii_filter IS BOUND.
-        lo_mutator_queue->add( lcl_filter_runner=>new( ii_filter ) ).
-      ENDIF.
-      lo_mutator_queue->lif_mutator_runner~run(
-        EXPORTING
-          it_source_tree = ii_source_json->mt_json_tree
-        IMPORTING
-          et_dest_tree   = ro_instance->mt_json_tree ).
-    ENDIF.
-
+    /apmg/if_apm_ajson~format_datetime( iv_format_datetime ).
   ENDMETHOD.
 
 
@@ -237,7 +131,7 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
 
   METHOD new.
-    CREATE OBJECT ro_instance
+    CREATE OBJECT ri_instance TYPE /apmg/cl_apm_ajson
       EXPORTING
         iv_to_abap_corresponding_only = iv_to_abap_corresponding_only
         iv_format_datetime            = iv_format_datetime
@@ -252,18 +146,20 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
   METHOD parse.
 
+    DATA lo_instance TYPE REF TO /apmg/cl_apm_ajson.
     DATA lo_parser TYPE REF TO lcl_json_parser.
 
-    CREATE OBJECT ro_instance.
+    CREATE OBJECT lo_instance
+      EXPORTING
+        iv_keep_item_order = iv_keep_item_order.
     CREATE OBJECT lo_parser.
-    ro_instance->mt_json_tree = lo_parser->parse(
+    lo_instance->mt_json_tree = lo_parser->parse(
       iv_json            = iv_json
       iv_keep_item_order = iv_keep_item_order ).
-    ro_instance->mi_custom_mapping = ii_custom_mapping.
-    ro_instance->ms_opts-keep_item_order = iv_keep_item_order.
 
+    ri_instance = lo_instance.
     IF iv_freeze = abap_true.
-      ro_instance->freeze( ).
+      ri_instance->freeze( ).
     ENDIF.
 
   ENDMETHOD.
@@ -366,7 +262,18 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_ajson~clone.
-    ri_json = create_from( me ).
+
+    DATA lo_new_instance TYPE REF TO /apmg/cl_apm_ajson.
+
+    CREATE OBJECT lo_new_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = me->/apmg/if_apm_ajson~opts( )-to_abap_corresponding_only
+        iv_format_datetime            = me->/apmg/if_apm_ajson~opts( )-format_datetime
+        iv_keep_item_order            = me->/apmg/if_apm_ajson~opts( )-keep_item_order.
+
+    lo_new_instance->mt_json_tree = me->mt_json_tree.
+    ri_json = lo_new_instance.
+
   ENDMETHOD.
 
 
@@ -392,9 +299,30 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_ajson~filter.
-    ri_json = create_from(
-      ii_source_json = me
-      ii_filter      = ii_filter ).
+
+    IF ii_filter IS NOT BOUND.
+      /apmg/cx_apm_ajson_error=>raise( 'Filter not bound' ).
+    ENDIF.
+
+    DATA lo_new_instance TYPE REF TO /apmg/cl_apm_ajson.
+    DATA lo_mutator_queue TYPE REF TO lcl_mutator_queue.
+
+    CREATE OBJECT lo_new_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = me->/apmg/if_apm_ajson~opts( )-to_abap_corresponding_only
+        iv_format_datetime            = me->/apmg/if_apm_ajson~opts( )-format_datetime
+        iv_keep_item_order            = me->/apmg/if_apm_ajson~opts( )-keep_item_order.
+
+    CREATE OBJECT lo_mutator_queue.
+    lo_mutator_queue->add( lcl_filter_runner=>new( ii_filter ) ).
+    lo_mutator_queue->lif_mutator_runner~run(
+      EXPORTING
+        it_source_tree = me->mt_json_tree
+      IMPORTING
+        et_dest_tree   = lo_new_instance->mt_json_tree ).
+
+    ri_json = lo_new_instance.
+
   ENDMETHOD.
 
 
@@ -554,9 +482,30 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
 
   METHOD /apmg/if_apm_ajson~map.
-    ri_json = create_from(
-      ii_source_json = me
-      ii_mapper      = ii_mapper ).
+
+    IF ii_mapper IS NOT BOUND.
+      /apmg/cx_apm_ajson_error=>raise( 'Mapper not bound' ).
+    ENDIF.
+
+    DATA lo_new_instance TYPE REF TO /apmg/cl_apm_ajson.
+    DATA lo_mutator_queue TYPE REF TO lcl_mutator_queue.
+
+    CREATE OBJECT lo_new_instance
+      EXPORTING
+        iv_to_abap_corresponding_only = me->/apmg/if_apm_ajson~opts( )-to_abap_corresponding_only
+        iv_format_datetime            = me->/apmg/if_apm_ajson~opts( )-format_datetime
+        iv_keep_item_order            = me->/apmg/if_apm_ajson~opts( )-keep_item_order.
+
+    CREATE OBJECT lo_mutator_queue.
+    lo_mutator_queue->add( lcl_mapper_runner=>new( ii_mapper ) ).
+    lo_mutator_queue->lif_mutator_runner~run(
+      EXPORTING
+        it_source_tree = me->mt_json_tree
+      IMPORTING
+        et_dest_tree   = lo_new_instance->mt_json_tree ).
+
+    ri_json = lo_new_instance.
+
   ENDMETHOD.
 
 
@@ -646,17 +595,15 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     IF ls_split_path IS INITIAL. " Assign root, exceptional processing
       IF iv_node_type IS NOT INITIAL.
         mt_json_tree = lcl_abap_to_json=>insert_with_type(
-          is_opts           = ms_opts
-          iv_data           = iv_val
-          iv_type           = iv_node_type
-          is_prefix         = ls_split_path
-          ii_custom_mapping = mi_custom_mapping ).
+          is_opts   = ms_opts
+          iv_data   = iv_val
+          iv_type   = iv_node_type
+          is_prefix = ls_split_path ).
       ELSE.
         mt_json_tree = lcl_abap_to_json=>convert(
-          is_opts           = ms_opts
-          iv_data           = iv_val
-          is_prefix         = ls_split_path
-          ii_custom_mapping = mi_custom_mapping ).
+          is_opts   = ms_opts
+          iv_data   = iv_val
+          is_prefix = ls_split_path ).
       ENDIF.
       RETURN.
     ENDIF.
@@ -687,21 +634,19 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
 
     IF iv_node_type IS NOT INITIAL.
       lt_new_nodes = lcl_abap_to_json=>insert_with_type(
-        is_opts           = ms_opts
-        iv_item_order     = lv_item_order
-        iv_data           = iv_val
-        iv_type           = iv_node_type
-        iv_array_index    = lv_array_index
-        is_prefix         = ls_split_path
-        ii_custom_mapping = mi_custom_mapping ).
+        is_opts        = ms_opts
+        iv_item_order  = lv_item_order
+        iv_data        = iv_val
+        iv_type        = iv_node_type
+        iv_array_index = lv_array_index
+        is_prefix      = ls_split_path ).
     ELSE.
       lt_new_nodes = lcl_abap_to_json=>convert(
-        is_opts           = ms_opts
-        iv_item_order     = lv_item_order
-        iv_data           = iv_val
-        iv_array_index    = lv_array_index
-        is_prefix         = ls_split_path
-        ii_custom_mapping = mi_custom_mapping ).
+        is_opts        = ms_opts
+        iv_item_order  = lv_item_order
+        iv_data        = iv_val
+        iv_array_index = lv_array_index
+        is_prefix      = ls_split_path ).
     ENDIF.
 
     " update nodes
@@ -898,7 +843,6 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     DATA lv_path_pattern    TYPE string.
 
     CREATE OBJECT lo_section.
-    lo_section->mi_custom_mapping = mi_custom_mapping.
 
     lv_normalized_path = lcl_utils=>normalize_path( iv_path ).
     lv_path_len        = strlen( lv_normalized_path ).
@@ -1002,7 +946,6 @@ CLASS /apmg/cl_apm_ajson IMPLEMENTATION.
     CREATE OBJECT lo_to_abap
       EXPORTING
         iv_corresponding  = boolc( iv_corresponding = abap_true OR ms_opts-to_abap_corresponding_only = abap_true )
-        ii_custom_mapping = mi_custom_mapping
         ii_refs_initiator = ii_refs_initiator.
 
     lo_to_abap->to_abap(

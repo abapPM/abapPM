@@ -157,9 +157,9 @@ CLASS /apmg/cl_apm_ajson_utilities IMPLEMENTATION.
       iv_json = iv_json_b
       io_json = io_json_b ).
 
-    mo_insert = /apmg/cl_apm_ajson=>create_empty( ).
-    mo_delete = /apmg/cl_apm_ajson=>create_empty( ).
-    mo_change = /apmg/cl_apm_ajson=>create_empty( ).
+    mo_insert = /apmg/cl_apm_ajson=>new( ).
+    mo_delete = /apmg/cl_apm_ajson=>new( ).
+    mo_change = /apmg/cl_apm_ajson=>new( ).
 
     diff_a_b( '/' ).
     diff_b_a( '/' ).

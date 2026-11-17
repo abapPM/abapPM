@@ -13,7 +13,7 @@ CLASS /apmg/cl_apm_emoji DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '3.0.1' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '3.1.0' ##NEEDED.
 
     TYPES:
       ty_code    TYPE string_table,
@@ -173,7 +173,7 @@ CLASS /apmg/cl_apm_emoji IMPLEMENTATION.
       && |  width: { size_in_px }px;|
       && |  line-height: 1;\n|
       && |  vertical-align: -3px;\n|
-      && |\}|.
+      && |\}\n|.
 
   ENDMETHOD.
 ENDCLASS.

@@ -450,8 +450,8 @@ CLASS /apmg/cl_apm_pacote IMPLEMENTATION.
           )->set(
             iv_path = '/'
             iv_val  = packument
-          )->map( /apmg/cl_apm_ajson_mapping=>create_compound_mapper(
-            ii_mapper1 = /apmg/cl_apm_ajson_mapping=>create_rename(
+          )->map( /apmg/cl_apm_ajson_mapper_lib=>create_compound_mapper(
+            ii_mapper1 = /apmg/cl_apm_ajson_mapper_lib=>create_rename(
                            VALUE #( ( from = 'dist_tags' to = 'dist-tags' ) ) )
             ii_mapper2 = /apmg/cl_apm_ajson_extensions=>to_camel_case_underscore( ) ) ).
 

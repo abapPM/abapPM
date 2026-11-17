@@ -3,12 +3,12 @@
 "
 CLASS lcl_to_camel_case_underscore DEFINITION.
   PUBLIC SECTION.
-    INTERFACES /apmg/if_apm_ajson_mapping.
+    INTERFACES /apmg/if_apm_ajson_mapper.
 ENDCLASS.
 
 CLASS lcl_to_camel_case_underscore IMPLEMENTATION.
 
-  METHOD /apmg/if_apm_ajson_mapping~rename_node.
+  METHOD /apmg/if_apm_ajson_mapper~rename_node.
 
     TYPES ty_token TYPE c LENGTH 255.
 
@@ -38,33 +38,17 @@ CLASS lcl_to_camel_case_underscore IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD /apmg/if_apm_ajson_mapping~to_abap. " deprecated
-    ASSERT 0 = 0.
-  ENDMETHOD.
-
-  METHOD /apmg/if_apm_ajson_mapping~to_json. " deprecated
-    ASSERT 0 = 0.
-  ENDMETHOD.
-
 ENDCLASS.
 
 CLASS lcl_from_camel_case_underscore DEFINITION.
   PUBLIC SECTION.
-    INTERFACES /apmg/if_apm_ajson_mapping.
+    INTERFACES /apmg/if_apm_ajson_mapper.
 ENDCLASS.
 
 CLASS lcl_from_camel_case_underscore IMPLEMENTATION.
 
-  METHOD /apmg/if_apm_ajson_mapping~rename_node.
+  METHOD /apmg/if_apm_ajson_mapper~rename_node.
     REPLACE ALL OCCURRENCES OF REGEX `([a-z])([A-Z])` IN cv_name WITH `$1_$2` ##REGEX_POSIX.
-  ENDMETHOD.
-
-  METHOD /apmg/if_apm_ajson_mapping~to_abap. " deprecated
-    ASSERT 0 = 0.
-  ENDMETHOD.
-
-  METHOD /apmg/if_apm_ajson_mapping~to_json. " deprecated
-    ASSERT 0 = 0.
   ENDMETHOD.
 
 ENDCLASS.

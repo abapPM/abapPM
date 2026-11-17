@@ -1,6 +1,11 @@
 INTERFACE /apmg/if_apm_ajson_types
   PUBLIC.
 
+  " Types remain in a separate interface, not in zif_ajson,
+  " because otherwise they create cyclic dependencies
+  " e.g. ZIF_AJSON_FILTER -> ZIF_AJSON -> ZIF_AJSON_FILTER and etc.
+  " So sadly not sure how to centralize the type definitions :(
+
   TYPES:
     ty_node_type TYPE string.
 

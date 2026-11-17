@@ -33,7 +33,7 @@ CLASS /apmg/cl_apm_markdown DEFINITION
 ************************************************************************
   PUBLIC SECTION.
 
-    CONSTANTS c_version TYPE string VALUE '1.0.0' ##NEEDED.
+    CONSTANTS c_version TYPE string VALUE '1.4.2' ##NEEDED.
 
     CLASS-METHODS styles
       RETURNING

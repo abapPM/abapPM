@@ -5,6 +5,8 @@ INTERFACE /apmg/if_apm_ajson
   CONSTANTS origin TYPE string VALUE 'https://github.com/sbcgua/ajson'. "#EC NOTEXT
   CONSTANTS license TYPE string VALUE 'MIT'.                "#EC NOTEXT
 
+  " TYPES
+
   TYPES:
     BEGIN OF ty_opts,
       read_only                  TYPE abap_bool,
@@ -33,7 +35,7 @@ INTERFACE /apmg/if_apm_ajson
       /apmg/cx_apm_ajson_error.
   METHODS map
     IMPORTING
-      ii_mapper      TYPE REF TO /apmg/if_apm_ajson_mapping
+      ii_mapper      TYPE REF TO /apmg/if_apm_ajson_mapper
     RETURNING
       VALUE(ri_json) TYPE REF TO /apmg/if_apm_ajson
     RAISING

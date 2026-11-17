@@ -22,7 +22,7 @@ CLASS /apmg/cl_apm_ajson_extensions DEFINITION
     "! DEV_DEPENDENCIES -> devDependencies
     CLASS-METHODS to_camel_case_underscore
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_mapping.
+        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_mapper.
 
     "! Like zcl_ajson_mapping=>create_camel_case( ) but keep any leading underscore
     "!
@@ -32,7 +32,7 @@ CLASS /apmg/cl_apm_ajson_extensions DEFINITION
     "! devDependencies -> DEV_DEPENDENCIES
     CLASS-METHODS from_camel_case_underscore
       RETURNING
-        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_mapping.
+        VALUE(result) TYPE REF TO /apmg/if_apm_ajson_mapper.
 
     "! Like zcl_ajson_filter_lib=>create_empty_filter( ) but also remove initial numbers and null
     CLASS-METHODS filter_empty_zero_null

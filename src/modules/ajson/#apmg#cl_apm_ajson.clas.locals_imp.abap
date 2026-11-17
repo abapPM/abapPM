@@ -787,7 +787,6 @@ CLASS lcl_json_to_abap DEFINITION FINAL.
     METHODS constructor
       IMPORTING
         !iv_corresponding  TYPE abap_bool DEFAULT abap_false
-        !ii_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
         !ii_refs_initiator TYPE REF TO /apmg/if_apm_ajson_ref_initial OPTIONAL.
 
     METHODS to_abap
@@ -843,7 +842,6 @@ CLASS lcl_json_to_abap DEFINITION FINAL.
     DATA mt_node_type_cache TYPE HASHED TABLE OF ty_type_cache WITH UNIQUE KEY type_path.
 
     DATA mr_nodes TYPE REF TO /apmg/if_apm_ajson_types=>ty_nodes_ts.
-    DATA mi_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping.
     DATA mi_refs_initiator TYPE REF TO /apmg/if_apm_ajson_ref_initial.
     DATA mv_corresponding TYPE abap_bool.
 
@@ -887,7 +885,6 @@ ENDCLASS.
 CLASS lcl_json_to_abap IMPLEMENTATION.
 
   METHOD constructor.
-    mi_custom_mapping = ii_custom_mapping.
     mi_refs_initiator = ii_refs_initiator.
     mv_corresponding  = iv_corresponding.
   ENDMETHOD.
@@ -932,17 +929,7 @@ CLASS lcl_json_to_abap IMPLEMENTATION.
     IF sy-subrc <> 0.
 
       rs_node_type-type_path         = lv_node_type_path.
-
-      IF mi_custom_mapping IS BOUND.
-        rs_node_type-target_field_name = to_upper( mi_custom_mapping->to_abap(
-          iv_path = is_node-path
-          iv_name = is_node-name ) ).
-        IF rs_node_type-target_field_name IS INITIAL.
-          rs_node_type-target_field_name = to_upper( is_node-name ).
-        ENDIF.
-      ELSE.
-        rs_node_type-target_field_name = to_upper( is_node-name ).
-      ENDIF.
+      rs_node_type-target_field_name = to_upper( is_node-name ).
 
       CASE is_parent_type-type_kind.
         WHEN lif_kind=>table.
@@ -1353,28 +1340,26 @@ CLASS lcl_abap_to_json DEFINITION FINAL.
 
     CLASS-METHODS convert
       IMPORTING
-        iv_data           TYPE any
-        is_prefix         TYPE /apmg/if_apm_ajson_types=>ty_path_name OPTIONAL
-        iv_array_index    TYPE i DEFAULT 0
-        ii_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
-        is_opts           TYPE /apmg/if_apm_ajson=>ty_opts OPTIONAL
-        iv_item_order     TYPE i DEFAULT 0
+        iv_data         TYPE any
+        is_prefix       TYPE /apmg/if_apm_ajson_types=>ty_path_name OPTIONAL
+        iv_array_index  TYPE i DEFAULT 0
+        is_opts         TYPE /apmg/if_apm_ajson=>ty_opts OPTIONAL
+        iv_item_order   TYPE i DEFAULT 0
       RETURNING
-        VALUE(rt_nodes)   TYPE /apmg/if_apm_ajson_types=>ty_nodes_tt
+        VALUE(rt_nodes) TYPE /apmg/if_apm_ajson_types=>ty_nodes_tt
       RAISING
         /apmg/cx_apm_ajson_error.
 
     CLASS-METHODS insert_with_type
       IMPORTING
-        iv_data           TYPE any
-        iv_type           TYPE /apmg/if_apm_ajson_types=>ty_node_type
-        is_prefix         TYPE /apmg/if_apm_ajson_types=>ty_path_name OPTIONAL
-        iv_array_index    TYPE i DEFAULT 0
-        ii_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping OPTIONAL
-        is_opts           TYPE /apmg/if_apm_ajson=>ty_opts OPTIONAL
-        iv_item_order     TYPE i DEFAULT 0
+        iv_data         TYPE any
+        iv_type         TYPE /apmg/if_apm_ajson_types=>ty_node_type
+        is_prefix       TYPE /apmg/if_apm_ajson_types=>ty_path_name OPTIONAL
+        iv_array_index  TYPE i DEFAULT 0
+        is_opts         TYPE /apmg/if_apm_ajson=>ty_opts OPTIONAL
+        iv_item_order   TYPE i DEFAULT 0
       RETURNING
-        VALUE(rt_nodes)   TYPE /apmg/if_apm_ajson_types=>ty_nodes_tt
+        VALUE(rt_nodes) TYPE /apmg/if_apm_ajson_types=>ty_nodes_tt
       RAISING
         /apmg/cx_apm_ajson_error.
 
@@ -1404,7 +1389,6 @@ CLASS lcl_abap_to_json DEFINITION FINAL.
   PRIVATE SECTION.
 
     CLASS-DATA gv_ajson_absolute_type_name TYPE string.
-    DATA mi_custom_mapping TYPE REF TO /apmg/if_apm_ajson_mapping.
     DATA mv_keep_item_order TYPE abap_bool.
     DATA mv_format_datetime TYPE abap_bool.
 
@@ -1512,7 +1496,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     lo_type = cl_abap_typedescr=>describe_by_data( iv_data ).
 
     CREATE OBJECT lo_converter.
-    lo_converter->mi_custom_mapping  = ii_custom_mapping.
     lo_converter->mv_keep_item_order = is_opts-keep_item_order.
     lo_converter->mv_format_datetime = is_opts-format_datetime.
 
@@ -1770,12 +1753,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     ls_node-index = iv_index.
     ls_node-order = iv_item_order.
 
-    IF mi_custom_mapping IS BOUND.
-      ls_node-name = mi_custom_mapping->to_json(
-        iv_path = is_prefix-path
-        iv_name = is_prefix-name ).
-    ENDIF.
-
     IF ls_node-name IS INITIAL.
       ls_node-name  = is_prefix-name.
     ENDIF.
@@ -1806,7 +1783,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     DATA lo_struc TYPE REF TO cl_abap_structdescr.
     DATA lt_comps TYPE cl_abap_structdescr=>included_view.
     DATA ls_next_prefix LIKE is_prefix.
-    DATA lv_mapping_prefix_name LIKE is_prefix-name.
     DATA lv_item_order TYPE i.
     DATA ls_root LIKE LINE OF ct_nodes.
 
@@ -1820,12 +1796,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     ls_root-name  = is_prefix-name.
     ls_root-type  = /apmg/if_apm_ajson_types=>node_type-object.
     ls_root-index = iv_index.
-
-    IF mi_custom_mapping IS BOUND.
-      ls_root-name = mi_custom_mapping->to_json(
-        iv_path = is_prefix-path
-        iv_name = is_prefix-name ).
-    ENDIF.
 
     IF ls_root-name IS INITIAL.
       ls_root-name  = is_prefix-name.
@@ -1848,21 +1818,11 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     ls_next_prefix-path = is_prefix-path && <root>-name && '/'.
 
     LOOP AT lt_comps ASSIGNING <c>.
-      CLEAR lv_mapping_prefix_name.
 
       <root>-children = <root>-children + 1.
       ls_next_prefix-name = to_lower( <c>-name ).
       ASSIGN COMPONENT <c>-name OF STRUCTURE iv_data TO <val>.
       ASSERT sy-subrc = 0.
-
-      IF mi_custom_mapping IS BOUND AND <c>-type->kind = cl_abap_typedescr=>kind_elem.
-        lv_mapping_prefix_name = mi_custom_mapping->to_json( iv_path = ls_next_prefix-path
-                                                             iv_name = ls_next_prefix-name ).
-      ENDIF.
-
-      IF lv_mapping_prefix_name IS NOT INITIAL.
-        ls_next_prefix-name = lv_mapping_prefix_name.
-      ENDIF.
 
       IF mv_keep_item_order = abap_true.
         lv_item_order = <root>-children.
@@ -1900,12 +1860,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     ls_root-type  = /apmg/if_apm_ajson_types=>node_type-array.
     ls_root-index = iv_index.
     ls_root-order = iv_item_order.
-
-    IF mi_custom_mapping IS BOUND.
-      ls_root-name = mi_custom_mapping->to_json(
-        iv_path = is_prefix-path
-        iv_name = is_prefix-name ).
-    ENDIF.
 
     IF ls_root-name IS INITIAL.
       ls_root-name  = is_prefix-name.
@@ -1948,7 +1902,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     lo_type = cl_abap_typedescr=>describe_by_data( iv_data ).
 
     CREATE OBJECT lo_converter.
-    lo_converter->mi_custom_mapping  = ii_custom_mapping.
     lo_converter->mv_keep_item_order = is_opts-keep_item_order.
     lo_converter->mv_format_datetime = is_opts-format_datetime.
 
@@ -1998,12 +1951,6 @@ CLASS lcl_abap_to_json IMPLEMENTATION.
     ls_node-value = iv_data.
     ls_node-type  = iv_type.
     ls_node-order = iv_item_order.
-
-    IF mi_custom_mapping IS BOUND.
-      ls_node-name = mi_custom_mapping->to_json(
-        iv_path = is_prefix-path
-        iv_name = is_prefix-name ).
-    ENDIF.
 
     IF ls_node-name IS INITIAL.
       ls_node-name  = is_prefix-name.
@@ -2150,15 +2097,15 @@ CLASS lcl_mapper_runner DEFINITION FINAL.
     INTERFACES lif_mutator_runner.
     CLASS-METHODS new
       IMPORTING
-        ii_mapper          TYPE REF TO /apmg/if_apm_ajson_mapping
+        ii_mapper          TYPE REF TO /apmg/if_apm_ajson_mapper
       RETURNING
         VALUE(ro_instance) TYPE REF TO lcl_mapper_runner.
     METHODS constructor
       IMPORTING
-        ii_mapper TYPE REF TO /apmg/if_apm_ajson_mapping.
+        ii_mapper TYPE REF TO /apmg/if_apm_ajson_mapper.
 
   PRIVATE SECTION.
-    DATA mi_mapper TYPE REF TO /apmg/if_apm_ajson_mapping.
+    DATA mi_mapper TYPE REF TO /apmg/if_apm_ajson_mapper.
     DATA mr_source_tree TYPE REF TO /apmg/if_apm_ajson_types=>ty_nodes_ts.
     DATA mr_dest_tree TYPE REF TO /apmg/if_apm_ajson_types=>ty_nodes_ts.
 
