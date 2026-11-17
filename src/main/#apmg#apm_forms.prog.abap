@@ -43,10 +43,15 @@ FORM open_gui RAISING /apmg/cx_apm_error.
     CASE mode.
       WHEN 'INIT'.
         " Initial mode: welcome page
+        PERFORM reset_settings.
         action = /apmg/if_apm_gui_router=>c_action-go_welcome.
       WHEN 'DB'.
         " Emergency mode: database utility
+        PERFORM reset_settings.
         action = /apmg/if_apm_gui_router=>c_action-go_db.
+      WHEN 'HREF'.
+        zcl_abapgit_html=>set_debug_mode( abap_true ).
+        action = /apmg/if_apm_gui_router=>c_action-go_home.
       WHEN OTHERS.
         action = /apmg/if_apm_gui_router=>c_action-go_home.
     ENDCASE.
@@ -56,6 +61,17 @@ FORM open_gui RAISING /apmg/cx_apm_error.
     CALL SELECTION-SCREEN 1001. " trigger screen
 
   ENDIF.
+
+ENDFORM.
+
+FORM reset_settings.
+
+  TRY.
+      DATA(settings) = /apmg/cl_apm_settings=>factory( )->get( ).
+      CLEAR settings-last_package.
+      /apmg/cl_apm_settings=>factory( )->set( settings )->save( ).
+    CATCH /apmg/cx_apm_error ##NO_HANDLER.
+  ENDTRY.
 
 ENDFORM.
 
