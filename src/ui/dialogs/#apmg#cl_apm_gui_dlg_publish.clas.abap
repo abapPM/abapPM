@@ -62,15 +62,19 @@ CLASS /apmg/cl_apm_gui_dlg_publish DEFINITION
       END OF c_action.
 
     DATA:
-      registry       TYPE string,
-      pubish_package TYPE devclass,
-      is_scoped      TYPE abap_bool,
-      params         TYPE ty_params,
-      popup          TYPE REF TO /apmg/cl_apm_popup_to_confirm,
-      form           TYPE REF TO /apmg/cl_apm_html_form,
-      form_data      TYPE REF TO /apmg/cl_apm_string_map,
-      form_util      TYPE REF TO /apmg/cl_apm_html_form_utils,
-      validation_log TYPE REF TO /apmg/cl_apm_string_map.
+      registry        TYPE string,
+      publish_package TYPE devclass,
+      is_scoped       TYPE abap_bool,
+      params          TYPE ty_params,
+      popup           TYPE REF TO /apmg/cl_apm_popup_to_confirm,
+      form            TYPE REF TO /apmg/cl_apm_html_form,
+      form_data       TYPE REF TO /apmg/cl_apm_string_map,
+      form_util       TYPE REF TO /apmg/cl_apm_html_form_utils,
+      validation_log  TYPE REF TO /apmg/cl_apm_string_map.
+
+    METHODS init_form
+      RAISING
+        /apmg/cx_apm_error.
 
     METHODS get_form_schema
       RETURNING
@@ -151,6 +155,8 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
           popup_to_confirm( params ).
         ENDIF.
 
+        publish_package = params-package.
+
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
       WHEN c_action-confirmed.
@@ -168,6 +174,7 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       WHEN c_action-cancel.
 
         popup_close( ).
+        init_form( ).
         rs_handled-state = /apmg/cl_apm_gui=>c_event_state-re_render.
 
     ENDCASE.
@@ -212,13 +219,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
     validation_log = NEW #( ).
     form_data      = NEW #( ).
 
-    pubish_package = package.
-    IF pubish_package IS NOT INITIAL.
-      form_data = read_package( pubish_package ).
-    ENDIF.
+    publish_package = package.
 
-    form      = get_form_schema( ).
-    form_util = /apmg/cl_apm_html_form_utils=>create( form ).
+    init_form( ).
 
   ENDMETHOD.
 
@@ -285,11 +288,23 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
     form_data->to_struc( CHANGING cs_container = result ).
 
-    IF result-access = abap_true.
+    IF result-access = abap_true OR is_scoped = abap_false.
       result-access = /apmg/if_apm_command=>c_access-public.
     ELSE.
       result-access = /apmg/if_apm_command=>c_access-restricted.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD init_form.
+
+    IF publish_package IS NOT INITIAL.
+      form_data = read_package( publish_package ).
+    ENDIF.
+
+    form      = get_form_schema( ).
+    form_util = /apmg/cl_apm_html_form_utils=>create( form ).
 
   ENDMETHOD.
 
@@ -317,7 +332,8 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   METHOD popup_to_confirm.
 
     DATA(question) = |This will <b>publish</b> all objects in { params-package } | &&
-                     |including subpackages as "{ params-name }" version { params-version } | &&
+                     |including subpackages as <b>{ params-access }</b> package | &&
+                     |"<b>{ params-name }</b>" version <b>{ params-version }</b> | &&
                      |to the registry|.
 
     popup = /apmg/cl_apm_popup_to_confirm=>create(
@@ -336,7 +352,11 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
   METHOD read_package.
 
-    DATA(package_json) = /apmg/cl_apm_package_json=>factory( package )->get( ).
+    TRY.
+        DATA(package_json) = /apmg/cl_apm_package_json=>factory( package )->get( ).
+      CATCH /apmg/cx_apm_error.
+        RETURN.
+    ENDTRY.
 
     result = NEW #( ).
 
@@ -374,11 +394,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       CATCH /apmg/cx_apm_error ##NO_HANDLER.
     ENDTRY.
 
-    IF access = /apmg/if_apm_command=>c_access-public OR is_scoped = abap_false.
-      result->set(
-        iv_key = c_id-access
-        iv_val = abap_true ).
-    ENDIF.
+    result->set(
+      iv_key = c_id-access
+      iv_val = |{ boolc( access = /apmg/if_apm_command=>c_access-public OR is_scoped = abap_false ) }| ).
 
   ENDMETHOD.
 
