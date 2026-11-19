@@ -64,6 +64,10 @@ CLASS /apmg/cl_apm_gui DEFINITION
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS is_top_of_stack
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -146,11 +150,11 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
 
     IF iv_text IS SUPPLIED. " String input
       /apmg/cl_apm_abapgit_convert=>string_to_tab(
-         EXPORTING
-           iv_str  = iv_text
-         IMPORTING
-           ev_size = lv_size
-           et_tab  = lt_html ).
+        EXPORTING
+          iv_str  = iv_text
+        IMPORTING
+          ev_size = lv_size
+          et_tab  = lt_html ).
 
       mi_html_viewer->load_data(
         EXPORTING
@@ -506,6 +510,11 @@ CLASS /apmg/cl_apm_gui IMPLEMENTATION.
       CATCH cx_sy_move_cast_error ##NO_HANDLER.
     ENDTRY.
 
+  ENDMETHOD.
+
+
+  METHOD is_top_of_stack.
+    result = xsdbool( mt_stack IS INITIAL ).
   ENDMETHOD.
 
 

@@ -356,6 +356,12 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
     hotkey_action-hotkey      = |u|.
     INSERT hotkey_action INTO TABLE rt_hotkey_actions.
 
+    " Package List
+    hotkey_action-description = |Package List|.
+    hotkey_action-action      = /apmg/if_apm_gui_router=>c_action-apm_home.
+    hotkey_action-hotkey      = |l|.
+    INSERT hotkey_action INTO TABLE rt_hotkey_actions.
+
   ENDMETHOD.
 
 
@@ -420,8 +426,15 @@ CLASS /apmg/cl_apm_gui_page_package IMPLEMENTATION.
       iv_act = c_action-view_json
     )->add(
       iv_txt = /apmg/cl_apm_html=>icon( 'chevron-right' ) && ' Commands'
-      io_sub = commands
-    )->add(
+      io_sub = commands ).
+
+    IF /apmg/cl_apm_gui_factory=>get_gui( )->is_top_of_stack( ).
+      toolbar->add(
+        iv_txt = /apmg/cl_apm_html=>icon( 'bars' ) && ' Package List'
+        iv_act = /apmg/if_apm_gui_router=>c_action-apm_home ).
+    ENDIF.
+
+    toolbar->add(
       iv_txt = 'Back'
       iv_act = /apmg/if_apm_gui_router=>c_action-go_back ).
 
