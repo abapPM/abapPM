@@ -264,11 +264,16 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_name  = c_id-tag
       iv_label = 'Tag'
       iv_hint  = 'Distribution Tag'
-    )->checkbox(
+    )->radio(
       iv_name     = c_id-access
-      iv_label    = 'Public package'
-      iv_readonly = xsdbool( is_scoped = abap_false )
-      iv_hint     = 'The package will be viewable (and installable) publicly' ).
+      iv_label    = 'Package Access'
+      iv_hint     = 'The package will be viewable (and installable) publicly'
+    )->option(
+      iv_value = /apmg/if_apm_command=>c_access-public
+      iv_label = 'Public'
+    )->option(
+      iv_value = /apmg/if_apm_command=>c_access-private
+      iv_label = 'Private' ).
 
     result->command(
       iv_label    = 'Publish'
@@ -287,12 +292,6 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
   METHOD get_parameters.
 
     form_data->to_struc( CHANGING cs_container = result ).
-
-    IF result-access = abap_true OR is_scoped = abap_false.
-      result-access = /apmg/if_apm_command=>c_access-public.
-    ELSE.
-      result-access = /apmg/if_apm_command=>c_access-restricted.
-    ENDIF.
 
   ENDMETHOD.
 
@@ -386,17 +385,27 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
 
     is_scoped = xsdbool( package_json-name CP '@*' ).
 
-    " Set access based on existing package
-    TRY.
-        DATA(access) = /apmg/cl_apm_registry=>get_packument(
-          registry = registry
-          name     = package_json-name )-access.
-      CATCH /apmg/cx_apm_error ##NO_HANDLER.
-    ENDTRY.
+    DATA(access) = /apmg/if_apm_command=>c_access-public.
+
+    IF is_scoped = abap_true.
+      " Set access based on existing package
+      TRY.
+          access = /apmg/cl_apm_registry=>get_packument(
+            registry = registry
+            name     = package_json-name )-access.
+
+          " Legacy packages didn't store access so we assume they are private
+          IF access IS INITIAL.
+            access = /apmg/if_apm_command=>c_access-private.
+          ENDIF.
+        CATCH /apmg/cx_apm_error.
+          access = /apmg/if_apm_command=>c_access-private.
+      ENDTRY.
+    ENDIF.
 
     result->set(
       iv_key = c_id-access
-      iv_val = |{ boolc( access = /apmg/if_apm_command=>c_access-public OR is_scoped = abap_false ) }| ).
+      iv_val = access ).
 
   ENDMETHOD.
 
@@ -412,6 +421,14 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       result->set(
         iv_key = c_id-package
         iv_val = msg ).
+    ENDIF.
+
+    DATA(access) = form_data->get( c_id-access ).
+
+    IF is_scoped = abap_false AND access <> /apmg/if_apm_command=>c_access-public.
+      result->set(
+        iv_key = c_id-access
+        iv_val = 'Unscoped packages must be public' ).
     ENDIF.
 
     " TODO: Validate dist-tag

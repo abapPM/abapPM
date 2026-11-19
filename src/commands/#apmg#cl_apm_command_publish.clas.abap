@@ -17,7 +17,7 @@ CLASS /apmg/cl_apm_command_publish DEFINITION
         !registry   TYPE string
         !package    TYPE devclass
         !tag        TYPE string OPTIONAL
-        !access     TYPE string DEFAULT 'public'
+        !access     TYPE string DEFAULT /apmg/if_apm_command=>c_access-public
         !is_dry_run TYPE abap_bool DEFAULT abap_false
       RAISING
         /apmg/cx_apm_error.
