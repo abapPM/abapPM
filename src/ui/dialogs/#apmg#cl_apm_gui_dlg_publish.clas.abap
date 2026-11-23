@@ -265,9 +265,9 @@ CLASS /apmg/cl_apm_gui_dlg_publish IMPLEMENTATION.
       iv_label = 'Tag'
       iv_hint  = 'Distribution Tag'
     )->radio(
-      iv_name     = c_id-access
-      iv_label    = 'Package Access'
-      iv_hint     = 'The package will be viewable (and installable) publicly'
+      iv_name  = c_id-access
+      iv_label = 'Package Access'
+      iv_hint  = 'Should the package be viewable and installable publicly or only if you are authorized to access to it?'
     )->option(
       iv_value = /apmg/if_apm_command=>c_access-public
       iv_label = 'Public'
