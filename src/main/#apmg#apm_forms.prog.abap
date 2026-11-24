@@ -25,7 +25,7 @@ ENDFORM.
 FORM open_gui RAISING /apmg/cx_apm_error.
 
   DATA:
-    action TYPE string,
+    action TYPE string VALUE /apmg/if_apm_gui_router=>c_action-go_home,
     mode   TYPE devclass.
 
   IF sy-batch = abap_true.
@@ -51,9 +51,6 @@ FORM open_gui RAISING /apmg/cx_apm_error.
         action = /apmg/if_apm_gui_router=>c_action-go_db.
       WHEN 'HREF'.
         zcl_abapgit_html=>set_debug_mode( abap_true ).
-        action = /apmg/if_apm_gui_router=>c_action-go_home.
-      WHEN OTHERS.
-        action = /apmg/if_apm_gui_router=>c_action-go_home.
     ENDCASE.
 
     /apmg/cl_apm_gui_factory=>get_gui( )->start( action ).
