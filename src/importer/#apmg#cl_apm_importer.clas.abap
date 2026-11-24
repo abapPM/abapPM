@@ -113,10 +113,25 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
       RAISING
         /apmg/cx_apm_error.
 
+    METHODS remove_objects
+      IMPORTING
+        !map           TYPE /apmg/if_apm_importer=>ty_map
+        !transport     TYPE trkorr
+        !is_dry_run    TYPE abap_bool DEFAULT abap_true
+        !is_production TYPE abap_bool DEFAULT abap_true
+      RAISING
+        /apmg/cx_apm_error.
+
     METHODS save_packages
       IMPORTING
         !packages     TYPE /apmg/if_apm_importer=>ty_packages
         !dependencies TYPE /apmg/if_apm_importer=>ty_dependencies
+      RAISING
+        /apmg/cx_apm_error.
+
+    METHODS log_out
+      IMPORTING
+        !log TYPE REF TO zcl_abapgit_log
       RAISING
         /apmg/cx_apm_error.
 
@@ -207,7 +222,14 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       is_dry_run    = is_dry_run
       is_production = is_production ).
 
-    " 8. Save packages to apm
+    " 8. Remove obsolete objects
+    remove_objects(
+      map           = map
+      transport     = transport
+      is_dry_run    = is_dry_run
+      is_production = is_production ).
+
+    " 9. Save packages to apm
     save_packages(
       packages     = packages
       dependencies = dependencies ).
@@ -548,23 +570,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
 
-    IF is_log = abap_true.
-      IF log->zif_abapgit_log~get_log_level( ) >= zif_abapgit_log=>c_log_level-warning.
-        LOOP AT log->zif_abapgit_log~get_messages( ) ASSIGNING FIELD-SYMBOL(<msg>).
-          CASE <msg>-type.
-            WHEN zif_abapgit_log=>c_status-error.
-              WRITE / <msg>-text COLOR COL_NEGATIVE.
-            WHEN zif_abapgit_log=>c_status-warning.
-              WRITE / <msg>-text COLOR COL_TOTAL.
-            WHEN OTHERS.
-              WRITE / <msg>-text COLOR COL_NORMAL.
-          ENDCASE.
-        ENDLOOP.
-      ENDIF.
-
-      FORMAT COLOR OFF.
-      SKIP.
-    ENDIF.
+    log_out( log ).
 
   ENDMETHOD.
 
@@ -588,6 +594,92 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
       CATCH zcx_abapgit_exception INTO DATA(error).
         RAISE EXCEPTION TYPE /apmg/cx_apm_error_prev EXPORTING previous = error.
     ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD log_out.
+
+    IF is_log = abap_true.
+      IF log->zif_abapgit_log~get_log_level( ) >= zif_abapgit_log=>c_log_level-warning.
+        LOOP AT log->zif_abapgit_log~get_messages( ) ASSIGNING FIELD-SYMBOL(<msg>).
+          CASE <msg>-type.
+            WHEN zif_abapgit_log=>c_status-error.
+              WRITE / <msg>-text COLOR COL_NEGATIVE.
+            WHEN zif_abapgit_log=>c_status-warning.
+              WRITE / <msg>-text COLOR COL_TOTAL.
+            WHEN OTHERS.
+              WRITE / <msg>-text COLOR COL_NORMAL.
+          ENDCASE.
+        ENDLOOP.
+      ENDIF.
+
+      FORMAT COLOR OFF.
+      SKIP.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD remove_objects.
+
+    DATA:
+      target_packages TYPE STANDARD TABLE OF devclass WITH KEY table_line,
+      delete_objects  TYPE zif_abapgit_definitions=>ty_tadir_tt,
+      checks          TYPE zif_abapgit_definitions=>ty_delete_checks.
+
+    DATA(log) = NEW zcl_abapgit_log( ).
+
+    IF is_log = abap_true.
+      FORMAT COLOR COL_HEADING.
+      WRITE: / 'Removing obsolete objects:', AT c_width space.
+      FORMAT COLOR OFF.
+      SKIP.
+    ENDIF.
+
+    LOOP AT map INTO DATA(mapping).
+      COLLECT mapping-target_package INTO target_packages.
+    ENDLOOP.
+
+    TRY.
+        LOOP AT target_packages INTO DATA(package).
+          DATA(existing_objects) = zcl_abapgit_factory=>get_tadir( )->read( package ).
+
+          LOOP AT existing_objects INTO DATA(existing_object) WHERE object <> 'DEVC' AND object <> 'NSPC'.
+            READ TABLE map TRANSPORTING NO FIELDS WITH KEY
+              target_package = package
+              object_type    = existing_object-object
+              new_object     = existing_object-obj_name.
+            IF sy-subrc <> 0.
+              IF is_log = abap_true.
+                WRITE: /
+                  'DELETE', existing_object-object, existing_object-obj_name,
+                  'IN PACKAGE', package.
+              ENDIF.
+
+              INSERT existing_object INTO TABLE delete_objects.
+            ENDIF.
+          ENDLOOP.
+        ENDLOOP.
+
+        IF is_dry_run = abap_false.
+          checks-transport-required  = abap_true.
+          checks-transport-transport = transport.
+
+          zcl_abapgit_objects=>delete(
+            it_tadir  = delete_objects
+            is_checks = checks
+            ii_log    = log ).
+        ENDIF.
+
+      CATCH zcx_abapgit_exception INTO DATA(error).
+        IF is_log = abap_true.
+          DATA(msg) = error->get_text( ).
+          WRITE / msg COLOR COL_NEGATIVE.
+        ENDIF.
+    ENDTRY.
+
+    log_out( log ).
 
   ENDMETHOD.
 
