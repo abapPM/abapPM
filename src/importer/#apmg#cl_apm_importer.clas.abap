@@ -115,10 +115,9 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
 
     METHODS remove_objects
       IMPORTING
-        !map           TYPE /apmg/if_apm_importer=>ty_map
-        !transport     TYPE trkorr
-        !is_dry_run    TYPE abap_bool DEFAULT abap_true
-        !is_production TYPE abap_bool DEFAULT abap_true
+        !map        TYPE /apmg/if_apm_importer=>ty_map
+        !transport  TYPE trkorr
+        !is_dry_run TYPE abap_bool DEFAULT abap_true
       RAISING
         /apmg/cx_apm_error.
 
@@ -134,7 +133,6 @@ CLASS /apmg/cl_apm_importer DEFINITION PUBLIC FINAL CREATE PUBLIC.
         !log TYPE REF TO zcl_abapgit_log
       RAISING
         /apmg/cx_apm_error.
-
 ENDCLASS.
 
 
@@ -224,10 +222,9 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     " 8. Remove obsolete objects
     remove_objects(
-      map           = map
-      transport     = transport
-      is_dry_run    = is_dry_run
-      is_production = is_production ).
+      map        = map
+      transport  = transport
+      is_dry_run = is_dry_run ).
 
     " 9. Save packages to apm
     save_packages(
@@ -645,11 +642,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
           DATA(existing_objects) = zcl_abapgit_factory=>get_tadir( )->read( package ).
 
           LOOP AT existing_objects INTO DATA(existing_object) WHERE object <> 'DEVC' AND object <> 'NSPC'.
-            READ TABLE map TRANSPORTING NO FIELDS WITH KEY
+            IF NOT line_exists( map[
               target_package = package
               object_type    = existing_object-object
-              new_object     = existing_object-obj_name.
-            IF sy-subrc <> 0.
+              new_object     = existing_object-obj_name ] ).
               IF is_log = abap_true.
                 WRITE: /
                   'DELETE', existing_object-object, existing_object-obj_name,

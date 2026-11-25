@@ -461,7 +461,7 @@ CLASS /apmg/cl_apm_installer_files IMPLEMENTATION.
       path = '/'.
       filename = str.
     ENDIF.
-    TRANSLATE filename TO LOWER CASE.
+    filename = to_lower( filename ).
 
   ENDMETHOD.
 

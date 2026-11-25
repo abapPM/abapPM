@@ -327,7 +327,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
     LOOP AT db_entries INTO DATA(db_entry).
       DATA(filename) = |{ db_entry-keys }|.
 
-      TRANSLATE filename USING '/#'.
+      filename = translate( val = filename from = '/' to = '#' ).
 
       IF filename CS 'JSON'.
         filename = filename && '.json'.
@@ -420,7 +420,7 @@ CLASS /apmg/cl_apm_gui_page_db IMPLEMENTATION.
       " Remove extension
       SPLIT <file>-name AT '.' INTO db_entry-keys DATA(rest) ##NEEDED.
 
-      TRANSLATE db_entry-keys USING '#/'.
+      db_entry-keys = translate( val = db_entry-keys from = '#' to = '/' ).
 
       " Validate DB key
       IF /apmg/cl_apm_persist_apm=>validate_key( db_entry-keys ) = abap_false.
