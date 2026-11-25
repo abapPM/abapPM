@@ -625,8 +625,7 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
 
     DATA:
       target_packages TYPE STANDARD TABLE OF devclass WITH KEY table_line,
-      delete_objects  TYPE zif_abapgit_definitions=>ty_tadir_tt,
-      checks          TYPE zif_abapgit_definitions=>ty_delete_checks.
+      delete_objects  TYPE zif_abapgit_definitions=>ty_tadir_tt.
 
     DATA(log) = NEW zcl_abapgit_log( ).
 
@@ -663,13 +662,10 @@ CLASS /apmg/cl_apm_importer IMPLEMENTATION.
         ENDLOOP.
 
         IF is_dry_run = abap_false.
-          checks-transport-required  = abap_true.
-          checks-transport-transport = transport.
-
-          zcl_abapgit_objects=>delete(
-            it_tadir  = delete_objects
-            is_checks = checks
-            ii_log    = log ).
+          /apmg/cl_apm_abapgit_objects=>delete(
+            it_tadir     = delete_objects
+            iv_transport = transport
+            ii_log       = log ).
         ENDIF.
 
       CATCH zcx_abapgit_exception INTO DATA(error).
